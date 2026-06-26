@@ -40,6 +40,12 @@ All commands must be run from the `src/` directory.
 pnpm tsx basic/basic-agent.ts
 ```
 
+### Exercise
+
+```bash
+pnpm tsx exercise
+```
+
 ## Project structure
 
 ```
