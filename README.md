@@ -26,4 +26,5 @@ Required
 - Access to an LLM API Key:
   - OpenAI API Key → Visit https://platform.openai.com, create an account, and generate your API key.
   - Google AI API Key → Visit https://ai.google.dev, sign up, and create your API key.
+
 📝 Notes: Use the [DownGit](https://downgit.evecalm.com/) tool to download a specific folder without cloning the entire repository.
