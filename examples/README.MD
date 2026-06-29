@@ -51,8 +51,10 @@ pnpm tsx exercise
 ```
 src/
 ├── basic/
-│   └── basic-agent.ts   # Minimal agent with a weather tool
-├── .env                 # API keys (not committed)
+│   ├── basic-agent.ts      # Minimal agent with a weather tool
+│   └── real-world-agent.ts
+├── exercise/
+├── .env                    # API keys (not committed)
 ├── package.json
 └── tsconfig.json
 ```
