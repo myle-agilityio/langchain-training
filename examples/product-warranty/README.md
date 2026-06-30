@@ -65,29 +65,47 @@ pnpm tsx product-warranty/
 ## Example Output
 
 ```bash
-=== Turn 1: Warranty Collection ===
-Hi, my phone screen is cracked
-Hello! I'm sorry to hear that your phone screen is cracked. Let's see if your device is still under warranty. Could you please confirm whether your device is in warranty?
+pnpm tsx product-warranty/
 
-=== Turn 2: Warranty Response ===
-Yes, it's still under warranty
+You: hi
 
-Warranty status recorded as: in_warranty
-Thank you for confirming that your device is under warranty. Since your issue is a cracked screen, this is classified as a hardware issue.
+Agent: Hello! How can I assist you today?
 
-I'll go ahead and record this classification for you. One moment, please.
-Issue type recorded as: hardware
+You: my phone cracked
 
-Solution provided: Since your device is under warranty, you can proceed with the warranty repair process. Please visit your device manufacturer's service center or website to initiate a warranty claim for your cracked screen.
-Current step: resolution_specialist
+Agent: I'm sorry to hear about your phone! Let’s see how we can help. Can you please let me know if your device is still under warranty?
 
-=== Turn 3: Issue Description ===
-The screen is physically cracked from dropping it
-Thank you for the additional information. I'll escalate this case for further assistance regarding your options for repair.
-Escalating to human support. Reason: The customer reported a cracked screen due to dropping the device, which may not be covered under warranty.
-Current step: resolution_specialist
+You: no
 
-=== Turn 4: Resolution ===
-What should I do?
-Please wait for a human support specialist to reach out to you regarding your repair options.
+Agent: Warranty status recorded as: out_of_warranty
+
+
+Agent: Thank you for that information. Now, can you describe the issue with your phone a bit more? Is it only the cracked screen, or are there any other problems you're experiencing?
+
+You: it only cracked screen
+
+Agent: Issue type recorded as: hardware
+
+
+Agent: Escalating to human support. Reason: Customer has a cracked screen and the device is out of warranty, needing paid repair options.
+
+
+Agent: I've escalated your case to a human support specialist who will provide you with information on paid repair options for your cracked screen. They will be in touch with you shortly. If you have any more questions or need further assistance in the meantime, feel free to ask!
+
+You: oh sorry, it still under warranty
+
+Agent: Solution provided: To proceed with your warranty repair for the cracked screen, please follow these steps: 1. Contact our warranty support team via phone or email. 2. Provide them with your device's serial number and a brief description of the issue. 3. They may provide you with a shipping label to send your device for repair, or direct you to an authorized service center. 4. Once they receive your device, they will assess the damage and perform the necessary repairs under warranty.
+
+
+Agent: Escalating to human support. Reason: Customer mistakenly said the device is out of warranty, but it is actually under warranty for a cracked screen.
+
+
+Agent: No problem! Since your device is under warranty, here are the steps to proceed with the warranty repair for the cracked screen:
+
+1. **Contact Warranty Support**: Reach out to our warranty support team via phone or email.
+2. **Provide Information**: Have your device's serial number ready and share a brief description of the issue.
+3. **Shipping Label**: They may send you a shipping label to send your device for repair or direct you to an authorized service center.
+4. **Assessment and Repair**: Once they receive your device, they will assess the damage and handle the necessary repairs under warranty.
+
+Additionally, I've escalated your case to a human support specialist to assist you further with the warranty claim. They will be in touch shortly. If you have any more questions, feel free to ask!
 ```

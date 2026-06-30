@@ -1,4 +1,5 @@
 import "dotenv/config";
+import * as readline from "readline";
 
 import { createAgent } from "langchain";
 import { HumanMessage } from "langchain";
@@ -31,50 +32,40 @@ const agent = createAgent({
 const threadId = crypto.randomUUID();
 const config = { configurable: { thread_id: threadId } };
 
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+function prompt(question: string): Promise<string> {
+  return new Promise((resolve) => rl.question(question, resolve));
+}
+
 let prevMessageCount = 0;
 
-function logNewMessages(result: { messages: { content: unknown }[]; currentStep?: string }) {
+function logNewMessages(result: { messages: { content: unknown; _getType: () => string }[] }) {
   const newMessages = result.messages.slice(prevMessageCount);
   for (const msg of newMessages) {
-    console.log(msg.content);
+    if (msg._getType() !== "human" && msg.content) {
+      console.log(`\nAgent: ${msg.content}\n`);
+    }
   }
   prevMessageCount = result.messages.length;
 }
 
-// Turn 1: Initial message - starts with warranty_collector step
-console.log("=== Turn 1: Warranty Collection ===");
-let result = await agent.invoke(
-  { messages: [new HumanMessage("Hi, my phone screen is cracked")] },
-  config
-);
-logNewMessages(result);
+console.log("Customer Support Agent (type 'exit' to quit)\n");
 
-// Turn 2: User responds about warranty
-console.log("\n=== Turn 2: Warranty Response ===");
-result = await agent.invoke(
-  { messages: [new HumanMessage("Yes, it's still under warranty")] },
-  config
-);
-logNewMessages(result);
-console.log(`Current step: ${result.currentStep}`);
+let turn = 1;
+while (true) {
+  const userInput = await prompt("You: ");
+  if (userInput.toLowerCase() === "exit") break;
 
-// Turn 3: User describes the issue
-console.log("\n=== Turn 3: Issue Description ===");
-result = await agent.invoke(
-  {
-    messages: [
-      new HumanMessage("The screen is physically cracked from dropping it"),
-    ],
-  },
-  config
-);
-logNewMessages(result);
-console.log(`Current step: ${result.currentStep}`);
+  const result = await agent.invoke(
+    { messages: [new HumanMessage(userInput)] },
+    config
+  );
+  logNewMessages(result);
+  turn++;
+}
 
-// Turn 4: Resolution
-console.log("\n=== Turn 4: Resolution ===");
-result = await agent.invoke(
-  { messages: [new HumanMessage("What should I do?")] },
-  config
-);
-logNewMessages(result);
+rl.close();
