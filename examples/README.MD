@@ -40,10 +40,10 @@ All commands must be run from the `src/` directory.
 pnpm tsx basic/basic-agent.ts
 ```
 
-### Exercise
+### Exercise: Read AI news
 
 ```bash
-pnpm tsx exercise
+pnpm tsx read-ai-news
 ```
 
 ## Project structure
@@ -53,7 +53,8 @@ src/
 ├── basic/
 │   ├── basic-agent.ts      # Minimal agent with a weather tool
 │   └── real-world-agent.ts
-├── exercise/
+├── read-ai-news/
+│   └── index.ts
 ├── .env                    # API keys (not committed)
 ├── package.json
 └── tsconfig.json

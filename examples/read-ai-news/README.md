@@ -3,7 +3,7 @@ Complete the practice exercise by searching for AI news and summarizing the find
 
 ## Result
 ```bash
-$ pnpm tsx exercise
+$ pnpm tsx read-ai-news
 
 [Tool] Searching AI news for: "AI"...
 
