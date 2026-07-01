@@ -47,6 +47,18 @@ pnpm tsx basic/basic-agent.ts
 pnpm tsx read-ai-news
 ```
 
+### Exercise: Product warranty
+
+```bash
+pnpm tsx product-warranty
+```
+
+### Example: Calculator agent
+
+```bash
+pnpm tsx calculator-agent
+```
+
 ## Project structure
 
 ```
@@ -54,6 +66,10 @@ src/
 ├── basic/
 │   ├── basic-agent.ts      # Minimal agent with a weather tool
 │   └── real-world-agent.ts
+├── calculator-agent
+│   └── index.ts
+├── product-warranty
+│   └── index.ts
 ├── read-ai-news/
 │   └── index.ts
 ├── .env                    # API keys (not committed)
