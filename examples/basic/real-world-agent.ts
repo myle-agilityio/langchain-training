@@ -45,7 +45,7 @@ const fetchTextFromUrl = tool(
 );
 
 // Step 3: Configure your model
-const model = await initChatModel("gpt-4o-mini", {
+const model = await initChatModel(process.env.MODEL, {
   temperature: 0.5,
 });
 

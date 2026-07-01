@@ -24,10 +24,11 @@ A hands-on TypeScript project for learning LangChain and LangGraph concepts.
    cp .env.example .env   # or create it manually
    ```
 
-   Add your API keys:
+   Add your OPENAI API key and MODEL:
 
    ```env
    OPENAI_API_KEY=sk-...
+   MODEL=
    ```
 
 ## Running examples

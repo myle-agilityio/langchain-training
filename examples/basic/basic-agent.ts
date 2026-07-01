@@ -14,7 +14,7 @@ const getWeather = tool(
 );
 
 const agent = createAgent({
-  model: "gpt-4o-mini",
+  model: process.env.MODEL ?? "gpt-4o-mini",
   tools: [getWeather],
 });
 

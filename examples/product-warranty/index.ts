@@ -17,7 +17,7 @@ const allTools = [
 ];
 
 const model = new ChatOpenAI({
-  model: "gpt-4o-mini",
+  model: process.env.MODEL,
 });
 
 // Create the agent with step-based configuration

@@ -5,7 +5,7 @@ import { fetchArticleContent, searchAINews } from "./tools.js";
 import { SYSTEM_PROMPT } from "./constants.js";
 import { AgentOutput } from "./schema.js";
 
-const model = await initChatModel("gpt-4o-mini", { temperature: 0.3 });
+const model = await initChatModel(process.env.MODEL, { temperature: 0.3 });
 
 async function main() {
   const agent = createAgent({
