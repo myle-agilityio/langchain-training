@@ -1,10 +1,8 @@
 # Exercise
 Complete the practice exercise by searching for AI news and summarizing the findings using all core components and middleware, following this [guideline](https://docs.langchain.com/oss/javascript/langchain/agents).
 
-## Result
-```bash
-$ pnpm tsx read-ai-news
-
+## Output
+```
 [Tool] Searching AI news for: "AI"...
 
 [Tool] Found 5 articles for "AI"
