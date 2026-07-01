@@ -64,9 +64,7 @@ pnpm tsx product-warranty/
 
 ## Example Output
 
-```bash
-pnpm tsx product-warranty/
-
+```
 You: hi
 
 Agent: Hello! How can I assist you today?
