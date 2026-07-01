@@ -56,13 +56,7 @@ product-warranty/
 └── prompts.ts      # System prompts for each step
 ```
 
-## Running
-
-```bash
-pnpm tsx product-warranty/
-```
-
-## Example Output
+## Output
 
 ```
 You: hi
