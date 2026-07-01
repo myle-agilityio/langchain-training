@@ -2,7 +2,7 @@ import { StateSchema } from "@langchain/langgraph";
 import { SupportStepSchema,
   WarrantyStatusSchema,
   IssueTypeSchema,
-} from "./schemas.js";
+} from "./schemas.ts";
 
 // State for customer support workflow
 export const SupportState = new StateSchema({

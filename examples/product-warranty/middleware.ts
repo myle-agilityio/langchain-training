@@ -1,7 +1,7 @@
 import { createMiddleware } from "langchain";
-import { SupportState } from "./state.js";
-import { ISSUE_CLASSIFIER_PROMPT, RESOLUTION_SPECIALIST_PROMPT, WARRANTY_COLLECTOR_PROMPT } from "./prompts.js";
-import { escalateToHuman, provideSolution, recordIssueType, recordWarrantyStatus } from "./tools.js";
+import { SupportState } from "./state.ts";
+import { ISSUE_CLASSIFIER_PROMPT, RESOLUTION_SPECIALIST_PROMPT, WARRANTY_COLLECTOR_PROMPT } from "./prompts.ts";
+import { escalateToHuman, provideSolution, recordIssueType, recordWarrantyStatus } from "./tools.ts";
 
 // Step configuration: maps step name to (prompt, tools, required_state)
 const STEP_CONFIG = {

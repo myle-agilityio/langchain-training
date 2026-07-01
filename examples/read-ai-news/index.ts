@@ -1,9 +1,9 @@
 import "dotenv/config";
 
 import { createAgent, initChatModel } from "langchain";
-import { fetchArticleContent, searchAINews } from "./tools.js";
-import { SYSTEM_PROMPT } from "./constants.js";
-import { AgentOutput } from "./schema.js";
+import { fetchArticleContent, searchAINews } from "./tools.ts";
+import { SYSTEM_PROMPT } from "./constants.ts";
+import { AgentOutput } from "./schema.ts";
 
 const model = await initChatModel(process.env.MODEL, { temperature: 0.3 });
 

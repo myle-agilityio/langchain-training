@@ -1,8 +1,8 @@
 import { tool, ToolMessage, type ToolRuntime } from "langchain";
 import { Command } from "@langchain/langgraph";
 import { z } from "zod";
-import { SupportState } from "./state.js";
-import { WarrantyStatusSchema, IssueTypeSchema } from "./schemas.js";
+import { SupportState } from "./state.ts";
+import { WarrantyStatusSchema, IssueTypeSchema } from "./schemas.ts";
 
 const recordWarrantyStatus = tool(
   async (input, config: ToolRuntime<typeof SupportState.State>) => {

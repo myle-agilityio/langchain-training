@@ -5,8 +5,8 @@ import { createAgent } from "langchain";
 import { HumanMessage } from "langchain";
 import { MemorySaver } from "@langchain/langgraph";
 import { ChatOpenAI } from "@langchain/openai";
-import { recordWarrantyStatus, recordIssueType, provideSolution, escalateToHuman } from "./tools.js";
-import { applyStepMiddleware } from "./middleware.js";
+import { recordWarrantyStatus, recordIssueType, provideSolution, escalateToHuman } from "./tools.ts";
+import { applyStepMiddleware } from "./middleware.ts";
 
 // Collect all tools from all step configurations
 const allTools = [
