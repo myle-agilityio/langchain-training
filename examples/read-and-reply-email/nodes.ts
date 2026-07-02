@@ -174,7 +174,7 @@ const humanReview: GraphNode<typeof EmailAgentState> = async (state, config) => 
 const sendReply: GraphNode<typeof EmailAgentState> = async (state, config) => {
   // Send the email response
   // Integrate with email service
-  console.log(`Sending reply: ${state.responseText!.substring(0, 100)}...`);
+  console.log(`Sending reply: ${state.responseText}`);
   return {};
 }
 

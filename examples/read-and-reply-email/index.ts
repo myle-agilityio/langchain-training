@@ -51,7 +51,7 @@ const app = workflow.compile({ checkpointer: memory });
 
 // Test with an urgent billing issue
 const initialState: EmailAgentStateType = {
-  emailContent: "I was charged twice for my subscription! This is urgent!",
+  emailContent: "How do I reset my password?",
   senderEmail: "customer@example.com",
   emailId: "email_123"
 };
