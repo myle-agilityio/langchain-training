@@ -69,6 +69,8 @@ read-and-reply-email/
 
 If the classification triggers human review, you'll be prompted in the terminal to approve (`y`/`n`) and optionally edit the draft before it's "sent".
 
+To try a different email, edit the `emailContent` field in [index.ts:54](index.ts#L54).
+
 ## Output
 ```
 Processing email: How do I reset my password?
