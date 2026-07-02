@@ -34,11 +34,9 @@ const classifyIntent: GraphNode<typeof EmailAgentState> = async (state, config) 
   const classification = await structuredLlm.invoke(classificationPrompt);
 
   // Determine next node based on classification
-  let nextNode: "searchDocumentation" | "humanReview" | "draftResponse" | "bugTracking";
+  let nextNode: "searchDocumentation" | "draftResponse" | "bugTracking";
 
-  if (classification.intent === "billing" || classification.urgency === "critical") {
-    nextNode = "humanReview";
-  } else if (classification.intent === "question" || classification.intent === "feature") {
+  if (classification.intent === "question" || classification.intent === "feature") {
     nextNode = "searchDocumentation";
   } else if (classification.intent === "bug") {
     nextNode = "bugTracking";
@@ -134,7 +132,8 @@ const draftResponse: GraphNode<typeof EmailAgentState> = async (state, config) =
   const needsReview = (
     classification.urgency === "high" ||
     classification.urgency === "critical" ||
-    classification.intent === "complex"
+    classification.intent === "complex" ||
+    classification.intent === "billing"
   );
 
   // Route to appropriate next node
