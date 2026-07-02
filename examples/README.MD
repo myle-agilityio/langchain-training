@@ -33,7 +33,7 @@ A hands-on TypeScript project for learning LangChain and LangGraph concepts.
 
 ## Running examples
 
-All commands must be run from the `src/` directory.
+All commands must be run from the `examples/` directory.
 
 ### Basic agent
 
