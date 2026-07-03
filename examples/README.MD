@@ -59,6 +59,12 @@ pnpm tsx product-warranty
 pnpm tsx calculator-agent
 ```
 
+### Exercise: Read and Reply email
+
+```bash
+pnpm tsx read-and-reply-email
+```
+
 ## Project structure
 
 ```
