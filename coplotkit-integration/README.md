@@ -198,6 +198,21 @@ If you see "I'm having trouble connecting to my tools", make sure:
 2. Your OpenAI API key is set correctly
 3. Both servers started successfully
 
+### "Cannot read properties of undefined (reading 'name')" console error
+
+If the browser console shows a CopilotKit error like:
+
+```
+[CopilotKit] Agent error: Cannot read properties of undefined (reading 'name')
+Code: agent_run_error_event
+```
+
+this means the frontend (port 3000) is running but the LangGraph agent server
+(port 8123, `AGENT_URL` in `.env`) is not — CopilotKit's error handler chokes
+while trying to log the connection failure. Run `npm run dev` (not just
+`next dev` / `npm run dev:ui`) so the agent starts alongside the UI, or run
+`npm run dev:agent` in a separate terminal if you're iterating on the UI only.
+
 ### Agent Dependencies
 
 If you encounter agent import errors:
@@ -208,7 +223,7 @@ npm run install:agent
 
 ## CopilotKit Intelligence
 
-This app is connected to the CopilotKit Intelligence project **coplotkit-integration**
+This app is connected to the CopilotKit Intelligence project **copilotkit-integration**
 (recorded in `.copilotkit/project.json`). Intelligence adds durable threads,
 message & event persistence, and analytics for your agent.
 
