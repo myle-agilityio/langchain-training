@@ -2,7 +2,7 @@
 
 A support-inbox triage agent built with [LangGraph](https://www.langchain.com/langgraph) and [CopilotKit](https://copilotkit.ai). The agent reads and classifies incoming emails, then either drafts a reply or files a bug ticket — always pausing for human approval before anything is sent or created.
 
-https://gitlab.asoft-python.com/my.le/langchain-training/-/wikis/uploads/d30806f2c01178dd0dc05a58eb6bc138/image.png
+![https://gitlab.asoft-python.com/my.le/langchain-training/-/wikis/uploads/d30806f2c01178dd0dc05a58eb6bc138/image.pnghttps://gitlab.asoft-python.com/my.le/langchain-training/-/wikis/uploads/d30806f2c01178dd0dc05a58eb6bc138/image.png](https://gitlab.asoft-python.com/my.le/langchain-training/-/wikis/uploads/d30806f2c01178dd0dc05a58eb6bc138/image.png)
 
 ## Prerequisites
 
