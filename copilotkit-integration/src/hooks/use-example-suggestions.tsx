@@ -59,9 +59,9 @@ export const useExampleSuggestions = () => {
         message: "Toggle the app theme using the toggleTheme tool.",
       },
       {
-        title: "Task Manager (Shared State)",
+        title: "Triage Inbox (Shared State + Human Review)",
         message:
-          "Enable app mode and add three todos about learning CopilotKit: one about reading the docs, one about building a prototype, and one about exploring agent state.",
+          "Enable app mode, then read and classify the unread emails. Draft a reply for the login issue, and file a bug ticket for anything that looks like a bug -- I'll review both before anything is sent.",
       },
     ],
     available: "always",

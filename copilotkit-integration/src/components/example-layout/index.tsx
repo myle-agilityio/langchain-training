@@ -16,7 +16,7 @@ export function ExampleLayout({ chatContent, appContent }: ExampleLayoutProps) {
   useFrontendTool({
     name: "enableAppMode",
     description:
-      "Enable app mode, make sure its open when interacting with todos.",
+      "Enable app mode, make sure its open when interacting with the email inbox.",
     handler: async () => {
       setMode("app");
     },
