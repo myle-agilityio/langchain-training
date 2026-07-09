@@ -34,19 +34,6 @@ const runtime = new CopilotRuntime({
       }
     : { runner: new InMemoryAgentRunner() }),
   // --- /copilotkit:intelligence ---
-  openGenerativeUI: true,
-  a2ui: {
-    injectA2UITool: false,
-  },
-  mcpApps: {
-    servers: [
-      {
-        type: "http",
-        url: process.env.MCP_SERVER_URL || "https://mcp.excalidraw.com",
-        serverId: "example_mcp_app",
-      },
-    ],
-  },
 });
 
 const app = createCopilotEndpoint({

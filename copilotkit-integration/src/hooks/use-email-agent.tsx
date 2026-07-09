@@ -5,12 +5,14 @@ import { z } from "zod";
 import {
   useAgent,
   useComponent,
+  useDefaultRenderTool,
   useHumanInTheLoop,
   UseAgentUpdate,
 } from "@copilotkit/react-core/v2";
 import { EmailAnalysisCard } from "@/components/generative-ui/email-analysis-card";
 import { ComposeReplyReview } from "@/components/generative-ui/email-compose-review";
 import { BugTicketReview } from "@/components/generative-ui/email-bug-review";
+import { ToolReasoning } from "@/components/tool-rendering";
 import type { Email } from "@/types/types";
 
 const IntentEnum = z.enum(["question", "bug", "billing", "feature", "complex"]);
@@ -39,6 +41,14 @@ export const useEmailAgent = () => {
       if (runningRef.current) agent.abortRun();
     };
   }, [agent]);
+
+  // Generic fallback UI for any backend tool call without a dedicated
+  // renderer (get_emails, manage_emails, finalize_email, search_knowledge_base).
+  useDefaultRenderTool({
+    render: ({ name, status, parameters }) => (
+      <ToolReasoning name={name} status={status} args={parameters} />
+    ),
+  });
 
   useComponent({
     name: "showEmailAnalysis",

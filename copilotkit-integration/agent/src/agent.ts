@@ -9,9 +9,6 @@ import {
 import { StateSchema } from "@langchain/langgraph";
 
 import { email_tools, EmailSchema, SEED_EMAILS } from "./tools/emails/index.js";
-import { query_data } from "./tools/query/query-data.js";
-import { search_flights } from "./tools/a2ui/flights.js";
-import { generate_a2ui } from "./tools/a2ui/dynamic.js";
 
 const AgentStateSchema = new StateSchema({
   emails: zodState(z.array(EmailSchema).default(() => SEED_EMAILS)),
@@ -25,7 +22,7 @@ const model = new ChatOpenAI({
 
 export const graph = createAgent({
   model,
-  tools: [query_data, ...email_tools, generate_a2ui, search_flights],
+  tools: [...email_tools],
   middleware: [copilotkitMiddleware],
   stateSchema: AgentStateSchema,
   systemPrompt: `
@@ -58,13 +55,5 @@ export const graph = createAgent({
       finalize_email with outcome "replied" (on its own, without bugTicketId) only follows a
       confirmed human approval from composeReply.
     - You may mark an email "read" via manage_emails once you've opened it.
-
-    Other tool guidance:
-    - Flights: call search_flights to show flight cards with a pre-built schema.
-    - Dashboards & rich UI: call generate_a2ui to create dashboard UIs with metrics,
-      charts, tables, and cards. It handles rendering automatically.
-    - Charts: call query_data first, then render with the chart component.
-    - A2UI actions: when you see a log_a2ui_event result (e.g. "view_details"),
-      respond with a brief confirmation. The UI already updated on the frontend.
   `,
 });

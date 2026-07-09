@@ -1,8 +1,6 @@
-# CopilotKit <> LangGraph Starter
+# Email Triage Agent — CopilotKit <> LangGraph
 
-This is a starter template for building AI agents using [LangGraph](https://www.langchain.com/langgraph) and [CopilotKit](https://copilotkit.ai). It provides a modern Next.js application with an integrated LangGraph agent (TypeScript) to be built on top of.
-
-https://github.com/user-attachments/assets/47761912-d46a-4fb3-b9bd-cb41ddd02e34
+A support-inbox triage agent built with [LangGraph](https://www.langchain.com/langgraph) and [CopilotKit](https://copilotkit.ai). The agent reads and classifies incoming emails, then either drafts a reply or files a bug ticket — always pausing for human approval before anything is sent or created.
 
 ## Prerequisites
 
@@ -79,101 +77,60 @@ The following scripts can also be run using your preferred package manager:
 ## Project Structure
 
 ```
-├── src/                         # Next.js frontend source
+├── src/                              # Next.js frontend source
 │   ├── app/
-│   │   ├── page.tsx             # Main page
-│   │   └── api/copilotkit/      # CopilotKit API route
+│   │   ├── page.tsx                  # Main page
+│   │   └── api/copilotkit/           # CopilotKit API route
 │   ├── components/
-│   │   ├── example-canvas/      # Todo list UI
-│   │   ├── example-layout/      # Layout: chat + canvas side-by-side
-│   │   └── generative-ui/       # Example generative UI components
-│   └── hooks/
-├── agent/                       # LangGraph TypeScript agent
+│   │   ├── example-canvas/           # Email inbox UI (list + detail panel)
+│   │   ├── example-layout/           # Layout: chat + canvas side-by-side
+│   │   └── generative-ui/            # Analysis card + reply/bug review cards
+│   ├── hooks/
+│   │   └── use-email-agent.tsx       # Registers the email analysis + human-in-the-loop review tools
+│   └── types/
+│       └── types.ts                  # Shared frontend Email / EmailClassification types
+├── agent/                            # LangGraph TypeScript agent
 │   ├── src/
-│   │   ├── agent.ts             # Agent entry point (createAgent)
-│   │   ├── todos.ts             # Todo tools and state schema
-│   │   ├── query.ts             # Example data query tool
-│   │   ├── a2ui.ts              # A2UI operation helpers
-│   │   ├── a2ui_fixed_schema.ts # Fixed-schema A2UI tool (flights)
-│   │   └── a2ui_dynamic_schema.ts # Dynamic-schema A2UI tool
+│   │   ├── agent.ts                  # Agent entry point (createAgent), system prompt, state schema
+│   │   └── tools/
+│   │       └── emails/               # Email triage tools + state
+│   │           ├── schema.ts         # Email / EmailClassification zod schemas
+│   │           ├── seed-data.ts      # Mock inbox (10 seed emails)
+│   │           ├── knowledge-base.ts # Mock KB used by search_knowledge_base
+│   │           ├── tools.ts          # manage_emails, finalize_email, get_emails, search_knowledge_base
+│   │           └── index.ts          # Barrel export
 │   └── langgraph.json
-├── scripts/                     # Agent run scripts
+├── scripts/                          # Agent run scripts
 │   └── run-agent.sh / .bat
-├── public/                      # Static assets
+├── public/                           # Static assets
 ├── next.config.ts
 ├── tsconfig.json
 └── package.json
 ```
 
-## A2UI — Agent-to-User Interface
+## Email Triage Agent
 
-This starter includes [A2UI](https://a2ui.org/specification/) support, allowing the agent to generate rich, interactive UI surfaces declaratively. Instead of returning plain text, the agent sends a JSON description of the UI it wants to render, and the frontend turns it into real components.
+The main demo in this app is a shared inbox that a LangGraph agent triages, with a human always in the loop before anything is sent or filed. Enable **App mode** (top-right toggle) to see the inbox alongside the chat.
 
-### How it works
+### Workflow
 
-A2UI uses three concepts:
-
-1. **Catalog** — a set of component definitions (schema) paired with React renderers. Registered once in `layout.tsx` via `<CopilotKitProvider a2ui={{ catalog: demonstrationCatalog }}>`.
-2. **Surface** — a rendered UI instance. The agent creates a surface, sets its components, and binds data to it.
-3. **Operations** — the agent returns `render(operations=[...])` from a tool, which the middleware streams to the frontend.
-
-### Two patterns
-
-| Pattern            | Description                                                                   | Agent tool       | Frontend                                    |
-| ------------------ | ----------------------------------------------------------------------------- | ---------------- | ------------------------------------------- |
-| **Fixed schema**   | Pre-defined component layout. Only the data changes per invocation.           | `search_flights` | Schema in `a2ui/schemas/flight_schema.json` |
-| **Dynamic schema** | A secondary LLM generates both components and data based on the conversation. | `generate_a2ui`  | Components decided at runtime               |
-
-Both patterns use the same catalog on the frontend — the difference is where the component tree comes from.
+1. **Read** — the agent calls `get_emails` to read the shared inbox, and `manage_emails` to mark an email read.
+2. **Classify** — the agent classifies intent (`question` / `bug` / `billing` / `feature` / `complex`) and urgency, records it via `manage_emails`, and shows it inline via the `showEmailAnalysis` generative UI card.
+3. **Act, gated by human review:**
+   - **Bug** → `createBugTicket` pauses for approval. Once approved, the agent drafts a short customer notification and records both the ticket id and the reply in one `finalize_email` call — no second approval, since the human already approved by approving the ticket.
+   - **Everything else** → the agent drafts a reply and calls `composeReply`, which pauses for approval (with inline editing) before `finalize_email` records it as sent.
+4. `manage_emails`'s schema deliberately excludes the `replied` / `bug_filed` statuses — `finalize_email` is the only way to reach them, and it's only ever called after a human-in-the-loop tool confirms approval. This makes review structurally required, not just prompted.
 
 ### Key files
 
-| Purpose                              | Path                                               |
-| ------------------------------------ | -------------------------------------------------- |
-| Catalog definitions (Zod schemas)    | `src/app/declarative-generative-ui/definitions.ts` |
-| Catalog renderers (React components) | `src/app/declarative-generative-ui/renderers.tsx`  |
-| Catalog registration                 | `src/app/layout.tsx`                               |
-| Fixed-schema agent tool              | `agent/src/a2ui_fixed_schema.ts`                   |
-| Dynamic-schema agent tool            | `agent/src/a2ui_dynamic_schema.ts`                 |
-| Flight schema JSON                   | `agent/src/a2ui/schemas/flight_schema.json`        |
-| Showcase config                      | `showcase.json`                                    |
-
-### Adding a custom component
-
-1. **Define** the component schema in `definitions.ts`:
-
-   ```typescript
-   MyWidget: {
-     description: "A brief description for the agent.",
-     props: z.object({ title: z.string(), value: z.number() }),
-   },
-   ```
-
-2. **Render** it in `renderers.tsx`:
-
-   ```typescript
-   MyWidget: ({ props }) => (
-     <div>{props.title}: {props.value}</div>
-   ),
-   ```
-
-   Renderers are type-checked against the definitions — TypeScript will error if props don't match.
-
-3. **Use it** from the agent. The component is automatically available to both fixed-schema templates and the dynamic-schema LLM.
-
-### Adding a new fixed-schema tool
-
-1. Create a JSON schema file in `agent/src/a2ui/schemas/` describing the component tree.
-2. Create a TypeScript tool that loads the schema with `loadSchema()` and returns `render([...])` with your data. See `a2ui_fixed_schema.ts` for the pattern.
-
-### Showcase mode
-
-`showcase.json` controls which suggestion pills are visually highlighted. Set `"showcase": "a2ui"` to highlight the A2UI demos, or `"showcase": "default"` for no highlights. This is configured automatically when scaffolding via `npx copilotkit create --framework a2ui`.
-
-### Further reading
-
-- [A2UI Specification](https://a2ui.org/specification/)
-- [CopilotKit A2UI Documentation](https://docs.copilotkit.ai)
+| Purpose                                    | Path                                          |
+| ------------------------------------------- | ---------------------------------------------- |
+| Email inbox list + detail panel             | `src/components/example-canvas/`               |
+| Analysis / reply-review / bug-review cards  | `src/components/generative-ui/email-*.tsx`     |
+| Human-in-the-loop tool registration         | `src/hooks/use-email-agent.tsx`                |
+| Shared frontend `Email` type                | `src/types/types.ts`                           |
+| Agent state schema + system prompt          | `agent/src/agent.ts`                           |
+| Email schema, seed data, tools              | `agent/src/tools/emails/`                      |
 
 ## Documentation
 
