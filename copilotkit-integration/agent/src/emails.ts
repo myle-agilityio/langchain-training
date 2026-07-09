@@ -178,9 +178,9 @@ export const finalize_email = tool(
     const current = runtime.state.emails ?? [];
     const emails = current.map((email) => {
       if (email.id !== input.id) return email;
-      // A bug ticket is the more significant outcome -- once filed, a follow-up
-      // notification reply (recorded via a second finalize_email call) attaches
-      // its text without downgrading the status back to plain "replied".
+      // A bug ticket is the more significant outcome -- if this call carries a
+      // bugTicketId (or the email is already bug_filed), the status stays
+      // "bug_filed" even when a reply is recorded in the same or a later call.
       const status = input.outcome === "bug_filed" || email.status === "bug_filed" ? "bug_filed" : "replied";
       return {
         ...email,
@@ -205,14 +205,12 @@ export const finalize_email = tool(
   {
     name: "finalize_email",
     description:
-      "Persist the outcome of an action onto an email in the shared inbox: pass outcome " +
-      "'replied' with the sent reply text, or outcome 'bug_filed' with the created ticket id. " +
-      "Can be called twice for the same email -- once for 'bug_filed' right after the ticket is " +
-      "approved via createBugTicket, then again for 'replied' with a short notification reply " +
-      "(sent directly, no separate approval needed since the human already approved the bug " +
-      "ticket); the email keeps its 'bug_filed' status and gains the reply text. Outside of that " +
-      "flow, only call outcome 'replied' immediately after composeReply confirms the human " +
-      "approved it -- never call it speculatively or before that approval.",
+      "Persist the outcome of an action onto an email in the shared inbox. For a bug ticket " +
+      "approved via createBugTicket, call this ONCE with { outcome: 'bug_filed', bugTicketId, " +
+      "reply } -- reply is a short notification you draft yourself and is sent directly, no " +
+      "separate approval needed since the human already approved the bug ticket. For a normal " +
+      "reply, call this with { outcome: 'replied', reply } immediately after composeReply " +
+      "confirms the human approved it. Never call it speculatively or before that approval.",
     schema: z.object({
       id: z.string(),
       outcome: z.enum(["replied", "bug_filed"]),
