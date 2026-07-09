@@ -7,7 +7,7 @@ import {
   render,
   updateComponents,
   updateDataModel,
-} from "./a2ui.js";
+} from "./protocol.js";
 
 const CUSTOM_CATALOG_ID = "copilotkit://app-dashboard-catalog";
 

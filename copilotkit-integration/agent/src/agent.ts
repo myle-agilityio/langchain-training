@@ -8,10 +8,10 @@ import {
 } from "@copilotkit/sdk-js/langgraph";
 import { StateSchema } from "@langchain/langgraph";
 
-import { email_tools, EmailSchema, SEED_EMAILS } from "./emails.js";
-import { query_data } from "./query.js";
-import { search_flights } from "./a2ui_fixed_schema.js";
-import { generate_a2ui } from "./a2ui_dynamic_schema.js";
+import { email_tools, EmailSchema, SEED_EMAILS } from "./tools/emails/index.js";
+import { query_data } from "./tools/query/query-data.js";
+import { search_flights } from "./tools/a2ui/flights.js";
+import { generate_a2ui } from "./tools/a2ui/dynamic.js";
 
 const AgentStateSchema = new StateSchema({
   emails: zodState(z.array(EmailSchema).default(() => SEED_EMAILS)),

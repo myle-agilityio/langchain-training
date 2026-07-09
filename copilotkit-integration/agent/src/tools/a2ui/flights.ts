@@ -6,7 +6,7 @@ import {
   render,
   updateComponents,
   updateDataModel,
-} from "./a2ui.js";
+} from "./protocol.js";
 
 const CATALOG_ID = "copilotkit://app-dashboard-catalog";
 const SURFACE_ID = "flight-search-results";
@@ -30,7 +30,7 @@ const FlightSchema = z.object({
 let _cachedSchema: unknown[] | null = null;
 async function flightSchema(): Promise<unknown[]> {
   if (_cachedSchema === null) {
-    _cachedSchema = await loadSchema("a2ui/schemas/flight_schema.json");
+    _cachedSchema = await loadSchema("schemas/flight_schema.json");
   }
   return _cachedSchema;
 }
