@@ -1,167 +1,163 @@
 {
   "fixtures": [
     {
-      "match": { "toolCallId": "call_query_data_pie_001" },
+      "match": { "userMessage": "read and classify the unread emails" },
       "response": {
-        "content": "Here's your revenue distribution by category:\n\n- **Enterprise Subscriptions**: 38%\n- **Pro Tier Upgrades**: 24%\n- **API Usage Overages**: 14%\n- **Consulting Services**: 13%\n- **Marketplace Sales**: 11%\n\nEnterprise subscriptions are your largest revenue source. I've rendered this as a pie chart above."
+        "toolCalls": [
+          { "name": "enableAppMode", "arguments": "{}", "id": "call_enable_app_mode_bug_001" }
+        ]
       }
     },
     {
-      "match": { "toolCallId": "call_query_data_bar_001" },
+      "match": { "toolCallId": "call_enable_app_mode_bug_001" },
       "response": {
-        "content": "Here are your expenses by category:\n\n- **Engineering Salaries**: $42,000\n- **Product Team**: $18,000\n- **Customer Success**: $15,000\n- **Marketing - Paid Ads**: $12,000\n- **AWS Infrastructure**: $8,200\n- **AI Model Costs**: $4,200\n\nEngineering salaries are your largest expense. I've rendered this as a bar chart above."
+        "toolCalls": [
+          { "name": "get_emails", "arguments": "{}", "id": "call_get_emails_bug_001" }
+        ]
       }
     },
     {
-      "match": { "toolCallId": "call_query_data_dashboard_001" },
+      "match": { "toolCallId": "call_get_emails_bug_001" },
       "response": {
         "toolCalls": [
           {
-            "name": "generate_a2ui",
-            "arguments": "{}",
-            "id": "call_generate_a2ui_001"
+            "name": "manage_emails",
+            "arguments": "{\"id\":\"email-1\",\"status\":\"read\",\"classification\":{\"intent\":\"bug\",\"urgency\":\"high\",\"topic\":\"Login failure after password reset\",\"summary\":\"Customer cannot log in after resetting her password multiple times and has an urgent client demo in an hour.\"}}",
+            "id": "call_manage_emails_bug_001"
           }
         ]
       }
     },
     {
-      "match": { "toolCallId": "call_generate_a2ui_001" },
+      "match": { "toolCallId": "call_manage_emails_bug_001" },
       "response": {
-        "content": "Here's your sales dashboard with total revenue, new customers, and conversion rate, plus a revenue-by-category pie chart and a monthly-sales bar chart, rendered above."
+        "toolCalls": [
+          {
+            "name": "showEmailAnalysis",
+            "arguments": "{\"emailId\":\"email-1\",\"intent\":\"bug\",\"urgency\":\"high\",\"topic\":\"Login failure after password reset\",\"summary\":\"Customer cannot log in after resetting her password multiple times and has an urgent client demo in an hour.\"}",
+            "id": "call_show_email_analysis_bug_001"
+          }
+        ]
       }
     },
     {
-      "match": { "toolCallId": "call_search_flights_001" },
+      "match": { "toolCallId": "call_show_email_analysis_bug_001" },
       "response": {
-        "content": "I found 2 flights from SFO to JFK next Tuesday: United UA 523 (8:15 AM, $329) and JetBlue B6 1042 (11:40 AM, $298). The cards are shown above."
+        "toolCalls": [
+          {
+            "name": "createBugTicket",
+            "arguments": "{\"emailId\":\"email-1\",\"title\":\"Login fails after password reset with invalid credentials\",\"description\":\"Customer resets her password multiple times but still receives 'Invalid credentials' on login. Urgent -- she has a client demo in about an hour.\",\"severity\":\"high\"}",
+            "id": "call_create_bug_ticket_001"
+          }
+        ]
       }
     },
     {
-      "match": { "toolCallId": "call_manage_todos_001" },
+      "match": { "toolCallId": "call_create_bug_ticket_001" },
       "response": {
-        "content": "I've added three todos about learning CopilotKit:\n\n1. **Read the CopilotKit docs** - Skim the quickstart and core concepts\n2. **Build a prototype** - Wire CopilotKit into a small demo app\n3. **Explore agent state** - Experiment with shared state and tools\n\nAll three are pending. Want to mark any as done or add more?"
+        "toolCalls": [
+          {
+            "name": "finalize_email",
+            "arguments": "{\"id\":\"email-1\",\"outcome\":\"bug_filed\",\"bugTicketId\":\"BUG-4821\",\"reply\":\"Hi Sarah, thanks for flagging this -- I've logged it as BUG-4821 and our engineering team is investigating the login issue right away. We'll follow up as soon as we have a fix or workaround.\"}",
+            "id": "call_finalize_email_bug_001"
+          }
+        ]
       }
     },
     {
-      "match": { "toolCallId": "call_get_weather_001" },
+      "match": { "toolCallId": "call_finalize_email_bug_001" },
       "response": {
-        "content": "The weather in New York is 70 degrees with clear skies, 45% humidity, 5 mph wind, and feels like 72 degrees. A great day to be outside!"
+        "content": "Email-1 (Sarah Chen) was classified as a high-urgency bug about login failure after password reset. I filed bug ticket BUG-4821 for your review, and once approved I sent her a short update letting her know it's being worked on."
+      }
+    },
+
+    {
+      "match": { "userMessage": "email-2" },
+      "response": {
+        "toolCalls": [
+          { "name": "enableAppMode", "arguments": "{}", "id": "call_enable_app_mode_reply_001" }
+        ]
       }
     },
     {
-      "match": { "toolCallId": "call_schedule_time_001" },
+      "match": { "toolCallId": "call_enable_app_mode_reply_001" },
       "response": {
-        "content": "Your 30-minute meeting to learn about CopilotKit is scheduled. I've added it to your calendar — let me know if you'd like to change the time."
+        "toolCalls": [
+          { "name": "get_emails", "arguments": "{}", "id": "call_get_emails_reply_001" }
+        ]
       }
     },
+    {
+      "match": { "toolCallId": "call_get_emails_reply_001" },
+      "response": {
+        "toolCalls": [
+          {
+            "name": "manage_emails",
+            "arguments": "{\"id\":\"email-2\",\"status\":\"read\",\"classification\":{\"intent\":\"question\",\"urgency\":\"low\",\"topic\":\"API rate limits on the Pro plan\",\"summary\":\"Customer asks for the Pro plan request-per-minute limit and whether it applies per API key or per account.\"}}",
+            "id": "call_manage_emails_reply_001"
+          }
+        ]
+      }
+    },
+    {
+      "match": { "toolCallId": "call_manage_emails_reply_001" },
+      "response": {
+        "toolCalls": [
+          {
+            "name": "showEmailAnalysis",
+            "arguments": "{\"emailId\":\"email-2\",\"intent\":\"question\",\"urgency\":\"low\",\"topic\":\"API rate limits on the Pro plan\",\"summary\":\"Customer asks for the Pro plan request-per-minute limit and whether it applies per API key or per account.\"}",
+            "id": "call_show_email_analysis_reply_001"
+          }
+        ]
+      }
+    },
+    {
+      "match": { "toolCallId": "call_show_email_analysis_reply_001" },
+      "response": {
+        "toolCalls": [
+          {
+            "name": "search_knowledge_base",
+            "arguments": "{\"query\":\"rate limit\"}",
+            "id": "call_search_kb_reply_001"
+          }
+        ]
+      }
+    },
+    {
+      "match": { "toolCallId": "call_search_kb_reply_001" },
+      "response": {
+        "toolCalls": [
+          {
+            "name": "composeReply",
+            "arguments": "{\"emailId\":\"email-2\",\"subject\":\"Re: Question about API rate limits\",\"body\":\"Hi Marcus, great question -- the Pro plan is limited to 600 requests/minute per API key (not per account), so you can plan batch jobs around that per-key ceiling. Current usage is returned on every response via the X-RateLimit-Remaining header. Let me know if that helps with your batch job planning!\"}",
+            "id": "call_compose_reply_001"
+          }
+        ]
+      }
+    },
+    {
+      "match": { "toolCallId": "call_compose_reply_001" },
+      "response": {
+        "toolCalls": [
+          {
+            "name": "finalize_email",
+            "arguments": "{\"id\":\"email-2\",\"outcome\":\"replied\",\"reply\":\"Hi Marcus, great question -- the Pro plan is limited to 600 requests/minute per API key (not per account), so you can plan batch jobs around that per-key ceiling. Current usage is returned on every response via the X-RateLimit-Remaining header. Let me know if that helps with your batch job planning!\"}",
+            "id": "call_finalize_email_reply_001"
+          }
+        ]
+      }
+    },
+    {
+      "match": { "toolCallId": "call_finalize_email_reply_001" },
+      "response": {
+        "content": "Email-2 (Marcus Webb) was a low-urgency question about API rate limits. I drafted a reply citing the 600 req/min per-API-key limit, and sent it once you approved it."
+      }
+    },
+
     {
       "match": { "userMessage": "Hello" },
       "response": {
-        "content": "Hello! I'm your LangGraph-powered assistant. I can help you manage proverbs, get weather information, and more. What would you like to do?"
-      }
-    },
-    {
-      "match": { "userMessage": "pie chart of our revenue" },
-      "response": {
-        "toolCalls": [
-          {
-            "name": "query_data",
-            "arguments": "{\"query\":\"revenue distribution by category for a pie chart\"}",
-            "id": "call_query_data_pie_001"
-          }
-        ]
-      }
-    },
-    {
-      "match": { "userMessage": "bar chart of our expenses" },
-      "response": {
-        "toolCalls": [
-          {
-            "name": "query_data",
-            "arguments": "{\"query\":\"expenses by category for a bar chart\"}",
-            "id": "call_query_data_bar_001"
-          }
-        ]
-      }
-    },
-    {
-      "match": { "userMessage": "sales dashboard with total revenue" },
-      "response": {
-        "toolCalls": [
-          {
-            "name": "query_data",
-            "arguments": "{\"query\":\"financial sales data for a dashboard\"}",
-            "id": "call_query_data_dashboard_001"
-          }
-        ]
-      }
-    },
-    {
-      "match": { "userMessage": "flights from SFO to JFK" },
-      "response": {
-        "toolCalls": [
-          {
-            "name": "search_flights",
-            "arguments": "{\"flights\":[{\"id\":\"fl_001\",\"airline\":\"United Airlines\",\"airlineLogo\":\"https://www.google.com/s2/favicons?domain=united.com&sz=64\",\"flightNumber\":\"UA 523\",\"origin\":\"SFO\",\"destination\":\"JFK\",\"date\":\"Tue, Jun 30\",\"departureTime\":\"8:15 AM\",\"arrivalTime\":\"4:45 PM\",\"duration\":\"5h 30m\",\"status\":\"On time\",\"statusIcon\":\"https://www.google.com/s2/favicons?domain=flightaware.com&sz=64\",\"price\":\"$329\"},{\"id\":\"fl_002\",\"airline\":\"JetBlue\",\"airlineLogo\":\"https://www.google.com/s2/favicons?domain=jetblue.com&sz=64\",\"flightNumber\":\"B6 1042\",\"origin\":\"SFO\",\"destination\":\"JFK\",\"date\":\"Tue, Jun 30\",\"departureTime\":\"11:40 AM\",\"arrivalTime\":\"8:05 PM\",\"duration\":\"5h 25m\",\"status\":\"On time\",\"statusIcon\":\"https://www.google.com/s2/favicons?domain=flightaware.com&sz=64\",\"price\":\"$298\"}]}",
-            "id": "call_search_flights_001"
-          }
-        ]
-      }
-    },
-    {
-      "match": { "userMessage": "schedule a 30-minute meeting" },
-      "response": {
-        "toolCalls": [
-          {
-            "name": "scheduleTime",
-            "arguments": "{\"reasonForScheduling\":\"Learn about CopilotKit\",\"meetingDuration\":30}",
-            "id": "call_schedule_time_001"
-          }
-        ]
-      }
-    },
-    {
-      "match": { "userMessage": "Use Excalidraw to create a simple network diagram" },
-      "response": {
-        "content": "In a live run I'd use the Excalidraw MCP app to sketch a network diagram: one router connected to two switches, each connected to two computers. (This is a scripted mock reply -- add your OPENAI_API_KEY to .env to draw it for real.)"
-      }
-    },
-    {
-      "match": { "userMessage": "build a modern calculator" },
-      "response": {
-        "content": "In a live run I'd call the generateSandboxedUi tool to build a modern calculator with standard buttons plus labeled metric shortcuts that insert sample company values into the display. (This is a scripted mock reply -- add your OPENAI_API_KEY to .env to generate the live app.)"
-      }
-    },
-    {
-      "match": { "userMessage": "Toggle the app theme" },
-      "response": {
-        "toolCalls": [
-          { "name": "toggleTheme", "arguments": "{}", "id": "call_toggle_theme_001" }
-        ]
-      }
-    },
-    {
-      "match": { "userMessage": "add three todos about learning CopilotKit" },
-      "response": {
-        "toolCalls": [
-          {
-            "name": "manage_todos",
-            "arguments": "{\"todos\":[{\"title\":\"Read the CopilotKit docs\",\"description\":\"Skim the quickstart and core concepts\",\"emoji\":\"📚\",\"status\":\"pending\"},{\"title\":\"Build a prototype\",\"description\":\"Wire CopilotKit into a small demo app\",\"emoji\":\"🛠️\",\"status\":\"pending\"},{\"title\":\"Explore agent state\",\"description\":\"Experiment with shared state and tools\",\"emoji\":\"🧠\",\"status\":\"pending\"}]}",
-            "id": "call_manage_todos_001"
-          }
-        ]
-      }
-    },
-    {
-      "match": { "userMessage": "weather" },
-      "response": {
-        "toolCalls": [
-          {
-            "name": "getWeather",
-            "arguments": "{\"location\":\"New York\"}",
-            "id": "call_get_weather_001"
-          }
-        ]
+        "content": "Hello! I'm your LangGraph-powered support triage assistant. I can read and classify emails in your shared inbox, then draft a reply or file a bug ticket for your review -- try the \"Triage Inbox\" suggestion to see it in action."
       }
     },
     {
