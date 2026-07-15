@@ -9,17 +9,16 @@ import {
 import { StateSchema } from "@langchain/langgraph";
 
 import {
-  stateItem,
-  stateStreamingMiddleware,
-} from "@copilotkit/sdk-js/langgraph-middlewares";
-
-import { todo_tools, TodoSchema } from "./todos.js";
-import { query_data } from "./query.js";
-import { search_flights } from "./a2ui_fixed_schema.js";
+  EmailSchema,
+  seedEmails,
+  get_emails,
+  manage_emails,
+  search_knowledge_base,
+} from "./tools/emails/index.js";
 import { generate_a2ui } from "./a2ui_dynamic_schema.js";
 
 const AgentStateSchema = new StateSchema({
-  todos: zodState(z.array(TodoSchema).default(() => [])),
+  emails: zodState(z.array(EmailSchema).default(() => seedEmails)),
   ...(CopilotKitStateSchema.fields as Record<string, any>),
 });
 
@@ -30,28 +29,21 @@ const model = new ChatOpenAI({
 
 export const graph = createAgent({
   model,
-  tools: [query_data, ...todo_tools, generate_a2ui, search_flights],
-  middleware: [
-    copilotkitMiddleware,
-    stateStreamingMiddleware(
-      stateItem({
-        stateKey: "todos",
-        tool: "manage_todos",
-        toolArgument: "todos",
-      }),
-    ),
-  ],
+  tools: [get_emails, manage_emails, search_knowledge_base, generate_a2ui],
+  middleware: [copilotkitMiddleware],
   stateSchema: AgentStateSchema,
   systemPrompt: `
-    You are a polished, professional demo assistant. Keep responses to 1-2 sentences.
+    You are a support-inbox triage assistant. Keep responses to 1-2 sentences.
 
     Tool guidance:
-    - Flights: call search_flights to show flight cards with a pre-built schema.
+    - get_emails: call this to see the shared inbox before acting on it.
+    - manage_emails: patch email(s) by id to mark read/unread and/or record a
+      classification (category + urgency). It cannot mark an email replied or
+      bug_filed — those require human approval, which isn't wired up yet.
+    - search_knowledge_base: call before drafting a reply or answering a policy/
+      feature question, to ground the response in real support articles instead
+      of guessing.
     - Dashboards & rich UI: call generate_a2ui to create dashboard UIs with metrics,
-      charts, tables, and cards. It handles rendering automatically.
-    - Charts: call query_data first, then render with the chart component.
-    - Todos: enable app mode first, then manage todos.
-    - A2UI actions: when you see a log_a2ui_event result (e.g. "view_details"),
-      respond with a brief confirmation. The UI already updated on the frontend.
+      charts, tables, and cards, if asked for one. It handles rendering automatically.
   `,
 });
