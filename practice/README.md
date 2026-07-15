@@ -2,11 +2,11 @@
 
 A support-inbox triage assistant being built with [LangGraph](https://www.langchain.com/langgraph) and [CopilotKit](https://copilotkit.ai) as a training practice. Target behavior: classify incoming email, research context, draft a reply or file a bug ticket, and always pause for human approval before anything is sent or created.
 
-> **Status: Phase 1, Day 1 in progress.** The email data model and mock inbox now exist
-> (`agent/src/tools/emails/`), but the agent still runs the unmodified starter demo (todo
-> list, mock flight search, dynamic dashboard generative UI) — see
-> [Current demo](#current-demo). No email tools are wired into the agent yet; that's next.
-> Full scope is in [Roadmap](#roadmap); collaboration rules are in [CLAUDE.md](./CLAUDE.md).
+> **Status: Phase 1, Day 1 done.** The agent reads/patches a mock shared inbox and can
+> look up support articles before answering — see [Current demo](#current-demo). No
+> drafting, human-approval, or UI work has started; the app still renders the starter's
+> generic layout, just backed by email state instead of todos. Full scope is in
+> [Roadmap](#roadmap); collaboration rules are in [CLAUDE.md](./CLAUDE.md).
 
 ## Prerequisites
 
@@ -99,14 +99,14 @@ Reflects what's actually in the repo today (starter boilerplate, pre-email-assis
 ├── agent/                            # LangGraph TypeScript agent
 │   ├── src/
 │   │   ├── agent.ts                  # Agent entry point (createAgent), state schema, system prompt
-│   │   ├── todos.ts                  # Todo tools + state (manage_todos, get_todos)
-│   │   ├── query.ts                  # Example data query tool
 │   │   ├── a2ui.ts                   # A2UI operation helpers
-│   │   ├── a2ui_fixed_schema.ts      # Fixed-schema A2UI tool (flight cards)
 │   │   ├── a2ui_dynamic_schema.ts    # Dynamic-schema A2UI tool (generated dashboards)
-│   │   └── tools/emails/             # Email domain — not yet wired into agent.ts
+│   │   └── tools/emails/             # Email domain — wired into agent.ts
 │   │       ├── schema.ts             # Email / classification zod schemas
-│   │       └── seed-data.ts          # Generated mock inbox (14 emails)
+│   │       ├── seed-data.ts          # Generated mock inbox (14 emails)
+│   │       ├── knowledge-base.ts     # Mock KB + search_knowledge_base's keyword search
+│   │       ├── tools.ts              # get_emails, manage_emails, search_knowledge_base
+│   │       └── index.ts              # Barrel export
 │   ├── scripts/
 │   │   └── generate-seed-emails.ts   # Regenerates seed-data.ts — see below
 │   └── langgraph.json
@@ -120,11 +120,20 @@ Reflects what's actually in the repo today (starter boilerplate, pre-email-assis
 
 ## Current demo
 
-What actually runs today via `npm run dev`: a single `createAgent` (LangChain.js) wired to
-CopilotKit, demonstrating todo management, a mock data query → chart, and two A2UI
-patterns (fixed-schema flight cards, LLM-generated dashboards). None of this is
-email-specific yet — it's the unmodified starting point the email assistant will be built
-on top of.
+The agent (`agent/src/agent.ts`) is a single `createAgent` (LangChain.js) wired to
+CopilotKit, with three email tools plus the starter's dynamic-dashboard A2UI tool:
+
+- `get_emails` — reads the shared inbox (defaults to the 14 seed emails on a fresh thread)
+- `manage_emails` — patches emails by id (mark read/unread, record a classification);
+  cannot set `replied`/`bug_filed` — those need a human-approved finalize step that
+  doesn't exist yet
+- `search_knowledge_base` — keyword search over a mock support-article KB
+- `generate_a2ui` — the starter's LLM-generated dashboard tool, left in as-is
+
+There's no frontend UI for any of this yet — the app still renders the starter's generic
+todo-list layout, unrelated to the email state. Verified so far via direct `graph.invoke`
+calls (not the UI): classification + mark-read + KB-grounded summarization all work
+end-to-end in one turn.
 
 ## Mock inbox data
 
@@ -154,8 +163,9 @@ and the practice plan for full day-by-day scope):
   and a2ui-catalog patterns; swap the demo domain for email. Ships: classification,
   document lookup, drafting with real human-in-the-loop approval, manual compose.
   - [x] Email schema + generated mock inbox (`agent/src/tools/emails/`)
-  - [ ] Read/update tools (`get_emails`, `manage_emails`) wired into `agent.ts`
-  - [ ] Classification, document lookup, drafting + HITL approval, manual compose, UI
+  - [x] Read/patch/lookup tools (`get_emails`, `manage_emails`, `search_knowledge_base`)
+        wired into `agent.ts`; classification and document lookup work via these tools
+  - [ ] Drafting + real human-in-the-loop approval, manual compose, inbox/card UI
 - **Phase 2 — Context, memory & multi-agent.** Migrate `createAgent` to an explicit
   LangGraph `StateGraph`; add short/long-term memory, PII/tone guardrails, time-travel
   replay, multi-tone forked drafts, and agent handoff.
