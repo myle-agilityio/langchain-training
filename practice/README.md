@@ -1,8 +1,12 @@
-# CopilotKit <> LangGraph Starter
+# AI Email Assistant — CopilotKit <> LangGraph (Practice)
 
-This is a starter template for building AI agents using [LangGraph](https://www.langchain.com/langgraph) and [CopilotKit](https://copilotkit.ai). It provides a modern Next.js application with an integrated LangGraph agent (TypeScript) to be built on top of.
+A support-inbox triage assistant being built with [LangGraph](https://www.langchain.com/langgraph) and [CopilotKit](https://copilotkit.ai) as a training practice. Target behavior: classify incoming email, research context, draft a reply or file a bug ticket, and always pause for human approval before anything is sent or created.
 
-https://github.com/user-attachments/assets/47761912-d46a-4fb3-b9bd-cb41ddd02e34
+> **Status: planning complete, implementation not started.** The app currently runs the
+> unmodified CopilotKit <> LangGraph starter demo (todo list, mock flight search, dynamic
+> dashboard generative UI) — see [Current demo](#current-demo) below. The email assistant
+> itself is scoped in [Roadmap](#roadmap) and hasn't been built yet. Collaboration rules
+> for this build are in [CLAUDE.md](./CLAUDE.md).
 
 ## Prerequisites
 
@@ -78,102 +82,58 @@ The following scripts can also be run using your preferred package manager:
 
 ## Project Structure
 
+Reflects what's actually in the repo today (starter boilerplate, pre-email-assistant):
+
 ```
-├── src/                         # Next.js frontend source
+├── src/                              # Next.js frontend source
 │   ├── app/
-│   │   ├── page.tsx             # Main page
-│   │   └── api/copilotkit/      # CopilotKit API route
+│   │   ├── page.tsx                  # Main page
+│   │   ├── api/copilotkit/           # CopilotKit API route (runtime, agent registration)
+│   │   └── declarative-generative-ui/# a2ui catalog: definitions.ts + renderers.tsx
 │   ├── components/
-│   │   ├── example-canvas/      # Todo list UI
-│   │   ├── example-layout/      # Layout: chat + canvas side-by-side
-│   │   └── generative-ui/       # Example generative UI components
-│   └── hooks/
-├── agent/                       # LangGraph TypeScript agent
+│   │   ├── example-canvas/           # Todo list UI
+│   │   ├── example-layout/           # Layout: chat + canvas side-by-side
+│   │   └── generative-ui/            # Charts + meeting-time-picker demo components
+│   ├── hooks/                        # use-generative-ui-examples, use-example-suggestions, use-theme
+│   └── lib/                          # a2ui-theme.css, utils
+├── agent/                            # LangGraph TypeScript agent
 │   ├── src/
-│   │   ├── agent.ts             # Agent entry point (createAgent)
-│   │   ├── todos.ts             # Todo tools and state schema
-│   │   ├── query.ts             # Example data query tool
-│   │   ├── a2ui.ts              # A2UI operation helpers
-│   │   ├── a2ui_fixed_schema.ts # Fixed-schema A2UI tool (flights)
-│   │   └── a2ui_dynamic_schema.ts # Dynamic-schema A2UI tool
+│   │   ├── agent.ts                  # Agent entry point (createAgent), state schema, system prompt
+│   │   ├── todos.ts                  # Todo tools + state (manage_todos, get_todos)
+│   │   ├── query.ts                  # Example data query tool
+│   │   ├── a2ui.ts                   # A2UI operation helpers
+│   │   ├── a2ui_fixed_schema.ts      # Fixed-schema A2UI tool (flight cards)
+│   │   └── a2ui_dynamic_schema.ts    # Dynamic-schema A2UI tool (generated dashboards)
 │   └── langgraph.json
-├── scripts/                     # Agent run scripts
+├── scripts/                          # Agent run scripts
 │   └── run-agent.sh / .bat
-├── public/                      # Static assets
+├── public/                           # Static assets
 ├── next.config.ts
 ├── tsconfig.json
 └── package.json
 ```
 
-## A2UI — Agent-to-User Interface
+## Current demo
 
-This starter includes [A2UI](https://a2ui.org/specification/) support, allowing the agent to generate rich, interactive UI surfaces declaratively. Instead of returning plain text, the agent sends a JSON description of the UI it wants to render, and the frontend turns it into real components.
+What actually runs today via `npm run dev`: a single `createAgent` (LangChain.js) wired to
+CopilotKit, demonstrating todo management, a mock data query → chart, and two A2UI
+patterns (fixed-schema flight cards, LLM-generated dashboards). None of this is
+email-specific yet — it's the unmodified starting point the email assistant will be built
+on top of.
 
-### How it works
+## Roadmap
 
-A2UI uses three concepts:
+Building the email assistant in two phases (see [CLAUDE.md](./CLAUDE.md) for how we work,
+and the practice plan for full day-by-day scope):
 
-1. **Catalog** — a set of component definitions (schema) paired with React renderers. Registered once in `layout.tsx` via `<CopilotKitProvider a2ui={{ catalog: demonstrationCatalog }}>`.
-2. **Surface** — a rendered UI instance. The agent creates a surface, sets its components, and binds data to it.
-3. **Operations** — the agent returns `render(operations=[...])` from a tool, which the middleware streams to the frontend.
+- **Phase 1 — Foundation & core assistant.** Reuse this boilerplate's tools, shared-state,
+  and a2ui-catalog patterns; swap the demo domain for email. Ships: classification,
+  document lookup, drafting with real human-in-the-loop approval, manual compose.
+- **Phase 2 — Context, memory & multi-agent.** Migrate `createAgent` to an explicit
+  LangGraph `StateGraph`; add short/long-term memory, PII/tone guardrails, time-travel
+  replay, multi-tone forked drafts, and agent handoff.
 
-### Two patterns
-
-| Pattern            | Description                                                                   | Agent tool       | Frontend                                    |
-| ------------------ | ----------------------------------------------------------------------------- | ---------------- | ------------------------------------------- |
-| **Fixed schema**   | Pre-defined component layout. Only the data changes per invocation.           | `search_flights` | Schema in `a2ui/schemas/flight_schema.json` |
-| **Dynamic schema** | A secondary LLM generates both components and data based on the conversation. | `generate_a2ui`  | Components decided at runtime               |
-
-Both patterns use the same catalog on the frontend — the difference is where the component tree comes from.
-
-### Key files
-
-| Purpose                              | Path                                               |
-| ------------------------------------ | -------------------------------------------------- |
-| Catalog definitions (Zod schemas)    | `src/app/declarative-generative-ui/definitions.ts` |
-| Catalog renderers (React components) | `src/app/declarative-generative-ui/renderers.tsx`  |
-| Catalog registration                 | `src/app/layout.tsx`                               |
-| Fixed-schema agent tool              | `agent/src/a2ui_fixed_schema.ts`                   |
-| Dynamic-schema agent tool            | `agent/src/a2ui_dynamic_schema.ts`                 |
-| Flight schema JSON                   | `agent/src/a2ui/schemas/flight_schema.json`        |
-| Showcase config                      | `showcase.json`                                    |
-
-### Adding a custom component
-
-1. **Define** the component schema in `definitions.ts`:
-
-   ```typescript
-   MyWidget: {
-     description: "A brief description for the agent.",
-     props: z.object({ title: z.string(), value: z.number() }),
-   },
-   ```
-
-2. **Render** it in `renderers.tsx`:
-
-   ```typescript
-   MyWidget: ({ props }) => (
-     <div>{props.title}: {props.value}</div>
-   ),
-   ```
-
-   Renderers are type-checked against the definitions — TypeScript will error if props don't match.
-
-3. **Use it** from the agent. The component is automatically available to both fixed-schema templates and the dynamic-schema LLM.
-
-### Adding a new fixed-schema tool
-
-1. Create a JSON schema file in `agent/src/a2ui/schemas/` describing the component tree.
-2. Create a TypeScript tool that loads the schema with `loadSchema()` and returns `render([...])` with your data. See `a2ui_fixed_schema.ts` for the pattern.
-
-### Showcase mode
-
-`showcase.json` controls which suggestion pills are visually highlighted. Set `"showcase": "a2ui"` to highlight the A2UI demos, or `"showcase": "default"` for no highlights. This is configured automatically when scaffolding via `npx copilotkit create --framework a2ui`.
-
-### Further reading
-
-- [A2UI Specification](https://a2ui.org/specification/)
-- [CopilotKit A2UI Documentation](https://docs.copilotkit.ai)
+This section will be updated as each phase ships, per the README rule in CLAUDE.md.
 
 ## Documentation
 
@@ -208,7 +168,7 @@ npm run install:agent
 
 ## CopilotKit Intelligence
 
-This app is connected to the CopilotKit Intelligence project **practice**
+This app is connected to the CopilotKit Intelligence project **coplotkit-integration**
 (recorded in `.copilotkit/project.json`). Intelligence adds durable threads,
 message & event persistence, and analytics for your agent.
 
