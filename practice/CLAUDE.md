@@ -18,12 +18,14 @@ These are process rules for how we collaborate on this project, not code style p
 — follow them on every change, not just when convenient.
 
 1. **Follow existing patterns before inventing new ones.** This boilerplate already has
-   working conventions: `Command`-based tool state updates (see `todos.ts`), `zodState` for
-   shared state fields, the a2ui catalog for generative UI. Reuse them; don't introduce a
-   second way to do the same thing without a reason.
-2. **Update the README on every big change.** "Big" = a new tool, a new agent node/edge, a
+   working conventions: `Command`-based tool state updates (see `agent/src/tools/emails/tools.ts`),
+   `zodState` for shared state fields, the a2ui catalog for generative UI. Reuse them; don't
+   introduce a second way to do the same thing without a reason.
+2. **Update the docs on every big change.** "Big" = a new tool, a new agent node/edge, a
    shipped feature, or a phase boundary (e.g. moving from `createAgent` to `StateGraph`).
-   Small internal refactors don't need a README entry.
+   Progress/scope go in [docs/ROADMAP.md](./docs/ROADMAP.md), structural changes go in
+   [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — keep `README.md` itself a stable
+   quickstart, not a running log. Small internal refactors don't need a docs entry.
 3. **Comment the *why*, not the *what*.** Every non-trivial change gets a short comment
    explaining the non-obvious reasoning — a constraint, a workaround, why an interrupt is
    gated a certain way. Skip comments that just restate the code; those go stale and add
@@ -45,7 +47,7 @@ These are process rules for how we collaborate on this project, not code style p
 ## Definition of done (per task/day)
 
 - [ ] Code follows an existing pattern in the repo, or the deviation is justified
-- [ ] README updated if the change is "big" per rule 2
+- [ ] docs/ROADMAP.md and/or docs/ARCHITECTURE.md updated if the change is "big" per rule 2
 - [ ] Non-obvious logic has a why-comment
 - [ ] Feature manually exercised end-to-end (not just typechecked)
 - [ ] `.env.example` in sync if env vars changed
