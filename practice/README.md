@@ -2,11 +2,11 @@
 
 A support-inbox triage assistant being built with [LangGraph](https://www.langchain.com/langgraph) and [CopilotKit](https://copilotkit.ai) as a training practice. Target behavior: classify incoming email, research context, draft a reply or file a bug ticket, and always pause for human approval before anything is sent or created.
 
-> **Status: planning complete, implementation not started.** The app currently runs the
-> unmodified CopilotKit <> LangGraph starter demo (todo list, mock flight search, dynamic
-> dashboard generative UI) — see [Current demo](#current-demo) below. The email assistant
-> itself is scoped in [Roadmap](#roadmap) and hasn't been built yet. Collaboration rules
-> for this build are in [CLAUDE.md](./CLAUDE.md).
+> **Status: Phase 1, Day 1 in progress.** The email data model and mock inbox now exist
+> (`agent/src/tools/emails/`), but the agent still runs the unmodified starter demo (todo
+> list, mock flight search, dynamic dashboard generative UI) — see
+> [Current demo](#current-demo). No email tools are wired into the agent yet; that's next.
+> Full scope is in [Roadmap](#roadmap); collaboration rules are in [CLAUDE.md](./CLAUDE.md).
 
 ## Prerequisites
 
@@ -103,7 +103,12 @@ Reflects what's actually in the repo today (starter boilerplate, pre-email-assis
 │   │   ├── query.ts                  # Example data query tool
 │   │   ├── a2ui.ts                   # A2UI operation helpers
 │   │   ├── a2ui_fixed_schema.ts      # Fixed-schema A2UI tool (flight cards)
-│   │   └── a2ui_dynamic_schema.ts    # Dynamic-schema A2UI tool (generated dashboards)
+│   │   ├── a2ui_dynamic_schema.ts    # Dynamic-schema A2UI tool (generated dashboards)
+│   │   └── tools/emails/             # Email domain — not yet wired into agent.ts
+│   │       ├── schema.ts             # Email / classification zod schemas
+│   │       └── seed-data.ts          # Generated mock inbox (14 emails)
+│   ├── scripts/
+│   │   └── generate-seed-emails.ts   # Regenerates seed-data.ts — see below
 │   └── langgraph.json
 ├── scripts/                          # Agent run scripts
 │   └── run-agent.sh / .bat
@@ -121,6 +126,25 @@ patterns (fixed-schema flight cards, LLM-generated dashboards). None of this is
 email-specific yet — it's the unmodified starting point the email assistant will be built
 on top of.
 
+## Mock inbox data
+
+`agent/src/tools/emails/seed-data.ts` is 14 support emails for a fictional product
+("Vela") covering every classification target (question / bug / billing / feature /
+complex, mixed urgency). It's generated, not hand-written: `agent/scripts/generate-seed-emails.ts`
+builds a structured "brief" per email with faker (customer, invoice ref, platform, date —
+fixed seed, so structure is reproducible), then has an LLM write the actual subject/body
+prose so the language is varied instead of templated. Output is validated against the
+`Email` zod schema before it's written, so a bad generation fails loudly rather than
+shipping broken fixtures.
+
+Regenerate with (from `agent/`):
+
+```bash
+npm run generate:seed
+```
+
+This overwrites `seed-data.ts` — hand edits made after generating will be lost on a rerun.
+
 ## Roadmap
 
 Building the email assistant in two phases (see [CLAUDE.md](./CLAUDE.md) for how we work,
@@ -129,6 +153,9 @@ and the practice plan for full day-by-day scope):
 - **Phase 1 — Foundation & core assistant.** Reuse this boilerplate's tools, shared-state,
   and a2ui-catalog patterns; swap the demo domain for email. Ships: classification,
   document lookup, drafting with real human-in-the-loop approval, manual compose.
+  - [x] Email schema + generated mock inbox (`agent/src/tools/emails/`)
+  - [ ] Read/update tools (`get_emails`, `manage_emails`) wired into `agent.ts`
+  - [ ] Classification, document lookup, drafting + HITL approval, manual compose, UI
 - **Phase 2 — Context, memory & multi-agent.** Migrate `createAgent` to an explicit
   LangGraph `StateGraph`; add short/long-term memory, PII/tone guardrails, time-travel
   replay, multi-tone forked drafts, and agent handoff.
