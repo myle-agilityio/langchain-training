@@ -20,19 +20,23 @@ For scope/checklist status see [ROADMAP.md](./ROADMAP.md); for how things are bu
 
 | Est. | Task | Status | Notes |
 | --- | --- | --- | --- |
-| 3h | `compose_reply`/`finalize_email` tools with HITL pause pattern | ✅ Done | Merged into a single `compose_reply` tool — no separate finalize step needed, since `humanInTheLoopMiddleware` only runs the tool body after approval. Verified with a real interrupt/resume round-trip against a running `langgraphjs dev` server, not just typecheck |
+| 3h | `compose_reply` tools with HITL pause pattern | ✅ Done | Merged into a single `compose_reply` tool. |
 | 3h | Classification step | ✅ Done early | Actually landed as part of Day 1's `manage_emails` work — classification was already exercised in the Day 1 smoke test |
 | 2h | `stateStreamingMiddleware` wiring (live preview as the model drafts) | ⏸ Deferred | Skipped: the patch-based `manage_emails`/`compose_reply` design means the tool's raw argument shape doesn't match `state.emails`' shape, so the same "stream raw arg straight into state" trick used for todos would corrupt the frontend mid-stream. Revisit during the Day 3 UI pass if the live-typing effect turns out to matter |
 
 **Day 2 net:** classification pulled forward + streaming middleware deferred roughly cancel out — real scope delivered (HITL drafting, verified) matches the plan even though the specific tasks shifted.
 
-### Day 3 (8h estimated) — not started
+### Day 3 (8h estimated)
 
-| Est. | Task | Status |
-| --- | --- | --- |
-| 3h | Generative UI: email card (Approve/Reject/Send/Cancel) | ⬜ Not started |
-| 2h | Inbox list + detail panel, Compose button + manual-draft form | ⬜ Not started |
-| 3h | Layout pass (chat sidebar + threads + app area), end-to-end smoke test | ⬜ Not started |
+| Est. | Task | Status | Notes |
+| --- | --- | --- | --- |
+| 3h | Generative UI: email card (Approve/Reject/Send/Cancel) | ✅ Done | Ran over the 3h estimate — required migrating `compose_reply` off `humanInTheLoopMiddleware` to `copilotKitInterrupt` (CopilotKit doesn't understand LangChain's interrupt shape), then discovering CopilotKit's resume isn't a true `Command`-replay either, so the state mutation moved to the frontend (`agent.setState`, same pattern as the todos demo). |
+| 2h | Inbox list + detail panel, Compose button + manual-draft form | ⬜ Not started | |
+| 3h | Layout pass (chat sidebar + threads + app area), end-to-end smoke test | ⬜ Not started | |
+
+**Day 3 net:** the Generative UI task alone absorbed effort well beyond its 3h estimate
+(two architecture pivots plus a dependency-compatibility bug), so the remaining Day 3
+tasks (manual compose, layout pass) are now trending behind budget for this phase.
 
 ## Phase 2 — Context, memory & multi-agent (Days 4–5, 16h estimated) — not started
 
