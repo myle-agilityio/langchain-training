@@ -21,7 +21,6 @@ For scope/checklist status see [ROADMAP.md](./ROADMAP.md); for how things are bu
 | Est. | Task | Status | Notes |
 | --- | --- | --- | --- |
 | 3h | `compose_reply`/`finalize_email` tools with HITL pause pattern | ✅ Done | Merged into a single `compose_reply` tool — no separate finalize step needed, since `humanInTheLoopMiddleware` only runs the tool body after approval. Verified with a real interrupt/resume round-trip against a running `langgraphjs dev` server, not just typecheck |
-| 3h | Classification step | ✅ Done early | Actually landed as part of Day 1's `manage_emails` work — classification was already exercised in the Day 1 smoke test |
 | 2h | `stateStreamingMiddleware` wiring (live preview as the model drafts) | ⏸ Deferred | Skipped: the patch-based `manage_emails`/`compose_reply` design means the tool's raw argument shape doesn't match `state.emails`' shape, so the same "stream raw arg straight into state" trick used for todos would corrupt the frontend mid-stream. Revisit during the Day 3 UI pass if the live-typing effect turns out to matter |
 
 **Day 2 net:** classification pulled forward + streaming middleware deferred roughly cancel out — real scope delivered (HITL drafting, verified) matches the plan even though the specific tasks shifted.
