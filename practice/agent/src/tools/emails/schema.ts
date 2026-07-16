@@ -26,6 +26,13 @@ export const EmailClassificationSchema = z.object({
 });
 export type EmailClassification = z.infer<typeof EmailClassificationSchema>;
 
+export const EmailReplySchema = z.object({
+  subject: z.string(),
+  body: z.string(),
+  sentAt: z.string(),
+});
+export type EmailReply = z.infer<typeof EmailReplySchema>;
+
 export const EmailSchema = z.object({
   id: z.string(),
   from: z.object({
@@ -40,5 +47,8 @@ export const EmailSchema = z.object({
   // emails unclassified so classification is something that visibly happens
   // during the demo, not baked into the fixtures.
   classification: EmailClassificationSchema.optional(),
+  // Only ever set by compose_reply, and compose_reply only ever runs after
+  // humanInTheLoopMiddleware has approved (or edited) the send — see tools.ts.
+  reply: EmailReplySchema.optional(),
 });
 export type Email = z.infer<typeof EmailSchema>;

@@ -1,6 +1,6 @@
 # Architecture & Current State
 
-What's actually built, as of **Phase 1, Day 1**. See [ROADMAP.md](./ROADMAP.md) for what's
+What's actually built, as of **Phase 1, Day 2**. See [ROADMAP.md](./ROADMAP.md) for what's
 planned but not built yet, and the root [README](../README.md) for setup/running.
 
 ## Project Structure
@@ -23,10 +23,10 @@ planned but not built yet, and the root [README](../README.md) for setup/running
 │   │   ├── a2ui.ts                   # A2UI operation helpers
 │   │   ├── a2ui_dynamic_schema.ts    # Dynamic-schema A2UI tool (generated dashboards)
 │   │   └── tools/emails/             # Email domain — wired into agent.ts
-│   │       ├── schema.ts             # Email / classification zod schemas
+│   │       ├── schema.ts             # Email / classification / reply zod schemas
 │   │       ├── seed-data.ts          # Generated mock inbox (14 emails)
 │   │       ├── knowledge-base.ts     # Mock KB + search_knowledge_base's keyword search
-│   │       ├── tools.ts              # get_emails, manage_emails, search_knowledge_base
+│   │       ├── tools.ts              # get_emails, manage_emails, compose_reply, search_knowledge_base
 │   │       └── index.ts              # Barrel export
 │   ├── scripts/
 │   │   └── generate-seed-emails.ts   # Regenerates seed-data.ts — see below
@@ -42,19 +42,26 @@ planned but not built yet, and the root [README](../README.md) for setup/running
 ## Current demo
 
 The agent (`agent/src/agent.ts`) is a single `createAgent` (LangChain.js) wired to
-CopilotKit, with three email tools plus the starter's dynamic-dashboard A2UI tool:
+CopilotKit, with four email tools plus the starter's dynamic-dashboard A2UI tool:
 
 - `get_emails` — reads the shared inbox (defaults to the 14 seed emails on a fresh thread)
 - `manage_emails` — patches emails by id (mark read/unread, record a classification);
-  cannot set `replied`/`bug_filed` — those need a human-approved finalize step that
-  doesn't exist yet
+  cannot set `replied`/`bug_filed` — only `compose_reply` can reach those
+- `compose_reply` — drafts + sends a reply by id. Gated by `humanInTheLoopMiddleware`
+  (`interruptOn: { compose_reply: {...} }`): the graph genuinely pauses (LangGraph
+  `interrupt()`, not a UI-only simulation) before the tool body runs, and only applies
+  the reply (sets `status: "replied"`, fills `reply`) after an approve/edit decision
+  resumes the run. Reject skips the state change entirely.
 - `search_knowledge_base` — keyword search over a mock support-article KB
 - `generate_a2ui` — the starter's LLM-generated dashboard tool, left in as-is
 
 There's no frontend UI for any of this yet — the app still renders the starter's generic
-todo-list layout, unrelated to the email state. Verified so far via direct `graph.invoke`
-calls (not the UI): classification + mark-read + KB-grounded summarization all work
-end-to-end in one turn.
+todo-list layout, unrelated to the email state. Verified via direct HTTP calls against a
+running `langgraphjs dev` server (not just typecheck): a run that calls `compose_reply`
+returns `__interrupt__` with the exact action/args/description payload instead of
+executing, and resuming the same thread with `{"command": {"resume": {"decisions":
+[{"type": "approve"}]}}}` completes the send and updates state correctly. The reject/edit
+decision branches are library-owned (not our code) and weren't separately re-tested.
 
 ## Mock inbox data
 
