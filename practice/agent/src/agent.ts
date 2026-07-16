@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createAgent, humanInTheLoopMiddleware } from "langchain";
+import { createAgent } from "langchain";
 import { ChatOpenAI } from "@langchain/openai";
 import {
   copilotkitMiddleware,
@@ -37,18 +37,7 @@ export const graph = createAgent({
     search_knowledge_base,
     generate_a2ui,
   ],
-  middleware: [
-    copilotkitMiddleware,
-    humanInTheLoopMiddleware({
-      interruptOn: {
-        compose_reply: {
-          allowedDecisions: ["approve", "edit", "reject"],
-          description: (toolCall) =>
-            `Send this reply?\n\nSubject: ${toolCall.args.subject}\n\n${toolCall.args.body}`,
-        },
-      },
-    }),
-  ],
+  middleware: [copilotkitMiddleware],
   stateSchema: AgentStateSchema,
   systemPrompt: `
     You are a support-inbox triage assistant. Keep responses to 1-2 sentences.
