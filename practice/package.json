@@ -2,7 +2,7 @@
   "name": "langgraph-js-starter",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "npm@11.12.1",
+  "packageManager": "pnpm@10.30.3",
   "scripts": {
     "dev": "turbo run dev:ui dev:agent",
     "dev:debug": "LOG_LEVEL=debug turbo run dev:ui dev:agent",
