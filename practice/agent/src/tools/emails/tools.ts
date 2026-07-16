@@ -35,8 +35,7 @@ const EmailPatchSchema = z.object({
   classification: EmailClassificationSchema.optional(),
 });
 
-// Patches, not a full-array replace like manage_todos: subject/body/from/receivedAt
-// are inbox facts the model must never rewrite, so it can only patch the mutable
+// Patches: subject/body/from/receivedAt are inbox facts the model must never rewrite, so it can only patch the mutable
 // status/classification fields by id instead of echoing the whole array back.
 export const manage_emails = tool(
   (
@@ -77,6 +76,62 @@ export const manage_emails = tool(
   },
 );
 
+// Runs only after humanInTheLoopMiddleware has approved (or edited) the call —
+// see agent.ts's interruptOn config. By the time this executes, sending is
+// already authorized, so it can apply the reply directly.
+export const compose_reply = tool(
+  (
+    input: { id: string; subject: string; body: string },
+    runtime: ToolRuntime<typeof EmailsStateSchema>,
+  ) => {
+    const current = runtime.state.emails ?? [];
+    if (!current.some((e) => e.id === input.id)) {
+      return new ToolMessage({
+        content: `No email with id ${input.id} — call get_emails first.`,
+        tool_call_id: runtime.toolCallId,
+      });
+    }
+
+    const updated: Email[] = current.map((email) =>
+      email.id === input.id
+        ? {
+            ...email,
+            status: "replied" as const,
+            reply: {
+              subject: input.subject,
+              body: input.body,
+              sentAt: new Date().toISOString(),
+            },
+          }
+        : email,
+    );
+
+    return new Command({
+      update: {
+        emails: updated,
+        messages: [
+          new ToolMessage({
+            content: `Reply sent for email ${input.id}.`,
+            tool_call_id: runtime.toolCallId,
+          }),
+        ],
+      },
+    });
+  },
+  {
+    name: "compose_reply",
+    description:
+      "Draft and send a reply to an email by id. This pauses for human approval " +
+      "before anything actually sends — call it as soon as the reply is ready, " +
+      "don't ask the human separately first.",
+    schema: z.object({
+      id: z.string(),
+      subject: z.string(),
+      body: z.string(),
+    }),
+  },
+);
+
 export const search_knowledge_base = tool(
   (input: { query: string }) => {
     return JSON.stringify(searchKnowledgeBase(input.query));
@@ -94,4 +149,9 @@ export const search_knowledge_base = tool(
 // TTools' const-generic inference needs each tool passed as a literal array
 // element; spreading a pre-typed array widens it and createAgent's overloads
 // stop resolving (see agent.ts, which lists the three tools individually).
-export const email_tools = [get_emails, manage_emails, search_knowledge_base];
+export const email_tools = [
+  get_emails,
+  manage_emails,
+  compose_reply,
+  search_knowledge_base,
+];
