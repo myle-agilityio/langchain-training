@@ -36,7 +36,9 @@ These are process rules for how we collaborate on this project, not code style p
    verified and what you didn't.
 5. **Match scope to the day's plan; flag deviations instead of absorbing them silently.**
    If a task is trending over its estimated hours or needs something outside that day's
-   scope, say so when it happens, not after the fact.
+   scope, say so when it happens, not after the fact. [docs/ESTIMATION.md](./docs/ESTIMATION.md)
+   tracks the original per-task hour estimate against actual status — update it whenever a
+   task's status changes, so drift is visible instead of discovered later.
 6. **Small, descriptive commits tied to the task.** e.g. `Day 2: wire email classification
    into shared state` rather than one giant end-of-day commit. Only commit when asked.
 7. **Never let secrets leak.** `.env` stays untracked; if a new env var is introduced,
@@ -48,6 +50,7 @@ These are process rules for how we collaborate on this project, not code style p
 
 - [ ] Code follows an existing pattern in the repo, or the deviation is justified
 - [ ] docs/ROADMAP.md and/or docs/ARCHITECTURE.md updated if the change is "big" per rule 2
+- [ ] docs/ESTIMATION.md status updated for the task(s) just finished
 - [ ] Non-obvious logic has a why-comment
 - [ ] Feature manually exercised end-to-end (not just typechecked)
 - [ ] `.env.example` in sync if env vars changed

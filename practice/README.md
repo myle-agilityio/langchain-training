@@ -83,6 +83,7 @@ The following scripts can also be run using your preferred package manager:
 
 - [Architecture](./docs/ARCHITECTURE.md) - project structure, current demo, mock inbox data
 - [Roadmap](./docs/ROADMAP.md) - phase-by-phase plan and progress checklist
+- [Estimation Tracking](./docs/ESTIMATION.md) - original per-task hour estimate vs. actual status, to catch schedule drift early
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraph/) - Learn more about LangGraph and its features
 - [CopilotKit Documentation](https://docs.copilotkit.ai) - Explore CopilotKit's capabilities
 
