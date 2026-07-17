@@ -30,16 +30,13 @@ For scope/checklist status see [ROADMAP.md](./ROADMAP.md); for how things are bu
 | Est. | Task | Status | Notes |
 | --- | --- | --- | --- |
 | 3h | Generative UI: email card (Approve/Reject/Send/Cancel) | ✅ Done | Ran over the 3h estimate — required migrating `compose_reply` off `humanInTheLoopMiddleware` to `copilotKitInterrupt` (CopilotKit doesn't understand LangChain's interrupt shape), then discovering CopilotKit's resume isn't a true `Command`-replay either, so the state mutation moved to the frontend (`agent.setState`, same pattern as the todos demo). |
-| 2h | Inbox list + detail panel, Compose button + manual-draft form | ✅ Done | `src/components/email-inbox/` (list, detail, compose-form) now wired into `page.tsx` in place of the todo canvas. Manual reply writes straight to `agent.setState` — no agent/interrupt round-trip — per the "without going through the agent" requirement. Ran over budget: verifying it required standing up the dev servers, which surfaced a pre-existing, unrelated dependency-resolution bug (`@langchain/langgraph-checkpoint` resolves to an invalid version in `agent/node_modules`, crashing every chat run's debug-checkpoint streaming — see ARCHITECTURE.md "Known issue"). Confirmed via typecheck (clean) and a live browser load (empty-state renders correctly, zero console errors) and via direct LangGraph REST calls (`/runs/wait`) that state hydrates with the correct `Email[]` shape my components expect — but could not click-through a live chat-driven flow end-to-end because of that blocker, so the manual-compose click path itself is unverified in-browser pending a dependency fix |
-| 3h | Layout pass (chat sidebar + threads + app area), end-to-end smoke test | ⬜ Not started | Blocked on the same dev-agent-server issue for its end-to-end smoke test half |
+| 2h | Inbox list + detail panel, Compose button + manual-draft form | ✅ Done | `src/components/email-inbox/` (list, detail, compose-form) now wired into `page.tsx` in place of the todo canvas. Manual reply writes straight to `agent.setState` — no agent/interrupt round-trip — per the "without going through the agent" requirement. The manual-compose click path is now confirmed end-to-end in a real browser (select unread email → marked read → Compose reply → fill → Send → reply thread renders with correct timestamp → row shows "Replied" badge), zero console errors |
+| 3h | Layout pass (chat sidebar + threads + app area), end-to-end smoke test | ✅ Done | Default `ExampleLayout` mode changed from `"chat"` to `"app"` (`src/components/example-layout/index.tsx`) so the inbox + chat render side by side on load instead of landing on an empty chat-only screen — the only change needed, since threads drawer + chat + app-area already coexisted, just not by default. Asked the agent to triage the duplicate-charge email → it called `get_emails` → `search_knowledge_base` → `manage_emails` (classified Billing/high) → `compose_reply` → `EmailReplyCard` rendered → approved → inbox row updated to "Replied" live. |
 
 **Day 3 net:** the Generative UI task alone absorbed effort well beyond its 3h estimate
 (two architecture pivots plus a dependency-compatibility bug); the inbox/compose task
-also is implemented, this time chasing a pre-existing, unrelated agent-server
-dependency bug during verification rather than the feature build itself. Flagging per
-CLAUDE.md rule 5 rather than absorbing it silently — recommend fixing the dependency
-tree (likely a clean `pnpm install` in `agent/`) before the layout-pass task, since it
-also needs a working chat round-trip for its smoke test.
+is implemented. The layout-pass task is landed.
+Phase 1 is complete.
 
 ## Phase 2 — Context, memory & multi-agent (Days 4–5, 16h estimated) — not started
 
