@@ -1,7 +1,7 @@
 "use client";
 
 import { ExampleLayout } from "@/components/example-layout";
-import { ExampleCanvas } from "@/components/example-canvas";
+import { EmailInbox } from "@/components/email-inbox";
 import {
   useGenerativeUIExamples,
   useExampleSuggestions,
@@ -51,7 +51,7 @@ export default function HomePage() {
                 input={{ disclaimer: () => null, className: "pb-6" }}
               />
             }
-            appContent={<ExampleCanvas />}
+            appContent={<EmailInbox />}
           />
         </div>
       </div>

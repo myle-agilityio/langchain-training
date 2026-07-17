@@ -11,8 +11,10 @@ For what's already built, see [ARCHITECTURE.md](./ARCHITECTURE.md).
         wired into `agent.ts`; classification and document lookup work via these tools
   - [x] Drafting + real human-in-the-loop approval. Migrated to `copilotKitInterrupt` once building the UI showed — see ARCHITECTURE.md for the full "HITL architecture" writeup
   - [x] Generative UI: email reply card (Approve & Send / Reject, editable subject/body).
-  - [ ] Manual compose (user drafts/sends without going through the agent)
-  - [ ] Inbox list + detail panel, layout pass (chat sidebar + threads + app area)
+  - [x] Manual compose (user drafts/sends without going through the agent)
+  - [x] Inbox list + detail panel (`src/components/email-inbox/`), now `page.tsx`'s
+        app-mode content in place of the todo canvas
+  - [ ] Layout pass (chat sidebar + threads + app area)
 - **Phase 2 — Context, memory & multi-agent.** Migrate `createAgent` to an explicit
   LangGraph `StateGraph`; add short/long-term memory, PII/tone guardrails, time-travel
   replay, multi-tone forked drafts, and agent handoff.
