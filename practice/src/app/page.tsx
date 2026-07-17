@@ -2,7 +2,11 @@
 
 import { ExampleLayout } from "@/components/example-layout";
 import { ExampleCanvas } from "@/components/example-canvas";
-import { useGenerativeUIExamples, useExampleSuggestions } from "@/hooks";
+import {
+  useGenerativeUIExamples,
+  useExampleSuggestions,
+  useEmailAgent,
+} from "@/hooks";
 
 import {
   CopilotChat,
@@ -15,6 +19,7 @@ import styles from "./page.module.css";
 export default function HomePage() {
   useGenerativeUIExamples();
   useExampleSuggestions();
+  useEmailAgent();
 
   return (
     /*

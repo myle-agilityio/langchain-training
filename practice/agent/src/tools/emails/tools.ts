@@ -2,6 +2,7 @@ import { z } from "zod";
 import { tool, type ToolRuntime } from "@langchain/core/tools";
 import { ToolMessage } from "@langchain/core/messages";
 import { Command } from "@langchain/langgraph";
+import { copilotKitInterrupt } from "@copilotkit/sdk-js/langgraph";
 
 import { EmailSchema, EmailClassificationSchema, type Email } from "./schema.js";
 import { searchKnowledgeBase } from "./knowledge-base.js";
@@ -76,9 +77,17 @@ export const manage_emails = tool(
   },
 );
 
-// Runs only after humanInTheLoopMiddleware has approved (or edited) the call —
-// see agent.ts's interruptOn config. By the time this executes, sending is
-// already authorized, so it can apply the reply directly.
+// Pauses via copilotKitInterrupt (not LangChain's humanInTheLoopMiddleware) so the
+// frontend's useHumanInTheLoop({ name: "compose_reply" }) can render a real card.
+//
+// copilotKitInterrupt's resume is NOT a true LangGraph Command-resume of this exact
+// call site — CopilotKit's runtime answers it by starting a brand-new run with the
+// answer spliced in as context, rather than replaying this function to completion.
+// Verified empirically: code placed after copilotKitInterrupt() here never affected
+// the persisted thread state. So this tool does the pause + returns the raw decision
+// for the model's own conversational context ONLY; EmailReplyCard is the one that
+// actually applies the state change, via agent.setState, when the human decides —
+// the same frontend-mutates-shared-state pattern the todos demo already used.
 export const compose_reply = tool(
   (
     input: { id: string; subject: string; body: string },
@@ -92,38 +101,23 @@ export const compose_reply = tool(
       });
     }
 
-    const updated: Email[] = current.map((email) =>
-      email.id === input.id
-        ? {
-            ...email,
-            status: "replied" as const,
-            reply: {
-              subject: input.subject,
-              body: input.body,
-              sentAt: new Date().toISOString(),
-            },
-          }
-        : email,
-    );
+    const { answer } = copilotKitInterrupt({
+      action: "compose_reply",
+      args: input,
+    });
 
-    return new Command({
-      update: {
-        emails: updated,
-        messages: [
-          new ToolMessage({
-            content: `Reply sent for email ${input.id}.`,
-            tool_call_id: runtime.toolCallId,
-          }),
-        ],
-      },
+    return new ToolMessage({
+      content:
+        typeof answer === "string" ? answer : JSON.stringify(answer ?? {}),
+      tool_call_id: runtime.toolCallId,
     });
   },
   {
     name: "compose_reply",
     description:
-      "Draft and send a reply to an email by id. This pauses for human approval " +
-      "before anything actually sends — call it as soon as the reply is ready, " +
-      "don't ask the human separately first.",
+      "Draft a reply to an email by id. This pauses for human approval before " +
+      "anything actually sends — call it as soon as the reply is ready, don't " +
+      "ask the human separately first.",
     schema: z.object({
       id: z.string(),
       subject: z.string(),

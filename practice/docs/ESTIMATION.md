@@ -25,13 +25,17 @@ For scope/checklist status see [ROADMAP.md](./ROADMAP.md); for how things are bu
 
 **Day 2 net:** classification pulled forward + streaming middleware deferred roughly cancel out — real scope delivered (HITL drafting, verified) matches the plan even though the specific tasks shifted.
 
-### Day 3 (8h estimated) — not started
+### Day 3 (8h estimated)
 
-| Est. | Task | Status |
-| --- | --- | --- |
-| 3h | Generative UI: email card (Approve/Reject/Send/Cancel) | ⬜ Not started |
-| 2h | Inbox list + detail panel, Compose button + manual-draft form | ⬜ Not started |
-| 3h | Layout pass (chat sidebar + threads + app area), end-to-end smoke test | ⬜ Not started |
+| Est. | Task | Status | Notes |
+| --- | --- | --- | --- |
+| 3h | Generative UI: email card (Approve/Reject/Send/Cancel) | ✅ Done | Ran over the 3h estimate — required migrating `compose_reply` off `humanInTheLoopMiddleware` to `copilotKitInterrupt` (CopilotKit doesn't understand LangChain's interrupt shape), then discovering CopilotKit's resume isn't a true `Command`-replay either, so the state mutation moved to the frontend (`agent.setState`, same pattern as the todos demo). |
+| 2h | Inbox list + detail panel, Compose button + manual-draft form | ⬜ Not started | |
+| 3h | Layout pass (chat sidebar + threads + app area), end-to-end smoke test | ⬜ Not started | |
+
+**Day 3 net:** the Generative UI task alone absorbed effort well beyond its 3h estimate
+(two architecture pivots plus a dependency-compatibility bug), so the remaining Day 3
+tasks (manual compose, layout pass) are now trending behind budget for this phase.
 
 ## Phase 2 — Context, memory & multi-agent (Days 4–5, 16h estimated) — not started
 

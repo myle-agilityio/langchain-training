@@ -1,6 +1,6 @@
 # Architecture & Current State
 
-What's actually built, as of **Phase 1, Day 2**. See [ROADMAP.md](./ROADMAP.md) for what's
+What's actually built, as of **Phase 1, Day 3**. See [ROADMAP.md](./ROADMAP.md) for what's
 planned but not built yet, and the root [README](../README.md) for setup/running.
 
 ## Project Structure
@@ -8,14 +8,15 @@ planned but not built yet, and the root [README](../README.md) for setup/running
 ```
 ├── src/                              # Next.js frontend source
 │   ├── app/
-│   │   ├── page.tsx                  # Main page
+│   │   ├── page.tsx                  # Main page — calls useEmailAgent() alongside the demo hooks
 │   │   ├── api/copilotkit/           # CopilotKit API route (runtime, agent registration)
 │   │   └── declarative-generative-ui/# a2ui catalog: definitions.ts + renderers.tsx
 │   ├── components/
-│   │   ├── example-canvas/           # Todo list UI
+│   │   ├── example-canvas/           # Todo list UI (unchanged, unrelated to email state)
 │   │   ├── example-layout/           # Layout: chat + canvas side-by-side
-│   │   └── generative-ui/            # Charts + meeting-time-picker demo components
-│   ├── hooks/                        # use-generative-ui-examples, use-example-suggestions, use-theme
+│   │   └── generative-ui/            # Charts, meeting-time-picker, email-reply-card
+│   ├── hooks/                        # use-email-agent (new), use-generative-ui-examples, use-example-suggestions, use-theme
+│   ├── types/email.ts                # Frontend Email type — mirrors agent/.../schema.ts, no shared import boundary between the two TS projects
 │   └── lib/                          # a2ui-theme.css, utils
 ├── agent/                            # LangGraph TypeScript agent
 │   ├── src/
@@ -41,27 +42,19 @@ planned but not built yet, and the root [README](../README.md) for setup/running
 
 ## Current demo
 
-The agent (`agent/src/agent.ts`) is a single `createAgent` (LangChain.js) wired to
-CopilotKit, with four email tools plus the starter's dynamic-dashboard A2UI tool:
+`agent/src/agent.ts` is a single `createAgent` wired to CopilotKit, with four email tools
+plus the starter's dashboard tool:
 
-- `get_emails` — reads the shared inbox (defaults to the 14 seed emails on a fresh thread)
-- `manage_emails` — patches emails by id (mark read/unread, record a classification);
-  cannot set `replied`/`bug_filed` — only `compose_reply` can reach those
-- `compose_reply` — drafts + sends a reply by id. Gated by `humanInTheLoopMiddleware`
-  (`interruptOn: { compose_reply: {...} }`): the graph genuinely pauses (LangGraph
-  `interrupt()`, not a UI-only simulation) before the tool body runs, and only applies
-  the reply (sets `status: "replied"`, fills `reply`) after an approve/edit decision
-  resumes the run. Reject skips the state change entirely.
-- `search_knowledge_base` — keyword search over a mock support-article KB
-- `generate_a2ui` — the starter's LLM-generated dashboard tool, left in as-is
+- `get_emails` — reads the shared inbox
+- `manage_emails` — patches status/classification by id; can't set `replied`/`bug_filed`
+- `compose_reply` — pauses via `copilotKitInterrupt` for approval; returns the decision but
+  doesn't apply it (see below)
+- `search_knowledge_base` — keyword search over a mock KB
+- `generate_a2ui` — starter's dashboard tool, untouched
 
-There's no frontend UI for any of this yet — the app still renders the starter's generic
-todo-list layout, unrelated to the email state. Verified via direct HTTP calls against a
-running `langgraphjs dev` server (not just typecheck): a run that calls `compose_reply`
-returns `__interrupt__` with the exact action/args/description payload instead of
-executing, and resuming the same thread with `{"command": {"resume": {"decisions":
-[{"type": "approve"}]}}}` completes the send and updates state correctly. The reject/edit
-decision branches are library-owned (not our code) and weren't separately re-tested.
+Frontend: `use-email-agent.tsx` + `email-reply-card.tsx` render an editable
+Approve/Reject card via `useHumanInTheLoop`. Verified end-to-end in a real browser: draft
+→ card renders → approve → backend state confirmed `status: "replied"`.
 
 ## Mock inbox data
 
