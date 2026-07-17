@@ -12,10 +12,11 @@ planned but not built yet, and the root [README](../README.md) for setup/running
 │   │   ├── api/copilotkit/           # CopilotKit API route (runtime, agent registration)
 │   │   └── declarative-generative-ui/# a2ui catalog: definitions.ts + renderers.tsx
 │   ├── components/
-│   │   ├── example-canvas/           # Todo list UI (unchanged, unrelated to email state)
+│   │   ├── email-inbox/               # Inbox list + detail panel + manual (non-agent) reply form
+│   │   ├── example-canvas/           # Todo list UI (kept as a demo reference; no longer mounted in page.tsx)
 │   │   ├── example-layout/           # Layout: chat + canvas side-by-side
 │   │   └── generative-ui/            # Charts, meeting-time-picker, email-reply-card
-│   ├── hooks/                        # use-email-agent (new), use-generative-ui-examples, use-example-suggestions, use-theme
+│   ├── hooks/                        # use-email-agent, use-generative-ui-examples, use-example-suggestions, use-theme
 │   ├── types/email.ts                # Frontend Email type — mirrors agent/.../schema.ts, no shared import boundary between the two TS projects
 │   └── lib/                          # a2ui-theme.css, utils
 ├── agent/                            # LangGraph TypeScript agent
@@ -56,6 +57,14 @@ Frontend: `use-email-agent.tsx` + `email-reply-card.tsx` render an editable
 Approve/Reject card via `useHumanInTheLoop`. Verified end-to-end in a real browser: draft
 → card renders → approve → backend state confirmed `status: "replied"`.
 
+`email-inbox/` is the app-mode content (`page.tsx`'s `appContent`, replacing the old todo
+canvas): a two-pane list + detail view over `agent.state.emails`. Selecting a row marks it
+read; the detail panel's "Compose reply" button opens a manual draft form (subject/body)
+that sends by writing `status: "replied"` + `reply` straight to shared state via
+`agent.setState` — the same frontend-mutates-shared-state pattern `EmailReplyCard`'s
+approve handler uses, just without any agent/interrupt round-trip at all, per the
+"manual compose" requirement (user drafts/sends without going through the agent).
+
 ## Mock inbox data
 
 `agent/src/tools/emails/seed-data.ts` is 14 support emails for a fictional product
@@ -74,3 +83,25 @@ npm run generate:seed
 ```
 
 This overwrites `seed-data.ts` — hand edits made after generating will be lost on a rerun.
+
+## Known issue: dev agent server crashes on every run
+
+`agent/node_modules` currently has a broken/conflicting dependency resolution —
+`@langchain/langgraph-checkpoint` resolves to `0.0.0` in one place (required
+`~0.0.16 || ^0.1.0 || ~1.0.0`), and `npm ls` also flags `@langchain/langgraph-cli`,
+`langchain`, and `@langchain/langgraph` as "invalid" (version conflicts) inside the
+pnpm-managed store. In practice this makes `POST /threads/{id}/runs/stream` — the
+endpoint the CopilotKit frontend uses for every chat turn — crash inside
+`preprocessDebugCheckpoint` (`@langchain/langgraph-api`'s `stream.mjs`) on the very
+first debug event of any run, so the browser never receives a state update and every
+chat message effectively no-ops from the UI's perspective.
+
+The graph itself is NOT broken: a direct `POST /threads/{id}/runs/wait` against the
+LangGraph dev server (bypassing the streaming endpoint) completes fine and correctly
+hydrates `state.emails` with the 14 seed emails, proving the crash is isolated to the
+stream/debug-checkpoint code path, not the agent logic. This blocks live-browser
+verification of any chat-driven flow (classification, `compose_reply`, etc.) until the
+dependency tree is reconciled — likely needs a clean `pnpm install` in `agent/` rather
+than the `npm install`/`npm ls` used to diagnose this, since the repo mixes both
+lockfiles (`package-lock.json` and `pnpm-lock.yaml` at root; `agent/node_modules` is
+pnpm-shaped but `agent/package-lock.json` also exists).

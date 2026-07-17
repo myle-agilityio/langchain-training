@@ -123,3 +123,30 @@ cpk-web-inspector {
   bottom: auto !important;
   right: 16px !important;
 }
+
+/*
+ * Slim, low-contrast scrollbar — Firefox via scrollbar-width/-color, WebKit/Blink
+ * via ::-webkit-scrollbar. Apply to any scroll container that shouldn't draw
+ * attention to itself (e.g. the inbox list).
+ */
+.thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.thin-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 9999px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--muted-foreground);
+}
