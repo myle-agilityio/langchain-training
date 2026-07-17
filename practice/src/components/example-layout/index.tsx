@@ -11,7 +11,10 @@ interface ExampleLayoutProps {
 }
 
 export function ExampleLayout({ chatContent, appContent }: ExampleLayoutProps) {
-  const [mode, setMode] = useState<"chat" | "app">("chat");
+  // Default to "app" (inbox + chat sidebar side by side) rather than chat-only —
+  // this is an email client first, so users should land on their inbox instead
+  // of a blank chat screen. See docs/ROADMAP.md's "layout pass" task.
+  const [mode, setMode] = useState<"chat" | "app">("app");
 
   useFrontendTool({
     name: "enableAppMode",

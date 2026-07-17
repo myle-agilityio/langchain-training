@@ -1,7 +1,8 @@
 # Architecture & Current State
 
-What's actually built, as of **Phase 1, Day 3**. See [ROADMAP.md](./ROADMAP.md) for what's
-planned but not built yet, and the root [README](../README.md) for setup/running.
+What's actually built, as of **Phase 1 complete (end of Day 3)**. See
+[ROADMAP.md](./ROADMAP.md) for what's planned but not built yet, and the root
+[README](../README.md) for setup/running.
 
 ## Project Structure
 
@@ -65,6 +66,18 @@ that sends by writing `status: "replied"` + `reply` straight to shared state via
 approve handler uses, just without any agent/interrupt round-trip at all, per the
 "manual compose" requirement (user drafts/sends without going through the agent).
 
+`example-layout/index.tsx`'s mode defaults to `"app"` rather than `"chat"` — this is an
+email client first, so the inbox + chat should both be visible on load instead of
+landing on an empty chat screen. The Chat/App toggle still lets you go chat-only (mobile
+in particular, where app mode hides the chat pane entirely — see the layout's own
+comments) or hide the inbox to focus on the conversation.
+
+Both the agent-drafted flow and the manual-compose flow are verified end-to-end in a
+real browser: chat → `get_emails`/`search_knowledge_base`/`manage_emails` →
+`compose_reply` → `EmailReplyCard` → approve → inbox row shows "Replied"; and,
+separately, select email → "Compose reply" → fill → Send → reply thread renders →
+inbox row shows "Replied" — both with zero console errors.
+
 ## Mock inbox data
 
 `agent/src/tools/emails/seed-data.ts` is 14 support emails for a fictional product
@@ -84,24 +97,23 @@ npm run generate:seed
 
 This overwrites `seed-data.ts` — hand edits made after generating will be lost on a rerun.
 
-## Known issue: dev agent server crashes on every run
+## Resolved: dev agent server used to crash on every run
 
-`agent/node_modules` currently has a broken/conflicting dependency resolution —
-`@langchain/langgraph-checkpoint` resolves to `0.0.0` in one place (required
-`~0.0.16 || ^0.1.0 || ~1.0.0`), and `npm ls` also flags `@langchain/langgraph-cli`,
-`langchain`, and `@langchain/langgraph` as "invalid" (version conflicts) inside the
-pnpm-managed store. In practice this makes `POST /threads/{id}/runs/stream` — the
-endpoint the CopilotKit frontend uses for every chat turn — crash inside
-`preprocessDebugCheckpoint` (`@langchain/langgraph-api`'s `stream.mjs`) on the very
-first debug event of any run, so the browser never receives a state update and every
-chat message effectively no-ops from the UI's perspective.
+`agent/node_modules` previously had a broken/conflicting dependency resolution —
+`@langchain/langgraph-checkpoint` resolved to `0.0.0` in one place (required
+`~0.0.16 || ^0.1.0 || ~1.0.0`), which crashed `POST /threads/{id}/runs/stream` (the
+endpoint the CopilotKit frontend uses for every chat turn) inside
+`preprocessDebugCheckpoint` (`@langchain/langgraph-api`'s `stream.mjs`) on the first
+debug event of any run — so the browser never received a state update and every chat
+message effectively no-op'd from the UI's perspective, even though the graph itself
+executed and mutated state correctly underneath.
 
-The graph itself is NOT broken: a direct `POST /threads/{id}/runs/wait` against the
-LangGraph dev server (bypassing the streaming endpoint) completes fine and correctly
-hydrates `state.emails` with the 14 seed emails, proving the crash is isolated to the
-stream/debug-checkpoint code path, not the agent logic. This blocks live-browser
-verification of any chat-driven flow (classification, `compose_reply`, etc.) until the
-dependency tree is reconciled — likely needs a clean `pnpm install` in `agent/` rather
-than the `npm install`/`npm ls` used to diagnose this, since the repo mixes both
-lockfiles (`package-lock.json` and `pnpm-lock.yaml` at root; `agent/node_modules` is
-pnpm-shaped but `agent/package-lock.json` also exists).
+Fixed with a clean reinstall: `rm -rf agent/node_modules agent/package-lock.json &&
+npm install` (from `agent/`). `npm ls` now shows a single deduped
+`@langchain/langgraph-checkpoint@1.1.3` matching the declared
+`@langchain/langgraph-cli@1.4.3`, the "dependencies are not up to date" boot warning is
+gone, and a real chat round-trip (classify → draft → approve) completes and streams
+state updates to the browser as expected. If this regresses again, re-run the same
+clean reinstall in `agent/` — the repo's mix of `package-lock.json` and
+`pnpm-lock.yaml` at the root makes it easy for `agent/node_modules` to drift into a bad
+state if it's ever installed via pnpm instead of the `npm install` its own scripts use.

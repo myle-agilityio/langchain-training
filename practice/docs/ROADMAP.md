@@ -3,9 +3,10 @@
 Building the email assistant in two phases (see [CLAUDE.md](../CLAUDE.md) for how we work).
 For what's already built, see [ARCHITECTURE.md](./ARCHITECTURE.md).
 
-- **Phase 1 — Foundation & core assistant.** Reuse this boilerplate's tools, shared-state,
-  and a2ui-catalog patterns; swap the demo domain for email. Ships: classification,
-  document lookup, drafting with real human-in-the-loop approval, manual compose.
+- **Phase 1 — Foundation & core assistant.** ✅ Complete. Reuse this boilerplate's tools,
+  shared-state, and a2ui-catalog patterns; swap the demo domain for email. Ships:
+  classification, document lookup, drafting with real human-in-the-loop approval, manual
+  compose.
   - [x] Email schema + generated mock inbox (`agent/src/tools/emails/`)
   - [x] Read/patch/lookup tools (`get_emails`, `manage_emails`, `search_knowledge_base`)
         wired into `agent.ts`; classification and document lookup work via these tools
@@ -14,7 +15,8 @@ For what's already built, see [ARCHITECTURE.md](./ARCHITECTURE.md).
   - [x] Manual compose (user drafts/sends without going through the agent)
   - [x] Inbox list + detail panel (`src/components/email-inbox/`), now `page.tsx`'s
         app-mode content in place of the todo canvas
-  - [ ] Layout pass (chat sidebar + threads + app area)
+  - [x] Layout pass (chat sidebar + threads + app area) — app-mode (inbox + chat side by
+        side) is now the default landing view instead of chat-only
 - **Phase 2 — Context, memory & multi-agent.** Migrate `createAgent` to an explicit
   LangGraph `StateGraph`; add short/long-term memory, PII/tone guardrails, time-travel
   replay, multi-tone forked drafts, and agent handoff.
