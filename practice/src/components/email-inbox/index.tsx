@@ -1,14 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useAgent } from "@copilotkit/react-core/v2";
 import type { Email } from "@/types/email";
+import { useSharedInbox } from "@/hooks/use-shared-inbox";
 import { InboxList } from "./inbox-list";
 import { EmailDetail } from "./email-detail";
 
 export function EmailInbox() {
-  const { agent } = useAgent();
-  const emails = (agent.state?.emails ?? []) as Email[];
+  const { emails, patchEmail } = useSharedInbox();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const selected = emails.find((e) => e.id === selectedId) ?? null;
@@ -16,28 +15,17 @@ export function EmailInbox() {
   const selectEmail = (email: Email) => {
     setSelectedId(email.id);
     // Opening an unread email marks it read — same frontend-owns-shared-state
-    // pattern as the todos demo and EmailReplyCard's approve handler, just
-    // triggered by a read instead of a decision.
+    // pattern as EmailReplyCard's approve handler, just triggered by a read
+    // instead of a decision.
     if (email.status === "unread") {
-      agent.setState({
-        emails: emails.map((e) =>
-          e.id === email.id ? { ...e, status: "read" as const } : e,
-        ),
-      });
+      patchEmail(email.id, { status: "read" });
     }
   };
 
   const sendManualReply = (id: string, subject: string, body: string) => {
-    agent.setState({
-      emails: emails.map((e) =>
-        e.id === id
-          ? {
-              ...e,
-              status: "replied" as const,
-              reply: { subject, body, sentAt: new Date().toISOString() },
-            }
-          : e,
-      ),
+    patchEmail(id, {
+      status: "replied",
+      reply: { subject, body, sentAt: new Date().toISOString() },
     });
   };
 

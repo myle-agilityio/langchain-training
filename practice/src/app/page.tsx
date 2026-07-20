@@ -6,6 +6,7 @@ import {
   useGenerativeUIExamples,
   useExampleSuggestions,
   useEmailAgent,
+  SharedInboxProvider,
 } from "@/hooks";
 
 import {
@@ -36,25 +37,33 @@ export default function HomePage() {
       mobile, where the drawer is an off-canvas modal rather than a sidebar.
     */
     <CopilotChatConfigurationProvider agentId="default">
-      <div className={styles.layout}>
-        {/*
-          SDK threads drawer (replaces the former hand-rolled fork). SSR-safe and
-          license-gated (shows its own locked view when threads aren't licensed), so it
-          needs no example-level gate.
-        */}
-        <CopilotThreadsDrawer agentId="default" />
-        <div className={styles.mainPanel}>
-          <ExampleLayout
-            chatContent={
-              <CopilotChat
-                attachments={{ enabled: true }}
-                input={{ disclaimer: () => null, className: "pb-6" }}
-              />
-            }
-            appContent={<EmailInbox />}
-          />
+      {/*
+        SharedInboxProvider needs useAgent(), which only resolves inside this
+        configuration provider — and it wraps BOTH the chat (EmailReplyCard renders
+        inside CopilotChat) and the inbox panel, since they must read/write the
+        same common inbox regardless of which one triggered the change.
+      */}
+      <SharedInboxProvider>
+        <div className={styles.layout}>
+          {/*
+            SDK threads drawer (replaces the former hand-rolled fork). SSR-safe and
+            license-gated (shows its own locked view when threads aren't licensed), so it
+            needs no example-level gate.
+          */}
+          <CopilotThreadsDrawer agentId="default" />
+          <div className={styles.mainPanel}>
+            <ExampleLayout
+              chatContent={
+                <CopilotChat
+                  attachments={{ enabled: true }}
+                  input={{ disclaimer: () => null, className: "pb-6" }}
+                />
+              }
+              appContent={<EmailInbox />}
+            />
+          </div>
         </div>
-      </div>
+      </SharedInboxProvider>
     </CopilotChatConfigurationProvider>
   );
 }

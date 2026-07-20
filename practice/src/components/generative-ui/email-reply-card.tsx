@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAgent } from "@copilotkit/react-core/v2";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Mail, Check, X } from "lucide-react";
-import type { Email } from "@/types/email";
+import { useSharedInbox } from "@/hooks/use-shared-inbox";
 
 export interface EmailReplyCardProps {
   status: "inProgress" | "executing" | "complete";
@@ -23,7 +22,7 @@ export function EmailReplyCard({
   subject: draftSubject,
   body: draftBody,
 }: EmailReplyCardProps) {
-  const { agent } = useAgent();
+  const { patchEmail } = useSharedInbox();
   const [subject, setSubject] = useState(draftSubject);
   const [body, setBody] = useState(draftBody);
   const [decision, setDecision] = useState<"approve" | "reject" | null>(null);
@@ -38,20 +37,12 @@ export function EmailReplyCard({
 
   // copilotKitInterrupt's resume doesn't replay the backend tool to completion (see
   // tools.ts), so this card — not the backend — is the one that actually applies the
-  // state change, the same way the todos demo mutates shared state via agent.setState.
+  // state change, via patchEmail (PATCH /api/emails into the shared inbox store).
   const handleApprove = () => {
     setDecision("approve");
-    const emails = (agent.state?.emails ?? []) as Email[];
-    agent.setState({
-      emails: emails.map((email) =>
-        email.id === id
-          ? {
-              ...email,
-              status: "replied" as const,
-              reply: { subject, body, sentAt: new Date().toISOString() },
-            }
-          : email,
-      ),
+    patchEmail(id, {
+      status: "replied",
+      reply: { subject, body, sentAt: new Date().toISOString() },
     });
     respond?.(JSON.stringify({ decision: "approve" }));
   };

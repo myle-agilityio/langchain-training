@@ -9,9 +9,10 @@ interface ComposeFormProps {
   onCancel: () => void;
 }
 
-// Manual counterpart to EmailReplyCard: sends directly via agent.setState with
-// no agent/interrupt round-trip at all, for when the human wants to write the
-// reply themselves instead of asking the model to draft one.
+// Manual counterpart to EmailReplyCard: sends directly via patchEmail (see
+// EmailInbox's sendManualReply) with no agent/interrupt round-trip at all, for
+// when the human wants to write the reply themselves instead of asking the
+// model to draft one.
 export function ComposeForm({ initialSubject, onSend, onCancel }: ComposeFormProps) {
   const [subject, setSubject] = useState(initialSubject);
   const [body, setBody] = useState("");

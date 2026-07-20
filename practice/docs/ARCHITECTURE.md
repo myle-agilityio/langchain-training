@@ -59,12 +59,39 @@ Approve/Reject card via `useHumanInTheLoop`. Verified end-to-end in a real brows
 → card renders → approve → backend state confirmed `status: "replied"`.
 
 `email-inbox/` is the app-mode content (`page.tsx`'s `appContent`, replacing the old todo
-canvas): a two-pane list + detail view over `agent.state.emails`. Selecting a row marks it
-read; the detail panel's "Compose reply" button opens a manual draft form (subject/body)
-that sends by writing `status: "replied"` + `reply` straight to shared state via
-`agent.setState` — the same frontend-mutates-shared-state pattern `EmailReplyCard`'s
-approve handler uses, just without any agent/interrupt round-trip at all, per the
-"manual compose" requirement (user drafts/sends without going through the agent).
+canvas): a two-pane list + detail view over the shared inbox (see below). Selecting a row
+marks it read; the detail panel's "Compose reply" button opens a manual draft form
+(subject/body) that sends by patching `status: "replied"` + `reply` into that same shared
+inbox — the same frontend-mutates-shared-state pattern `EmailReplyCard`'s approve handler
+uses, just without any agent/interrupt round-trip at all, per the "manual compose"
+requirement (user drafts/sends without going through the agent).
+
+## Shared inbox: LangGraph cross-thread Store, not per-thread state
+
+The inbox used to live in per-thread `agent.state.emails`, so once the threads drawer
+shipped, each thread forked its own copy instead of sharing one mailbox. Fixed by moving it
+to LangGraph's cross-thread `Store` (namespace `["emails"]`, one item per email keyed by
+id — `agent/src/tools/emails/store.ts`), which every thread reads/writes the same copy of:
+
+- `get_emails`/`manage_emails`/`compose_reply` (`tools.ts`) use `runtime.store` instead of
+  `runtime.state.emails`; `emails` is gone from `AgentStateSchema` in `agent.ts`. No other
+  wiring needed — `langgraph dev`/the deployed API server attaches a store to every
+  compiled graph automatically.
+- The frontend can't reach that store directly (separate process), so
+  `src/app/api/emails/route.ts` talks to the same store over the LangGraph deployment's
+  REST API via `@langchain/langgraph-sdk`'s `Client.store`.
+- `src/hooks/use-shared-inbox.tsx` (`SharedInboxProvider`/`useSharedInbox`) replaces
+  `useAgent().state.emails`/`setState` on the frontend, refetching on mount and whenever a
+  chat run finalizes. Mounted once in `page.tsx` around both the chat and the inbox panel.
+
+`get_emails` also returns `total`/`countsByStatus`, not just the raw array — testing this
+fix surfaced the model miscounting entries in the JSON dump when asked "how many unread?"
+(a known LLM weak spot, not a data bug); precomputing the breakdown turns that into a
+lookup instead of model arithmetic.
+
+Verified: opened the inbox in two different chat threads (via the threads drawer) and
+confirmed marking an email read/replied in one is immediately visible after switching to
+the other.
 
 `example-layout/index.tsx`'s mode defaults to `"app"` rather than `"chat"` — this is an
 email client first, so the inbox + chat should both be visible on load instead of

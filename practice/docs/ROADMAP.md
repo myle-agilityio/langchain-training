@@ -17,6 +17,9 @@ For what's already built, see [ARCHITECTURE.md](./ARCHITECTURE.md).
         app-mode content in place of the todo canvas
   - [x] Layout pass (chat sidebar + threads + app area) — app-mode (inbox + chat side by
         side) is now the default landing view instead of chat-only
+  - [x] Shared inbox fix — moved `emails` off per-thread `agent.state` onto LangGraph's
+        cross-thread Store so the inbox is common across every thread instead of forking a
+        copy per checkpoint (see ARCHITECTURE.md's "Shared inbox" section)
 - **Phase 2 — Context, memory & multi-agent.** Migrate `createAgent` to an explicit
   LangGraph `StateGraph`; add short/long-term memory, PII/tone guardrails, time-travel
   replay, multi-tone forked drafts, and agent handoff.

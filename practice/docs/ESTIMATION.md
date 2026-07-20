@@ -38,6 +38,16 @@ For scope/checklist status see [ROADMAP.md](./ROADMAP.md); for how things are bu
 is implemented. The layout-pass task is landed.
 Phase 1 is complete.
 
+### Post-Phase-1 fix: shared inbox (unplanned, ~1h)
+
+Threads shipped in Day 3's layout pass, which exposed a bug the original plan hadn't
+anticipated: `emails` lived in per-thread `agent.state`, so each thread forked its own copy
+of the inbox instead of sharing one. Fixed by moving the inbox onto LangGraph's cross-thread
+`Store` — see ARCHITECTURE.md. Note: this pulls forward the *mechanism* Phase 2 Day 4
+planned to use for long-term memory ("per-customer profile/tone via Store"), just applied to
+the inbox instead of customer profiles. Not scope creep on Day 4's task itself, but worth
+knowing the Store is already wired in when that task starts.
+
 ## Phase 2 — Context, memory & multi-agent (Days 4–5, 16h estimated) — not started
 
 ### Day 4 (8h estimated)
