@@ -66,6 +66,14 @@ inbox — the same frontend-mutates-shared-state pattern `EmailReplyCard`'s appr
 uses, just without any agent/interrupt round-trip at all, per the "manual compose"
 requirement (user drafts/sends without going through the agent).
 
+The detail panel also has an "Ask AI to draft" button next to "Compose reply": it hands the
+selected email to the agent as a normal chat turn (`agent.addMessage` + `agent.runAgent` on
+the same agent the chat pane binds to), so the run streams into the visible chat and its
+`compose_reply` interrupt renders the editable `EmailReplyCard` there for approval. It's
+disabled (showing "Drafting…") while `agent.isRunning`. This is the agent-assisted
+counterpart to manual compose — one button routes through the model + approval card, the
+other writes straight to the shared inbox.
+
 ## Shared inbox: LangGraph cross-thread Store, not per-thread state
 
 The inbox used to live in per-thread `agent.state.emails`, so once the threads drawer

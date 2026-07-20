@@ -5,14 +5,21 @@ import type { Email } from "@/types/email";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ComposeForm } from "./compose-form";
-import { Mail } from "lucide-react";
+import { Mail, Sparkles } from "lucide-react";
 
 interface EmailDetailProps {
   email: Email | null;
   onSendReply: (id: string, subject: string, body: string) => void;
+  onAskAgent: (email: Email) => void;
+  agentRunning: boolean;
 }
 
-export function EmailDetail({ email, onSendReply }: EmailDetailProps) {
+export function EmailDetail({
+  email,
+  onSendReply,
+  onAskAgent,
+  agentRunning,
+}: EmailDetailProps) {
   const [composing, setComposing] = useState(false);
 
   // Switching to a different email shouldn't leave a stale draft open against
@@ -33,7 +40,9 @@ export function EmailDetail({ email, onSendReply }: EmailDetailProps) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-8 py-8">
+    // pt-20 clears the fixed Chat/App toggle (top-4 + ~46px tall) pinned at the
+    // panel's top-right, so a long subject's first line doesn't render under it.
+    <div className="max-w-2xl mx-auto px-8 pb-8 pt-20">
       <div className="mb-6">
         <h1 className="text-xl font-bold text-[var(--foreground)]">
           {email.subject}
@@ -83,7 +92,19 @@ export function EmailDetail({ email, onSendReply }: EmailDetailProps) {
             onCancel={() => setComposing(false)}
           />
         ) : (
-          <Button onClick={() => setComposing(true)}>Compose reply</Button>
+          <div className="flex flex-wrap gap-2">
+            {/* Analyze + draft via the agent — the reply comes back as an
+                editable approval card in the chat pane, not applied directly. */}
+            <Button
+              variant="outline"
+              onClick={() => onAskAgent(email)}
+              disabled={agentRunning}
+            >
+              <Sparkles className="h-4 w-4" />
+              {agentRunning ? "Drafting…" : "Ask AI to draft"}
+            </Button>
+            <Button onClick={() => setComposing(true)}>Compose reply</Button>
+          </div>
         )}
       </div>
     </div>
