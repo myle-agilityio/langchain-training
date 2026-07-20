@@ -49,14 +49,27 @@ plus the starter's dashboard tool:
 
 - `get_emails` — reads the shared inbox
 - `manage_emails` — patches status/classification by id; can't set `replied`/`bug_filed`
-- `compose_reply` — pauses via `copilotKitInterrupt` for approval; returns the decision but
-  doesn't apply it (see below)
+- `compose_reply` — pauses via LangGraph's raw `interrupt()` for approval; returns the
+  decision but doesn't apply it (see below, and the HITL note)
 - `search_knowledge_base` — keyword search over a mock KB
 - `generate_a2ui` — starter's dashboard tool, untouched
 
 Frontend: `use-email-agent.tsx` + `email-reply-card.tsx` render an editable
 Approve/Reject card via `useHumanInTheLoop`. Verified end-to-end in a real browser: draft
 → card renders → approve → backend state confirmed `status: "replied"`.
+
+**HITL interrupt — why raw `interrupt()`, not `copilotKitInterrupt`.** `compose_reply` calls
+LangGraph's `interrupt()` directly (with CopilotKit's `__copilotkit_interrupt_value__` /
+`__copilotkit_messages__` payload shape so the runtime + frontend still recognize the
+`compose_reply` action). We do **not** use `@copilotkit/sdk-js`'s `copilotKitInterrupt`
+helper: on langgraph 1.4.x, `interrupt()` pauses by *throwing* a `GraphInterrupt`, and that
+helper wraps the call in a `try/catch` that swallows it and rethrows as
+`CopilotKitMisuseError` ("Failed to create interrupt: …"), so the run errors instead of
+pausing (langgraph's own `interrupt()` docstring warns: never catch it without rethrowing).
+Verified against the running server: with the helper the run errors and records no
+interrupt; calling `interrupt()` directly, the run pauses with the interrupt recorded and
+the card renders. Triggering the run must also go through the core's interrupt-aware path
+(`copilotkit.runAgent({ agent })` / CopilotChat), not a bare `agent.runAgent()`.
 
 `email-inbox/` is the app-mode content (`page.tsx`'s `appContent`, replacing the old todo
 canvas): a two-pane list + detail view over the shared inbox (see below). Selecting a row

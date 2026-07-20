@@ -5,6 +5,8 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -24,7 +26,12 @@ const SharedInboxContext = createContext<SharedInboxValue | null>(null);
 // useAgent()'s per-thread state — is the single source of truth every consumer
 // (EmailInbox, EmailReplyCard) reads from, regardless of which chat thread is active.
 export function SharedInboxProvider({ children }: { children: ReactNode }) {
-  const { agent } = useAgent();
+  // updates: [] — we only need the agent HANDLE (to subscribe to run completion
+  // below), not a re-render on every message/state/status event. Subscribing to all
+  // updates here re-rendered this provider (and its whole subtree) on every streamed
+  // token during a run; combined with the onRunFinalized→refresh→setEmails effect it
+  // produced a re-render storm that tripped React's "maximum update depth".
+  const { agent } = useAgent({ updates: [] });
   const [emails, setEmails] = useState<Email[]>(seedEmails);
 
   const refresh = useCallback(async () => {
@@ -33,6 +40,11 @@ export function SharedInboxProvider({ children }: { children: ReactNode }) {
     const data = (await res.json()) as { emails: Email[] };
     setEmails(data.emails);
   }, []);
+
+  // Keep the subscribe effect from re-binding (and thus re-subscribing) when refresh's
+  // identity is irrelevant — read it through a ref so the effect depends only on `agent`.
+  const refreshRef = useRef(refresh);
+  refreshRef.current = refresh;
 
   useEffect(() => {
     refresh();
@@ -44,11 +56,11 @@ export function SharedInboxProvider({ children }: { children: ReactNode }) {
     // agent.state used to — refetch once a run settles to pick those up.
     const { unsubscribe } = agent.subscribe({
       onRunFinalized: () => {
-        refresh();
+        refreshRef.current();
       },
     });
     return unsubscribe;
-  }, [agent, refresh]);
+  }, [agent]);
 
   const patchEmail = useCallback(async (id: string, patch: Partial<Email>) => {
     setEmails((current) =>
@@ -67,8 +79,10 @@ export function SharedInboxProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const value = useMemo(() => ({ emails, patchEmail }), [emails, patchEmail]);
+
   return (
-    <SharedInboxContext.Provider value={{ emails, patchEmail }}>
+    <SharedInboxContext.Provider value={value}>
       {children}
     </SharedInboxContext.Provider>
   );

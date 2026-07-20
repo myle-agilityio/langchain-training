@@ -1,8 +1,7 @@
 import { z } from "zod";
 import { tool, type ToolRuntime } from "@langchain/core/tools";
-import { ToolMessage } from "@langchain/core/messages";
-import type { BaseStore } from "@langchain/langgraph";
-import { copilotKitInterrupt } from "@copilotkit/sdk-js/langgraph";
+import { ToolMessage, AIMessage } from "@langchain/core/messages";
+import { interrupt, type BaseStore } from "@langchain/langgraph";
 
 import { EmailClassificationSchema, type Email } from "./schema.js";
 import { searchKnowledgeBase } from "./knowledge-base.js";
@@ -103,18 +102,24 @@ export const manage_emails = tool(
   },
 );
 
-// Pauses via copilotKitInterrupt (not LangChain's humanInTheLoopMiddleware) so the
-// frontend's useHumanInTheLoop({ name: "compose_reply" }) can render a real card.
+// Pauses via LangGraph's raw `interrupt()` (not LangChain's humanInTheLoopMiddleware)
+// so the frontend's useHumanInTheLoop({ name: "compose_reply" }) can render a real card.
 //
-// copilotKitInterrupt's resume is NOT a true LangGraph Command-resume of this exact
-// call site — CopilotKit's runtime answers it by starting a brand-new run with the
-// answer spliced in as context, rather than replaying this function to completion.
-// Verified empirically: code placed after copilotKitInterrupt() here never affected
-// the persisted thread state. So this tool does the pause + returns the raw decision
-// for the model's own conversational context ONLY; EmailReplyCard is the one that
-// actually applies the state change — via a PATCH to /api/emails, which writes
-// straight to the shared inbox store — the same frontend-mutates-shared-state
-// pattern the todos demo already used.
+// We deliberately do NOT use @copilotkit/sdk-js's `copilotKitInterrupt` helper: on
+// langgraph 1.4.x, `interrupt()` PAUSES by throwing a `GraphInterrupt`, and that helper
+// wraps the call in a try/catch that swallows it and rethrows as CopilotKitMisuseError
+// ("Failed to create interrupt"), so the run errors instead of pausing (langgraph's own
+// interrupt() docs warn: never catch it without rethrowing). Calling `interrupt()`
+// directly lets the GraphInterrupt propagate, so the run interrupts cleanly. We replicate
+// the helper's payload shape (__copilotkit_interrupt_value__ / __copilotkit_messages__) so
+// the CopilotKit runtime + frontend still recognize it as a `compose_reply` action.
+//
+// The resume is NOT a true LangGraph Command-resume of this call site — CopilotKit answers
+// it by starting a brand-new run with the answer spliced in as context, rather than
+// replaying this function to completion. So this tool does the pause + returns the raw
+// decision for the model's own conversational context ONLY; EmailReplyCard is the one that
+// actually applies the state change — via a PATCH to /api/emails, which writes straight to
+// the shared inbox store — the same frontend-mutates-shared-state pattern the todos demo used.
 export const compose_reply = tool(
   async (
     input: { id: string; subject: string; body: string },
@@ -128,10 +133,23 @@ export const compose_reply = tool(
       });
     }
 
-    const { answer } = copilotKitInterrupt({
-      action: "compose_reply",
-      args: input,
+    const response = interrupt({
+      __copilotkit_interrupt_value__: { action: "compose_reply", args: input },
+      __copilotkit_messages__: [
+        new AIMessage({
+          content: "",
+          tool_calls: [
+            { id: crypto.randomUUID(), name: "compose_reply", args: input },
+          ],
+        }),
+      ],
     });
+
+    // On resume, `response` is the array of messages CopilotKit splices back in; the
+    // human's decision is the content of the last one.
+    const answer = Array.isArray(response)
+      ? response[response.length - 1]?.content
+      : response;
 
     return new ToolMessage({
       content:

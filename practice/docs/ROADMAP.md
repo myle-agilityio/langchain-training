@@ -10,7 +10,7 @@ For what's already built, see [ARCHITECTURE.md](./ARCHITECTURE.md).
   - [x] Email schema + generated mock inbox (`agent/src/tools/emails/`)
   - [x] Read/patch/lookup tools (`get_emails`, `manage_emails`, `search_knowledge_base`)
         wired into `agent.ts`; classification and document lookup work via these tools
-  - [x] Drafting + real human-in-the-loop approval. Migrated to `copilotKitInterrupt` once building the UI showed — see ARCHITECTURE.md for the full "HITL architecture" writeup
+  - [x] Drafting + real human-in-the-loop approval via a LangGraph `interrupt()` (initially the `copilotKitInterrupt` helper, later switched to raw `interrupt()` — the helper swallows the pause on langgraph 1.4.x; see ARCHITECTURE.md's HITL note)
   - [x] Generative UI: email reply card (Approve & Send / Reject, editable subject/body).
   - [x] Manual compose (user drafts/sends without going through the agent)
   - [x] Inbox list + detail panel (`src/components/email-inbox/`), now `page.tsx`'s

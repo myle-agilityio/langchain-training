@@ -35,9 +35,10 @@ export function EmailReplyCard({
     setBody(draftBody);
   }, [draftSubject, draftBody]);
 
-  // copilotKitInterrupt's resume doesn't replay the backend tool to completion (see
-  // tools.ts), so this card — not the backend — is the one that actually applies the
-  // state change, via patchEmail (PATCH /api/emails into the shared inbox store).
+  // The interrupt's resume doesn't replay the backend tool to completion (CopilotKit
+  // starts a fresh run instead — see tools.ts), so this card — not the backend — is the
+  // one that actually applies the state change, via patchEmail (PATCH /api/emails into
+  // the shared inbox store).
   const handleApprove = () => {
     setDecision("approve");
     patchEmail(id, {

@@ -5,9 +5,10 @@ import { useHumanInTheLoop } from "@copilotkit/react-core/v2";
 import { EmailReplyCard } from "@/components/generative-ui/email-reply-card";
 
 export const useEmailAgent = () => {
-  // Matches the backend's compose_reply tool by name — the agent calls
-  // copilotKitInterrupt({ action: "compose_reply", args }) from inside that
-  // tool, which is what this hook's render/respond cycle actually resolves.
+  // Matches the backend's compose_reply tool by name — the tool pauses with a
+  // LangGraph interrupt carrying { action: "compose_reply", args } (see
+  // agent/src/tools/emails/tools.ts), which is what this hook's render/respond
+  // cycle resolves.
   useHumanInTheLoop({
     name: "compose_reply",
     description:

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAgent } from "@copilotkit/react-core/v2";
+import { useAgent, useCopilotKit } from "@copilotkit/react-core/v2";
 import type { Email } from "@/types/email";
 import { useSharedInbox } from "@/hooks/use-shared-inbox";
 import { InboxList } from "./inbox-list";
@@ -13,6 +13,11 @@ export function EmailInbox() {
   // configuration), so a run kicked off here streams into that visible chat and
   // its compose_reply interrupt renders the EmailReplyCard there.
   const { agent } = useAgent();
+  // Run through the CopilotKit core, not agent.runAgent() directly: the core's
+  // runAgent is the same interrupt-aware path CopilotChat uses, so compose_reply's
+  // pause is routed to the useHumanInTheLoop card (and its resume back into the run)
+  // rather than left unhandled.
+  const { copilotkit } = useCopilotKit();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const selected = emails.find((e) => e.id === selectedId) ?? null;
@@ -49,8 +54,17 @@ export function EmailInbox() {
         `From: ${email.from.name} <${email.from.email}>\n` +
         `Subject: ${email.subject}`,
     });
-    agent.runAgent();
+    copilotkit.runAgent({ agent });
   };
+
+  // Block a second "Ask AI to draft" while the agent is mid-run OR paused on an
+  // unresolved compose_reply interrupt: after the pause the run has finished
+  // (isRunning is false), but pendingInterrupts stays populated until the approval
+  // card is approved/rejected — firing another draft in that window would stack a
+  // second interrupt on top of the one still awaiting a decision.
+  const awaitingApproval = (agent.pendingInterrupts?.length ?? 0) > 0;
+  const agentBusy = agent.isRunning || awaitingApproval;
+  const agentBusyLabel = agent.isRunning ? "Drafting…" : "Awaiting approval…";
 
   return (
     <div className="h-full flex">
@@ -62,7 +76,8 @@ export function EmailInbox() {
           email={selected}
           onSendReply={sendManualReply}
           onAskAgent={askAgentToReply}
-          agentRunning={agent.isRunning}
+          agentBusy={agentBusy}
+          agentBusyLabel={agentBusyLabel}
         />
       </div>
     </div>

@@ -48,6 +48,17 @@ planned to use for long-term memory ("per-customer profile/tone via Store"), jus
 the inbox instead of customer profiles. Not scope creep on Day 4's task itself, but worth
 knowing the Store is already wired in when that task starts.
 
+### Post-Phase-1: "Ask AI to draft" button + HITL interrupt fix (unplanned, ~1h)
+
+Added an "Ask AI to draft" button in the email detail panel that hands the selected email
+to the agent (analyze → KB lookup → `compose_reply`) so the approval card renders in chat —
+the agent-assisted counterpart to manual compose. Building it surfaced that the
+`compose_reply` HITL was broken: the `copilotKitInterrupt` helper swallows LangGraph's
+`GraphInterrupt` on langgraph 1.4.x, so the run errored ("Failed to create interrupt")
+instead of pausing. Switched the tool to call `interrupt()` directly; verified against the
+running server that the run now pauses with the interrupt recorded. See ARCHITECTURE.md's
+HITL note. (The `copilotKitInterrupt` migration in the Day 3 row above is thus superseded.)
+
 ## Phase 2 — Context, memory & multi-agent (Days 4–5, 16h estimated) — not started
 
 ### Day 4 (8h estimated)

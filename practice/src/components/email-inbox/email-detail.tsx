@@ -11,14 +11,18 @@ interface EmailDetailProps {
   email: Email | null;
   onSendReply: (id: string, subject: string, body: string) => void;
   onAskAgent: (email: Email) => void;
-  agentRunning: boolean;
+  // True while the agent is drafting OR paused awaiting approval — either way a new
+  // draft can't be started. agentBusyLabel says which state we're in.
+  agentBusy: boolean;
+  agentBusyLabel: string;
 }
 
 export function EmailDetail({
   email,
   onSendReply,
   onAskAgent,
-  agentRunning,
+  agentBusy,
+  agentBusyLabel,
 }: EmailDetailProps) {
   const [composing, setComposing] = useState(false);
 
@@ -98,10 +102,10 @@ export function EmailDetail({
             <Button
               variant="outline"
               onClick={() => onAskAgent(email)}
-              disabled={agentRunning}
+              disabled={agentBusy}
             >
               <Sparkles className="h-4 w-4" />
-              {agentRunning ? "Drafting…" : "Ask AI to draft"}
+              {agentBusy ? agentBusyLabel : "Ask AI to draft"}
             </Button>
             <Button onClick={() => setComposing(true)}>Compose reply</Button>
           </div>
