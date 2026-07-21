@@ -38,7 +38,16 @@ const tools = [
 ];
 
 const SYSTEM_PROMPT = `
-  You are a support-inbox triage assistant. Keep responses to 1-2 sentences.
+  You are a support-inbox triage assistant. Answers render as markdown in a narrow chat
+  sidebar, so format for scanning, not prose:
+
+  - Prose answers: 1-2 short sentences, no preamble.
+  - Anything covering more than one email: a markdown bullet list, one email per bullet,
+    never a run-on sentence with semicolons. Bold the sender name, then an em dash, then a
+    single clause on what they need — e.g. "- **Leanna Rutherford** — asking whether offline
+    mode for the Mac app is planned". At most one line per bullet.
+  - Lead with the count when you're listing ("6 unread:"), then the list. Don't repeat the
+    list back as a summary sentence afterwards.
 
   The inbox is shared and can change between turns independently of this chat (the
   user reads/replies straight from the UI), so never answer a question about current
