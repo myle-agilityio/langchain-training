@@ -1,8 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { ModeToggle } from "./mode-toggle";
+import { ResizeHandle } from "./resize-handle";
 import { useFrontendTool } from "@copilotkit/react-core/v2";
 
 interface ExampleLayoutProps {
@@ -10,11 +11,32 @@ interface ExampleLayoutProps {
   appContent: ReactNode;
 }
 
+const DEFAULT_CHAT_WIDTH = 50;
+// Both panels stay usable at the extremes: the chat can't get too narrow to read a draft in,
+// and the inbox list needs room for a subject line plus its status badge.
+const MIN_CHAT_WIDTH = 25;
+const MAX_CHAT_WIDTH = 75;
+
+const clampWidth = (pct: number) =>
+  Math.min(MAX_CHAT_WIDTH, Math.max(MIN_CHAT_WIDTH, pct));
+
 export function ExampleLayout({ chatContent, appContent }: ExampleLayoutProps) {
   // Default to "app" (inbox + chat sidebar side by side) rather than chat-only —
   // this is an email client first, so users should land on their inbox instead
   // of a blank chat screen. See docs/ROADMAP.md's "layout pass" task.
   const [mode, setMode] = useState<"chat" | "app">("app");
+
+  // Chat panel width as a percentage of the layout, so the split survives window resizes.
+  const [chatWidth, setChatWidth] = useState(DEFAULT_CHAT_WIDTH);
+  const [isResizing, setIsResizing] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const resizeTo = useCallback((clientX: number) => {
+    const container = containerRef.current;
+    if (!container) return;
+    const { left, width } = container.getBoundingClientRect();
+    setChatWidth(clampWidth(((clientX - left) / width) * 100));
+  }, []);
 
   useFrontendTool({
     name: "enableAppMode",
@@ -34,14 +56,22 @@ export function ExampleLayout({ chatContent, appContent }: ExampleLayoutProps) {
   });
 
   return (
-    <div className="h-full flex flex-row pb-6">
+    <div
+      ref={containerRef}
+      className={`h-full flex flex-row pb-6 ${
+        // While dragging, the pointer sweeps across both panels — without this it would
+        // select their text and flicker the I-beam cursor.
+        isResizing ? "select-none cursor-col-resize" : ""
+      }`}
+    >
       <ModeToggle mode={mode} onModeChange={setMode} />
 
       {/* Chat Content */}
       <div
+        style={mode === "app" ? { width: `${chatWidth}%` } : undefined}
         className={`max-h-full flex flex-col dark:bg-stone-950 ${
           mode === "app"
-            ? "w-1/2 px-6 max-lg:hidden" // Half/half with the canvas; hidden on mobile in app mode
+            ? "shrink-0 px-6 max-lg:hidden" // Width comes from the resizable split; hidden on mobile in app mode
             : "flex-1 max-lg:px-4"
         }`}
       >
@@ -65,11 +95,27 @@ export function ExampleLayout({ chatContent, appContent }: ExampleLayoutProps) {
         <div className="flex-1 min-h-0 overflow-y-auto">{chatContent}</div>
       </div>
 
+      {mode === "app" && (
+        <ResizeHandle
+          valueNow={chatWidth}
+          onResize={resizeTo}
+          onResizeStart={() => setIsResizing(true)}
+          onResizeEnd={() => setIsResizing(false)}
+          onReset={() => setChatWidth(DEFAULT_CHAT_WIDTH)}
+          onNudge={(direction) =>
+            setChatWidth((current) => clampWidth(current + direction * 2))
+          }
+        />
+      )}
+
       {/* State Panel */}
       <div
         className={`h-full overflow-hidden ${
           mode === "app"
-            ? "w-1/2 max-lg:w-full border-l border-[var(--border)] max-lg:border-l-0" // Half/half with the chat; full width on mobile
+            ? // Takes whatever the chat panel leaves, so dragging the divider is a single
+              // width change. The dividing line itself now lives in ResizeHandle, which is
+              // why there's no border-l here anymore.
+              "flex-1 min-w-0"
             : "w-0 border-l-0"
         }`}
       >
