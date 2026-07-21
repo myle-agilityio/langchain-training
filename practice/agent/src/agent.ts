@@ -16,18 +16,35 @@ import {
   createCallModel,
   restoreFrontendToolCalls,
 } from "./copilotkit-bridge.js";
+import {
+  HistoryMemorySchema,
+  WorkingContextSchema,
+  buildModelMessages,
+  createSummarizeHistory,
+  renderHistorySummary,
+  renderWorkingContext,
+  trackWorkingContext,
+} from "./memory/index.js";
 
 // `emails` intentionally isn't part of this state schema — the inbox lives in LangGraph's
 // cross-thread Store (see tools/emails/store.ts) so it's common across every thread instead
-// of forking a copy per checkpoint.
+// of forking a copy per checkpoint. The two memory fields are the opposite case: per-thread
+// on purpose, since two threads can be triaging two different emails.
 const AgentStateSchema = new StateSchema({
   ...CopilotKitStateSchema.fields,
+  historyMemory: HistoryMemorySchema,
+  workingContext: WorkingContextSchema,
 });
 
 const model = new ChatOpenAI({
   model: "gpt-5.4",
   modelKwargs: { parallel_tool_calls: false },
 });
+
+// Summarizing old turns is a mechanical rewrite, not triage reasoning — a smaller model is
+// enough, and this call is on the critical path of every long-thread turn. gpt-4.1 is already
+// the second model in this repo (generate_a2ui uses it).
+const summarizerModel = new ChatOpenAI({ model: "gpt-4.1" });
 
 const tools = [
   get_emails,
@@ -115,12 +132,32 @@ function routeAfterModel(state: { messages: BaseMessage[] }) {
 // compose_reply's approval pause still propagates instead of being swallowed as an error.
 export const graph = new StateGraph(AgentStateSchema)
   .addNode("prepare_context", prepareContext)
-  .addNode("call_model", createCallModel({ model, tools, systemPrompt: SYSTEM_PROMPT }))
+  // Summarizing costs an LLM call, so it sits outside the tool loop: once per user turn,
+  // and a no-op entirely until the thread is actually long.
+  .addNode("manage_memory", createSummarizeHistory({ model: summarizerModel }))
+  .addNode(
+    "call_model",
+    createCallModel({
+      model,
+      tools,
+      // Both blocks are rebuilt per call, so they always reflect the latest focus/draft/summary.
+      systemPrompt: (state) =>
+        SYSTEM_PROMPT +
+        renderHistorySummary(state.historyMemory) +
+        renderWorkingContext(state.workingContext),
+      prepareMessages: buildModelMessages,
+    }),
+  )
+  .addNode("track_context", trackWorkingContext)
   .addNode("tools", new ToolNode(tools))
   .addNode("finalize", restoreFrontendToolCalls)
   .addEdge(START, "prepare_context")
-  .addEdge("prepare_context", "call_model")
-  .addConditionalEdges("call_model", routeAfterModel, ["tools", "finalize"])
+  .addEdge("prepare_context", "manage_memory")
+  .addEdge("manage_memory", "call_model")
+  // track_context sits between the model and the tools so a draft is recorded *before*
+  // compose_reply's approval pause rather than after it (see memory/working-context.ts).
+  .addEdge("call_model", "track_context")
+  .addConditionalEdges("track_context", routeAfterModel, ["tools", "finalize"])
   .addEdge("tools", "call_model")
   .addEdge("finalize", END)
   .compile();

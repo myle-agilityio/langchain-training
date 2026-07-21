@@ -24,6 +24,7 @@ What's actually built, as of **Phase 2 in progress (Day 4: StateGraph migration 
 │   ├── src/
 │   │   ├── agent.ts                  # Graph entry point (StateGraph), state schema, system prompt
 │   │   ├── copilotkit-bridge.ts      # Runs CopilotKit's middleware hooks from plain graph nodes
+│   │   ├── memory/                   # Short-term memory: history trimming/summary + working context
 │   │   ├── a2ui.ts                   # A2UI operation helpers
 │   │   ├── a2ui_dynamic_schema.ts    # Dynamic-schema A2UI tool (generated dashboards)
 │   │   └── tools/emails/             # Email domain — wired into agent.ts
@@ -48,13 +49,16 @@ What's actually built, as of **Phase 2 in progress (Day 4: StateGraph migration 
 `agent/src/agent.ts` is a hand-built `StateGraph`, not `createAgent`:
 
 ```
-START → prepare_context → call_model ⇄ tools
-                              ↓
-                          finalize → END
+START → prepare_context → manage_memory → call_model → track_context ⇄ tools
+                                              ↑______________|
+                                                             ↓
+                                                         finalize → END
 ```
 
 - `prepare_context` — folds `useCopilotReadable` app context into the messages.
+- `manage_memory` — summarizes old turns once a thread gets long (short-term memory).
 - `call_model` — the model call, plus splitting frontend tool calls back out of the response.
+- `track_context` — records what the conversation is working on, from the tool calls just made.
 - `tools` — LangGraph's prebuilt `ToolNode` over the five backend tools.
 - `finalize` — restores the intercepted frontend tool calls onto the AI message so the browser
   executes them.
@@ -132,6 +136,67 @@ the same agent the chat pane binds to), so the run streams into the visible chat
 disabled (showing "Drafting…") while `agent.isRunning`. This is the agent-assisted
 counterpart to manual compose — one button routes through the model + approval card, the
 other writes straight to the shared inbox.
+
+## Short-term memory (`agent/src/memory/`)
+
+Thread-scoped memory, in two parts. The checkpointer already persisted messages per thread for
+free; the part that needed building is keeping a long thread affordable to send to the model.
+
+**The problem, measured.** The system prompt (correctly) orders `get_emails` on every question
+about inbox state, since the inbox changes outside the chat. Each call appends a full 14-email
+JSON dump *with bodies*. On a real 28-message thread that was ~12k tokens, 98% of it tool
+results, three separate inbox dumps of which only the newest was still true.
+
+**1. History management (`history.ts`).** Two mechanisms, both applied when *building the
+model's input* rather than by mutating `state.messages`:
+
+- **Tombstoning** — every superseded `get_emails` result is replaced with a one-line marker.
+  The content is replaced rather than the message dropped: a ToolMessage is the required
+  answer to an earlier AI tool call, so removing it would leave a dangling call the provider
+  rejects.
+- **Summarization** — past `SUMMARIZE_WHEN_OVER` messages, everything except the recent tail is
+  folded into a running summary (`historyMemory.summary`, written by `manage_memory` using
+  gpt-4.1) and dropped from the model's input from then on. The cut always lands on a human
+  message, since slicing mid-turn would separate a tool call from its answer.
+
+Why not `RemoveMessage`, which is LangGraph's usual answer: CopilotKit renders the chat
+transcript from the graph's message list, so deleting from state would erase the user's
+visible scrollback. Trimming at model-call time (LangGraph's `pre_model_hook` pattern) gets the
+token saving with the conversation intact — hence `createCallModel`'s `prepareMessages`.
+
+**2. Working context (`working-context.ts`).** A small structured carry-over — focused
+`emailId` + `emailLabel` + `lastDraft` — so "classify it" resolves without re-listing and "make
+it shorter" revises the remembered draft instead of rewriting it. On its own this would be
+redundant (both facts are in the transcript, and the model resolves them fine from there); it
+earns its place *because of* part 1, as the residue that survives once the messages it was
+derivable from are summarized away and tombstoned.
+
+It's derived in a node rather than returned by tools as a `Command` — the pattern the rest of
+the repo uses — because `compose_reply` pauses on `interrupt()` and CopilotKit answers that
+pause with a fresh run instead of replaying the tool, so anything returned after the interrupt
+never lands. `track_context` reads the tool calls off the AI message instead, recording the
+draft *before* the approval pause. That's also why it sits between `call_model` and `tools`.
+
+Both memory fields reach the model as system-prompt blocks rebuilt per model call
+(`renderHistorySummary` / `renderWorkingContext`), which is why `createCallModel` takes a
+function for `systemPrompt`. Both are wrapped in CopilotKit's `zodState` so they survive into
+the graph's output schema and are visible to the frontend.
+
+**Verified** against the running server, over a six-turn thread that asks about inbox state
+every turn:
+
+| Turn | Messages | Stored history | Sent to model |
+| --- | --- | --- | --- |
+| 1 | 4 | ~3.9k tok | 5.1k tok |
+| 3 | 12 | ~11.9k tok | 5.4k tok |
+| 6 | 24 | ~23.7k tok | 5.6k tok |
+
+Stored history grows linearly; what the model receives stays flat, and all 24 messages remain
+in state for the UI. Summarization triggered on turn 6 (`summarizedCount: 8`) and the summary
+correctly captured which emails were discussed and what was done. Separately: marking one
+email read set the focus, "Draft a reply to it." resolved the pronoun and recorded `lastDraft`
+*while the run was paused at the approval interrupt*, and "Three sentences, no apology"
+returned the same draft with the apology removed rather than a fresh one.
 
 ## Shared inbox: LangGraph cross-thread Store, not per-thread state
 

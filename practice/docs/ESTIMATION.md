@@ -64,7 +64,7 @@ HITL note. (The `copilotKitInterrupt` migration in the Day 3 row above is thus s
 | Est. | Task | Status | Notes |
 | --- | --- | --- | --- |
 | 4h | Migrate `createAgent` → explicit `StateGraph` | ✅ Done | Roughly on estimate. The unplanned part was CopilotKit: its LangGraph integration is a `createAgent` *middleware*, and a raw `StateGraph` has no middleware runner, so `agent/src/copilotkit-bridge.ts` now calls the middleware's own hooks from the nodes rather than reimplementing frontend-tool merging/interception. Verified against the running dev server (node path, `compose_reply` interrupt, frontend-action restore, token streaming) — see ARCHITECTURE.md's "Graph shape"; browser click-through not repeated |
-| 2h | Short-term memory (thread-scoped context via checkpointer) | ⬜ Not started | |
+| 2h | Short-term memory (thread-scoped context via checkpointer) | ✅ Done | The first pass was only a `workingContext` state field; review caught that this is the *scratchpad* facet of short-term memory while the facet this app actually needs is history management (a 28-message thread measured 12k tokens, 98% tool results, 3 stale inbox dumps). Rebuilt as trimming + summarization at model-call time, with `workingContext` kept as the residue that survives trimming. The extra hour bought the measurable result — stored history grows linearly, tokens sent to the model stay flat — that the first version couldn't demonstrate |
 | 2h | Long-term memory (per-customer profile/tone via Store) | ⬜ Not started | The Store itself is already wired in — pulled forward by the post-Phase-1 shared-inbox fix |
 
 ### Day 5 (8h estimated)

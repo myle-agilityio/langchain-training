@@ -27,7 +27,10 @@ For what's already built, see [ARCHITECTURE.md](./ARCHITECTURE.md).
         (`prepare_context → call_model → tools ⇄ call_model → finalize`), with CopilotKit's
         middleware hooks driven by hand from `agent/src/copilotkit-bridge.ts` (see
         ARCHITECTURE.md's "Graph shape" section)
-  - [ ] Short-term memory (thread-scoped context via checkpointer)
+  - [x] Short-term memory (`agent/src/memory/`) — superseded `get_emails` dumps tombstoned and
+        old turns summarized when building the model's input (stored history untouched, so the
+        UI keeps its scrollback), plus a `workingContext` carry-over (focused email + last
+        draft) that survives that trimming
   - [ ] Long-term memory (per-customer profile/tone via Store)
   - [ ] Guardrails (PII redaction, tone/compliance check)
   - [ ] Time-travel replay demo

@@ -65,13 +65,25 @@ export function createCallModel({
   model,
   tools,
   systemPrompt,
+  prepareMessages,
 }: {
   model: BaseChatModel;
   tools: unknown[];
-  systemPrompt: string;
+  // A function when the prompt depends on graph state — that's how short-term memory reaches
+  // the model: the summary and working-context blocks are rebuilt on every model call.
+  systemPrompt: string | ((state: AnyState) => string);
+  /**
+   * Shapes the message list the model sees, without touching `state.messages` (LangGraph's
+   * `pre_model_hook` pattern). Kept separate from the stored history because CopilotKit
+   * renders the chat from state — trimming there would erase the user's scrollback.
+   */
+  prepareMessages?: (state: AnyState) => unknown[];
 }) {
   return async function callModel(state: AnyState, config: LangGraphRunnableConfig) {
     const runtime = toRuntime(config);
+    const prompt =
+      typeof systemPrompt === "function" ? systemPrompt(state) : systemPrompt;
+    const messages = prepareMessages ? prepareMessages(state) : state.messages;
 
     const invokeModel = async (request: AnyState): Promise<AIMessage> => {
       // `wrapModelCall` rewrites `systemPrompt` into a SystemMessage when the middleware is
@@ -95,9 +107,9 @@ export function createCallModel({
       {
         model,
         tools,
-        messages: state.messages,
-        systemPrompt,
-        systemMessage: new SystemMessage(systemPrompt),
+        messages,
+        systemPrompt: prompt,
+        systemMessage: new SystemMessage(prompt),
         state,
         runtime,
       } as never,
