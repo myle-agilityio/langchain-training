@@ -3,6 +3,7 @@
 import type { Email, EmailCategory, Urgency } from "@/types/email";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { formatReceivedAt, formatReceivedAtFull } from "@/lib/format-date";
 
 const CATEGORY_LABEL: Record<EmailCategory, string> = {
   question: "Question",
@@ -95,9 +96,24 @@ export function InboxList({ emails, selectedId, onSelect }: InboxListProps) {
                 >
                   {email.from.name}
                 </span>
-                {isUnread && (
-                  <span className="h-2 w-2 rounded-full bg-[var(--tone)] shrink-0" />
-                )}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <time
+                    dateTime={email.receivedAt}
+                    title={formatReceivedAtFull(email.receivedAt)}
+                    suppressHydrationWarning
+                    className={cn(
+                      "text-[11px] tabular-nums",
+                      isUnread
+                        ? "font-semibold text-[var(--foreground)]"
+                        : "text-[var(--muted-foreground)]",
+                    )}
+                  >
+                    {formatReceivedAt(email.receivedAt)}
+                  </time>
+                  {isUnread && (
+                    <span className="h-2 w-2 rounded-full bg-[var(--tone)]" />
+                  )}
+                </div>
               </div>
               <div
                 className={cn(

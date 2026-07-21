@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ComposeForm } from "./compose-form";
 import { CATEGORY_TONE, URGENCY_TONE } from "./inbox-list";
+import { formatReceivedAtFull } from "@/lib/format-date";
 import { Mail, Sparkles } from "lucide-react";
 
 interface EmailDetailProps {
@@ -58,7 +59,9 @@ export function EmailDetail({
           </span>
           <span>&lt;{email.from.email}&gt;</span>
           <span>·</span>
-          <span>{new Date(email.receivedAt).toLocaleString()}</span>
+          <time dateTime={email.receivedAt} suppressHydrationWarning>
+            {formatReceivedAtFull(email.receivedAt)}
+          </time>
         </div>
         {email.classification && (
           <div className="flex gap-1.5 mt-3">
