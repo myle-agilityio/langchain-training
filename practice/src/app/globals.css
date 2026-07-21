@@ -53,6 +53,19 @@
     #85ecce 45.673%,
     #ffac4d 100%
   );
+
+  /*
+   * Semantic tones — one hue per meaning (category / urgency / status), consumed
+   * only through the `.tone-*` + `.badge-tone*` pair below. Light mode uses
+   * darkened hues so the tinted-background badges stay readable; dark mode
+   * (further down) swaps in lighter values, mostly the CopilotKit brand accents.
+   */
+  --tone-blue: #2563eb;
+  --tone-red: #cf2f36;
+  --tone-amber: #b45309;
+  --tone-violet: #7c3aed;
+  --tone-teal: #0d9488;
+  --tone-green: #15803d;
 }
 
 :root.dark,
@@ -79,6 +92,14 @@
   --chart-tooltip-bg: #191a1e;
   --chart-tooltip-border: #303136;
   --chart-axis: #adadb2;
+
+  /* Lighter tones for dark surfaces; violet/teal/amber reuse the brand accents. */
+  --tone-blue: #8fb0ff;
+  --tone-red: #fa5f67;
+  --tone-amber: #ffac4d;
+  --tone-violet: #bec2ff;
+  --tone-teal: #85ecce;
+  --tone-green: #6ee7b7;
 }
 
 body {
@@ -90,6 +111,51 @@ body {
 body,
 html {
   height: 100%;
+}
+
+/*
+ * Tone system. A `.tone-*` class only sets `--tone`; a separate class decides how
+ * that hue is rendered. Splitting hue from treatment means a new colour is one
+ * variable, and a new treatment (e.g. a tinted row) doesn't have to be written
+ * once per colour. Everything derives from `--tone` via color-mix, so both
+ * themes work off the single value swapped in `.dark`.
+ */
+.tone-blue {
+  --tone: var(--tone-blue);
+}
+.tone-red {
+  --tone: var(--tone-red);
+}
+.tone-amber {
+  --tone: var(--tone-amber);
+}
+.tone-violet {
+  --tone: var(--tone-violet);
+}
+.tone-teal {
+  --tone: var(--tone-teal);
+}
+.tone-green {
+  --tone: var(--tone-green);
+}
+
+/* Soft treatment: tinted fill, for labels that shouldn't outshout the subject line. */
+.badge-tone {
+  border-color: color-mix(in srgb, var(--tone) 32%, transparent);
+  background: color-mix(in srgb, var(--tone) 12%, var(--background));
+  color: var(--tone);
+}
+
+/* Loud treatment: reserved for the one badge per row that should grab the eye. */
+.badge-tone-solid {
+  border-color: transparent;
+  background: var(--tone);
+  color: var(--background);
+}
+
+/* Left rail on a list row — same hue, used to tint the row rather than a pill. */
+.row-accent {
+  box-shadow: inset 3px 0 0 0 var(--tone);
 }
 
 /*

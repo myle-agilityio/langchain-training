@@ -12,10 +12,27 @@ const CATEGORY_LABEL: Record<EmailCategory, string> = {
   complex: "Complex",
 };
 
-const URGENCY_VARIANT: Record<Urgency, "default" | "secondary" | "outline"> = {
-  high: "default",
-  medium: "secondary",
-  low: "outline",
+// One hue per category so a triaged inbox is scannable by colour alone.
+export const CATEGORY_TONE: Record<EmailCategory, string> = {
+  question: "tone-blue",
+  bug: "tone-red",
+  billing: "tone-amber",
+  feature: "tone-violet",
+  complex: "tone-teal",
+};
+
+// Urgency shares hues with categories, so it's separated by *treatment* instead:
+// only `high` gets the solid fill, keeping at most one loud badge per row.
+export const URGENCY_TONE: Record<Urgency, string> = {
+  high: "tone-red",
+  medium: "tone-amber",
+  low: "tone-teal",
+};
+
+const URGENCY_VARIANT: Record<Urgency, "tone" | "toneSolid"> = {
+  high: "toneSolid",
+  medium: "tone",
+  low: "tone",
 };
 
 interface InboxListProps {
@@ -27,7 +44,13 @@ interface InboxListProps {
 export function InboxList({ emails, selectedId, onSelect }: InboxListProps) {
   return (
     <div>
-      <div className="sticky top-0 z-10 bg-[var(--card)] border-b border-[var(--border)] px-4 py-3">
+      <div className="sticky top-0 z-10 relative bg-[var(--card)] border-b border-[var(--border)] px-4 py-3">
+        {/* Brand gradient hairline — the one purely decorative bit of colour here,
+            anchoring the panel so the semantic badges below aren't the only hue. */}
+        <div
+          className="absolute inset-x-0 top-0 h-0.5"
+          style={{ background: "var(--cpk-ambient-gradient)" }}
+        />
         <h2 className="text-sm font-bold text-[var(--foreground)]">
           Inbox{" "}
           <span className="text-[var(--muted-foreground)] font-normal">
@@ -44,13 +67,21 @@ export function InboxList({ emails, selectedId, onSelect }: InboxListProps) {
         emails.map((email) => {
           const isUnread = email.status === "unread";
           const isSelected = email.id === selectedId;
+          // Rail hue tracks urgency once classified; before that it falls back to
+          // the brand lilac so selection is still visible on an untriaged inbox.
+          const railTone = email.classification
+            ? URGENCY_TONE[email.classification.urgency]
+            : "tone-violet";
           return (
             <button
               key={email.id}
               onClick={() => onSelect(email)}
               className={cn(
                 "w-full text-left px-4 py-3 border-b border-[var(--border)] transition-colors cursor-pointer",
-                isSelected ? "bg-[var(--secondary)]" : "hover:bg-[var(--secondary)]/50",
+                railTone,
+                isSelected
+                  ? "row-accent bg-[color-mix(in_srgb,var(--tone)_8%,var(--background))]"
+                  : "hover:bg-[var(--secondary)]/50",
               )}
             >
               <div className="flex items-center justify-between gap-2">
@@ -65,7 +96,7 @@ export function InboxList({ emails, selectedId, onSelect }: InboxListProps) {
                   {email.from.name}
                 </span>
                 {isUnread && (
-                  <span className="h-2 w-2 rounded-full bg-[var(--primary)] shrink-0" />
+                  <span className="h-2 w-2 rounded-full bg-[var(--tone)] shrink-0" />
                 )}
               </div>
               <div
@@ -85,24 +116,33 @@ export function InboxList({ emails, selectedId, onSelect }: InboxListProps) {
                 <div className="flex gap-1.5 mt-2 flex-wrap">
                   {email.classification && (
                     <>
-                      <Badge variant="outline" className="text-[10px]">
+                      <Badge
+                        variant="tone"
+                        className={cn(
+                          "text-[10px]",
+                          CATEGORY_TONE[email.classification.category],
+                        )}
+                      >
                         {CATEGORY_LABEL[email.classification.category]}
                       </Badge>
                       <Badge
                         variant={URGENCY_VARIANT[email.classification.urgency]}
-                        className="text-[10px]"
+                        className={cn(
+                          "text-[10px]",
+                          URGENCY_TONE[email.classification.urgency],
+                        )}
                       >
                         {email.classification.urgency}
                       </Badge>
                     </>
                   )}
                   {email.status === "replied" && (
-                    <Badge variant="secondary" className="text-[10px]">
+                    <Badge variant="tone" className="text-[10px] tone-green">
                       Replied
                     </Badge>
                   )}
                   {email.status === "bug_filed" && (
-                    <Badge variant="secondary" className="text-[10px]">
+                    <Badge variant="tone" className="text-[10px] tone-red">
                       Bug filed
                     </Badge>
                   )}

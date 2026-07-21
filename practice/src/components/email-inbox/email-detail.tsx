@@ -5,6 +5,7 @@ import type { Email } from "@/types/email";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ComposeForm } from "./compose-form";
+import { CATEGORY_TONE, URGENCY_TONE } from "./inbox-list";
 import { Mail, Sparkles } from "lucide-react";
 
 interface EmailDetailProps {
@@ -61,8 +62,19 @@ export function EmailDetail({
         </div>
         {email.classification && (
           <div className="flex gap-1.5 mt-3">
-            <Badge variant="outline">{email.classification.category}</Badge>
-            <Badge variant="secondary">{email.classification.urgency} urgency</Badge>
+            <Badge
+              variant="tone"
+              className={CATEGORY_TONE[email.classification.category]}
+            >
+              {email.classification.category}
+            </Badge>
+            <Badge
+              // Solid only for `high`, matching the inbox list's treatment split.
+              variant={email.classification.urgency === "high" ? "toneSolid" : "tone"}
+              className={URGENCY_TONE[email.classification.urgency]}
+            >
+              {email.classification.urgency} urgency
+            </Badge>
           </div>
         )}
       </div>
@@ -73,11 +85,13 @@ export function EmailDetail({
 
       <div className="mt-8 pt-6 border-t border-[var(--border)]">
         {email.reply ? (
-          <div>
-            <p className="text-xs font-semibold text-[var(--muted-foreground)] mb-2">
+          // Green-tinted, matching the "Replied" badge — a sent reply is the one
+          // resolved/terminal state in this pane, so it reads as done at a glance.
+          <div className="tone-green">
+            <p className="text-xs font-semibold text-[var(--tone)] mb-2">
               Your reply — sent {new Date(email.reply.sentAt).toLocaleString()}
             </p>
-            <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--secondary)] p-4">
+            <div className="rounded-[var(--radius)] border border-[color-mix(in_srgb,var(--tone)_28%,transparent)] bg-[color-mix(in_srgb,var(--tone)_8%,var(--background))] p-4">
               <p className="text-sm font-medium text-[var(--foreground)]">
                 {email.reply.subject}
               </p>
