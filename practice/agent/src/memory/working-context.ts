@@ -1,9 +1,15 @@
 import { z } from "zod";
-import { AIMessage, type BaseMessage } from "@langchain/core/messages";
+import { AIMessage, HumanMessage, type BaseMessage } from "@langchain/core/messages";
 import { zodState } from "@copilotkit/sdk-js/langgraph";
 import type { BaseStore, LangGraphRunnableConfig } from "@langchain/langgraph";
 
 import { loadEmails } from "../tools/emails/store.js";
+import {
+  CustomerProfileSchema,
+  loadProfile,
+  renderCustomerProfile,
+  type CustomerProfile,
+} from "./customer-profile.js";
 
 /**
  * Short-term memory, part 2: the carry-over — what this conversation is working on.
@@ -29,6 +35,12 @@ export const WorkingContextSchema = zodState(
       emailLabel: z.string().optional(),
       /** Most recent draft proposed for `emailId`, as the model last wrote it. */
       lastDraft: z.object({ subject: z.string(), body: z.string() }).optional(),
+      /**
+       * Long-term memory about whoever sent the focused email, recalled from the Store. A
+       * cache, not the source of truth — refreshed whenever focus moves or the model writes a
+       * new fact, so a stale copy can't outlive the turn it was read in.
+       */
+      customer: CustomerProfileSchema.optional(),
     })
     .default(() => ({})),
 );
@@ -65,17 +77,69 @@ export function renderWorkingContext(context: WorkingContext | undefined): strin
     "  directly instead of asking which one. Anything naming a different email replaces the",
     "  focus. Still call get_emails first when you need its current status.",
     "",
+    renderCustomerProfile(context.customer),
   );
   return lines.join("\n");
 }
 
-async function labelFor(
+/**
+ * Recall: the focused email identifies a customer, and the customer identifies a profile in the
+ * Store. Deliberately not a tool the model has to remember to call — long-term memory is only
+ * useful if it's already there when the draft is being written.
+ */
+async function recallFor(
   emailId: string,
   store: BaseStore | undefined,
-): Promise<string | undefined> {
-  if (!store) return undefined;
+): Promise<{ label?: string; customer?: CustomerProfile }> {
+  if (!store) return {};
   const email = (await loadEmails(store)).find((e) => e.id === emailId);
-  return email ? `"${email.subject}" from ${email.from.name}` : undefined;
+  if (!email) return {};
+  return {
+    label: `"${email.subject}" from ${email.from.name}`,
+    customer: await loadProfile(store, email.from.email),
+  };
+}
+
+/**
+ * The `recall_memory` node: resolves who the *user's own message* is about, before the model
+ * runs.
+ *
+ * `track_context` below can only set focus once the model calls a tool naming an email — and
+ * for a drafting request that's the same call that writes the draft, so long-term memory would
+ * arrive one model call too late to shape it (observed: a fresh thread recalled "short, no
+ * apologies" only *after* producing a long apologetic draft). Matching sender names in the
+ * latest user message is a deterministic string match, no LLM call, and it runs before the
+ * model — so the profile is in the prompt for the draft that request produces.
+ */
+export async function recallMemory(
+  state: { messages: BaseMessage[]; workingContext?: WorkingContext },
+  config: LangGraphRunnableConfig,
+) {
+  const lastHuman = [...state.messages]
+    .reverse()
+    .find((message) => HumanMessage.isInstance(message));
+  const text =
+    typeof lastHuman?.content === "string" ? lastHuman.content.toLowerCase() : "";
+  if (!text || !config.store) return {};
+
+  const current = state.workingContext ?? {};
+  // Emails are newest-first, so the first match is the most recent one from that sender.
+  const mentioned = (await loadEmails(config.store)).find(
+    (email) =>
+      text.includes(email.from.name.toLowerCase()) ||
+      text.includes(email.from.email.toLowerCase()),
+  );
+  if (!mentioned || mentioned.from.email === current.customer?.email) return {};
+
+  return {
+    workingContext: {
+      emailId: mentioned.id,
+      emailLabel: `"${mentioned.subject}" from ${mentioned.from.name}`,
+      // Focus moved to a different person, so any draft held for the previous one is stale.
+      lastDraft: mentioned.id === current.emailId ? current.lastDraft : undefined,
+      customer: await loadProfile(config.store, mentioned.from.email),
+    },
+  };
 }
 
 /**
@@ -100,6 +164,7 @@ export async function trackWorkingContext(
   let emailId = current.emailId;
   let lastDraft = current.lastDraft;
   let draftedNow = false;
+  let profileChanged = false;
 
   for (const call of last.tool_calls) {
     const args = (call.args ?? {}) as Record<string, unknown>;
@@ -119,17 +184,28 @@ export async function trackWorkingContext(
         if (typeof id === "string") emailId = id;
       }
     }
+    // The model just wrote to long-term memory, so the cached copy below is now behind.
+    if (call.name === "remember_customer") profileChanged = true;
   }
 
-  if (emailId === current.emailId && !draftedNow) return {};
+  const focusMoved = emailId !== current.emailId;
+  if (!focusMoved && !draftedNow && !profileChanged) return {};
 
   // A draft only ever belongs to the email it was written for, so moving focus drops it.
-  if (!draftedNow && emailId !== current.emailId) lastDraft = undefined;
+  if (!draftedNow && focusMoved) lastDraft = undefined;
 
-  const emailLabel =
-    emailId === current.emailId
-      ? current.emailLabel
-      : await labelFor(emailId!, config.store);
+  // Re-read from the Store only when something could have changed — otherwise reuse the cache.
+  const recalled =
+    focusMoved || profileChanged
+      ? await recallFor(emailId!, config.store)
+      : { label: current.emailLabel, customer: current.customer };
 
-  return { workingContext: { emailId, emailLabel, lastDraft } };
+  return {
+    workingContext: {
+      emailId,
+      emailLabel: recalled.label ?? current.emailLabel,
+      lastDraft,
+      customer: recalled.customer,
+    },
+  };
 }
