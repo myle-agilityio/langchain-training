@@ -49,14 +49,15 @@ What's actually built, as of **Phase 2 in progress (Day 4: StateGraph migration 
 `agent/src/agent.ts` is a hand-built `StateGraph`, not `createAgent`:
 
 ```
-START → prepare_context → manage_memory → call_model → track_context ⇄ tools
-                                              ↑______________|
-                                                             ↓
-                                                         finalize → END
+START → prepare_context → manage_memory → recall_memory → call_model → track_context ⇄ tools
+                                                              ↑______________|
+                                                                             ↓
+                                                                         finalize → END
 ```
 
 - `prepare_context` — folds `useCopilotReadable` app context into the messages.
 - `manage_memory` — summarizes old turns once a thread gets long (short-term memory).
+- `recall_memory` — loads the profile of whoever the user's message is about (long-term memory).
 - `call_model` — the model call, plus splitting frontend tool calls back out of the response.
 - `track_context` — records what the conversation is working on, from the tool calls just made.
 - `tools` — LangGraph's prebuilt `ToolNode` over the five backend tools.
@@ -99,6 +100,7 @@ The graph is wired to CopilotKit with four email tools plus the starter's dashbo
 - `compose_reply` — pauses via LangGraph's raw `interrupt()` for approval; returns the
   decision but doesn't apply it (see below, and the HITL note)
 - `search_knowledge_base` — keyword search over a mock KB
+- `remember_customer` — writes a durable fact/tone to that customer's long-term profile
 - `generate_a2ui` — starter's dashboard tool, untouched
 
 `emails` still isn't in the state schema (see "Shared inbox" below), so the graph's state is
@@ -197,6 +199,52 @@ correctly captured which emails were discussed and what was done. Separately: ma
 email read set the focus, "Draft a reply to it." resolved the pronoun and recorded `lastDraft`
 *while the run was paused at the approval interrupt*, and "Three sentences, no apology"
 returned the same draft with the apology removed rather than a fresh one.
+
+## Long-term memory: customer profiles (`agent/src/memory/customer-profile.ts`)
+
+Short-term memory dies with the thread, so anything learned while replying to a customer is
+gone when the next conversation opens. A profile keyed by the customer's **email address**
+outlives both the thread and the individual email — that's the axis long-term memory adds.
+
+- **Storage** — LangGraph's cross-thread `Store`, namespace `["customer_profiles"]`, one item
+  per customer: `{ email, name, tone?, facts[], updatedAt }`. Facts are capped at 8 and
+  FIFO-trimmed: a profile is injected into every model call for that customer, so an unbounded
+  list would quietly undo the context savings from history.ts.
+- **Writing** — the `remember_customer` tool, called explicitly by the model. Deliberately not
+  an automatic post-reply writer: only the model can tell a durable fact ("on the Team plan",
+  "wants no apologies") from a passing detail of one message, and the tool call stays visible
+  in the transcript.
+- **Reading** — automatic, never a tool. `recall_memory` runs before the model each turn and
+  loads the profile for whoever the user's message names; `track_context` refreshes it when
+  focus moves or a new fact is written. It lands in `workingContext.customer` (a cache of the
+  Store, not the source of truth) and renders into the system prompt.
+
+**Two bugs this shook out, both worth keeping in mind:**
+
+1. **Never let the model mint the identity key.** The first version took the customer's address
+   as a tool argument. The model confidently invented `lilla.douglas-fisher@example.com` for a
+   customer whose real address is `lilla_douglas-fisher@hotmail.com` — the write succeeded, and
+   since recall looks profiles up by the *real* sender address, that memory was unreachable
+   forever. `remember_customer` now takes an **email id** and resolves the address from the
+   inbox, matching how every other tool here addresses things.
+2. **Recall has to happen before the model call that needs it.** Originally focus (and so
+   recall) was established only by `track_context`, from the model's tool calls — but for a
+   drafting request, the call that names the email is the same one that writes the draft, so
+   the profile arrived one model call too late. Hence `recall_memory`: a deterministic
+   sender-name match against the user's message, no LLM call, running before the model.
+
+**Verified** across two threads sharing no messages. Thread A: "her duplicate charge was
+refunded yesterday, she's on the Team plan, she asked for short replies with no apologies" →
+stored under the correct `lilla_douglas-fisher@hotmail.com`. Thread B (fresh): "Draft a reply
+to Lilla Douglas-Fisher about her duplicate charge" →
+
+> We refunded the duplicate renewal charge on 2026-07-20. Your Team plan is still active with
+> one subscription only […] refund will post back to your original payment method in 5–7
+> business days.
+
+against the same request *before* memory existed, which produced a long apologetic draft saying
+the charge "should be refunded". A customer with no stored profile (Florian Klein) drafts
+exactly as before, with `workingContext.customer` undefined — no leakage.
 
 ## Shared inbox: LangGraph cross-thread Store, not per-thread state
 

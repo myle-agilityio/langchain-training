@@ -21,6 +21,8 @@ import {
   WorkingContextSchema,
   buildModelMessages,
   createSummarizeHistory,
+  recallMemory,
+  remember_customer,
   renderHistorySummary,
   renderWorkingContext,
   trackWorkingContext,
@@ -51,6 +53,7 @@ const tools = [
   manage_emails,
   compose_reply,
   search_knowledge_base,
+  remember_customer,
   generate_a2ui,
 ];
 
@@ -104,6 +107,14 @@ ${RESPONSE_FORMAT}
   - compose_reply: call this as soon as a reply is ready to send. It pauses for
     human approval automatically — you don't need to ask permission yourself
     first, just call the tool.
+  - remember_customer: call this when you learn something about a customer that will
+    still matter the next time they write in — their plan, an outcome already
+    delivered (refund issued, bug filed), a promise made, or how the user wants
+    replies to them written. Identify the customer with the id of one of their
+    emails — never type an address yourself, call get_emails if you don't have
+    the id. What you already know is given to you below; don't call it to re-save
+    something already listed there, and don't use it for details of a single
+    message or for anything the inbox itself records.
   - Dashboards & rich UI: call generate_a2ui to create dashboard UIs with metrics,
     charts, tables, and cards, if asked for one. It handles rendering automatically.
 `;
@@ -135,6 +146,9 @@ export const graph = new StateGraph(AgentStateSchema)
   // Summarizing costs an LLM call, so it sits outside the tool loop: once per user turn,
   // and a no-op entirely until the thread is actually long.
   .addNode("manage_memory", createSummarizeHistory({ model: summarizerModel }))
+  // Long-term recall runs before the model so a profile is in the prompt for the draft this
+  // turn produces, not the one after it (see memory/working-context.ts).
+  .addNode("recall_memory", recallMemory)
   .addNode(
     "call_model",
     createCallModel({
@@ -153,7 +167,8 @@ export const graph = new StateGraph(AgentStateSchema)
   .addNode("finalize", restoreFrontendToolCalls)
   .addEdge(START, "prepare_context")
   .addEdge("prepare_context", "manage_memory")
-  .addEdge("manage_memory", "call_model")
+  .addEdge("manage_memory", "recall_memory")
+  .addEdge("recall_memory", "call_model")
   // track_context sits between the model and the tools so a draft is recorded *before*
   // compose_reply's approval pause rather than after it (see memory/working-context.ts).
   .addEdge("call_model", "track_context")
