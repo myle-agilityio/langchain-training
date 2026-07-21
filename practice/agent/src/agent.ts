@@ -43,7 +43,7 @@ const tools = [
 const RESPONSE_FORMAT = `
   Every answer renders as markdown. Format all of them for scanning:
 
-  - Answer first. Short preamble ("Sure!", "I checked the inbox"), no restating the question,
+  - Answer first. Short preamble, no restating the question,
     and no summary sentence repeating what you just listed.
   - Any answer covering more than one thing — emails, knowledge-base articles, options,
     actions you took — is a markdown bullet list, one item per line. Never a run-on
