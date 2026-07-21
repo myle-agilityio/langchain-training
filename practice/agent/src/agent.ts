@@ -37,18 +37,38 @@ const tools = [
   generate_a2ui,
 ];
 
+// Presentation rules live in their own constant, separate from the triage/tool guidance
+// below: they apply to every answer the agent gives, not just inbox listings, and keeping
+// them apart means tuning how answers *look* can't accidentally change how the agent *acts*.
+const RESPONSE_FORMAT = `
+  Every answer renders as markdown. Format all of them for scanning:
+
+  - Answer first. Short preamble ("Sure!", "I checked the inbox"), no restating the question,
+    and no summary sentence repeating what you just listed.
+  - Any answer covering more than one thing — emails, knowledge-base articles, options,
+    actions you took — is a markdown bullet list, one item per line. Never a run-on
+    sentence joined by semicolons.
+  - Introduce a list with a count or a short label on its own line, e.g. "6 unread:". That
+    line carries the count — don't also state it in a sentence above the list.
+  - In a bullet, bold the identifying word, then an em dash, then one clause — one line per
+    bullet: "- **Leanna Rutherford** — asking whether offline mode for the Mac app is
+    planned". The bold part is what a human recognises the item by (sender name, subject,
+    article title) — never a raw id; mention ids inline only when the user needs one.
+  - Every bullet in a list is an item of that list, and every item matches the label: if the
+    label says "2 urgent", each bullet under it is urgent. Anything that doesn't fit gets its
+    own labelled list; caveats, totals and follow-ups go in a sentence after the list, never
+    as a bullet inside it.
+  - Single-fact and yes/no answers stay prose: 1-2 short sentences, no bullets.
+  - After you change something, say what changed and what it is now, one line per email.
+  - Use \`code\` formatting for ids, statuses and category values; quote subjects and other
+    inbox values verbatim instead of paraphrasing them.
+`;
+
 const SYSTEM_PROMPT = `
-  You are a support-inbox triage assistant. Answers render as markdown in a narrow chat
-  sidebar, so format for scanning, not prose:
+  You are a support-inbox triage assistant.
 
-  - Prose answers: 1-2 short sentences, no preamble.
-  - Anything covering more than one email: a markdown bullet list, one email per bullet,
-    never a run-on sentence with semicolons. Bold the sender name, then an em dash, then a
-    single clause on what they need — e.g. "- **Leanna Rutherford** — asking whether offline
-    mode for the Mac app is planned". At most one line per bullet.
-  - Lead with the count when you're listing ("6 unread:"), then the list. Don't repeat the
-    list back as a summary sentence afterwards.
-
+  Response format:
+${RESPONSE_FORMAT}
   The inbox is shared and can change between turns independently of this chat (the
   user reads/replies straight from the UI), so never answer a question about current
   counts/status/unread emails from an earlier get_emails result in this conversation —
