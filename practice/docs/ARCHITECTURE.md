@@ -1,6 +1,6 @@
 # Architecture & Current State
 
-What's actually built, as of **Phase 1 complete (end of Day 3)**. See
+What's actually built, as of **Phase 2 in progress (Day 4: StateGraph migration landed)**. See
 [ROADMAP.md](./ROADMAP.md) for what's planned but not built yet, and the root
 [README](../README.md) for setup/running.
 
@@ -22,7 +22,8 @@ What's actually built, as of **Phase 1 complete (end of Day 3)**. See
 │   └── lib/                          # a2ui-theme.css, utils
 ├── agent/                            # LangGraph TypeScript agent
 │   ├── src/
-│   │   ├── agent.ts                  # Agent entry point (createAgent), state schema, system prompt
+│   │   ├── agent.ts                  # Graph entry point (StateGraph), state schema, system prompt
+│   │   ├── copilotkit-bridge.ts      # Runs CopilotKit's middleware hooks from plain graph nodes
 │   │   ├── a2ui.ts                   # A2UI operation helpers
 │   │   ├── a2ui_dynamic_schema.ts    # Dynamic-schema A2UI tool (generated dashboards)
 │   │   └── tools/emails/             # Email domain — wired into agent.ts
@@ -42,10 +43,52 @@ What's actually built, as of **Phase 1 complete (end of Day 3)**. See
 └── package.json
 ```
 
+## Graph shape (Phase 2: explicit StateGraph)
+
+`agent/src/agent.ts` is a hand-built `StateGraph`, not `createAgent`:
+
+```
+START → prepare_context → call_model ⇄ tools
+                              ↓
+                          finalize → END
+```
+
+- `prepare_context` — folds `useCopilotReadable` app context into the messages.
+- `call_model` — the model call, plus splitting frontend tool calls back out of the response.
+- `tools` — LangGraph's prebuilt `ToolNode` over the five backend tools.
+- `finalize` — restores the intercepted frontend tool calls onto the AI message so the browser
+  executes them.
+
+It's the same ReAct loop `createAgent` produced, but every step is a node we own — which is
+what the rest of Phase 2 needs, since memory, guardrails and agent handoff are all "put
+another node in the loop" changes that `createAgent`'s single opaque agent node can't express.
+
+**Why `copilotkit-bridge.ts` exists.** CopilotKit ships its LangGraph integration as a
+`createAgent` *middleware*, and a raw `StateGraph` has no middleware runner. Reimplementing
+what it does (context injection, merging frontend tools from `state.copilotkit.actions` into
+the model call, intercepting frontend tool calls so the browser runs them instead of the
+graph) would be a second, drifting copy of CopilotKit's behaviour — so instead the bridge
+calls the middleware's own hooks (`beforeAgent`, `wrapModelCall`, `afterModel`, `afterAgent`)
+by hand from the nodes above, rebuilding the langchain `Runtime` object from the node's
+config the same way `createAgent` does. The loose typing in that file is deliberate: the hook
+signatures are generic over `createAgent`'s inferred state, which a hand-built graph can't
+reproduce, so the casts are confined there.
+
+`wrapToolCall` is *not* bridged: its only job in this middleware is supplying the
+dynamically-injected A2UI tool, and the runtime is configured with `a2ui.injectA2UITool:
+false` (`src/app/api/copilotkit/[[...slug]]/route.ts`) — our `generate_a2ui` is a static
+backend tool the `ToolNode` already knows about. If that flag is ever flipped on, the tools
+node will need the bridge too.
+
+Verified against the running `langgraphjs dev` server after the migration: node path
+`prepare_context → call_model → tools → call_model → finalize`; a `compose_reply` run pauses
+with the CopilotKit interrupt recorded; a run with a `toggleTheme` frontend action in
+`copilotkit.actions` ends with that tool call restored on the final AI message (not executed
+in-graph); and `stream_mode: ["messages"]` still emits token chunks, so chat text streams.
+
 ## Current demo
 
-`agent/src/agent.ts` is a single `createAgent` wired to CopilotKit, with four email tools
-plus the starter's dashboard tool:
+The graph is wired to CopilotKit with four email tools plus the starter's dashboard tool:
 
 - `get_emails` — reads the shared inbox
 - `manage_emails` — patches status/classification by id; can't set `replied`/`bug_filed`
@@ -53,6 +96,9 @@ plus the starter's dashboard tool:
   decision but doesn't apply it (see below, and the HITL note)
 - `search_knowledge_base` — keyword search over a mock KB
 - `generate_a2ui` — starter's dashboard tool, untouched
+
+`emails` still isn't in the state schema (see "Shared inbox" below), so the graph's state is
+just CopilotKit's own `messages` + `copilotkit` fields.
 
 Frontend: `use-email-agent.tsx` + `email-reply-card.tsx` render an editable
 Approve/Reject card via `useHumanInTheLoop`. Verified end-to-end in a real browser: draft
