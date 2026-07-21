@@ -57,15 +57,15 @@ instead of pausing. Switched the tool to call `interrupt()` directly; verified a
 running server that the run now pauses with the interrupt recorded. See ARCHITECTURE.md's
 HITL note. (The `copilotKitInterrupt` migration in the Day 3 row above is thus superseded.)
 
-## Phase 2 — Context, memory & multi-agent (Days 4–5, 16h estimated) — not started
+## Phase 2 — Context, memory & multi-agent (Days 4–5, 16h estimated) — in progress
 
 ### Day 4 (8h estimated)
 
-| Est. | Task | Status |
-| --- | --- | --- |
-| 4h | Migrate `createAgent` → explicit `StateGraph` | ⬜ Not started |
-| 2h | Short-term memory (thread-scoped context via checkpointer) | ⬜ Not started |
-| 2h | Long-term memory (per-customer profile/tone via Store) | ⬜ Not started |
+| Est. | Task | Status | Notes |
+| --- | --- | --- | --- |
+| 4h | Migrate `createAgent` → explicit `StateGraph` | ✅ Done | Roughly on estimate. The unplanned part was CopilotKit: its LangGraph integration is a `createAgent` *middleware*, and a raw `StateGraph` has no middleware runner, so `agent/src/copilotkit-bridge.ts` now calls the middleware's own hooks from the nodes rather than reimplementing frontend-tool merging/interception. Verified against the running dev server (node path, `compose_reply` interrupt, frontend-action restore, token streaming) — see ARCHITECTURE.md's "Graph shape"; browser click-through not repeated |
+| 2h | Short-term memory (thread-scoped context via checkpointer) | ⬜ Not started | |
+| 2h | Long-term memory (per-customer profile/tone via Store) | ⬜ Not started | The Store itself is already wired in — pulled forward by the post-Phase-1 shared-inbox fix |
 
 ### Day 5 (8h estimated)
 

@@ -20,8 +20,18 @@ For what's already built, see [ARCHITECTURE.md](./ARCHITECTURE.md).
   - [x] Shared inbox fix — moved `emails` off per-thread `agent.state` onto LangGraph's
         cross-thread Store so the inbox is common across every thread instead of forking a
         copy per checkpoint (see ARCHITECTURE.md's "Shared inbox" section)
-- **Phase 2 — Context, memory & multi-agent.** Migrate `createAgent` to an explicit
-  LangGraph `StateGraph`; add short/long-term memory, PII/tone guardrails, time-travel
-  replay, multi-tone forked drafts, and agent handoff.
+- **Phase 2 — Context, memory & multi-agent.** In progress. Migrate `createAgent` to an
+  explicit LangGraph `StateGraph`; add short/long-term memory, PII/tone guardrails,
+  time-travel replay, multi-tone forked drafts, and agent handoff.
+  - [x] `createAgent` → explicit `StateGraph`
+        (`prepare_context → call_model → tools ⇄ call_model → finalize`), with CopilotKit's
+        middleware hooks driven by hand from `agent/src/copilotkit-bridge.ts` (see
+        ARCHITECTURE.md's "Graph shape" section)
+  - [ ] Short-term memory (thread-scoped context via checkpointer)
+  - [ ] Long-term memory (per-customer profile/tone via Store)
+  - [ ] Guardrails (PII redaction, tone/compliance check)
+  - [ ] Time-travel replay demo
+  - [ ] Forked responses (two draft tones)
+  - [ ] Handoff / sub-agents (stretch)
 
 This file is updated as each phase/task ships, per the docs rule in CLAUDE.md.
