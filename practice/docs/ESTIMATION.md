@@ -57,6 +57,32 @@ instead of pausing. Switched the tool to call `interrupt()` directly; verified a
 running server that the run now pauses with the interrupt recorded. See ARCHITECTURE.md's
 HITL note. (The `copilotKitInterrupt` migration in the Day 3 row above is thus superseded.)
 
+### Post-Phase-1: domain re-theme to a teacher's inbox (unplanned, ~3h)
+
+Not in the original plan — a scope change requested after Phase 1 shipped: the SaaS support
+inbox became a high school math teacher's inbox (Grade 11 / Grade 12). Data and copy only;
+the graph, tools, store, and HITL flow were untouched, which is why it cost ~3h rather than
+a rebuild. The substantive design change is classification going from one axis to three
+(`topic` + `course` + `workType`, plus `urgency`) — see ARCHITECTURE.md's "Domain" section.
+
+This does **not** move Phase 2's estimates: every Phase 2 task is structural (StateGraph,
+memory, guardrails, multi-agent) and sits above the domain data. One knock-on to note for
+Day 4: "long-term memory (per-customer profile/tone)" now reads as per-student/per-parent
+profile, same mechanism, same estimate.
+
+### Post-Phase-1: domain re-theme to a teacher's inbox (unplanned, ~3h)
+
+Not in the original plan — a scope change requested after Phase 1 shipped: the SaaS support
+inbox became a high school math teacher's inbox (Grade 11 / Grade 12). Data and copy only;
+the graph, tools, store, and HITL flow were untouched, which is why it cost ~3h rather than
+a rebuild. The substantive design change is classification going from one axis to three
+(`topic` + `course` + `workType`, plus `urgency`) — see ARCHITECTURE.md's "Domain" section.
+
+This does **not** move Phase 2's estimates: every Phase 2 task is structural (StateGraph,
+memory, guardrails, multi-agent) and sits above the domain data. One knock-on to note for
+Day 4: "long-term memory (per-customer profile/tone)" now reads as per-student/per-parent
+profile, same mechanism, same estimate.
+
 ## Phase 2 — Context, memory & multi-agent (Days 4–5, 16h estimated) — in progress
 
 ### Day 4 (8h estimated)

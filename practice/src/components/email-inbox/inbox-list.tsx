@@ -1,28 +1,56 @@
 "use client";
 
-import type { Email, EmailCategory, Urgency } from "@/types/email";
+import type { Course, Email, EmailTopic, Urgency, WorkType } from "@/types/email";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { formatReceivedAt, formatReceivedAtFull } from "@/lib/format-date";
 
-const CATEGORY_LABEL: Record<EmailCategory, string> = {
+export const TOPIC_LABEL: Record<EmailTopic, string> = {
   question: "Question",
-  bug: "Bug",
-  billing: "Billing",
-  feature: "Feature",
+  submission: "Submission",
+  review_request: "Review",
+  grade_dispute: "Grade dispute",
+  absence: "Absence",
+  scheduling: "Scheduling",
+  admin: "Admin",
   complex: "Complex",
 };
 
-// One hue per category so a triaged inbox is scannable by colour alone.
-export const CATEGORY_TONE: Record<EmailCategory, string> = {
+// Hue per topic so a triaged inbox is scannable by colour alone. There are only
+// six tones for eight topics, so two pairs share one — the reuses are paired so
+// the two never plausibly apply to the same email (a student's Question vs staff
+// Admin mail; Scheduling vs Complex), and the label disambiguates either way.
+export const TOPIC_TONE: Record<EmailTopic, string> = {
   question: "tone-blue",
-  bug: "tone-red",
-  billing: "tone-amber",
-  feature: "tone-violet",
-  complex: "tone-teal",
+  submission: "tone-green",
+  review_request: "tone-teal",
+  grade_dispute: "tone-red",
+  absence: "tone-amber",
+  scheduling: "tone-violet",
+  admin: "tone-blue",
+  complex: "tone-violet",
 };
 
-// Urgency shares hues with categories, so it's separated by *treatment* instead:
+// Course and workType stay deliberately colourless (outline badges): they're
+// filter facets, not triage signals, and giving them hues would put four
+// competing colours in one row and drown the urgency cue.
+export const COURSE_LABEL: Record<Course, string> = {
+  math_11: "Grade 11",
+  math_12: "Grade 12",
+  none: "",
+};
+
+export const WORK_TYPE_LABEL: Record<WorkType, string> = {
+  practice: "Practice",
+  exercise: "Exercise",
+  homework: "Homework",
+  quiz: "Quiz",
+  test: "Test",
+  project: "Project",
+  none: "",
+};
+
+// Urgency shares hues with topics, so it's separated by *treatment* instead:
 // only `high` gets the solid fill, keeping at most one loud badge per row.
 export const URGENCY_TONE: Record<Urgency, string> = {
   high: "tone-red",
@@ -43,6 +71,7 @@ interface InboxListProps {
 }
 
 export function InboxList({ emails, selectedId, onSelect }: InboxListProps) {
+  console.log("InboxList rendered with emails:", emails, "selectedId:", selectedId);
   return (
     <div>
       <div className="sticky top-0 z-10 relative bg-[var(--card)] border-b border-[var(--border)] px-4 py-3">
@@ -136,11 +165,18 @@ export function InboxList({ emails, selectedId, onSelect }: InboxListProps) {
                         variant="tone"
                         className={cn(
                           "text-[10px]",
-                          CATEGORY_TONE[email.classification.category],
+                          TOPIC_TONE[email.classification.topic],
                         )}
                       >
-                        {CATEGORY_LABEL[email.classification.category]}
+                        {TOPIC_LABEL[email.classification.topic]}
                       </Badge>
+                      {/* course/workType are omitted when "none" — an absence note
+                          references no assignment, and a blank badge is just noise. */}
+                      {email.classification.course !== "none" && (
+                        <Badge variant="outline" className="text-[10px]">
+                          {COURSE_LABEL[email.classification.course]}
+                        </Badge>
+                      )}
                       <Badge
                         variant={URGENCY_VARIANT[email.classification.urgency]}
                         className={cn(
@@ -157,9 +193,9 @@ export function InboxList({ emails, selectedId, onSelect }: InboxListProps) {
                       Replied
                     </Badge>
                   )}
-                  {email.status === "bug_filed" && (
-                    <Badge variant="tone" className="text-[10px] tone-red">
-                      Bug filed
+                  {email.status === "flagged_for_followup" && (
+                    <Badge variant="tone" className="text-[10px] tone-amber">
+                      Follow up
                     </Badge>
                   )}
                 </div>

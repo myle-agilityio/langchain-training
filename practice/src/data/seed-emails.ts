@@ -7,165 +7,208 @@ import type { Email } from "@/types/email";
 
 export const seedEmails: Email[] = [
   {
-    "id": "d64a6f07-2802-4252-ba30-fa76dcbbe970",
+    "id": "1d4ff3e7-81b9-4d39-ad26-1e93e622d363",
     "from": {
-      "name": "Lilla Douglas-Fisher",
-      "email": "lilla_douglas-fisher@hotmail.com"
+      "name": "Angelina Connelly",
+      "email": "angelina.connelly@hotmail.com"
     },
-    "subject": "Duplicate charge for Team plan renewal (INV-24326)",
-    "body": "Hi, I just noticed I was billed twice for our Vela Team plan renewal, both tied to invoice ref INV-24326. Two identical charges hit my card today, 15 July, and I only have one workspace on this account.\n\nWe use Vela daily for shared docs and task boards, so I want to make sure the subscription is active correctly, but I need the duplicate charge reversed as soon as possible.\n\nCan you check what happened and confirm when the extra payment will be refunded?",
-    "receivedAt": "2026-07-15T08:23:43.575Z",
+    "subject": "Question about #4 on the related rates quiz",
+    "body": "Hi Ms. Lam,\n\nI was looking over the quiz from Period 3 today and I think my work on question 4 might have been marked wrong even though I got the same final answer, just a different way.\n\nIt was the ladder problem where we had to find how fast the top was sliding down when the bottom was 6 m from the wall. I used implicit differentiation starting from x^2 + y^2 = 100 and plugged in the values after, instead of the way from your notes. My answer still came out to the same rate.\n\nCould you maybe take another look when you have a chance?\n\nThanks,\nAngelina",
+    "receivedAt": "2026-07-21T22:50:42.986Z",
     "status": "unread"
   },
   {
-    "id": "0e19a8e6-34db-4fbd-948b-d7d7d9401ae9",
+    "id": "d01cce28-9812-444f-8f1d-9e47149547e1",
     "from": {
-      "name": "Rasheed Murphy",
-      "email": "rasheed_murphy58@gmail.com"
+      "name": "Felix Gislason",
+      "email": "felix_gislason@hotmail.com"
     },
-    "subject": "Shared doc lost a chunk of notes after syncing — also need to ask about billing",
-    "body": "Hi, I'm seeing missing content in a shared Vela doc and need help figuring out what happened. On May 9, in our workspace \"Northstar Ops,\" a doc called \"Q2 rollout notes\" lost about three sections after another teammate opened it. We use real-time docs on the Team plan, and I can't tell if this was a sync issue or if we hit some storage limit.\n\nNothing was intentionally deleted, and the task board links inside that doc are gone too. Can you check whether there's a recovery/version history option for that date? Also, since this affected our work for most of May, I'd like a refund/credit for this month if possible.\n\nThanks,\nRasheed Murphy",
-    "receivedAt": "2026-07-14T04:09:31.412Z",
+    "subject": "late project from period 6",
+    "body": "Hi Ms. Lam,\n\nI just submitted my project on polynomial and rational functions in Google Classroom, but it’s a day late. I was planning to turn it in yesterday, but my internet was being weird at home and then I had to leave with my mom before I could get it uploaded. The graph comparison part and the section on vertical/horizontal asymptotes are all in there now.\n\nI know it was due Tuesday, so I get it if there’s a late deduction, but I wanted to ask if the one-day late penalty still applies in this case.\n\nFelix",
+    "receivedAt": "2026-07-21T16:59:25.898Z",
     "status": "unread"
   },
   {
-    "id": "7c2a2843-0c87-4f69-8624-01a315fde44b",
+    "id": "d1ad1f6a-1312-4eaa-aedc-0d69be06426f",
     "from": {
-      "name": "Jillian Fahey",
-      "email": "jillian_fahey89@yahoo.com"
+      "name": "Flo Beahan",
+      "email": "flo.beahan93@hotmail.com"
     },
-    "subject": "Shortcut to switch between workspaces?",
-    "body": "Hi Vela team — quick feature request. I'm in three workspaces all day (Client Ops, Product Wiki, and our Freelancers space) and I'm constantly mousing back to the sidebar to switch between them. Is there already a keyboard shortcut to jump between workspaces, or if not, could you add one?\n\nI use slash commands and the editor shortcuts a lot, so this feels like the one thing slowing me down. I'm on the Pro plan and mostly using the Mac app.\n\nSomething like Ctrl/Cmd+K for workspace switching would be amazing.",
-    "receivedAt": "2026-07-14T02:28:48.081Z",
+    "subject": "Jewell Beahan - missed test Monday / grading question",
+    "body": "Ms. Lam,\n\nI’m writing about Jewell Beahan in Period 1. Jewell was absent on Monday, Oct. 16 and missed the related rates test. I’d like to know when that will be made up, because this unit has already been stressful.\n\nAlso, I’m still confused about the optimization/implicit differentiation quiz from Oct. 6. On #4, Jewell set up the cylinder problem correctly but lost several marks, and on #7 the tangent line question seems like it was marked more harshly than necessary. I’m not trying to argue every point, but the grading did not feel consistent.\n\nCould we meet in person sometime this week after school?\n\nFlo Beahan",
+    "receivedAt": "2026-07-20T18:12:20.073Z",
     "status": "unread"
   },
   {
-    "id": "452dba9e-ba21-4ab2-b32b-2435cfe93137",
+    "id": "aaead21e-1dcc-4905-a1fc-a5494b6dfb4b",
     "from": {
-      "name": "Amanda Kemmer",
-      "email": "amanda_kemmer76@hotmail.com"
+      "name": "Imani Dietrich",
+      "email": "imani_dietrich53@hotmail.com"
     },
-    "subject": "Could you add our VAT number to previous Vela invoices?",
-    "body": "Hi, could you update our past Vela invoices to include our VAT number for accounting?\n\nWe're on the Team plan, and our finance team noticed the invoices from March through June 2026 don't show the VAT number. The company name is already correct, but they need the VAT ID added to those invoices before they close out the quarter.\n\nVAT number: DE329184771\n\nIf you're able to reissue those invoices, that would be great. Let me know if you need the workspace name or invoice numbers from me.",
-    "receivedAt": "2026-07-14T00:37:28.338Z",
+    "subject": "corrected 5.4 assignment",
+    "body": "Hi Ms. Lam,\n\nI’m resubmitting the 5.4 definite integrals/area worksheet from last Thursday. I fixed the sign errors you marked on #3, #7, and #9 — on #7 I forgot the curve was below the x-axis on part of the interval, and on #9 I switched the bounds when I rewrote the integral.\n\nI attached the corrected pages and highlighted the changes so it’s easier to check. If you want me to also redo #10 because my setup looks messy, I can.\n\nThanks,\nImani",
+    "receivedAt": "2026-07-19T18:05:24.593Z",
     "status": "unread"
   },
   {
-    "id": "92929780-badc-4c8b-afa6-95bac6a38f68",
+    "id": "a30389ba-fb53-4308-984d-b922434a7f3a",
     "from": {
-      "name": "Marie Torphy",
-      "email": "marie.torphy@hotmail.com"
+      "name": "Marcus Mohr",
+      "email": "marcus.mohr52@yahoo.com"
     },
-    "subject": "A couple things in Vela + can someone from management reach out?",
-    "body": "Hi, I'm Marie Torphy from our Blue Harbor workspace on the Team plan. I've been using Vela pretty heavily this week and one small thing is driving me a little nuts: in real-time docs, the comment sidebar keeps collapsing after I switch over to the task board and back. Not a huge bug, just annoying.\n\nAlso, do you support SSO with Okta on the Team plan, or is that only on Business/Enterprise? I couldn't tell from the pricing page updated on May 6.\n\nAnd lastly, I'd really like to speak with a manager about our account before renewal on June 1. Who's the right person for that?",
-    "receivedAt": "2026-07-12T06:17:41.504Z",
+    "subject": "could you check my work on the extra practice?",
+    "body": "Hi Ms. Lam,\n\nI finished the extra practice set you posted for polynomial + rational functions, and I wanted to ask if you could look over my work before Friday’s quiz if you have time. I’m mostly not sure about #7 and #12 — on #7 I got a hole at x = -2 and on #12 I think my asymptotes are right but my graph feels off.\n\nI can bring the pages to Period 5 tomorrow or send photos tonight, whatever is easier.\n\nThanks,\nMarcus",
+    "receivedAt": "2026-07-19T13:09:08.596Z",
     "status": "unread"
   },
   {
-    "id": "b6837b0b-7109-4bea-9afd-af23872525c6",
+    "id": "1fb3a668-a0f9-4dc0-81a6-235c168cc1ab",
     "from": {
-      "name": "Sydni McDermott",
-      "email": "sydni.mcdermott58@gmail.com"
+      "name": "Ezra Konopelski",
+      "email": "ezra_konopelski@yahoo.com"
     },
-    "subject": "Unsaved edits disappearing after sleep/wake between Mac and iPhone",
-    "body": "Hi, I'm running into a really bad issue with Vela. Since Monday (Mar 4), edits I make in the iPhone app keep disappearing if my MacBook wakes from sleep while the same doc is open in our workspace. I'll type notes in a shared doc, switch back later, and chunks are gone with no recovery prompt.\n\nThis has happened 4 times this week in our Product Ops workspace, mostly in meeting notes and task descriptions. I'm on the Pro plan, iPhone 14 iOS 17.3, MacBook Air on Sonoma 14.3. Is there a way to recover the missing text, and is this a known sync bug?",
-    "receivedAt": "2026-07-12T04:13:54.550Z",
+    "subject": "Absent today / test this afternoon",
+    "body": "Hi Ms. Lam,\n\nI woke up feeling pretty awful this morning and my parents are keeping me home, so I’m going to miss Period 5 today, including the chain rule test this afternoon. I’m really sorry.\n\nCould you let me know how I should set up a makeup? I’ve done the review from last night, especially the compositions and the trig/exponential derivative questions, so I don’t want to miss it completely or fall behind.\n\nIf there’s a time before school, lunch, or after school later this week that works, I can be there.\n\nThanks,\nEzra",
+    "receivedAt": "2026-07-18T23:24:16.351Z",
     "status": "unread"
   },
   {
-    "id": "6ae1034a-58bd-4f4d-906b-de62898c6bfc",
+    "id": "4ab207af-862a-4b48-96ce-b7cb75b13486",
     "from": {
-      "name": "Enola Stracke",
-      "email": "enola_stracke@hotmail.com"
+      "name": "Javonte Mohr",
+      "email": "javonte.mohr@westbrookhigh.edu"
     },
-    "subject": "Real-time docs showing old version after simultaneous edits",
-    "body": "Hi, we ran into a pretty bad sync issue in Vela this morning. In our shared workspace on the Team plan, two teammates were editing the same project notes doc at the same time around 9:15 AM ET, and my screen kept showing an older version even though I could see their cursors moving.\n\nAfter refreshing, some of my changes were missing and a few of theirs appeared out of order. This was in the doc \"Q3 Launch Notes\" on July 15. Can you check whether there's a sync problem or version conflict happening on your side? We use real-time docs heavily, so I need to know how to avoid this.",
-    "receivedAt": "2026-07-12T01:15:02.628Z",
-    "status": "read",
-    "classification": {
-      "category": "bug",
-      "urgency": "high"
-    }
-  },
-  {
-    "id": "135620fa-7a6a-43f0-88f6-abc621bda291",
-    "from": {
-      "name": "Justine Hagenes",
-      "email": "justine.hagenes6@gmail.com"
-    },
-    "subject": "Still charged full Team plan after downgrading to Starter on April 12",
-    "body": "Hi, I changed our Vela workspace from Team to Starter on April 12, but the invoice that hit today still charged me the full Team amount for the whole billing cycle.\n\nWorkspace: Northline Studio\nInvoice date: April 18\n\nI downgraded because we're not using task boards or the extra real-time doc seats anymore, so I expected the billing to reflect that change or at least be prorated.\n\nCan you check what happened and let me know if there's a credit or refund due? I just want to make sure we're on the right plan going forward.",
-    "receivedAt": "2026-07-11T21:56:19.496Z",
+    "subject": "P3 plans / seating chart?",
+    "body": "Hi Ms. Lam — I’m in with your Period 3 this block. Could you send me the pacing guide for the Grade 11 group and the current seating chart when you get a minute? They said they were on rational functions and a few mentioned finishing #18–24 from yesterday, but I want to make sure I’m pointing them to the right work for today. If there are any usual notes about who shouldn’t be paired up or who needs to sit near the front, send that along too. Thanks.",
+    "receivedAt": "2026-07-18T23:18:40.687Z",
     "status": "unread"
   },
   {
-    "id": "19b9ab77-de50-4e0f-9128-d616c142e068",
+    "id": "bdab2560-a695-470e-91b8-7bcc23b06b93",
+    "from": {
+      "name": "Jerry Torp",
+      "email": "jerry.torp@yahoo.com"
+    },
+    "subject": "Marcelino Torp absent next week (Period 2)",
+    "body": "Ms. Lam,\n\nI’m writing to let you know Marcelino Torp will be away all of next week for a family trip, from Monday, March 11 through Friday, March 15. Could you please tell me what he should keep up with so he doesn’t fall behind in Period 2?\n\nIf you already know the sections or assignments coming up, that would help. Even page numbers, problem sets, or topics like polynomial division, zeros of functions, or transformations would be useful so he can work ahead while we’re away.\n\nPlease let me know the best way for him to stay current.\n\nJerry Torp",
+    "receivedAt": "2026-07-18T11:32:02.507Z",
+    "status": "unread"
+  },
+  {
+    "id": "c8636bd0-b3a1-4662-b38d-83e8200bac82",
+    "from": {
+      "name": "Vidal Fisher",
+      "email": "vidal.fisher50@hotmail.com"
+    },
+    "subject": "Request to review Katrina Fisher’s test from March 14",
+    "body": "Ms. Lam,\n\nI’m writing about Katrina Fisher’s Period 2 test from Friday, March 14. She came home concerned that several answers in the logarithms and exponential functions section may have been marked incorrect despite using valid steps. She specifically mentioned #7 on solving 3^(2x-1)=27, #11 on expanding log(4x^2/y), and #14 involving compound interest. If partial credit was not given where the method was correct, I would appreciate a re-check.\n\nKatrina is preparing her college applications, so a difference of even a few points matters right now. Please let me know if you can review it.\n\nVidal Fisher",
+    "receivedAt": "2026-07-18T07:53:14.625Z",
+    "status": "unread"
+  },
+  {
+    "id": "1f7d5ad2-a5a0-4993-999e-6fbbe763e076",
     "from": {
       "name": "Destinee Johnston",
       "email": "destinee_johnston18@gmail.com"
     },
-    "subject": "Can Vela docs be exported as Markdown?",
-    "body": "Hi, I'm using Vela with our shared workspace on the Team plan and wanted to check if there's a way to export a doc as Markdown. I found PDF/export options, but I'm not seeing anything for .md.\n\nWe're moving a few meeting notes and specs into another repo and Markdown would make that a lot easier. If it's supported, can you point me to where that lives in the doc menu? If not, is it on the roadmap at all?\n\nThanks.",
-    "receivedAt": "2026-07-10T19:28:14.809Z",
+    "subject": "question about #7 on the practice set",
+    "body": "hi ms. lam,\n\nI’m stuck on the worked example and #7 from the packet. I get the derivative part at first, but then when it switches to plugging in the values and solving for the rate I lose what is supposed to stay variable and what becomes a number. I tried it again from today’s notes and still got a different answer than the example.\n\nCould you maybe show one more step for that kind of question tomorrow, or tell me which notes page matches it best? I’m trying to study before the test on Thursday and I don’t want to practice it wrong.\n\nDestinee",
+    "receivedAt": "2026-07-17T21:46:26.729Z",
     "status": "read",
     "classification": {
-      "category": "question",
-      "urgency": "low"
+      "topic": "question",
+      "course": "math_12",
+      "workType": "practice",
+      "urgency": "medium"
     }
   },
   {
-    "id": "ee4571bb-91f3-4c1b-a54b-336d57f9885b",
+    "id": "94ddcadc-2c2f-4e35-bd63-0f89035dc648",
     "from": {
-      "name": "Leanna Rutherford",
-      "email": "leanna_rutherford@hotmail.com"
+      "name": "Alaina Ziemann",
+      "email": "alaina_ziemann74@yahoo.com"
     },
-    "subject": "Any plans for offline mode in the Mac app?",
-    "body": "Hi Vela team — I use Vela on macOS for meeting notes and project docs in our shared workspace, and I've been wondering if offline mode is on the roadmap. I’m on the Pro plan and travel a fair bit, so there are stretches on trains/flights where I can open the app but can’t really do much if my connection drops. Even just being able to view recent docs and draft edits locally, then sync later, would help a lot. I noticed this again on a trip last Friday, June 7. Is this something you're planning for the Mac app?",
-    "receivedAt": "2026-07-09T11:52:44.063Z",
+    "subject": "could you look over my project draft?",
+    "body": "Hi Ms. Lam,\n\nI have a draft of my definite integrals project done and wanted to see if you could give me quick feedback before I turn in the final on Friday. I’m mostly not sure if my setup is right on the part where I find the area between y = x^2 - 4x + 3 and y = x + 1 from the intersection points. I got the intersections at x=0 and x=5, but then I started second guessing which function should be on top in the integral.\n\nAlso, is it okay if my explanation for why I split the shaded region into two parts is kind of short right now?\n\nThanks,\nAlaina",
+    "receivedAt": "2026-07-17T21:10:34.321Z",
+    "status": "read",
+    "classification": {
+      "topic": "review_request",
+      "course": "math_12",
+      "workType": "project",
+      "urgency": "medium"
+    }
+  },
+  {
+    "id": "88e5095d-5c6d-4513-a0e1-9ac9b89893c4",
+    "from": {
+      "name": "Dayana Zulauf",
+      "email": "dayana_zulauf25@hotmail.com"
+    },
+    "subject": "friday + question on 5.4 hw",
+    "body": "hi Ms. Lam,\n\nI had a question about #17 on the 5.4 homework. I got it into standard form for the hyperbola, but when I try to find the vertices/asymptotes I keep mixing up which number goes under x and y after completing the square. If my equation ended up as ((y-1)^2)/9 - ((x+2)^2)/16 = 1, does that mean it opens up/down?\n\nAlso just wanted to let you know I’ll be absent Friday (May 10) for a family thing.\n\nIf I turn in tonight’s homework on Monday instead, can it still get partial credit or is it a zero after the due date?\n\nthanks,\nDayana",
+    "receivedAt": "2026-07-17T16:11:24.315Z",
     "status": "unread"
   },
   {
-    "id": "615c1686-bd8d-43a3-b87f-5d13a87c546f",
+    "id": "016b5953-735f-4297-b0c7-cae89a8a7325",
+    "from": {
+      "name": "Omari O'Keefe",
+      "email": "omari.okeefe@hotmail.com"
+    },
+    "subject": "Request to meet about Alta before report cards",
+    "body": "Dear Ms. Lam,\n\nI’m writing to ask if we could set up a parent-teacher conference about Alta O’Keefe’s progress in Period 6 before report cards are finalized. She told me the recent quadratics and polynomial functions work, especially the completing-the-square review and questions like #17–21 on last Thursday’s assignment, did not go as well as she expected.\n\nI’d appreciate a clearer sense of where she stands right now and what she should focus on over the next couple of weeks. I’m available after school most days this week, or Friday morning if that is easier.\n\nThank you,\nOmari O’Keefe",
+    "receivedAt": "2026-07-17T11:47:27.590Z",
+    "status": "unread"
+  },
+  {
+    "id": "207a6fa1-27b5-4b6f-8d51-7a8e4c48f327",
+    "from": {
+      "name": "Laurel Rolfson",
+      "email": "laurel.rolfson@westbrookhigh.edu"
+    },
+    "subject": "Grade 12 midterm marks by Friday",
+    "body": "Hi Ms. Lam — quick reminder from Laurel: admin needs the Period 7 midterm scores in the gradebook by Friday so they can lock reports. I think most of yours should be from the limits/derivatives section plus the optimization free-response on the last page. If you had any kids finish in the Learning Commons or write on Tuesday instead of Monday, just enter whatever you’ve got and flag the rest for me.\n\nIf it helps, I’m in the workroom after lunch tomorrow and can help double-check any entries.",
+    "receivedAt": "2026-07-16T22:19:24.678Z",
+    "status": "read",
+    "classification": {
+      "topic": "admin",
+      "course": "math_12",
+      "workType": "none",
+      "urgency": "medium"
+    }
+  },
+  {
+    "id": "fe9bc507-d944-401c-bf8f-1aa49c6f7811",
     "from": {
       "name": "Raegan Morar",
       "email": "raegan_morar@yahoo.com"
     },
-    "subject": "How do I move a workspace to our other team plan?",
-    "body": "Hi, I'm trying to move our workspace “Q3 Product Notes” over to a different team plan in Vela and I'm not seeing an option for it.\n\nRight now it’s under our Starter team, but we want it billed under the Marketing Team on the Business plan instead. The workspace has our docs, task boards, and comments already in it, so I'd rather not recreate anything if there's a proper transfer process.\n\nIs this something an admin can do from settings, or does support need to move it? If there are any limits around permissions or ownership, please let me know.",
-    "receivedAt": "2026-07-09T02:57:22.208Z",
+    "subject": "q6 on tonight’s homework",
+    "body": "Hi Ms. Lam,\n\nI’m stuck on question 6 from the Period 4 homework. I can tell it wants an identity but I can’t figure out which one I’m supposed to use first, and I keep going in circles after rewriting it.\n\nIs this the kind where we start by changing everything into sine/cosine first, or is there a better first step I’m missing? I don’t need the whole answer, just a nudge so I know I’m not doing something totally wrong.\n\nThanks,\nRaegan",
+    "receivedAt": "2026-07-16T02:18:41.126Z",
     "status": "unread"
   },
   {
-    "id": "03a30056-2bd3-40ad-a25b-3570d7c60b9e",
+    "id": "0ccaa22c-6dce-4ae2-8611-1311430f2cd0",
     "from": {
       "name": "Florian Klein",
-      "email": "florian.klein82@hotmail.com"
+      "email": "florian_klein10@hotmail.com"
     },
-    "subject": "How can I bulk-invite 40 teammates to our workspace?",
-    "body": "Hi Vela team,\n\nI'm the new admin for our workspace and I'm trying to get everyone set up before our Monday kickoff. We have about 40 teammates to invite, and doing them one by one doesn't seem practical.\n\nIs there a bulk invite option in Vela for shared workspaces, or a way to upload a list of email addresses? We're on the Team plan right now, if that matters.\n\nIf there's a specific place in settings for this, could you point me to it?\n\nThanks,\nFlorian Klein",
-    "receivedAt": "2026-07-08T23:48:55.254Z",
+    "subject": "Question about calculator requirements for the final",
+    "body": "Hello Ms. Lam,\n\nBefore I buy a graphing calculator for Garry Klein, could you let me know which models are actually permitted on the Period 4 final? He mentioned the review packet for limits and related rates, and I would rather not spend money on something he cannot bring into the exam.\n\nIf there is a school-recommended list, or if certain TI or Casio models are not allowed, I would appreciate the clarification. I know some exams are stricter about calculators with CAS features, so I wanted to check with you first.\n\nThank you,\nFlorian Klein",
+    "receivedAt": "2026-07-15T19:55:14.267Z",
     "status": "unread"
   },
   {
-    "id": "1b8f2fa0-0753-46b4-9e72-dcbdd6d7b641",
+    "id": "c9ca90a0-5985-46ab-a083-a3c284a7a12a",
     "from": {
-      "name": "Augustine Weimann",
-      "email": "augustine.weimann@gmail.com"
+      "name": "Anita McGlynn",
+      "email": "anita_mcglynn39@hotmail.com"
     },
-    "subject": "Task board is randomly creating duplicate cards when I drag them",
-    "body": "Hi, I'm seeing a strange issue in Vela on our Growth plan workspace. On the task board for our Q3 launch project, dragging a card from \"In Progress\" to \"Review\" will sometimes leave the original card behind and create a duplicate in the new column.\n\nIt's not every time, which makes it hard to pin down, but we noticed it several times today (July 15) in Chrome with two people in the board at once. The duplicates keep the same title/checklist, so people are accidentally working from the wrong one.\n\nCan you take a look and let me know if there's a fix or workaround?",
-    "receivedAt": "2026-07-08T23:28:35.564Z",
-    "status": "unread"
-  },
-  {
-    "id": "c9994773-7182-42e8-987a-20858b221697",
-    "from": {
-      "name": "Hassan Gislason",
-      "email": "hassan_gislason@yahoo.com"
-    },
-    "subject": "Dark mode display issue on Settings page",
-    "body": "Hi, I noticed a small rendering bug in dark mode on the Settings page in Vela. I'm on the Pro plan, and when I open Settings > Workspace members, some of the text looks doubled or slightly offset, like it's being drawn twice. The toggle labels in the left sidebar also get pretty blurry.\n\nI first spotted it this morning (July 15) in Chrome on macOS. Light mode looks normal, so it seems specific to dark mode.\n\nNot blocking anything for me, but figured I should report it in case it helps. Happy to share a screenshot if needed.",
-    "receivedAt": "2026-07-08T14:13:53.955Z",
+    "subject": "can i move tomorrow’s makeup?",
+    "body": "Hi Ms. Lam,\n\nI just found out my physics lab got moved to tomorrow morning, and it overlaps with the makeup we booked. The lab is the one for oscillations that got rescheduled after the assembly, so I can’t miss it.\n\nWould it be possible to move my makeup to lunch, after school, or sometime Thursday? I’ve still been reviewing the derivatives/integration review sheet, especially the related rates and volume questions like #7 and #11, so I’ll be ready.\n\nSorry for the late email, I only got the lab update tonight.\n\nAnita",
+    "receivedAt": "2026-07-15T15:22:40.410Z",
     "status": "unread"
   }
 ];

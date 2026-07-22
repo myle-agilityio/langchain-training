@@ -5,7 +5,13 @@ import type { Email } from "@/types/email";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ComposeForm } from "./compose-form";
-import { CATEGORY_TONE, URGENCY_TONE } from "./inbox-list";
+import {
+  COURSE_LABEL,
+  TOPIC_LABEL,
+  TOPIC_TONE,
+  URGENCY_TONE,
+  WORK_TYPE_LABEL,
+} from "./inbox-list";
 import { formatReceivedAtFull } from "@/lib/format-date";
 import { Mail, Sparkles } from "lucide-react";
 
@@ -64,13 +70,25 @@ export function EmailDetail({
           </time>
         </div>
         {email.classification && (
-          <div className="flex gap-1.5 mt-3">
+          <div className="flex flex-wrap gap-1.5 mt-3">
             <Badge
               variant="tone"
-              className={CATEGORY_TONE[email.classification.category]}
+              className={TOPIC_TONE[email.classification.topic]}
             >
-              {email.classification.category}
+              {TOPIC_LABEL[email.classification.topic]}
             </Badge>
+            {/* Unlike the list row, the detail pane has room for workType too —
+                same "none" suppression so unrelated mail stays uncluttered. */}
+            {email.classification.course !== "none" && (
+              <Badge variant="outline">
+                {COURSE_LABEL[email.classification.course]}
+              </Badge>
+            )}
+            {email.classification.workType !== "none" && (
+              <Badge variant="outline">
+                {WORK_TYPE_LABEL[email.classification.workType]}
+              </Badge>
+            )}
             <Badge
               // Solid only for `high`, matching the inbox list's treatment split.
               variant={email.classification.urgency === "high" ? "toneSolid" : "tone"}

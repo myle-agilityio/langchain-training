@@ -4,24 +4,51 @@ export const EmailStatusSchema = z.enum([
   "unread",
   "read",
   "replied",
-  "bug_filed",
+  "flagged_for_followup",
 ]);
 export type EmailStatus = z.infer<typeof EmailStatusSchema>;
 
-export const EmailCategorySchema = z.enum([
+// Why the sender wrote. "complex" is deliberately kept as an escape hatch for
+// emails that genuinely straddle several topics (an absence note that also
+// disputes a grade and asks for a meeting) — without it classification is
+// trivially easy and the triage step stops being interesting to watch.
+export const EmailTopicSchema = z.enum([
   "question",
-  "bug",
-  "billing",
-  "feature",
+  "submission",
+  "review_request",
+  "grade_dispute",
+  "absence",
+  "scheduling",
+  "admin",
   "complex",
 ]);
-export type EmailCategory = z.infer<typeof EmailCategorySchema>;
+export type EmailTopic = z.infer<typeof EmailTopicSchema>;
+
+// Which class it concerns. Closed enum rather than free text so the inbox can be
+// filtered/grouped reliably; "none" covers school-admin mail tied to no class.
+export const CourseSchema = z.enum(["math_11", "math_12", "none"]);
+export type Course = z.infer<typeof CourseSchema>;
+
+// Which artifact it's about. Frequently absent (an absence note references no
+// work at all), hence the explicit "none" member instead of an optional field.
+export const WorkTypeSchema = z.enum([
+  "practice",
+  "exercise",
+  "homework",
+  "quiz",
+  "test",
+  "project",
+  "none",
+]);
+export type WorkType = z.infer<typeof WorkTypeSchema>;
 
 export const UrgencySchema = z.enum(["low", "medium", "high"]);
 export type Urgency = z.infer<typeof UrgencySchema>;
 
 export const EmailClassificationSchema = z.object({
-  category: EmailCategorySchema,
+  topic: EmailTopicSchema,
+  course: CourseSchema,
+  workType: WorkTypeSchema,
   urgency: UrgencySchema,
 });
 export type EmailClassification = z.infer<typeof EmailClassificationSchema>;

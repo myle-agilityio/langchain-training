@@ -20,6 +20,12 @@ For what's already built, see [ARCHITECTURE.md](./ARCHITECTURE.md).
   - [x] Shared inbox fix — moved `emails` off per-thread `agent.state` onto LangGraph's
         cross-thread Store so the inbox is common across every thread instead of forking a
         copy per checkpoint (see ARCHITECTURE.md's "Shared inbox" section)
+  - [x] Domain re-theme — SaaS support inbox → a high school math teacher's inbox
+        (Grade 11 / Grade 12). Classification went from one axis (`category`) to three
+        (`topic` + `course` + `workType`, plus `urgency`); `bug_filed` → `flagged_for_followup`;
+        seed data and knowledge base rewritten for school policy + Grade 11/12 curriculum.
+        Data and copy only — no change to the graph, tools, store, or HITL flow. See
+        ARCHITECTURE.md's "Domain" section.
 - **Phase 2 — Context, memory & multi-agent.** In progress. Migrate `createAgent` to an
   explicit LangGraph `StateGraph`; add short/long-term memory, PII/tone guardrails,
   time-travel replay, multi-tone forked drafts, and agent handoff.

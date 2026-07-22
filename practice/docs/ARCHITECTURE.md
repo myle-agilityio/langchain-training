@@ -96,7 +96,7 @@ in-graph); and `stream_mode: ["messages"]` still emits token chunks, so chat tex
 The graph is wired to CopilotKit with four email tools plus the starter's dashboard tool:
 
 - `get_emails` — reads the shared inbox
-- `manage_emails` — patches status/classification by id; can't set `replied`/`bug_filed`
+- `manage_emails` — patches status/classification by id; can't set `replied`/`flagged_for_followup`
 - `compose_reply` — pauses via LangGraph's raw `interrupt()` for approval; returns the
   decision but doesn't apply it (see below, and the HITL note)
 - `search_knowledge_base` — keyword search over a mock KB
@@ -285,16 +285,52 @@ real browser: chat → `get_emails`/`search_knowledge_base`/`manage_emails` →
 separately, select email → "Compose reply" → fill → Send → reply thread renders →
 inbox row shows "Replied" — both with zero console errors.
 
+## Domain: a high school math teacher's inbox
+
+The app was originally themed as a SaaS support inbox; it now models the inbox of a high
+school mathematics teacher who teaches Grade 11 (algebra 2 / precalculus) and Grade 12
+(calculus). Only the *data and copy* changed — the store, interrupt/approval flow, tools,
+and generative UI are theme-neutral and were untouched by the re-theme.
+
+Classification went from one axis to three, because a teacher triages along all of them
+(`agent/src/tools/emails/schema.ts`):
+
+| Field | Values | Role |
+| --- | --- | --- |
+| `topic` | `question`, `submission`, `review_request`, `grade_dispute`, `absence`, `scheduling`, `admin`, `complex` | why they wrote — drives the reply |
+| `course` | `math_11`, `math_12`, `none` | which class — drives filtering/grouping |
+| `workType` | `practice`, `exercise`, `homework`, `quiz`, `test`, `project`, `none` | which artifact |
+| `urgency` | `low`, `medium`, `high` | how fast, per the rules in the system prompt |
+
+All four are required together — `manage_emails` takes the classification as a unit, since
+a partial one renders as a half-filled badge row. `course`/`workType` carry an explicit
+`none` member rather than being optional, because plenty of mail (an absence note, a
+staff request) legitimately concerns no class or no assignment; the UI suppresses those
+badges instead of drawing an empty one. `complex` is kept deliberately as an escape hatch
+for genuinely multi-topic mail — without it, classification is trivially easy and the
+triage step stops being interesting to watch.
+
+The terminal status `bug_filed` became `flagged_for_followup`; it keeps the same structural
+role (reachable only after human approval, never from `manage_emails`).
+
+The knowledge base (`knowledge-base.ts`) holds two kinds of article on purpose: school
+*policy* (late work, re-grades, absences/makeups, grade weighting, calculator rules — what
+the teacher is actually allowed to promise) and *curriculum* notes per Grade 11/12 unit
+(the common student errors), so a reply to a stuck student can be specific rather than
+generic. The system prompt forbids inventing deadlines, penalties, or re-grade outcomes.
+
 ## Mock inbox data
 
-`agent/src/tools/emails/seed-data.ts` is 14 support emails for a fictional product
-("Vela") covering every classification target (question / bug / billing / feature /
-complex, mixed urgency). It's generated, not hand-written: `agent/scripts/generate-seed-emails.ts`
-builds a structured "brief" per email with faker (customer, invoice ref, platform, date —
-fixed seed, so structure is reproducible), then has an LLM write the actual subject/body
-prose so the language is varied instead of templated. Output is validated against the
-`Email` zod schema before it's written, so a bad generation fails loudly rather than
-shipping broken fixtures.
+`agent/src/tools/emails/seed-data.ts` is 17 emails to the teacher covering every topic,
+both courses, and mixed urgency, from three sender voices (students, parents, colleagues).
+It's generated, not hand-written: `agent/scripts/generate-seed-emails.ts` builds a
+structured "brief" per email with faker (sender, child name for parents, class period,
+unit, date — fixed seed, so structure is reproducible), then has an LLM write the actual
+subject/body prose so the language is varied instead of templated. Units are drawn from a
+course-specific list, so a Grade 12 email never cites a Grade 11 topic — the classifier
+should be able to infer `course` from the mathematics itself, not just from an explicit
+grade mention. Output is validated against the `Email` zod schema before it's written, so a
+bad generation fails loudly rather than shipping broken fixtures.
 
 Regenerate with (from `agent/`):
 
@@ -303,6 +339,13 @@ npm run generate:seed
 ```
 
 This overwrites `seed-data.ts` — hand edits made after generating will be lost on a rerun.
+The frontend's `src/data/seed-emails.ts` is a manual mirror of the same array (separate TS
+projects, no shared import boundary) and must be updated alongside it.
+
+**Changing any classification enum requires resetting the store.** `loadEmails` runs
+`EmailSchema.parse` over every stored item, so rows written under an older enum throw and
+break the whole inbox read. Stop the dev servers and delete
+`agent/.langgraph_api/.langgraphjs_api.store.json`; it re-seeds on the next read.
 
 ## Resolved: dev agent server used to crash on every run
 
