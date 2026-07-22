@@ -22,6 +22,25 @@ interface SharedInboxValue {
 
 const SharedInboxContext = createContext<SharedInboxValue | null>(null);
 
+/**
+ * Whether a refetch actually changed anything.
+ *
+ * This is load-bearing, not an optimization. `onRunFinalized` fires a refetch, and
+ * `compose_reply`'s approval interrupt *ends the run* — so the refetch happens at the exact
+ * moment the reply card mounts. Handing back a fresh array reference there re-rendered this
+ * provider's whole subtree (chat and card included), and that re-render can feed back into
+ * another finalize/subscribe cycle, which is how this tripped "Maximum update depth exceeded".
+ * Returning the previous reference makes React bail out of the render entirely.
+ *
+ * Stringify rather than a hand-written field-by-field compare: the payload is a small mailbox
+ * of plain JSON that came straight off `res.json()`, key order is stable because it's produced
+ * by the same query every time, and a shallow compare would miss exactly the nested
+ * classification/reply changes that matter here.
+ */
+function sameEmails(a: Email[], b: Email[]): boolean {
+  return a.length === b.length && JSON.stringify(a) === JSON.stringify(b);
+}
+
 // The inbox now lives in the agent's cross-thread Store instead of per-thread
 // agent.state (see agent/src/tools/emails/store.ts), so this provider — not
 // useAgent()'s per-thread state — is the single source of truth every consumer
@@ -45,7 +64,10 @@ export function SharedInboxProvider({ children }: { children: ReactNode }) {
       const res = await fetch("/api/emails");
       if (!res.ok) return;
       const data = (await res.json()) as { emails: Email[] };
-      setEmails(data.emails);
+      // Returning `current` unchanged is what stops the re-render — see sameEmails.
+      setEmails((current) =>
+        sameEmails(current, data.emails) ? current : data.emails,
+      );
     } finally {
       // Also clears on a failed fetch: the skeleton means "still loading", and leaving it up
       // forever would misreport a dead API as a slow one.
