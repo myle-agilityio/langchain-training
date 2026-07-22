@@ -105,7 +105,6 @@ export function InboxList({
   selectedId,
   onSelect,
 }: InboxListProps) {
-  console.log("InboxList rendered with emails:", emails, "selectedId:", selectedId);
   return (
     <div>
       <div className="sticky top-0 z-10 relative bg-[var(--card)] border-b border-[var(--border)] px-4 py-3">

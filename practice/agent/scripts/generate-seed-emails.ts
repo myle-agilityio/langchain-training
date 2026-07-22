@@ -402,7 +402,6 @@ export const seedEmails: Email[] = ${JSON.stringify(validated, null, 2)};
 `;
 
   writeFileSync(outPath, fileContents, "utf8");
-  console.log(`Wrote ${validated.length} seed emails to ${outPath}`);
 }
 
 main().catch((err) => {
