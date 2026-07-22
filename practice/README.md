@@ -1,6 +1,6 @@
 # AI Email Assistant — CopilotKit <> LangGraph (Practice)
 
-A support-inbox triage assistant being built with [LangGraph](https://www.langchain.com/langgraph) and [CopilotKit](https://copilotkit.ai) as a training practice.
+An inbox triage assistant for a high school math teacher, being built with [LangGraph](https://www.langchain.com/langgraph) and [CopilotKit](https://copilotkit.ai) as a training practice.
 Target behavior: classify incoming email, research context, draft a reply or file a bug ticket, and always pause for human approval before anything is sent or created.
 
 > **Status: Phase 1, Day 3 in progress.** See [docs/ROADMAP.md](./docs/ROADMAP.md) for what's

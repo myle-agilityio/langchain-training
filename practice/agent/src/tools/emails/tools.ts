@@ -42,17 +42,17 @@ export const get_emails = tool(
   {
     name: "get_emails",
     description:
-      "Get the current shared inbox: total count, a countsByStatus breakdown " +
-      "(unread/read/replied/bug_filed), and the full email list. For any question " +
+      "Get the teacher's current shared inbox: total count, a countsByStatus breakdown " +
+      "(unread/read/replied/flagged_for_followup), and the full email list. For any question " +
       "about how many emails are unread/read/etc., use countsByStatus directly — " +
       "don't count entries in the emails array yourself.",
     schema: z.object({}),
   },
 );
 
-// manage_emails deliberately cannot set "replied" or "bug_filed" — those statuses
-// are only reachable via a future finalize tool that runs after human approval, so
-// review stays structurally required instead of just prompted (see CLAUDE.md).
+// manage_emails deliberately cannot set "replied" or "flagged_for_followup" — those
+// statuses are only reachable via a future finalize tool that runs after human approval,
+// so review stays structurally required instead of just prompted (see CLAUDE.md).
 const ManageableStatusSchema = z.enum(["unread", "read"]);
 
 const EmailPatchSchema = z.object({
@@ -63,6 +63,8 @@ const EmailPatchSchema = z.object({
 
 // Patches: subject/body/from/receivedAt are inbox facts the model must never rewrite, so it can only patch the mutable
 // status/classification fields by id instead of echoing the whole array back.
+// classification is all-or-nothing (topic + course + workType + urgency together) — a
+// partial classification would render as a half-filled badge row in the inbox UI.
 export const manage_emails = tool(
   async (
     input: { patches: z.infer<typeof EmailPatchSchema>[] },
@@ -97,7 +99,8 @@ export const manage_emails = tool(
     name: "manage_emails",
     description:
       "Patch one or more emails in the shared inbox by id — mark read/unread and/or " +
-      "record a classification. Cannot mark an email replied or bug_filed.",
+      "record a classification (topic + course + workType + urgency). Cannot mark an " +
+      "email replied or flagged_for_followup.",
     schema: z.object({ patches: z.array(EmailPatchSchema) }),
   },
 );
@@ -178,8 +181,9 @@ export const search_knowledge_base = tool(
   {
     name: "search_knowledge_base",
     description:
-      "Search internal support articles for context relevant to an email (billing " +
-      "policy, known bugs, feature availability, etc.) before drafting a reply.",
+      "Search school policy and course curriculum notes for context relevant to an email " +
+      "(late-work and re-grade policy, absence/makeup rules, grade weighting, calculator " +
+      "rules, and the common errors in each Grade 11/12 unit) before drafting a reply.",
     schema: z.object({ query: z.string() }),
   },
 );
