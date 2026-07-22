@@ -16,6 +16,7 @@ Target behavior: classify incoming email, research context, draft a reply or fil
   - [yarn](https://classic.yarnpkg.com/lang/en/docs/install/)
   - [bun](https://bun.sh/)
 - OpenAI API Key (for the LangGraph agent)
+- Model: `gpt-4o-mini`
 
 ## Getting Started
 

@@ -320,7 +320,7 @@ const EmailDraftSchema = z.object({
     ),
 });
 
-const model = new ChatOpenAI({ model: "gpt-5.4" }).withStructuredOutput(
+const model = new ChatOpenAI({ model: "gpt-4o-mini" }).withStructuredOutput(
   EmailDraftSchema,
 );
 

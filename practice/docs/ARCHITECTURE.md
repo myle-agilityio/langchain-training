@@ -157,8 +157,8 @@ model's input* rather than by mutating `state.messages`:
   answer to an earlier AI tool call, so removing it would leave a dangling call the provider
   rejects.
 - **Summarization** — past `SUMMARIZE_WHEN_OVER` messages, everything except the recent tail is
-  folded into a running summary (`historyMemory.summary`, written by `manage_memory` using
-  gpt-4.1) and dropped from the model's input from then on. The cut always lands on a human
+  folded into a running summary (`historyMemory.summary`, written by `manage_memory` on its own
+  model instance) and dropped from the model's input from then on. The cut always lands on a human
   message, since slicing mid-turn would separate a tool call from its answer.
 
 Why not `RemoveMessage`, which is LangGraph's usual answer: CopilotKit renders the chat

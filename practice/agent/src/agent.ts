@@ -38,15 +38,19 @@ const AgentStateSchema = new StateSchema({
   workingContext: WorkingContextSchema,
 });
 
+// gpt-4o-mini everywhere, per the practice plan's recommendation. One constant rather than a
+// literal per call site so the whole practice moves models in one edit.
+const MODEL = "gpt-4o-mini";
+
 const model = new ChatOpenAI({
-  model: "gpt-5.4",
+  model: MODEL,
   modelKwargs: { parallel_tool_calls: false },
 });
 
-// Summarizing old turns is a mechanical rewrite, not triage reasoning — a smaller model is
-// enough, and this call is on the critical path of every long-thread turn. gpt-4.1 is already
-// the second model in this repo (generate_a2ui uses it).
-const summarizerModel = new ChatOpenAI({ model: "gpt-4.1" });
+// Kept as its own instance even though it's the same model as the triage one: summarizing old
+// turns is a mechanical rewrite on the critical path of every long-thread turn, so it's the
+// first thing that would be pinned to something cheaper/faster if this ever needs tuning.
+const summarizerModel = new ChatOpenAI({ model: MODEL });
 
 const tools = [
   get_emails,
