@@ -17,6 +17,10 @@ interface SharedInboxValue {
   emails: Email[];
   /** True until the first fetch settles. Consumers render a skeleton rather than an inbox. */
   isLoading: boolean;
+  /** True only during a user-triggered refresh, for the button's spinner. */
+  isRefreshing: boolean;
+  /** User-triggered refetch. The list is otherwise a snapshot — see `refresh` below. */
+  refresh: () => Promise<void>;
   patchEmail: (id: string, patch: Partial<Email>) => Promise<void>;
 }
 
@@ -58,6 +62,7 @@ export function SharedInboxProvider({ children }: { children: ReactNode }) {
   // for one fetch is less confusing than data that changes under the reader.
   const [emails, setEmails] = useState<Email[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
@@ -74,6 +79,22 @@ export function SharedInboxProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     }
   }, []);
+
+  /**
+   * The button's refresh. Separate from `refresh` on purpose: `isRefreshing` toggles state
+   * twice per call, so routing the automatic paths (mount, onRunFinalized) through this would
+   * re-render on every run completion even when nothing changed — exactly what the sameEmails
+   * bail-out above exists to prevent. A user pressing a button is bounded; a run finalizing
+   * is not.
+   */
+  const refreshManually = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await refresh();
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [refresh]);
 
   // Keep the subscribe effect from re-binding (and thus re-subscribing) when refresh's
   // identity is irrelevant — read it through a ref so the effect depends only on `agent`.
@@ -114,8 +135,14 @@ export function SharedInboxProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ emails, isLoading, patchEmail }),
-    [emails, isLoading, patchEmail],
+    () => ({
+      emails,
+      isLoading,
+      isRefreshing,
+      refresh: refreshManually,
+      patchEmail,
+    }),
+    [emails, isLoading, isRefreshing, refreshManually, patchEmail],
   );
 
   return (

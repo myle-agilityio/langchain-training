@@ -1,7 +1,9 @@
 "use client";
 
+import { RefreshCw } from "lucide-react";
 import type { Course, Email, EmailTopic, Urgency, WorkType } from "@/types/email";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatReceivedAt, formatReceivedAtFull } from "@/lib/format-date";
 
@@ -67,6 +69,8 @@ const URGENCY_VARIANT: Record<Urgency, "tone" | "toneSolid"> = {
 interface InboxListProps {
   emails: Email[];
   isLoading: boolean;
+  isRefreshing: boolean;
+  onRefresh: () => void;
   selectedId: string | null;
   onSelect: (email: Email) => void;
 }
@@ -102,6 +106,8 @@ function InboxSkeleton() {
 export function InboxList({
   emails,
   isLoading,
+  isRefreshing,
+  onRefresh,
   selectedId,
   onSelect,
 }: InboxListProps) {
@@ -114,14 +120,34 @@ export function InboxList({
           className="absolute inset-x-0 top-0 h-0.5"
           style={{ background: "var(--cpk-ambient-gradient)" }}
         />
-        <h2 className="text-sm font-bold text-[var(--foreground)]">
-          Inbox{" "}
-          <span className="text-[var(--muted-foreground)] font-normal">
-            {/* A count of 0 while loading reads as "empty inbox", which is a different
-                (and alarming) claim than "not known yet". */}
-            {isLoading ? "…" : `(${emails.length})`}
-          </span>
-        </h2>
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-sm font-bold text-[var(--foreground)]">
+            Inbox{" "}
+            <span className="text-[var(--muted-foreground)] font-normal">
+              {/* A count of 0 while loading reads as "empty inbox", which is a different
+                  (and alarming) claim than "not known yet". */}
+              {isLoading ? "…" : `(${emails.length})`}
+            </span>
+          </h2>
+          {/* The list is a snapshot: it refetches on mount and when a chat run finishes, but
+              nothing else pushes changes (a row edited straight in Postgres, or another tab
+              replying). This is the manual way to pull those in. */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 -mr-1 text-[var(--muted-foreground)]"
+            onClick={onRefresh}
+            // Disabled during the first load too — there's nothing to refresh yet, and the
+            // skeleton is already saying "fetching".
+            disabled={isLoading || isRefreshing}
+            title="Refresh inbox"
+            aria-label="Refresh inbox"
+          >
+            <RefreshCw
+              className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")}
+            />
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (

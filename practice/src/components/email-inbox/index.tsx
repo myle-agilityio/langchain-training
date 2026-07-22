@@ -8,7 +8,7 @@ import { InboxList } from "./inbox-list";
 import { EmailDetail } from "./email-detail";
 
 export function EmailInbox() {
-  const { emails, isLoading, patchEmail } = useSharedInbox();
+  const { emails, isLoading, isRefreshing, refresh, patchEmail } = useSharedInbox();
   // Same agent the chat pane binds to (resolved from the surrounding chat
   // configuration), so a run kicked off here streams into that visible chat and
   // its compose_reply interrupt renders the EmailReplyCard there.
@@ -72,6 +72,8 @@ export function EmailInbox() {
         <InboxList
           emails={emails}
           isLoading={isLoading}
+          isRefreshing={isRefreshing}
+          onRefresh={refresh}
           selectedId={selectedId}
           onSelect={selectEmail}
         />
