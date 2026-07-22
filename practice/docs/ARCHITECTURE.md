@@ -250,23 +250,77 @@ against the same request *before* memory existed, which produced a long apologet
 the charge "should be refunded". A customer with no stored profile (Florian Klein) drafts
 exactly as before, with `workingContext.customer` undefined — no leakage.
 
-## Shared inbox: LangGraph cross-thread Store, not per-thread state
+## Persistence: Postgres for application data, LangGraph for graph state
+
+The app's own data — the inbox and contact profiles — lives in **Postgres**
+(`agent/src/db/index.ts`). Graph **checkpoints** still live in LangGraph's own storage. That
+split isn't a preference; it's forced:
+
+`@langchain/langgraph-api` (what `langgraph dev` runs) reassigns persistence on every request:
+
+```js
+// node_modules/@langchain/langgraph-api/dist/graph/load.mjs — getGraph()
+compiled.checkpointer = checkpointer;      // its own JSON-file storage
+compiled.store = options?.store ?? store;
+```
+
+So a `PostgresSaver`/`PostgresStore` passed to `.compile()` — the approach in
+[LangGraph's add-memory docs](https://docs.langchain.com/oss/javascript/langgraph/add-memory) —
+is silently discarded here. That page describes a self-hosted graph; this project runs behind
+the platform dev server, which has no Postgres support at all (no `postgres` reference anywhere
+in its dist, no database flags on `langgraphjs dev`). Moving checkpoints to Postgres would mean
+dropping `langgraph dev` and rebuilding the CopilotKit integration (streaming, interrupts,
+threads) by hand. Application data has no such constraint: it's ours, so it goes straight to
+Postgres. Deploying to LangGraph Platform puts checkpoints in Postgres anyway, with no code
+change.
+
+**Schema** — two tables, created idempotently on first query (`ensureSchema`, memoized so
+concurrent callers share one round trip). No migration step: two tables, and a
+missing-table error on first run is a worse experience than `CREATE TABLE IF NOT EXISTS`.
+
+- `emails` — the four classification fields are **columns**, not one `jsonb` blob, so counting
+  and grouping ("how many Grade 12 are urgent") is a SQL question rather than something the
+  model has to derive. A `classification_all_or_nothing` CHECK enforces that all four are
+  written together, mirroring the zod schema's invariant in the database itself.
+- `contact_profiles` — keyed by the contact's email address, `facts` as `jsonb`.
+
+**Both processes talk to the same database.** The agent reaches it through
+`tools/emails/store.ts`; the Next side through `src/lib/db.ts` (duplicated deliberately —
+separate TS projects, same reason `src/types/email.ts` duplicates the agent's schema). The
+frontend used to reach the inbox through the LangGraph store's REST API, so listing emails
+required the agent server to be up. It no longer does.
+
+**TLS** — `sslmode`/`channel_binding` are stripped from the URL and TLS is decided from an
+explicit `ssl` option, because node-postgres warns it currently treats `sslmode=require` as
+`verify-full` and will adopt libpq's weaker semantics in its next major. Pinning it here means
+the same URL can't silently change behaviour on a dependency bump.
+
+## Shared inbox: history — LangGraph cross-thread Store, not per-thread state
+
+> Superseded by the Postgres section above — the inbox now lives in Postgres, and the tools
+> no longer take a store at all. Kept because the *problem* it solves still shapes the design:
+> the inbox must be common to every thread, which is why it was never graph state.
 
 The inbox used to live in per-thread `agent.state.emails`, so once the threads drawer
-shipped, each thread forked its own copy instead of sharing one mailbox. Fixed by moving it
-to LangGraph's cross-thread `Store` (namespace `["emails"]`, one item per email keyed by
-id — `agent/src/tools/emails/store.ts`), which every thread reads/writes the same copy of:
+shipped, each thread forked its own copy instead of sharing one mailbox. The first fix moved
+it to LangGraph's cross-thread `Store` (namespace `["emails"]`, one item per email keyed by
+id), which every thread reads/writes the same copy of:
 
-- `get_emails`/`manage_emails`/`compose_reply` (`tools.ts`) use `runtime.store` instead of
+- `get_emails`/`manage_emails`/`compose_reply` (`tools.ts`) used `runtime.store` instead of
   `runtime.state.emails`; `emails` is gone from `AgentStateSchema` in `agent.ts`. No other
-  wiring needed — `langgraph dev`/the deployed API server attaches a store to every
+  wiring was needed — `langgraph dev`/the deployed API server attaches a store to every
   compiled graph automatically.
 - The frontend can't reach that store directly (separate process), so
-  `src/app/api/emails/route.ts` talks to the same store over the LangGraph deployment's
+  `src/app/api/emails/route.ts` talked to the same store over the LangGraph deployment's
   REST API via `@langchain/langgraph-sdk`'s `Client.store`.
 - `src/hooks/use-shared-inbox.tsx` (`SharedInboxProvider`/`useSharedInbox`) replaces
   `useAgent().state.emails`/`setState` on the frontend, refetching on mount and whenever a
   chat run finalizes. Mounted once in `page.tsx` around both the chat and the inbox panel.
+  It starts **empty** and exposes `isLoading` so the list renders a skeleton for the first
+  fetch. It used to seed its first paint from `src/data/seed-emails.ts`, which meant the list
+  painted untriaged emails and then visibly rewrote itself once the fetch landed — a database
+  seed can't reflect triage done since, so the two stages always drifted apart the moment
+  anything was classified. That file is now server-side only (seeding an empty database).
 
 `get_emails` also returns `total`/`countsByStatus`, not just the raw array — testing this
 fix surfaced the model miscounting entries in the JSON dump when asked "how many unread?"

@@ -12,10 +12,11 @@ import {
 } from "react";
 import { useAgent } from "@copilotkit/react-core/v2";
 import type { Email } from "@/types/email";
-import { seedEmails } from "@/data/seed-emails";
 
 interface SharedInboxValue {
   emails: Email[];
+  /** True until the first fetch settles. Consumers render a skeleton rather than an inbox. */
+  isLoading: boolean;
   patchEmail: (id: string, patch: Partial<Email>) => Promise<void>;
 }
 
@@ -32,13 +33,24 @@ export function SharedInboxProvider({ children }: { children: ReactNode }) {
   // token during a run; combined with the onRunFinalized→refresh→setEmails effect it
   // produced a re-render storm that tripped React's "maximum update depth".
   const { agent } = useAgent({ updates: [] });
-  const [emails, setEmails] = useState<Email[]>(seedEmails);
+  // Starts empty, not from the static seed file. Seeding the first paint meant the list
+  // rendered untriaged emails and then visibly rewrote itself the moment the fetch landed —
+  // the seed file is a *database* seed, so it can't reflect any triage done since. A skeleton
+  // for one fetch is less confusing than data that changes under the reader.
+  const [emails, setEmails] = useState<Email[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const refresh = useCallback(async () => {
-    const res = await fetch("/api/emails");
-    if (!res.ok) return;
-    const data = (await res.json()) as { emails: Email[] };
-    setEmails(data.emails);
+    try {
+      const res = await fetch("/api/emails");
+      if (!res.ok) return;
+      const data = (await res.json()) as { emails: Email[] };
+      setEmails(data.emails);
+    } finally {
+      // Also clears on a failed fetch: the skeleton means "still loading", and leaving it up
+      // forever would misreport a dead API as a slow one.
+      setIsLoading(false);
+    }
   }, []);
 
   // Keep the subscribe effect from re-binding (and thus re-subscribing) when refresh's
@@ -79,7 +91,10 @@ export function SharedInboxProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const value = useMemo(() => ({ emails, patchEmail }), [emails, patchEmail]);
+  const value = useMemo(
+    () => ({ emails, isLoading, patchEmail }),
+    [emails, isLoading, patchEmail],
+  );
 
   return (
     <SharedInboxContext.Provider value={value}>

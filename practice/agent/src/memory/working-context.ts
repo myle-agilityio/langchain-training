@@ -1,9 +1,7 @@
 import { z } from "zod";
 import { AIMessage, HumanMessage, type BaseMessage } from "@langchain/core/messages";
 import { zodState } from "@copilotkit/sdk-js/langgraph";
-import type { BaseStore, LangGraphRunnableConfig } from "@langchain/langgraph";
-
-import { loadEmails } from "../tools/emails/store.js";
+import { findEmail, loadEmails } from "../tools/emails/store.js";
 import {
   ContactProfileSchema,
   loadProfile,
@@ -89,14 +87,12 @@ export function renderWorkingContext(context: WorkingContext | undefined): strin
  */
 async function recallFor(
   emailId: string,
-  store: BaseStore | undefined,
 ): Promise<{ label?: string; contact?: ContactProfile }> {
-  if (!store) return {};
-  const email = (await loadEmails(store)).find((e) => e.id === emailId);
+  const email = await findEmail(emailId);
   if (!email) return {};
   return {
     label: `"${email.subject}" from ${email.from.name}`,
-    contact: await loadProfile(store, email.from.email),
+    contact: await loadProfile(email.from.email),
   };
 }
 
@@ -111,20 +107,20 @@ async function recallFor(
  * latest user message is a deterministic string match, no LLM call, and it runs before the
  * model — so the profile is in the prompt for the draft that request produces.
  */
-export async function recallMemory(
-  state: { messages: BaseMessage[]; workingContext?: WorkingContext },
-  config: LangGraphRunnableConfig,
-) {
+export async function recallMemory(state: {
+  messages: BaseMessage[];
+  workingContext?: WorkingContext;
+}) {
   const lastHuman = [...state.messages]
     .reverse()
     .find((message) => HumanMessage.isInstance(message));
   const text =
     typeof lastHuman?.content === "string" ? lastHuman.content.toLowerCase() : "";
-  if (!text || !config.store) return {};
+  if (!text) return {};
 
   const current = state.workingContext ?? {};
   // Emails are newest-first, so the first match is the most recent one from that sender.
-  const mentioned = (await loadEmails(config.store)).find(
+  const mentioned = (await loadEmails()).find(
     (email) =>
       text.includes(email.from.name.toLowerCase()) ||
       text.includes(email.from.email.toLowerCase()),
@@ -137,7 +133,7 @@ export async function recallMemory(
       emailLabel: `"${mentioned.subject}" from ${mentioned.from.name}`,
       // Focus moved to a different person, so any draft held for the previous one is stale.
       lastDraft: mentioned.id === current.emailId ? current.lastDraft : undefined,
-      contact: await loadProfile(config.store, mentioned.from.email),
+      contact: await loadProfile(mentioned.from.email),
     },
   };
 }
@@ -153,10 +149,10 @@ export async function recallMemory(
  * which is exactly when a later "make it shorter" needs it. Hence this node's position:
  * between the model and the tools, not after them.
  */
-export async function trackWorkingContext(
-  state: { messages: BaseMessage[]; workingContext?: WorkingContext },
-  config: LangGraphRunnableConfig,
-) {
+export async function trackWorkingContext(state: {
+  messages: BaseMessage[];
+  workingContext?: WorkingContext;
+}) {
   const last = state.messages[state.messages.length - 1];
   if (!AIMessage.isInstance(last) || !last.tool_calls?.length) return {};
 
@@ -197,7 +193,7 @@ export async function trackWorkingContext(
   // Re-read from the Store only when something could have changed — otherwise reuse the cache.
   const recalled =
     focusMoved || profileChanged
-      ? await recallFor(emailId!, config.store)
+      ? await recallFor(emailId!)
       : { label: current.emailLabel, contact: current.contact };
 
   return {

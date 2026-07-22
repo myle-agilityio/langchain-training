@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { tool, type ToolRuntime } from "@langchain/core/tools";
 import { ToolMessage } from "@langchain/core/messages";
-import type { BaseStore } from "@langchain/langgraph";
 
-import { loadEmails } from "../tools/emails/store.js";
+import { findEmail } from "../tools/emails/store.js";
+import { query } from "../db/index.js";
 
 /**
  * Long-term memory: what we know about a *contact* — a student, a parent, or a colleague —
@@ -20,10 +20,9 @@ import { loadEmails } from "../tools/emails/store.js";
  * about their child, and a profile keyed off the parent's address is about the parent, with the
  * child as a remembered fact.
  *
- * It lives in LangGraph's cross-thread `Store`, the same mechanism the shared inbox uses (see
- * tools/emails/store.ts), under its own namespace.
+ * It lives in Postgres, the same database as the inbox (see ../db/index.ts), in its own
+ * `contact_profiles` table.
  */
-const NAMESPACE = ["contact_profiles"];
 
 /**
  * Facts are capped and FIFO-trimmed. A profile is a prompt ingredient, not an archive: it's
@@ -48,14 +47,30 @@ export type ContactProfile = z.infer<typeof ContactProfileSchema>;
 // per-email), so the key is the normalized address.
 const keyFor = (email: string) => email.trim().toLowerCase();
 
+interface ProfileRow {
+  email: string;
+  name: string | null;
+  tone: string | null;
+  facts: string[];
+  updated_at: Date;
+}
+
 export async function loadProfile(
-  store: BaseStore | undefined,
-  email: string,
+  email: string | undefined,
 ): Promise<ContactProfile | undefined> {
-  if (!store || !email) return undefined;
-  const item = await store.get(NAMESPACE, keyFor(email));
-  if (!item) return undefined;
-  const parsed = ContactProfileSchema.safeParse(item.value);
+  if (!email) return undefined;
+  const { rows } = await query<ProfileRow>(
+    `SELECT email, name, tone, facts, updated_at FROM contact_profiles WHERE email = $1`,
+    [keyFor(email)],
+  );
+  if (!rows[0]) return undefined;
+  const parsed = ContactProfileSchema.safeParse({
+    email: rows[0].email,
+    name: rows[0].name ?? undefined,
+    tone: rows[0].tone ?? undefined,
+    facts: rows[0].facts,
+    updatedAt: rows[0].updated_at.toISOString(),
+  });
   return parsed.success ? parsed.data : undefined;
 }
 
@@ -80,13 +95,6 @@ export function renderContactProfile(
   return lines.join("\n");
 }
 
-function requireStore(runtime: ToolRuntime): BaseStore {
-  if (!runtime.store) {
-    throw new Error("No store available on this run — cannot reach contact memory.");
-  }
-  return runtime.store as unknown as BaseStore;
-}
-
 /**
  * Writing is an explicit tool call rather than something inferred automatically after each
  * reply: the model is the only thing that can tell a durable fact ("in Grade 12, Period 3",
@@ -99,15 +107,13 @@ export const remember_contact = tool(
     input: { emailId: string; facts?: string[]; tone?: string },
     runtime: ToolRuntime,
   ) => {
-    const store = requireStore(runtime);
-
     // The contact's identity is resolved from the inbox, never taken from the model. Asked
     // for an address directly, it will confidently invent a plausible one (observed: it wrote
     // a profile under `lilla.douglas-fisher@example.com` for a sender whose real address is
     // `lilla_douglas-fisher@hotmail.com`), and since recall looks the profile up by the *real*
     // sender address, that write is unreachable forever — memory that silently never recalls.
     // Passing an email id matches how every other tool here addresses things.
-    const source = (await loadEmails(store)).find((e) => e.id === input.emailId);
+    const source = await findEmail(input.emailId);
     if (!source) {
       return new ToolMessage({
         content: `No email with id ${input.emailId} — call get_emails first to find the contact's email.`,
@@ -115,7 +121,7 @@ export const remember_contact = tool(
       });
     }
     const { email: address, name } = source.from;
-    const existing = await loadProfile(store, address);
+    const existing = await loadProfile(address);
 
     const incoming = (input.facts ?? []).map((f) => f.trim()).filter(Boolean);
     // Dedupe case-insensitively so re-learning the same fact doesn't consume the cap.
@@ -133,7 +139,24 @@ export const remember_contact = tool(
       facts: merged.slice(-MAX_FACTS),
       updatedAt: new Date().toISOString(),
     };
-    await store.put(NAMESPACE, keyFor(address), profile);
+    // Upsert on the address so re-remembering the same contact updates their row rather than
+    // failing the primary key.
+    await query(
+      `INSERT INTO contact_profiles (email, name, tone, facts, updated_at)
+       VALUES ($1, $2, $3, $4::jsonb, $5)
+       ON CONFLICT (email) DO UPDATE SET
+         name       = EXCLUDED.name,
+         tone       = EXCLUDED.tone,
+         facts      = EXCLUDED.facts,
+         updated_at = EXCLUDED.updated_at`,
+      [
+        keyFor(address),
+        profile.name ?? null,
+        profile.tone ?? null,
+        JSON.stringify(profile.facts),
+        profile.updatedAt,
+      ],
+    );
 
     return new ToolMessage({
       content: `Remembered for ${name} (${address}): ${

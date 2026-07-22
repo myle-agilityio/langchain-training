@@ -89,6 +89,26 @@ Lesson worth carrying: a domain re-theme touches prompts, and prompts live in th
 structural work rewrites — so a re-theme merged across a structural branch needs the prompt
 files diffed by hand, not trusted to the merge.
 
+### Post-Phase-1: application data to Postgres (unplanned, ~4h)
+
+Not in the original plan — requested mid-Phase-2. The inbox and contact profiles moved off
+LangGraph's cross-thread Store into Postgres (`agent/src/db/`, `src/lib/db.ts`).
+
+Scoped deliberately to **application data only**. The obvious reading of the request was "follow
+the add-memory docs and use `PostgresSaver`/`PostgresStore`" — but reading
+`@langchain/langgraph-api`'s source showed it reassigns `compiled.checkpointer`/`compiled.store`
+on every request, so that wiring is silently discarded under `langgraph dev`. Full Postgres
+persistence would mean self-hosting the graph and rebuilding the CopilotKit integration
+(streaming, interrupts, threads) — a 1-2 day job that would destabilise Phase 2, for something a
+LangGraph Platform deployment gives you free. Flagged the fork before writing code rather than
+discovering it halfway; see ARCHITECTURE.md's "Persistence" section.
+
+Two things the move bought beyond storage: classification became four real columns with a CHECK
+enforcing the all-or-nothing invariant the zod schema already had, and `manage_emails` went from
+read-whole-mailbox-then-write-back to a targeted `UPDATE ... COALESCE`, so concurrent patches
+stop clobbering each other. The frontend also no longer needs the agent server up just to list
+emails.
+
 ## Phase 2 — Context, memory & multi-agent (Days 4–5, 16h estimated) — in progress
 
 ### Day 4 (8h estimated)

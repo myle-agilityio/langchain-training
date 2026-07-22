@@ -42,6 +42,10 @@ For what's already built, see [ARCHITECTURE.md](./ARCHITECTURE.md).
         (`agent/src/memory/contact-profile.ts`): `remember_contact` writes durable facts/tone,
         `recall_memory` loads them before the model so drafts in a *new* thread already know
         what was settled in an old one
+  - [x] Postgres for application data — the inbox and contact profiles moved off LangGraph's
+        cross-thread Store into real Postgres tables (`agent/src/db/`, `src/lib/db.ts`).
+        Graph checkpoints stay with LangGraph, because `langgraph dev` overwrites any
+        compiled-in checkpointer/store — see ARCHITECTURE.md's "Persistence" section
   - [ ] Guardrails (PII redaction, tone/compliance check)
   - [ ] Time-travel replay demo
   - [ ] Forked responses (two draft tones)

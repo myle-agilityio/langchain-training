@@ -66,11 +66,45 @@ const URGENCY_VARIANT: Record<Urgency, "tone" | "toneSolid"> = {
 
 interface InboxListProps {
   emails: Email[];
+  isLoading: boolean;
   selectedId: string | null;
   onSelect: (email: Email) => void;
 }
 
-export function InboxList({ emails, selectedId, onSelect }: InboxListProps) {
+/**
+ * Placeholder rows shaped like real ones (sender, subject, preview) so the list doesn't jump
+ * when the fetch lands. Deliberately not a spinner: the inbox is the whole screen here, and a
+ * centred spinner would leave the panel looking broken rather than pending.
+ */
+function InboxSkeleton() {
+  return (
+    <div aria-hidden>
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div
+          key={i}
+          className="px-4 py-3 border-b border-[var(--border)] animate-pulse"
+          // Fading successive rows suggests a list continuing past the fold instead of six
+          // identical bars.
+          style={{ opacity: 1 - i * 0.14 }}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <div className="h-3 w-28 rounded bg-[var(--secondary)]" />
+            <div className="h-2.5 w-10 rounded bg-[var(--secondary)]" />
+          </div>
+          <div className="h-3 w-52 rounded bg-[var(--secondary)] mt-2" />
+          <div className="h-2.5 w-full rounded bg-[var(--secondary)] mt-2" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function InboxList({
+  emails,
+  isLoading,
+  selectedId,
+  onSelect,
+}: InboxListProps) {
   console.log("InboxList rendered with emails:", emails, "selectedId:", selectedId);
   return (
     <div>
@@ -84,12 +118,16 @@ export function InboxList({ emails, selectedId, onSelect }: InboxListProps) {
         <h2 className="text-sm font-bold text-[var(--foreground)]">
           Inbox{" "}
           <span className="text-[var(--muted-foreground)] font-normal">
-            ({emails.length})
+            {/* A count of 0 while loading reads as "empty inbox", which is a different
+                (and alarming) claim than "not known yet". */}
+            {isLoading ? "…" : `(${emails.length})`}
           </span>
         </h2>
       </div>
 
-      {emails.length === 0 ? (
+      {isLoading ? (
+        <InboxSkeleton />
+      ) : emails.length === 0 ? (
         <div className="p-6 text-sm text-[var(--muted-foreground)] text-center">
           No emails
         </div>

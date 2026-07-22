@@ -1,41 +1,21 @@
 import { z } from "zod";
 import { tool, type ToolRuntime } from "@langchain/core/tools";
 import { ToolMessage, AIMessage } from "@langchain/core/messages";
-import { interrupt, type BaseStore } from "@langchain/langgraph";
+import { interrupt } from "@langchain/langgraph";
 
-import { EmailClassificationSchema, type Email } from "./schema.js";
+import { EmailClassificationSchema } from "./schema.js";
 import { searchKnowledgeBase } from "./knowledge-base.js";
-import { loadEmails, saveEmail } from "./store.js";
+import { countsByStatus, findEmail, loadEmails, patchEmail } from "./store.js";
 
-// `ToolRuntime.store` is typed against `@langchain/core`'s generic mget/mset
-// BaseStore (core can't depend on langgraph-checkpoint), but the value actually
-// injected at runtime is langgraph's namespaced cross-thread BaseStore — see
-// store.ts. Cast at the boundary instead of threading `any` through every tool.
-function requireStore(runtime: ToolRuntime): BaseStore {
-  if (!runtime.store) {
-    throw new Error("No store available on this run — cannot access the shared inbox.");
-  }
-  return runtime.store as unknown as BaseStore;
-}
-
-// Counting items out of a JSON dump is a known LLM weak spot (verified: it miscounted
-// "11 unread" as 9/10 across repeated tries on the exact same data). Precomputing the
-// breakdown here makes counting questions a lookup instead of the model doing arithmetic
-// over the array itself.
-function summarizeByStatus(emails: Email[]): Record<string, number> {
-  const counts: Record<string, number> = {};
-  for (const email of emails) {
-    counts[email.status] = (counts[email.status] ?? 0) + 1;
-  }
-  return counts;
-}
+// These tools no longer take the LangGraph store from `runtime`: the inbox lives in Postgres
+// and store.ts reaches it directly (see ../../db/index.ts).
 
 export const get_emails = tool(
-  async (_input: Record<string, never>, runtime: ToolRuntime) => {
-    const emails = await loadEmails(requireStore(runtime));
+  async () => {
+    const [emails, counts] = await Promise.all([loadEmails(), countsByStatus()]);
     return JSON.stringify({
       total: emails.length,
-      countsByStatus: summarizeByStatus(emails),
+      countsByStatus: counts,
       emails,
     });
   },
@@ -70,28 +50,22 @@ export const manage_emails = tool(
     input: { patches: z.infer<typeof EmailPatchSchema>[] },
     runtime: ToolRuntime,
   ) => {
-    const store = requireStore(runtime);
-    const current = await loadEmails(store);
-    const patchesById = new Map(input.patches.map((p) => [p.id, p]));
-
-    const updated: Email[] = current.map((email) => {
-      const patch = patchesById.get(email.id);
-      if (!patch) return email;
-      return {
-        ...email,
-        ...(patch.status ? { status: patch.status } : {}),
-        ...(patch.classification ? { classification: patch.classification } : {}),
-      };
-    });
-
-    await Promise.all(
-      updated
-        .filter((email) => patchesById.has(email.id))
-        .map((email) => saveEmail(store, email)),
+    const applied = await Promise.all(
+      input.patches.map((patch) =>
+        patchEmail(patch.id, {
+          status: patch.status,
+          classification: patch.classification,
+        }),
+      ),
     );
 
+    // Report unknown ids rather than silently succeeding — the model hallucinating an id it
+    // never read is exactly the case this catches.
+    const missed = input.patches.filter((_, i) => !applied[i]).map((p) => p.id);
     return new ToolMessage({
-      content: `Updated ${input.patches.length} email(s).`,
+      content: missed.length
+        ? `Updated ${applied.filter(Boolean).length} email(s). No email found for: ${missed.join(", ")} — call get_emails for current ids.`
+        : `Updated ${applied.length} email(s).`,
       tool_call_id: runtime.toolCallId,
     });
   },
@@ -128,8 +102,7 @@ export const compose_reply = tool(
     input: { id: string; subject: string; body: string },
     runtime: ToolRuntime,
   ) => {
-    const current = await loadEmails(requireStore(runtime));
-    if (!current.some((e) => e.id === input.id)) {
+    if (!(await findEmail(input.id))) {
       return new ToolMessage({
         content: `No email with id ${input.id} — call get_emails first.`,
         tool_call_id: runtime.toolCallId,

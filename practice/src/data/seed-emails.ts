@@ -1,8 +1,12 @@
 // Mirrors agent/src/tools/emails/seed-data.ts. Frontend and agent are separate
 // TS projects (no shared import boundary — see src/types/email.ts), so this is
-// duplicated deliberately. Used as the inbox's initial render data so the list
-// shows immediately like a normal app, instead of waiting on the agent/thread
-// to connect and sync its own copy of this same default state.
+// duplicated deliberately.
+//
+// Server-side only: /api/emails uses it to seed an empty database on first read. It is
+// deliberately NOT the client's initial render data any more — painting from this file meant
+// the list showed untriaged emails and then rewrote itself when the fetch landed, since a
+// database seed can't reflect any triage done since. use-shared-inbox.tsx starts empty and
+// shows a skeleton instead.
 import type { Email } from "@/types/email";
 
 export const seedEmails: Email[] = [

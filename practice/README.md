@@ -17,6 +17,7 @@ Target behavior: classify incoming email, research context, draft a reply or fil
   - [bun](https://bun.sh/)
 - OpenAI API Key (for the LangGraph agent)
 - Model: `gpt-4o-mini`
+- A Postgres database (local install, or hosted — Neon/Supabase both work)
 
 ## Getting Started
 
@@ -44,11 +45,17 @@ This also installs the agent dependencies via `npm install` inside `agent/`.
 cp .env.example .env
 ```
 
-Then edit the `.env` file and add your OpenAI API key:
+Then edit the `.env` file and add your OpenAI API key and database URL:
 
 ```bash
 OPENAI_API_KEY=your-openai-api-key-here
+DATABASE_URL=postgresql://user:password@host:5432/dbname
 ```
+
+The inbox and contact profiles live in Postgres. Tables are created automatically on first
+connect — there's no migration step to run. Graph checkpoints stay in LangGraph's own
+storage; see [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)'s "Persistence" section for why
+that split is forced rather than chosen.
 
 3. Start the development server:
 

@@ -17,6 +17,7 @@ import { Mail, Sparkles } from "lucide-react";
 
 interface EmailDetailProps {
   email: Email | null;
+  isLoading: boolean;
   onSendReply: (id: string, subject: string, body: string) => void;
   onAskAgent: (email: Email) => void;
   // True while the agent is drafting OR paused awaiting approval — either way a new
@@ -27,6 +28,7 @@ interface EmailDetailProps {
 
 export function EmailDetail({
   email,
+  isLoading,
   onSendReply,
   onAskAgent,
   agentBusy,
@@ -45,7 +47,9 @@ export function EmailDetail({
       <div className="h-full flex flex-col items-center justify-center gap-3 text-center px-6">
         <Mail className="h-8 w-8 text-[var(--muted-foreground)]" />
         <p className="text-sm text-[var(--muted-foreground)]">
-          Select an email to read it
+          {/* "Select an email" while the list is still a skeleton would be an instruction
+              the reader can't act on yet. */}
+          {isLoading ? "Loading inbox…" : "Select an email to read it"}
         </p>
       </div>
     );
