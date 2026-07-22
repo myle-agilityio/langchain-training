@@ -39,18 +39,45 @@ export function EmailReplyCard({
   // starts a fresh run instead — see tools.ts), so this card — not the backend — is the
   // one that actually applies the state change, via patchEmail (PATCH /api/emails into
   // the shared inbox store).
+  // Same reasoning as handleReject below: `respond` continues the run, so the model gets a
+  // turn either way and the payload is where we say what that turn should be. Left bare, it
+  // narrates the whole job back — classification, KB findings, and the full draft — all of
+  // which this card is already showing on screen.
   const handleApprove = () => {
     setDecision("approve");
     patchEmail(id, {
       status: "replied",
       reply: { subject, body, sentAt: new Date().toISOString() },
     });
-    respond?.(JSON.stringify({ decision: "approve" }));
+    respond?.(
+      JSON.stringify({
+        decision: "approve",
+        instruction:
+          "The teacher approved this draft and it has been sent. The UI already shows a " +
+          "'Reply sent' confirmation with the subject. Do NOT repeat the draft body, the " +
+          "subject, the classification, or anything from the knowledge base. Reply with one " +
+          "short line confirming it was sent, then stop.",
+      }),
+    );
   };
 
+  // `respond` is what clears the pending interrupt, and CopilotKit answers it by continuing
+  // the run — there's no exposed way to resolve an interrupt *without* the agent getting
+  // another turn. So the payload carries the instruction itself: a bare
+  // `{"decision":"reject"}` reads to the model as "that one didn't land, try again", and it
+  // would immediately produce a second card. The system prompt carries the same rule; this is
+  // belt-and-braces because it sits right next to the decision in the transcript.
   const handleReject = () => {
     setDecision("reject");
-    respond?.(JSON.stringify({ decision: "reject" }));
+    respond?.(
+      JSON.stringify({
+        decision: "reject",
+        instruction:
+          "The teacher rejected this draft and nothing was sent. Do NOT write another " +
+          "draft and do NOT call compose_reply again unless they explicitly ask. Reply " +
+          "with one short line acknowledging it, then stop.",
+      }),
+    );
   };
 
   if (decision === "approve") {

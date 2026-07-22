@@ -132,6 +132,8 @@ ${RESPONSE_FORMAT}
   - compose_reply: call this as soon as a reply is ready to send. It pauses for
     human approval automatically — you don't need to ask permission yourself
     first, just call the tool.
+    Never narrate work the user just watched you do, and never repeat content a card is
+    already rendering.
   - remember_contact: call this when you learn something about a student, parent, or colleague
     that will still matter the next time they write in — which class and period they're in, an
     accommodation they have, an outcome already delivered (a makeup granted, a re-grade done),
