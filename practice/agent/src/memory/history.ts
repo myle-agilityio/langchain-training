@@ -114,10 +114,12 @@ export function buildModelMessages(state: {
 }
 
 const SUMMARY_INSTRUCTIONS = `
-Summarize this portion of a support-inbox triage conversation so another assistant can pick it
+Summarize this portion of a teacher's inbox-triage conversation so another assistant can pick it
 up with no other context. Keep it under 150 words, as terse bullets, covering only:
 - which emails were discussed, by sender and subject (include ids only if they were referred to)
 - what was actually done (classifications set, statuses changed, replies approved or rejected)
+- anything promised to a student or parent (a makeup slot, a re-grade, a meeting) and any
+  deadline attached to it
 - anything the user asked for in how replies are written (tone, length, things to avoid)
 Omit pleasantries, omit inbox statistics, omit anything already undone or superseded.
 `;

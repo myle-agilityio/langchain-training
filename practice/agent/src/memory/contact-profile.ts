@@ -6,38 +6,43 @@ import type { BaseStore } from "@langchain/langgraph";
 import { loadEmails } from "../tools/emails/store.js";
 
 /**
- * Long-term memory: what we know about a *customer*, across every thread and every email.
+ * Long-term memory: what we know about a *contact* — a student, a parent, or a colleague —
+ * across every thread and every email.
  *
  * The distinction that makes this worth having next to memory/history.ts: short-term memory is
- * scoped to one conversation and dies with it, so anything learned while replying to a customer
- * in one thread is gone when you open the next one. A profile keyed by the customer's email
- * address outlives both the thread and the individual email — "she's on the Team plan", "we
- * already refunded INV-24326", "prefers short replies, no apologies" — which is exactly the
- * context that makes the *second* reply to someone better than the first.
+ * scoped to one conversation and dies with it, so anything learned while replying to a student
+ * in one thread is gone when you open the next one. A profile keyed by the contact's email
+ * address outlives both the thread and the individual email — "in Grade 12, Period 3", "already
+ * granted a makeup for the related rates test", "her parent prefers a phone call over email" —
+ * which is exactly the context that makes the *second* reply to someone better than the first.
+ *
+ * "Contact" rather than "student" because the sender often isn't the student: a parent writes
+ * about their child, and a profile keyed off the parent's address is about the parent, with the
+ * child as a remembered fact.
  *
  * It lives in LangGraph's cross-thread `Store`, the same mechanism the shared inbox uses (see
  * tools/emails/store.ts), under its own namespace.
  */
-const NAMESPACE = ["customer_profiles"];
+const NAMESPACE = ["contact_profiles"];
 
 /**
  * Facts are capped and FIFO-trimmed. A profile is a prompt ingredient, not an archive: it's
- * injected into every model call for that customer, so unbounded growth would quietly undo the
+ * injected into every model call for that contact, so unbounded growth would quietly undo the
  * context savings from history.ts.
  */
 const MAX_FACTS = 8;
 
-export const CustomerProfileSchema = z.object({
+export const ContactProfileSchema = z.object({
   email: z.string(),
   name: z.string().optional(),
-  /** How this customer likes to be written to, in the user's own words. */
+  /** How this contact likes to be written to, in the user's own words. */
   tone: z.string().optional(),
-  /** Durable facts — plan, past resolutions, promises made. Newest last. */
+  /** Durable facts — class/period, accommodations, past outcomes, promises made. Newest last. */
   facts: z.array(z.string()).default(() => []),
   updatedAt: z.string(),
 });
 
-export type CustomerProfile = z.infer<typeof CustomerProfileSchema>;
+export type ContactProfile = z.infer<typeof ContactProfileSchema>;
 
 // Email addresses are the stable identity here (names get typed inconsistently, ids are
 // per-email), so the key is the normalized address.
@@ -46,17 +51,17 @@ const keyFor = (email: string) => email.trim().toLowerCase();
 export async function loadProfile(
   store: BaseStore | undefined,
   email: string,
-): Promise<CustomerProfile | undefined> {
+): Promise<ContactProfile | undefined> {
   if (!store || !email) return undefined;
   const item = await store.get(NAMESPACE, keyFor(email));
   if (!item) return undefined;
-  const parsed = CustomerProfileSchema.safeParse(item.value);
+  const parsed = ContactProfileSchema.safeParse(item.value);
   return parsed.success ? parsed.data : undefined;
 }
 
 /** Renders a profile as a system-prompt block. Empty when we know nothing about them yet. */
-export function renderCustomerProfile(
-  profile: CustomerProfile | undefined,
+export function renderContactProfile(
+  profile: ContactProfile | undefined,
 ): string {
   if (!profile || (!profile.tone && profile.facts.length === 0)) return "";
   const lines = [
@@ -77,34 +82,35 @@ export function renderCustomerProfile(
 
 function requireStore(runtime: ToolRuntime): BaseStore {
   if (!runtime.store) {
-    throw new Error("No store available on this run — cannot reach customer memory.");
+    throw new Error("No store available on this run — cannot reach contact memory.");
   }
   return runtime.store as unknown as BaseStore;
 }
 
 /**
  * Writing is an explicit tool call rather than something inferred automatically after each
- * reply: the model is the only thing that can tell a durable fact ("on the Team plan", "asked
- * us to skip the apologies") from a passing detail of one email, and an automatic writer would
- * fill the profile with the latter. It also keeps the write visible in the transcript.
+ * reply: the model is the only thing that can tell a durable fact ("in Grade 12, Period 3",
+ * "gets extended time on assessments") from a passing detail of one email, and an automatic
+ * writer would fill the profile with the latter. It also keeps the write visible in the
+ * transcript.
  */
-export const remember_customer = tool(
+export const remember_contact = tool(
   async (
     input: { emailId: string; facts?: string[]; tone?: string },
     runtime: ToolRuntime,
   ) => {
     const store = requireStore(runtime);
 
-    // The customer's identity is resolved from the inbox, never taken from the model. Asked
+    // The contact's identity is resolved from the inbox, never taken from the model. Asked
     // for an address directly, it will confidently invent a plausible one (observed: it wrote
-    // a profile under `lilla.douglas-fisher@example.com` for a customer whose real address is
+    // a profile under `lilla.douglas-fisher@example.com` for a sender whose real address is
     // `lilla_douglas-fisher@hotmail.com`), and since recall looks the profile up by the *real*
     // sender address, that write is unreachable forever — memory that silently never recalls.
     // Passing an email id matches how every other tool here addresses things.
     const source = (await loadEmails(store)).find((e) => e.id === input.emailId);
     if (!source) {
       return new ToolMessage({
-        content: `No email with id ${input.emailId} — call get_emails first to find the customer's email.`,
+        content: `No email with id ${input.emailId} — call get_emails first to find the contact's email.`,
         tool_call_id: runtime.toolCallId,
       });
     }
@@ -120,7 +126,7 @@ export const remember_customer = tool(
       }
     }
 
-    const profile: CustomerProfile = {
+    const profile: ContactProfile = {
       email: address,
       name: name ?? existing?.name,
       tone: input.tone ?? existing?.tone,
@@ -137,18 +143,19 @@ export const remember_customer = tool(
     });
   },
   {
-    name: "remember_customer",
+    name: "remember_contact",
     description:
-      "Save something durable about a customer so it's available in future conversations: " +
-      "their plan, an outcome already delivered (a refund issued, a bug filed), a promise " +
-      "made, or how they want replies written. Identify them by the id of one of their " +
-      "emails — never by typing an address yourself. Don't store one-off details of a single " +
-      "message, and don't store anything the inbox already records (status, classification).",
+      "Save something durable about a student, parent, or colleague so it's available in " +
+      "future conversations: which class/period they're in, an accommodation they have, an " +
+      "outcome already delivered (a makeup granted, a re-grade done), a promise made, or how " +
+      "they want replies written. Identify them by the id of one of their emails — never by " +
+      "typing an address yourself. Don't store one-off details of a single message, and don't " +
+      "store anything the inbox already records (status, classification).",
     schema: z.object({
       emailId: z
         .string()
         .describe(
-          "id of any email from this customer — the profile is keyed off that email's sender",
+          "id of any email from this contact — the profile is keyed off that email's sender",
         ),
       facts: z
         .array(z.string())
@@ -157,7 +164,7 @@ export const remember_customer = tool(
       tone: z
         .string()
         .optional()
-        .describe("how they want replies written, e.g. 'short, no apologies'"),
+        .describe("how they want replies written, e.g. 'formal, always cc the parent'"),
     }),
   },
 );

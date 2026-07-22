@@ -70,18 +70,24 @@ memory, guardrails, multi-agent) and sits above the domain data. One knock-on to
 Day 4: "long-term memory (per-customer profile/tone)" now reads as per-student/per-parent
 profile, same mechanism, same estimate.
 
-### Post-Phase-1: domain re-theme to a teacher's inbox (unplanned, ~3h)
+### Post-merge fixup: re-theme conflicts in Phase 2 code (unplanned, ~1h)
 
-Not in the original plan — a scope change requested after Phase 1 shipped: the SaaS support
-inbox became a high school math teacher's inbox (Grade 11 / Grade 12). Data and copy only;
-the graph, tools, store, and HITL flow were untouched, which is why it cost ~3h rather than
-a rebuild. The substantive design change is classification going from one axis to three
-(`topic` + `course` + `workType`, plus `urgency`) — see ARCHITECTURE.md's "Domain" section.
+The re-theme branch was merged into the Phase 2 branch after both had moved, and the merge
+resolved `agent/src/agent.ts` in favour of the Phase 2 side — silently dropping the re-theme's
+system prompt. The agent went back to calling itself a support-inbox assistant and describing
+`manage_emails` as taking `category + urgency`, a field that no longer exists. Restored, along
+with the teacher urgency rules and the "never promise a grade change" guardrail.
 
-This does **not** move Phase 2's estimates: every Phase 2 task is structural (StateGraph,
-memory, guardrails, multi-agent) and sits above the domain data. One knock-on to note for
-Day 4: "long-term memory (per-customer profile/tone)" now reads as per-student/per-parent
-profile, same mechanism, same estimate.
+Separately, the Phase 2 memory module had never been re-themed at all — it postdates the
+re-theme. `customer-profile.ts` → `contact-profile.ts`, `remember_customer` →
+`remember_contact`, store namespace `customer_profiles` → `contact_profiles`, and the
+summarizer prompt in `history.ts` now also carries forward anything promised to a student or
+parent. The namespace change orphans any profiles written before it; there were none worth
+keeping.
+
+Lesson worth carrying: a domain re-theme touches prompts, and prompts live in the same files
+structural work rewrites — so a re-theme merged across a structural branch needs the prompt
+files diffed by hand, not trusted to the merge.
 
 ## Phase 2 — Context, memory & multi-agent (Days 4–5, 16h estimated) — in progress
 

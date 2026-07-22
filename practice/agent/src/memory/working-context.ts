@@ -5,11 +5,11 @@ import type { BaseStore, LangGraphRunnableConfig } from "@langchain/langgraph";
 
 import { loadEmails } from "../tools/emails/store.js";
 import {
-  CustomerProfileSchema,
+  ContactProfileSchema,
   loadProfile,
-  renderCustomerProfile,
-  type CustomerProfile,
-} from "./customer-profile.js";
+  renderContactProfile,
+  type ContactProfile,
+} from "./contact-profile.js";
 
 /**
  * Short-term memory, part 2: the carry-over — what this conversation is working on.
@@ -40,7 +40,7 @@ export const WorkingContextSchema = zodState(
        * cache, not the source of truth — refreshed whenever focus moves or the model writes a
        * new fact, so a stale copy can't outlive the turn it was read in.
        */
-      customer: CustomerProfileSchema.optional(),
+      contact: ContactProfileSchema.optional(),
     })
     .default(() => ({})),
 );
@@ -77,26 +77,26 @@ export function renderWorkingContext(context: WorkingContext | undefined): strin
     "  directly instead of asking which one. Anything naming a different email replaces the",
     "  focus. Still call get_emails first when you need its current status.",
     "",
-    renderCustomerProfile(context.customer),
+    renderContactProfile(context.contact),
   );
   return lines.join("\n");
 }
 
 /**
- * Recall: the focused email identifies a customer, and the customer identifies a profile in the
+ * Recall: the focused email identifies a contact, and the contact identifies a profile in the
  * Store. Deliberately not a tool the model has to remember to call — long-term memory is only
  * useful if it's already there when the draft is being written.
  */
 async function recallFor(
   emailId: string,
   store: BaseStore | undefined,
-): Promise<{ label?: string; customer?: CustomerProfile }> {
+): Promise<{ label?: string; contact?: ContactProfile }> {
   if (!store) return {};
   const email = (await loadEmails(store)).find((e) => e.id === emailId);
   if (!email) return {};
   return {
     label: `"${email.subject}" from ${email.from.name}`,
-    customer: await loadProfile(store, email.from.email),
+    contact: await loadProfile(store, email.from.email),
   };
 }
 
@@ -129,7 +129,7 @@ export async function recallMemory(
       text.includes(email.from.name.toLowerCase()) ||
       text.includes(email.from.email.toLowerCase()),
   );
-  if (!mentioned || mentioned.from.email === current.customer?.email) return {};
+  if (!mentioned || mentioned.from.email === current.contact?.email) return {};
 
   return {
     workingContext: {
@@ -137,7 +137,7 @@ export async function recallMemory(
       emailLabel: `"${mentioned.subject}" from ${mentioned.from.name}`,
       // Focus moved to a different person, so any draft held for the previous one is stale.
       lastDraft: mentioned.id === current.emailId ? current.lastDraft : undefined,
-      customer: await loadProfile(config.store, mentioned.from.email),
+      contact: await loadProfile(config.store, mentioned.from.email),
     },
   };
 }
@@ -185,7 +185,7 @@ export async function trackWorkingContext(
       }
     }
     // The model just wrote to long-term memory, so the cached copy below is now behind.
-    if (call.name === "remember_customer") profileChanged = true;
+    if (call.name === "remember_contact") profileChanged = true;
   }
 
   const focusMoved = emailId !== current.emailId;
@@ -198,14 +198,14 @@ export async function trackWorkingContext(
   const recalled =
     focusMoved || profileChanged
       ? await recallFor(emailId!, config.store)
-      : { label: current.emailLabel, customer: current.customer };
+      : { label: current.emailLabel, contact: current.contact };
 
   return {
     workingContext: {
       emailId,
       emailLabel: recalled.label ?? current.emailLabel,
       lastDraft,
-      customer: recalled.customer,
+      contact: recalled.contact,
     },
   };
 }

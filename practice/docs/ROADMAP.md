@@ -37,8 +37,9 @@ For what's already built, see [ARCHITECTURE.md](./ARCHITECTURE.md).
         old turns summarized when building the model's input (stored history untouched, so the
         UI keeps its scrollback), plus a `workingContext` carry-over (focused email + last
         draft) that survives that trimming
-  - [x] Long-term memory — per-customer profiles in the cross-thread Store
-        (`agent/src/memory/customer-profile.ts`): `remember_customer` writes durable facts/tone,
+  - [x] Long-term memory — per-contact profiles (students, parents, colleagues) in the
+        cross-thread Store
+        (`agent/src/memory/contact-profile.ts`): `remember_contact` writes durable facts/tone,
         `recall_memory` loads them before the model so drafts in a *new* thread already know
         what was settled in an old one
   - [ ] Guardrails (PII redaction, tone/compliance check)

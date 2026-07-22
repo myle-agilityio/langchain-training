@@ -100,7 +100,7 @@ The graph is wired to CopilotKit with four email tools plus the starter's dashbo
 - `compose_reply` — pauses via LangGraph's raw `interrupt()` for approval; returns the
   decision but doesn't apply it (see below, and the HITL note)
 - `search_knowledge_base` — keyword search over a mock KB
-- `remember_customer` — writes a durable fact/tone to that customer's long-term profile
+- `remember_contact` — writes a durable fact/tone to that contact's long-term profile
 - `generate_a2ui` — starter's dashboard tool, untouched
 
 `emails` still isn't in the state schema (see "Shared inbox" below), so the graph's state is
@@ -200,32 +200,36 @@ email read set the focus, "Draft a reply to it." resolved the pronoun and record
 *while the run was paused at the approval interrupt*, and "Three sentences, no apology"
 returned the same draft with the apology removed rather than a fresh one.
 
-## Long-term memory: customer profiles (`agent/src/memory/customer-profile.ts`)
+## Long-term memory: contact profiles (`agent/src/memory/contact-profile.ts`)
 
-Short-term memory dies with the thread, so anything learned while replying to a customer is
-gone when the next conversation opens. A profile keyed by the customer's **email address**
+Short-term memory dies with the thread, so anything learned while replying to a student is
+gone when the next conversation opens. A profile keyed by the contact's **email address**
 outlives both the thread and the individual email — that's the axis long-term memory adds.
 
-- **Storage** — LangGraph's cross-thread `Store`, namespace `["customer_profiles"]`, one item
-  per customer: `{ email, name, tone?, facts[], updatedAt }`. Facts are capped at 8 and
-  FIFO-trimmed: a profile is injected into every model call for that customer, so an unbounded
+"Contact", not "student", because the sender often isn't the student: a parent writes about
+their child, so a profile keyed off the parent's address is about the parent, with the child
+as a remembered fact.
+
+- **Storage** — LangGraph's cross-thread `Store`, namespace `["contact_profiles"]`, one item
+  per contact: `{ email, name, tone?, facts[], updatedAt }`. Facts are capped at 8 and
+  FIFO-trimmed: a profile is injected into every model call for that contact, so an unbounded
   list would quietly undo the context savings from history.ts.
-- **Writing** — the `remember_customer` tool, called explicitly by the model. Deliberately not
-  an automatic post-reply writer: only the model can tell a durable fact ("on the Team plan",
-  "wants no apologies") from a passing detail of one message, and the tool call stays visible
-  in the transcript.
+- **Writing** — the `remember_contact` tool, called explicitly by the model. Deliberately not
+  an automatic post-reply writer: only the model can tell a durable fact ("Grade 12, Period 3",
+  "gets extended time on assessments") from a passing detail of one message, and the tool call
+  stays visible in the transcript.
 - **Reading** — automatic, never a tool. `recall_memory` runs before the model each turn and
   loads the profile for whoever the user's message names; `track_context` refreshes it when
-  focus moves or a new fact is written. It lands in `workingContext.customer` (a cache of the
+  focus moves or a new fact is written. It lands in `workingContext.contact` (a cache of the
   Store, not the source of truth) and renders into the system prompt.
 
 **Two bugs this shook out, both worth keeping in mind:**
 
-1. **Never let the model mint the identity key.** The first version took the customer's address
+1. **Never let the model mint the identity key.** The first version took the contact's address
    as a tool argument. The model confidently invented `lilla.douglas-fisher@example.com` for a
-   customer whose real address is `lilla_douglas-fisher@hotmail.com` — the write succeeded, and
+   sender whose real address is `lilla_douglas-fisher@hotmail.com` — the write succeeded, and
    since recall looks profiles up by the *real* sender address, that memory was unreachable
-   forever. `remember_customer` now takes an **email id** and resolves the address from the
+   forever. `remember_contact` now takes an **email id** and resolves the address from the
    inbox, matching how every other tool here addresses things.
 2. **Recall has to happen before the model call that needs it.** Originally focus (and so
    recall) was established only by `track_context`, from the model's tool calls — but for a

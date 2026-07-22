@@ -7,12 +7,12 @@ export {
   createSummarizeHistory,
 } from "./history.js";
 export {
-  CustomerProfileSchema,
-  type CustomerProfile,
+  ContactProfileSchema,
+  type ContactProfile,
   loadProfile,
-  renderCustomerProfile,
-  remember_customer,
-} from "./customer-profile.js";
+  renderContactProfile,
+  remember_contact,
+} from "./contact-profile.js";
 export {
   WorkingContextSchema,
   type WorkingContext,
