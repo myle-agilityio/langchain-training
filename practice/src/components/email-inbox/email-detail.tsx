@@ -20,10 +20,11 @@ interface EmailDetailProps {
   isLoading: boolean;
   onSendReply: (id: string, subject: string, body: string) => void;
   onAskAgent: (email: Email) => void;
-  // True while the agent is drafting OR paused awaiting approval — either way a new
-  // draft can't be started. agentBusyLabel says which state we're in.
+  // True while the agent is running at all, or paused awaiting approval — either way a new
+  // draft can't be started. Deliberately just disables the button without relabelling it:
+  // the agent runs for plenty of reasons that aren't drafting (answering a question, a
+  // triage pass), so a "Drafting…" label would routinely be a lie.
   agentBusy: boolean;
-  agentBusyLabel: string;
 }
 
 export function EmailDetail({
@@ -32,7 +33,6 @@ export function EmailDetail({
   onSendReply,
   onAskAgent,
   agentBusy,
-  agentBusyLabel,
 }: EmailDetailProps) {
   const [composing, setComposing] = useState(false);
 
@@ -144,7 +144,7 @@ export function EmailDetail({
               disabled={agentBusy}
             >
               <Sparkles className="h-4 w-4" />
-              {agentBusy ? agentBusyLabel : "Ask AI to draft"}
+              Ask AI to draft
             </Button>
             <Button onClick={() => setComposing(true)}>Compose reply</Button>
           </div>

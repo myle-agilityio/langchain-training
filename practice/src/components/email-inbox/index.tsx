@@ -64,7 +64,6 @@ export function EmailInbox() {
   // second interrupt on top of the one still awaiting a decision.
   const awaitingApproval = (agent.pendingInterrupts?.length ?? 0) > 0;
   const agentBusy = agent.isRunning || awaitingApproval;
-  const agentBusyLabel = agent.isRunning ? "Drafting…" : "Awaiting approval…";
 
   return (
     <div className="h-full flex">
@@ -85,7 +84,6 @@ export function EmailInbox() {
           onSendReply={sendManualReply}
           onAskAgent={askAgentToReply}
           agentBusy={agentBusy}
-          agentBusyLabel={agentBusyLabel}
         />
       </div>
     </div>
