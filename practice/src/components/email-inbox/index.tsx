@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAgent, useCopilotKit } from "@copilotkit/react-core/v2";
+import { useAgent, useAgentContext, useCopilotKit } from "@copilotkit/react-core/v2";
 import type { Email } from "@/types/email";
 import { useSharedInbox } from "@/hooks/use-shared-inbox";
 import { InboxList } from "./inbox-list";
@@ -21,6 +21,20 @@ export function EmailInbox() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const selected = emails.find((e) => e.id === selectedId) ?? null;
+
+  // Publish which email the teacher currently has open as readable agent context, so a bare
+  // "reply this email" resolves without them pasting an id. prepareContext (the first graph
+  // node) folds this into the model's prompt each turn; the system prompt says how to use it.
+  // Re-registers whenever the selection changes; sends a plain sentence when nothing is open.
+  useAgentContext({
+    description:
+      "The email the teacher currently has open in the inbox UI. When they say 'this email', " +
+      "'this one', 'reply this', or similar without naming a person, they mean this email — " +
+      "use its id.",
+    value: selected
+      ? { id: selected.id, from: selected.from.name, subject: selected.subject }
+      : "No email is currently open in the inbox.",
+  });
 
   const selectEmail = (email: Email) => {
     setSelectedId(email.id);

@@ -100,6 +100,13 @@ ${RESPONSE_FORMAT}
   counts/status/unread emails from an earlier get_emails result in this conversation —
   always call it again first.
 
+  The context above may say which email the teacher currently has open in the inbox. When
+  they say "this email", "this one", "reply this", "it", or similar without naming a person
+  or subject, they mean that open email — act on its id directly instead of asking which one.
+  (If the working-context block below already names a focused email, that takes precedence —
+  it's the one you were just working on.) If no email is open and they haven't named one,
+  then ask which.
+
   Classification has four fields, all required together:
   - topic: why they wrote — question (stuck on the material), submission (turning work in),
     review_request (asking for feedback before it's graded), grade_dispute (contesting a mark
