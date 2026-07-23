@@ -216,3 +216,25 @@ cpk-web-inspector {
 .thin-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: var(--muted-foreground);
 }
+
+/*
+ * Threads-drawer scrollbar. The drawer is <copilotkit-threads-drawer>, a custom element with a
+ * shadow root, so ordinary selectors — and ::-webkit-scrollbar in particular — can't reach its
+ * scroll container: pseudo-elements don't cross a shadow boundary. Per CopilotKit's component
+ * reference the drawer exposes its internals as CSS Parts (`root`, `list`, `header`, `footer`,
+ * …), and ::part() is the one selector that DOES cross the boundary.
+ *
+ * `scrollbar-color`/`scrollbar-width` are standard, inherited properties, so setting them on the
+ * outer `root` part both styles root's own scrollbar and cascades down to whichever nested
+ * element actually scrolls — tracking the theme through --border (thumb) on transparent (track),
+ * matching the inbox's .thin-scrollbar. `!important` is deliberate, not cargo-cult: it's needed
+ * to beat the drawer's own self-contained scrollbar rule living inside the shadow tree.
+ *
+ * Honored by Chromium 121+, Edge, and Firefox. Older Chromium supports only ::-webkit-scrollbar,
+ * which can't cross the shadow boundary at all, so the drawer keeps its default there.
+ */
+copilotkit-threads-drawer::part(root),
+copilotkit-threads-drawer::part(list) {
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--border) transparent !important;
+}
