@@ -54,6 +54,13 @@ These are process rules for how we collaborate on this project, not code style p
    prompt, check it isn't already covered by a tool description or another block. If two places
    would say the same thing, cut one — the tool schema/description is usually the canonical home
    for anything about that tool.
+10. **Tear down anything you started to verify.** Verifying often means spinning up a
+    background process — a `langgraph dev` agent (port 8123), a Next dev server (port 3000), a
+    monitor, a probe script. Stop it once you have your answer. An orphaned server holds its
+    port and collides with the next run or the user's own `npm run dev`, and background
+    processes pile up invisibly until something mysteriously won't start. If you started it,
+    you kill it — free the ports and delete any temp probe scripts; don't leave them for the
+    user to hunt down.
 
 ## Definition of done (per task/day)
 
