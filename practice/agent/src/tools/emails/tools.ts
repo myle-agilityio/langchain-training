@@ -102,9 +102,28 @@ export const compose_reply = tool(
     input: { id: string; subject: string; body: string },
     runtime: ToolRuntime,
   ) => {
-    if (!(await findEmail(input.id))) {
+    const target = await findEmail(input.id);
+    if (!target) {
       return new ToolMessage({
         content: `No email with id ${input.id} — call get_emails first.`,
+        tool_call_id: runtime.toolCallId,
+      });
+    }
+
+    // Triage before reply, enforced here rather than asked for in the prompt. Both the system
+    // prompt and the "Ask AI to draft" message already say to classify first, and the model
+    // skipped it anyway in 3 of 5 measured runs — classification is the one step that doesn't
+    // visibly advance "draft a reply", so it's the one that gets dropped (made worse by
+    // parallel_tool_calls: false, which turns this into four separate chances to shortcut).
+    // Returning a corrective ToolMessage makes the model classify and call back, the same
+    // self-correcting pattern as the unknown-id case above.
+    if (!target.classification) {
+      return new ToolMessage({
+        content:
+          `Email ${input.id} has no classification yet, and every email must be triaged ` +
+          `before it's replied to. Call manage_emails to record its classification ` +
+          `(topic + course + workType + urgency), then call compose_reply again with the ` +
+          `same draft.`,
         tool_call_id: runtime.toolCallId,
       });
     }
@@ -136,9 +155,10 @@ export const compose_reply = tool(
   {
     name: "compose_reply",
     description:
-      "Draft a reply to an email by id. This pauses for human approval before " +
-      "anything actually sends — call it as soon as the reply is ready, don't " +
-      "ask the human separately first.",
+      "Draft a reply to an email by id. The email must already be classified — record a " +
+      "classification with manage_emails first, or this will refuse. Pauses for human " +
+      "approval before anything actually sends: call it as soon as the reply is ready, " +
+      "don't ask the human separately first.",
     schema: z.object({
       id: z.string(),
       subject: z.string(),
