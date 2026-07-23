@@ -126,7 +126,25 @@ emails.
 | 2h | Guardrails (PII redaction, tone/compliance check) | ⬜ Not started |
 | 2h | Time-travel replay demo | ⬜ Not started |
 | 2h | Forked responses (two draft tones) | ⬜ Not started |
-| 2h | Handoff / sub-agents (flagged as stretch from the start) | ⬜ Not started |
+| 2h | Handoff / sub-agents (flagged as stretch from the start) | 🟡 Partially done | The compose-reply subgraph (below) is a first sub-graph composition — a deterministic pipeline entered by a `reply_to_email` tool. Not a full multi-agent handoff, but the same "graph as a node" mechanism |
+
+### Post-Phase-1: compose-reply subgraph (unplanned, ~3h)
+
+Requested directly ("create a subgraph for the compose reply process"), and it doubled as a fix
+for the reliability bug measured earlier: the model orchestrating classify → KB → draft skipped
+steps (KB 0/4, classify 2/5). Rebuilt the reply flow as a deterministic prompt-chaining subgraph
+(`agent/src/compose-reply/`, triage → research → write_draft → request_approval) composed into
+the main graph as a node; the model just calls `reply_to_email` to enter it. classify + KB now
+run 3/3.
+
+Verification earned its keep three times: a plain-LangGraph probe first confirmed a subgraph-node
+`interrupt()` propagates the CopilotKit payload to the top-level run (the whole approach hinged on
+it); then a live run surfaced a node/channel name collision (`draft` used for both) that had
+crashed the graph compile; then another surfaced an OpenAI 400 (`parallel_tool_calls` invalid on
+`withStructuredOutput`), fixed by splitting the model into tool-calling vs plain instances. None
+of these show up in a typecheck. The make-it-shorter revision path couldn't be exercised
+headlessly (it needs an approved card, i.e. CopilotKit's resume-by-new-run) and is flagged for
+browser testing.
 
 ## Reading this table
 

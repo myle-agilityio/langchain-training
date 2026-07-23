@@ -63,9 +63,9 @@ export function renderWorkingContext(context: WorkingContext | undefined): strin
       `    subject: ${context.lastDraft.subject}`,
       `    body: ${context.lastDraft.body.replace(/\n+/g, " ")}`,
       "",
-      "  When asked to change the draft ('shorter', 'less formal', 'drop the apology'), revise",
-      "  the draft above and keep everything they didn't ask you to change — don't start over.",
-      "  Call compose_reply again with the revised version.",
+      "  When asked to change the draft ('shorter', 'less formal', 'drop the apology'), call",
+      "  reply_to_email again with this email's id — the reply pipeline will revise the draft",
+      "  above, keeping everything they didn't ask you to change.",
     );
   }
 
@@ -141,13 +141,10 @@ export async function recallMemory(state: {
 /**
  * The `track_context` node: derives working context from the tool calls the model just made.
  *
- * Why derive it here rather than have the tools return `Command` state updates (the pattern
- * the rest of the repo uses): `compose_reply` pauses on `interrupt()`, and CopilotKit answers
- * that pause by starting a *fresh run* rather than replaying the tool to completion (see
- * tools.ts), so a `Command` returned after the interrupt would never land. Deriving from the
- * AI message records the draft the moment the model proposes it — before the approval pause,
- * which is exactly when a later "make it shorter" needs it. Hence this node's position:
- * between the model and the tools, not after them.
+ * The draft itself is recorded by the compose-reply subgraph's draft node, not here — that
+ * runs downstream of this node and writes `lastDraft` straight into workingContext. This node's
+ * job is just to move focus: a `reply_to_email` call or a single-email `manage_emails` patch
+ * means "this one is what we're on now".
  */
 export async function trackWorkingContext(state: {
   messages: BaseMessage[];
@@ -159,18 +156,15 @@ export async function trackWorkingContext(state: {
   const current = state.workingContext ?? {};
   let emailId = current.emailId;
   let lastDraft = current.lastDraft;
-  let draftedNow = false;
   let profileChanged = false;
 
   for (const call of last.tool_calls) {
     const args = (call.args ?? {}) as Record<string, unknown>;
-    if (call.name === "compose_reply" && typeof args.id === "string") {
+    // A reply request moves focus to that email — but doesn't clear lastDraft, so a repeat
+    // reply_to_email on the SAME email (a "make it shorter") keeps the prior draft for the
+    // subgraph to revise.
+    if (call.name === "reply_to_email" && typeof args.id === "string") {
       emailId = args.id;
-      lastDraft = {
-        subject: String(args.subject ?? ""),
-        body: String(args.body ?? ""),
-      };
-      draftedNow = true;
     }
     if (call.name === "manage_emails") {
       // Only a single-email patch is a focus signal — a bulk triage pass isn't "this one".
@@ -185,10 +179,10 @@ export async function trackWorkingContext(state: {
   }
 
   const focusMoved = emailId !== current.emailId;
-  if (!focusMoved && !draftedNow && !profileChanged) return {};
+  if (!focusMoved && !profileChanged) return {};
 
   // A draft only ever belongs to the email it was written for, so moving focus drops it.
-  if (!draftedNow && focusMoved) lastDraft = undefined;
+  if (focusMoved) lastDraft = undefined;
 
   // Re-read from the Store only when something could have changed — otherwise reuse the cache.
   const recalled =
