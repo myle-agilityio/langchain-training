@@ -53,17 +53,15 @@ export function EmailInbox() {
     });
   };
 
-  // Hand the selected email to the agent as a normal chat turn — the system
-  // prompt already tells it to classify, search the KB, then call compose_reply,
-  // so we just point it at this specific email (id + headers) rather than making
-  // it call get_emails and guess which one we mean.
+  // Hand the selected email to the agent as a normal chat turn. The reply_to_email tool runs
+  // the whole pipeline (classify → research → draft → approval), so we just name the email and
+  // ask for a reply rather than spelling out the steps.
   const askAgentToReply = (email: Email) => {
     agent.addMessage({
       role: "user",
       id: crypto.randomUUID(),
       content:
-        `Please analyze and draft a reply to this email for my approval — classify it, ` +
-        `search the knowledge base for anything relevant, then compose the reply.\n\n` +
+        `Draft a reply to this email for my approval.\n\n` +
         `Email id: ${email.id}\n` +
         `From: ${email.from.name} <${email.from.email}>\n` +
         `Subject: ${email.subject}`,

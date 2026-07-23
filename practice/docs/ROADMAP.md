@@ -46,9 +46,15 @@ For what's already built, see [ARCHITECTURE.md](./ARCHITECTURE.md).
         cross-thread Store into real Postgres tables (`agent/src/db/`, `src/lib/db.ts`).
         Graph checkpoints stay with LangGraph, because `langgraph dev` overwrites any
         compiled-in checkpointer/store — see ARCHITECTURE.md's "Persistence" section
+  - [x] Compose-reply subgraph (`agent/src/compose-reply/`) — the reply flow moved from
+        model-orchestrated tool calls to a deterministic prompt-chaining subgraph
+        (triage → research → write_draft → request_approval), composed into the main graph as a
+        node and entered via a `reply_to_email` tool. Makes classify + KB-search always run
+        (they were being skipped) and keeps the same approval card. See ARCHITECTURE.md's
+        "Compose-reply subgraph" section
   - [ ] Guardrails (PII redaction, tone/compliance check)
   - [ ] Time-travel replay demo
   - [ ] Forked responses (two draft tones)
-  - [ ] Handoff / sub-agents (stretch)
+  - [ ] Handoff / sub-agents (stretch) — partially covered by the compose-reply subgraph above
 
 This file is updated as each phase/task ships, per the docs rule in CLAUDE.md.

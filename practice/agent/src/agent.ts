@@ -1,16 +1,17 @@
-import { ChatOpenAI } from "@langchain/openai";
 import { AIMessage, type BaseMessage } from "@langchain/core/messages";
 import { CopilotKitStateSchema } from "@copilotkit/sdk-js/langgraph";
 import { StateSchema, StateGraph, START, END } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 
+import { model, plainModel } from "./model.js";
 import {
   get_emails,
   manage_emails,
-  compose_reply,
   search_knowledge_base,
+  CLASSIFICATION_GUIDE,
 } from "./tools/emails/index.js";
 import { generate_a2ui } from "./a2ui_dynamic_schema.js";
+import { composeReplySubgraph, reply_to_email } from "./compose-reply/index.js";
 import {
   prepareContext,
   createCallModel,
@@ -38,24 +39,22 @@ const AgentStateSchema = new StateSchema({
   workingContext: WorkingContextSchema,
 });
 
-// gpt-4o-mini everywhere, per the practice plan's recommendation. One constant rather than a
-// literal per call site so the whole practice moves models in one edit.
-const MODEL = "gpt-4o-mini";
-
-const model = new ChatOpenAI({
-  model: MODEL,
-  modelKwargs: { parallel_tool_calls: false },
-});
-
-// Kept as its own instance even though it's the same model as the triage one: summarizing old
-// turns is a mechanical rewrite on the critical path of every long-thread turn, so it's the
-// first thing that would be pinned to something cheaper/faster if this ever needs tuning.
-const summarizerModel = new ChatOpenAI({ model: MODEL });
-
-const tools = [
+// Tools the MODEL may call. reply_to_email is here so the model can request a reply, but it is
+// deliberately absent from `executableTools` below: the router routes a reply_to_email call into
+// the compose-reply subgraph instead of executing it as a plain tool.
+const modelTools = [
   get_emails,
   manage_emails,
-  compose_reply,
+  search_knowledge_base,
+  remember_contact,
+  generate_a2ui,
+  reply_to_email,
+];
+
+// Tools the ToolNode actually runs. Same set minus reply_to_email (handled by the subgraph).
+const executableTools = [
+  get_emails,
+  manage_emails,
   search_knowledge_base,
   remember_contact,
   generate_a2ui,
@@ -109,24 +108,8 @@ ${RESPONSE_FORMAT}
   it's the one you were just working on.) If no email is open and they haven't named one,
   then ask which.
 
-  Classification has four fields, all required together:
-  - topic: why they wrote — question (stuck on the material), submission (turning work in),
-    review_request (asking for feedback before it's graded), grade_dispute (contesting a mark
-    already given), absence, scheduling, admin (staff/paperwork), or complex. Use complex only
-    when an email genuinely spans several topics and picking one would lose something the
-    teacher must act on.
-  - course: math_11, math_12, or none. Infer it from the mathematics referenced — logarithms,
-    trig identities, rational functions are Grade 11; limits, derivatives, related rates,
-    optimization, integrals are Grade 12 — not just from an explicit grade mention.
-  - workType: practice, exercise, homework, quiz, test, project, or none.
-  - urgency: high if something is time-bound within ~48 hours or a relationship is at stake —
-    a missed or imminent assessment, an absence affecting a class today, a hard administrative
-    deadline, or an escalating parent. medium if it needs action this week. low if it's a
-    general question with no deadline attached.
-
-  Replies go to teenagers and their parents, so drafts should be warm, plain, and specific
-  about next steps and dates. Never promise a grade change, a waived penalty, or a re-grade
-  outcome in a draft — offer the process instead.
+  When you classify emails (e.g. "classify all unread"), fill all four fields together:
+${CLASSIFICATION_GUIDE}
 
   Each tool's own description says when and how to use it; don't re-derive that here. The only
   thing to add: for remember_contact, what you already know about a contact is shown below —
@@ -134,17 +117,22 @@ ${RESPONSE_FORMAT}
 `;
 
 /**
- * Backend tool calls loop back through the model; anything else ends the run. Frontend tool
- * calls never reach here as tool calls — `call_model` (via CopilotKit's `afterModel`) has
- * already stripped them off the message and stashed them for `finalize` to restore, precisely
- * so this router sends the run to the browser instead of looking for a tool the graph
- * doesn't have.
+ * Routes after the model. A `reply_to_email` call goes to the compose-reply subgraph; any other
+ * backend tool call loops through the `tools` node; anything else ends the run. `reply_to_email`
+ * is never executed as a plain tool — it's purely a signal to enter the subgraph.
+ *
+ * Frontend tool calls never reach here as tool calls: `call_model` (via CopilotKit's
+ * `afterModel`) has already stripped them off and stashed them for `finalize` to restore, so
+ * this router sends the run to the browser instead of looking for a tool the graph doesn't have.
+ * With `parallel_tool_calls: false` the model makes at most one call per turn, so a
+ * reply_to_email call never coexists with another backend tool call.
  */
 function routeAfterModel(state: { messages: BaseMessage[] }) {
   const last = state.messages[state.messages.length - 1];
-  const hasBackendToolCalls =
-    AIMessage.isInstance(last) && (last.tool_calls?.length ?? 0) > 0;
-  return hasBackendToolCalls ? "tools" : "finalize";
+  if (!AIMessage.isInstance(last)) return "finalize";
+  const calls = last.tool_calls ?? [];
+  if (calls.some((c) => c.name === "reply_to_email")) return "compose_reply";
+  return calls.length > 0 ? "tools" : "finalize";
 }
 
 // Phase 2: an explicit StateGraph rather than `createAgent`. Same ReAct shape, but each step
@@ -159,7 +147,7 @@ export const graph = new StateGraph(AgentStateSchema)
   .addNode("prepare_context", prepareContext)
   // Summarizing costs an LLM call, so it sits outside the tool loop: once per user turn,
   // and a no-op entirely until the thread is actually long.
-  .addNode("manage_memory", createSummarizeHistory({ model: summarizerModel }))
+  .addNode("manage_memory", createSummarizeHistory({ model: plainModel }))
   // Long-term recall runs before the model so a profile is in the prompt for the draft this
   // turn produces, not the one after it (see memory/working-context.ts).
   .addNode("recall_memory", recallMemory)
@@ -167,7 +155,7 @@ export const graph = new StateGraph(AgentStateSchema)
     "call_model",
     createCallModel({
       model,
-      tools,
+      tools: modelTools,
       // Both blocks are rebuilt per call, so they always reflect the latest focus/draft/summary.
       systemPrompt: (state) =>
         SYSTEM_PROMPT +
@@ -177,16 +165,28 @@ export const graph = new StateGraph(AgentStateSchema)
     }),
   )
   .addNode("track_context", trackWorkingContext)
-  .addNode("tools", new ToolNode(tools))
+  .addNode("tools", new ToolNode(executableTools))
+  // The compose-reply subgraph, composed directly as a node so its approval interrupt propagates
+  // to this run (see compose-reply/index.ts). A reply_to_email call routes here instead of to
+  // `tools`; the pipeline classifies, researches, drafts, and raises the interrupt.
+  .addNode("compose_reply", composeReplySubgraph)
   .addNode("finalize", restoreFrontendToolCalls)
   .addEdge(START, "prepare_context")
   .addEdge("prepare_context", "manage_memory")
   .addEdge("manage_memory", "recall_memory")
   .addEdge("recall_memory", "call_model")
-  // track_context sits between the model and the tools so a draft is recorded *before*
-  // compose_reply's approval pause rather than after it (see memory/working-context.ts).
+  // track_context sits between the model and the tools so a single-email focus is recorded
+  // before any downstream step (see memory/working-context.ts).
   .addEdge("call_model", "track_context")
-  .addConditionalEdges("track_context", routeAfterModel, ["tools", "finalize"])
+  .addConditionalEdges("track_context", routeAfterModel, [
+    "tools",
+    "compose_reply",
+    "finalize",
+  ])
   .addEdge("tools", "call_model")
+  // On a successful draft the subgraph pauses at its interrupt, so this edge isn't traversed
+  // until resume (a fresh CopilotKit run). It only fires when triage found no email — then the
+  // subgraph END returns here with an error ToolMessage the model can react to.
+  .addEdge("compose_reply", "call_model")
   .addEdge("finalize", END)
   .compile();

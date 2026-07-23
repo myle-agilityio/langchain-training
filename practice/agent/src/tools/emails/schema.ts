@@ -53,6 +53,25 @@ export const EmailClassificationSchema = z.object({
 });
 export type EmailClassification = z.infer<typeof EmailClassificationSchema>;
 
+// The human-facing rules for filling the four fields above. Co-located with the schema so the
+// enums and how to choose among them live together. Shared by both classification paths — the
+// main agent's prompt (for bulk "classify all" via manage_emails) and the compose-reply
+// subgraph's deterministic triage node — so the guidance is written once, per CLAUDE.md rule 9.
+export const CLASSIFICATION_GUIDE = `
+  - topic: why they wrote — question (stuck on the material), submission (turning work in),
+    review_request (asking for feedback before it's graded), grade_dispute (contesting a mark
+    already given), absence, scheduling, admin (staff/paperwork), or complex. Use complex only
+    when an email genuinely spans several topics and picking one would lose something the
+    teacher must act on.
+  - course: math_11, math_12, or none. Infer it from the mathematics referenced — logarithms,
+    trig identities, rational functions are Grade 11; limits, derivatives, related rates,
+    optimization, integrals are Grade 12 — not just from an explicit grade mention.
+  - workType: practice, exercise, homework, quiz, test, project, or none.
+  - urgency: high if something is time-bound within ~48 hours or a relationship is at stake —
+    a missed or imminent assessment, an absence affecting a class today, a hard administrative
+    deadline, or an escalating parent. medium if it needs action this week. low if it's a
+    general question with no deadline attached.`;
+
 export const EmailReplySchema = z.object({
   subject: z.string(),
   body: z.string(),

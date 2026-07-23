@@ -27,11 +27,16 @@ What's actually built, as of **Phase 2 in progress (Day 4: StateGraph migration 
 │   │   ├── memory/                   # Short-term memory: history trimming/summary + working context
 │   │   ├── a2ui.ts                   # A2UI operation helpers
 │   │   ├── a2ui_dynamic_schema.ts    # Dynamic-schema A2UI tool (generated dashboards)
+│   │   ├── model.ts                  # Shared model instances (tool-calling + plain)
+│   │   ├── compose-reply/            # Compose-reply subgraph (reply pipeline) — see below
+│   │   │   ├── state.ts              # Subgraph state channels
+│   │   │   ├── nodes.ts              # triage / research / draft / approval + reply_to_email tool
+│   │   │   └── index.ts              # Assembles + compiles the subgraph
 │   │   └── tools/emails/             # Email domain — wired into agent.ts
-│   │       ├── schema.ts             # Email / classification / reply zod schemas
-│   │       ├── seed-data.ts          # Generated mock inbox (14 emails)
+│   │       ├── schema.ts             # Email / classification / reply zod schemas + CLASSIFICATION_GUIDE
+│   │       ├── seed-data.ts          # Generated mock inbox
 │   │       ├── knowledge-base.ts     # Mock KB + search_knowledge_base's keyword search
-│   │       ├── tools.ts              # get_emails, manage_emails, compose_reply, search_knowledge_base
+│   │       ├── tools.ts              # get_emails, manage_emails, search_knowledge_base
 │   │       └── index.ts              # Barrel export
 │   ├── scripts/
 │   │   └── generate-seed-emails.ts   # Regenerates seed-data.ts — see below
@@ -50,7 +55,9 @@ What's actually built, as of **Phase 2 in progress (Day 4: StateGraph migration 
 
 ```
 START → prepare_context → manage_memory → recall_memory → call_model → track_context ⇄ tools
-                                                              ↑______________|
+                                                              ↑                ↓
+                                                              |         compose_reply (subgraph)
+                                                              |________________|
                                                                              ↓
                                                                          finalize → END
 ```
@@ -60,9 +67,49 @@ START → prepare_context → manage_memory → recall_memory → call_model →
 - `recall_memory` — loads the profile of whoever the user's message is about (long-term memory).
 - `call_model` — the model call, plus splitting frontend tool calls back out of the response.
 - `track_context` — records what the conversation is working on, from the tool calls just made.
-- `tools` — LangGraph's prebuilt `ToolNode` over the five backend tools.
+- `tools` — LangGraph's prebuilt `ToolNode` over the backend tools.
+- `compose_reply` — the compose-reply **subgraph**, entered when the model calls `reply_to_email`
+  (see below).
 - `finalize` — restores the intercepted frontend tool calls onto the AI message so the browser
   executes them.
+
+The router after `track_context` sends a `reply_to_email` call to the `compose_reply` subgraph,
+any other backend tool call to `tools`, and everything else to `finalize`. `reply_to_email` is
+never executed as a plain tool — it's purely the signal to enter the subgraph.
+
+### Compose-reply subgraph (`agent/src/compose-reply/`)
+
+Replying used to be the model orchestrating `manage_emails → search_knowledge_base →
+compose_reply` as separate tool calls — and it skipped steps (measured: KB search 0/4 on a bare
+request, classify 2/5 before a guard). That's now a deterministic subgraph, composed into the
+main graph as a single node, following LangGraph's prompt-chaining pattern:
+
+```
+triage ──(email found)──▶ research ──▶ write_draft ──▶ request_approval ──▶ (interrupt)
+   └────(not found)──────────────────────────────────────────────────────▶ END
+```
+
+- `triage` — loads the email and classifies it if unclassified (deterministic — the step the
+  model used to skip). Leaves `emailId` empty → END if the id is unknown, answering the tool
+  call with an error so the model can recover.
+- `research` — always searches the knowledge base for relevant policy.
+- `write_draft` — writes the reply (or revises the prior draft for a "make it shorter"), grounded
+  in the classification + KB; records it in `workingContext.lastDraft`.
+- `request_approval` — raises the CopilotKit approval interrupt (same payload the old
+  `compose_reply` tool used, so `EmailReplyCard` is unchanged).
+
+**Why the pipeline ends at the interrupt** rather than applying the send in a later node:
+CopilotKit resumes an interrupt by starting a *new* run, not by replaying the graph, so any node
+after the interrupt would be dead code. The send is applied by the frontend (`EmailReplyCard` →
+`PATCH /api/emails`), as before. Verified against a running server: an unclassified email replied
+to via `reply_to_email` comes back classified 3/3, with the approval interrupt raised 3/3 carrying
+the `compose_reply` action — the interrupt propagates from inside the subgraph to the top-level
+run because a subgraph composed as a node shares the parent's checkpointer.
+
+**Two model instances** (`agent/src/model.ts`): the main `model` binds `parallel_tool_calls:
+false` for the ReAct loop; the subgraph's classify/draft calls use `plainModel` (no tool kwargs),
+because `withStructuredOutput` sends a `response_format` rather than tools and OpenAI 400s if
+`parallel_tool_calls` is set without tools.
 
 It's the same ReAct loop `createAgent` produced, but every step is a node we own — which is
 what the rest of Phase 2 needs, since memory, guardrails and agent handoff are all "put
@@ -93,13 +140,14 @@ in-graph); and `stream_mode: ["messages"]` still emits token chunks, so chat tex
 
 ## Current demo
 
-The graph is wired to CopilotKit with four email tools plus the starter's dashboard tool:
+The graph is wired to CopilotKit with these tools:
 
 - `get_emails` — reads the shared inbox
 - `manage_emails` — patches status/classification by id; can't set `replied`/`flagged_for_followup`
-- `compose_reply` — pauses via LangGraph's raw `interrupt()` for approval; returns the
-  decision but doesn't apply it (see below, and the HITL note)
 - `search_knowledge_base` — keyword search over a mock KB
+- `reply_to_email` — signals the model wants to reply; routes into the compose-reply subgraph
+  (which classifies, researches, drafts, and raises the approval interrupt — see "Graph shape").
+  Never executed as a plain tool.
 - `remember_contact` — writes a durable fact/tone to that contact's long-term profile
 - `generate_a2ui` — starter's dashboard tool, untouched
 
@@ -110,10 +158,11 @@ Frontend: `use-email-agent.tsx` + `email-reply-card.tsx` render an editable
 Approve/Reject card via `useHumanInTheLoop`. Verified end-to-end in a real browser: draft
 → card renders → approve → backend state confirmed `status: "replied"`.
 
-**HITL interrupt — why raw `interrupt()`, not `copilotKitInterrupt`.** `compose_reply` calls
-LangGraph's `interrupt()` directly (with CopilotKit's `__copilotkit_interrupt_value__` /
-`__copilotkit_messages__` payload shape so the runtime + frontend still recognize the
-`compose_reply` action). We do **not** use `@copilotkit/sdk-js`'s `copilotKitInterrupt`
+**HITL interrupt — why raw `interrupt()`, not `copilotKitInterrupt`.** The subgraph's
+`request_approval` node (`compose-reply/nodes.ts`) calls LangGraph's `interrupt()` directly
+(with CopilotKit's `__copilotkit_interrupt_value__` / `__copilotkit_messages__` payload shape so
+the runtime + frontend still recognize the `compose_reply` action — the action name is kept even
+though it's no longer a tool, because the frontend card binds to it). We do **not** use `@copilotkit/sdk-js`'s `copilotKitInterrupt`
 helper: on langgraph 1.4.x, `interrupt()` pauses by *throwing* a `GraphInterrupt`, and that
 helper wraps the call in a `try/catch` that swallows it and rethrows as
 `CopilotKitMisuseError` ("Failed to create interrupt: …"), so the run errors instead of

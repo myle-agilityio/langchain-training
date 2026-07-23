@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { tool, type ToolRuntime } from "@langchain/core/tools";
-import { ToolMessage, AIMessage } from "@langchain/core/messages";
-import { interrupt } from "@langchain/langgraph";
+import { ToolMessage } from "@langchain/core/messages";
 
 import { EmailClassificationSchema } from "./schema.js";
 import { searchKnowledgeBase } from "./knowledge-base.js";
-import { countsByStatus, findEmail, loadEmails, patchEmail } from "./store.js";
+import { countsByStatus, loadEmails, patchEmail } from "./store.js";
+import { debug } from "../../debug.js";
 
 // These tools no longer take the LangGraph store from `runtime`: the inbox lives in Postgres
 // and store.ts reaches it directly (see ../../db/index.ts).
@@ -58,7 +58,7 @@ export const manage_emails = tool(
         }),
       ),
     );
-
+    debug(`manage_emails: ${input.patches.length} patch(es)`, input.patches);
     // Report unknown ids rather than silently succeeding — the model hallucinating an id it
     // never read is exactly the case this catches.
     const missed = input.patches.filter((_, i) => !applied[i]).map((p) => p.id);
@@ -79,93 +79,11 @@ export const manage_emails = tool(
   },
 );
 
-// Pauses via LangGraph's raw `interrupt()` (not LangChain's humanInTheLoopMiddleware)
-// so the frontend's useHumanInTheLoop({ name: "compose_reply" }) can render a real card.
-//
-// We deliberately do NOT use @copilotkit/sdk-js's `copilotKitInterrupt` helper: on
-// langgraph 1.4.x, `interrupt()` PAUSES by throwing a `GraphInterrupt`, and that helper
-// wraps the call in a try/catch that swallows it and rethrows as CopilotKitMisuseError
-// ("Failed to create interrupt"), so the run errors instead of pausing (langgraph's own
-// interrupt() docs warn: never catch it without rethrowing). Calling `interrupt()`
-// directly lets the GraphInterrupt propagate, so the run interrupts cleanly. We replicate
-// the helper's payload shape (__copilotkit_interrupt_value__ / __copilotkit_messages__) so
-// the CopilotKit runtime + frontend still recognize it as a `compose_reply` action.
-//
-// The resume is NOT a true LangGraph Command-resume of this call site — CopilotKit answers
-// it by starting a brand-new run with the answer spliced in as context, rather than
-// replaying this function to completion. So this tool does the pause + returns the raw
-// decision for the model's own conversational context ONLY; EmailReplyCard is the one that
-// actually applies the state change — via a PATCH to /api/emails, which writes straight to
-// the shared inbox store — the same frontend-mutates-shared-state pattern the todos demo used.
-export const compose_reply = tool(
-  async (
-    input: { id: string; subject: string; body: string },
-    runtime: ToolRuntime,
-  ) => {
-    const target = await findEmail(input.id);
-    if (!target) {
-      return new ToolMessage({
-        content: `No email with id ${input.id} — call get_emails first.`,
-        tool_call_id: runtime.toolCallId,
-      });
-    }
-
-    // Triage before reply, enforced here rather than asked for in the prompt. Both the system
-    // prompt and the "Ask AI to draft" message already say to classify first, and the model
-    // skipped it anyway in 3 of 5 measured runs — classification is the one step that doesn't
-    // visibly advance "draft a reply", so it's the one that gets dropped (made worse by
-    // parallel_tool_calls: false, which turns this into four separate chances to shortcut).
-    // Returning a corrective ToolMessage makes the model classify and call back, the same
-    // self-correcting pattern as the unknown-id case above.
-    if (!target.classification) {
-      return new ToolMessage({
-        content:
-          `Email ${input.id} has no classification yet, and every email must be triaged ` +
-          `before it's replied to. Call manage_emails to record its classification ` +
-          `(topic + course + workType + urgency), then call compose_reply again with the ` +
-          `same draft.`,
-        tool_call_id: runtime.toolCallId,
-      });
-    }
-
-    const response = interrupt({
-      __copilotkit_interrupt_value__: { action: "compose_reply", args: input },
-      __copilotkit_messages__: [
-        new AIMessage({
-          content: "",
-          tool_calls: [
-            { id: crypto.randomUUID(), name: "compose_reply", args: input },
-          ],
-        }),
-      ],
-    });
-
-    // On resume, `response` is the array of messages CopilotKit splices back in; the
-    // human's decision is the content of the last one.
-    const answer = Array.isArray(response)
-      ? response[response.length - 1]?.content
-      : response;
-
-    return new ToolMessage({
-      content:
-        typeof answer === "string" ? answer : JSON.stringify(answer ?? {}),
-      tool_call_id: runtime.toolCallId,
-    });
-  },
-  {
-    name: "compose_reply",
-    description:
-      "Draft a reply to an email by id. The email must already be classified — record a " +
-      "classification with manage_emails first, or this will refuse. Pauses for human " +
-      "approval before anything actually sends: call it as soon as the reply is ready, " +
-      "don't ask the human separately first.",
-    schema: z.object({
-      id: z.string(),
-      subject: z.string(),
-      body: z.string(),
-    }),
-  },
-);
+// The reply flow used to be a model-called `compose_reply` tool that classified, drafted, and
+// raised the approval interrupt. It's now the compose-reply subgraph (see src/compose-reply/):
+// the model calls `reply_to_email`, the graph routes into a deterministic triage → research →
+// draft → approval pipeline. The interrupt payload + the "why raw interrupt(), not
+// copilotKitInterrupt" reasoning moved to compose-reply/nodes.ts's request_approval node.
 
 export const search_knowledge_base = tool(
   (input: { query: string }) => {
@@ -187,9 +105,4 @@ export const search_knowledge_base = tool(
 // TTools' const-generic inference needs each tool passed as a literal array
 // element; spreading a pre-typed array widens it and createAgent's overloads
 // stop resolving (see agent.ts, which lists the three tools individually).
-export const email_tools = [
-  get_emails,
-  manage_emails,
-  compose_reply,
-  search_knowledge_base,
-];
+export const email_tools = [get_emails, manage_emails, search_knowledge_base];
