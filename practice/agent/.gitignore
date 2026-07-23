@@ -7,3 +7,6 @@ __pycache__/
 # LangGraph API
 .langgraph_api
 node_modules/
+
+# Local debug log (see src/debug.ts)
+debug.log
