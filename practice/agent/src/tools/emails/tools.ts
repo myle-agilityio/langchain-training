@@ -176,7 +176,9 @@ export const search_knowledge_base = tool(
     description:
       "Search school policy and course curriculum notes for context relevant to an email " +
       "(late-work and re-grade policy, absence/makeup rules, grade weighting, calculator " +
-      "rules, and the common errors in each Grade 11/12 unit) before drafting a reply.",
+      "rules, and the common errors in each Grade 11/12 unit). Call it before drafting a reply " +
+      "or answering a policy/curriculum question — deadlines, penalties, and makeup rules are " +
+      "never safe to invent, ground them here.",
     schema: z.object({ query: z.string() }),
   },
 );

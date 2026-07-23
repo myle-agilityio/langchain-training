@@ -45,6 +45,15 @@ These are process rules for how we collaborate on this project, not code style p
    add it to `.env.example` in the same change.
 8. **Typecheck/lint clean before a task is considered finished.** Don't leave a task
    "working but red."
+9. **Don't duplicate prompt text — every instruction has one home.** A tool description, the
+   system prompt, and a tool-result/`respond()` payload are all sent to the model and cost
+   tokens on every call. State each rule once, where it's most effective, and don't repeat it
+   elsewhere: tool-specific usage and constraints live in that tool's `description` (the model
+   sees them bound to the tool); cross-cutting behaviour and response style live in the system
+   prompt; a decision's follow-up lives in that decision's payload. Before adding a line to a
+   prompt, check it isn't already covered by a tool description or another block. If two places
+   would say the same thing, cut one — the tool schema/description is usually the canonical home
+   for anything about that tool.
 
 ## Definition of done (per task/day)
 

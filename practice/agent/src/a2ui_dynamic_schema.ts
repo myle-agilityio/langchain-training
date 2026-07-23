@@ -90,8 +90,8 @@ export const generate_a2ui = tool(
   {
     name: "generate_a2ui",
     description:
-      "Generate dynamic A2UI components based on the conversation. " +
-      "A secondary LLM designs the UI schema and data.",
+      "Generate a dashboard UI (metrics, charts, tables, cards) when the user asks for one. " +
+      "A secondary LLM designs the UI schema and data; rendering is automatic.",
     schema: z.object({}),
   },
 );

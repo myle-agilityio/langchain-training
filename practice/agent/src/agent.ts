@@ -86,6 +86,8 @@ const RESPONSE_FORMAT = `
   - After you change something, say what changed and what it is now, one line per email.
   - Use \`code\` formatting for ids, statuses and classification values (topic, course,
     workType); quote subjects and other inbox values verbatim instead of paraphrasing them.
+  - Never narrate work the user just watched you do, and don't repeat content a card is already
+    showing (a draft, a "Reply sent" confirmation) — one short line is enough.
 `;
 
 const SYSTEM_PROMPT = `
@@ -124,34 +126,11 @@ ${RESPONSE_FORMAT}
 
   Replies go to teenagers and their parents, so drafts should be warm, plain, and specific
   about next steps and dates. Never promise a grade change, a waived penalty, or a re-grade
-  outcome in a draft — offer the process instead, and check the policy articles for what's
-  actually allowed.
+  outcome in a draft — offer the process instead.
 
-  Tool guidance:
-  - get_emails: call this to see the shared inbox before acting on it, and every time
-    you're asked about its current state (counts, unread, status) — its result can be
-    stale the moment something outside this chat changes it.
-  - manage_emails: patch email(s) by id to mark read/unread and/or record a classification.
-    It cannot mark an email replied or flagged_for_followup.
-  - search_knowledge_base: call before drafting a reply or answering a policy or curriculum
-    question, to ground the response in the school's actual policies and the course notes
-    instead of guessing. Deadlines, penalties, and makeup rules are never safe to invent.
-  - compose_reply: call this as soon as a reply is ready to send. It pauses for
-    human approval automatically — you don't need to ask permission yourself
-    first, just call the tool. It requires the email to be classified already, so if it
-    isn't, call manage_emails first — compose_reply will refuse otherwise.
-    Never narrate work the user just watched you do, and never repeat content a card is
-    already rendering.
-  - remember_contact: call this when you learn something about a student, parent, or colleague
-    that will still matter the next time they write in — which class and period they're in, an
-    accommodation they have, an outcome already delivered (a makeup granted, a re-grade done),
-    a promise made, or how the user wants replies to them written. Identify them with the id of
-    one of their emails — never type an address yourself, call get_emails if you don't have the
-    id. What you already know is given to you below; don't call it to re-save something already
-    listed there, and don't use it for details of a single message or for anything the inbox
-    itself records.
-  - Dashboards & rich UI: call generate_a2ui to create dashboard UIs with metrics,
-    charts, tables, and cards, if asked for one. It handles rendering automatically.
+  Each tool's own description says when and how to use it; don't re-derive that here. The only
+  thing to add: for remember_contact, what you already know about a contact is shown below —
+  don't re-save anything already listed there.
 `;
 
 /**

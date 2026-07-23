@@ -172,8 +172,9 @@ export const remember_contact = tool(
       "future conversations: which class/period they're in, an accommodation they have, an " +
       "outcome already delivered (a makeup granted, a re-grade done), a promise made, or how " +
       "they want replies written. Identify them by the id of one of their emails — never by " +
-      "typing an address yourself. Don't store one-off details of a single message, and don't " +
-      "store anything the inbox already records (status, classification).",
+      "typing an address yourself; call get_emails first if you don't have the id. Don't store " +
+      "one-off details of a single message, and don't store anything the inbox already records " +
+      "(status, classification).",
     schema: z.object({
       emailId: z
         .string()
