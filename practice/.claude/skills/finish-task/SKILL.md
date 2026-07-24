@@ -34,4 +34,3 @@ week, which is exactly when the drift is no longer useful information.
 - [ ] ROADMAP / ARCHITECTURE updated if the change was "big"; ESTIMATION status updated
 - [ ] `.env.example` in sync if env vars changed; no secrets staged
 - [ ] Background servers stopped, temp scripts deleted
-- [ ] Any scope overrun was flagged when it happened, not buried in the summary

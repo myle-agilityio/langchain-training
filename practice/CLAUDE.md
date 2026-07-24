@@ -42,10 +42,6 @@ These are how we work on this project, not style preferences. Follow them on eve
    scripts. An orphaned server holds its port and collides with the user's next `npm run dev`.
 5. **Never let secrets leak.** `.env` stays untracked; a new env var goes into `.env.example` in
    the same change.
-6. **Commit only when asked**, then small and task-scoped: `Day 2: wire email classification into
-   shared state`, not one end-of-day dump.
-7. **Flag scope deviations when they happen**, not after. If a task is running past its estimate
-   or needs something outside the day's plan, say so mid-task.
 
 ## Workflows
 
