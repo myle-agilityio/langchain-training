@@ -8,6 +8,7 @@
     "dev:debug": "LOG_LEVEL=debug turbo run dev:ui dev:agent",
     "dev:ui": "next dev --turbopack",
     "dev:agent": "./scripts/run-agent.sh || scripts\\run-agent.bat",
+    "typecheck": "tsc --noEmit",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

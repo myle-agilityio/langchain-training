@@ -1,73 +1,57 @@
-# AI Email Assistant — Practice Project
+# AI Email Assistant — practice project
 
-CopilotKit + LangChain.js/LangGraph email triage assistant, built in two phases per the
-practice plan (Phase 1: reuse boilerplate, single-agent, core features. Phase 2: LangGraph
-StateGraph, memory, guardrails, multi-agent).
+CopilotKit + LangGraph.js inbox-triage assistant for a high-school math teacher, built as
+training in two phases (Phase 1: single-agent on the boilerplate. Phase 2: `StateGraph`,
+memory, guardrails, multi-agent). Scope and progress live in [docs/ROADMAP.md](./docs/ROADMAP.md).
 
-## Stack & commands
+## Commands
 
-- Next.js (App Router, TypeScript) frontend + LangGraph TypeScript agent, wired through
-  `@copilotkit/*` v2.
-- `npm run dev` — starts UI + agent together. `npm run dev:agent` / `dev:ui` to isolate one.
-- Agent lives in `agent/src/agent.ts` (`createAgent` from `langchain`); frontend CopilotKit
-  wiring is in `src/app/layout.tsx` and `src/app/api/copilotkit/[[...slug]]/route.ts`.
+- `npm run dev` — UI on :3000 + agent on :8123 together. `dev:ui` / `dev:agent` to isolate one.
+- `npm run typecheck` (Next app) and `npm run typecheck --prefix agent` — both must be clean
+  before a task is done. **The root check has 4 pre-existing errors** in untouched boilerplate
+  demo files (`src/app/declarative-generative-ui/renderers.tsx`,
+  `src/components/generative-ui/charts/bar-chart.tsx`). That is the baseline: don't add to it,
+  and don't fix them as a side quest.
+- The agent runs under `langgraphjs dev`; the graph entry is `agent/src/agent.ts:graph`,
+  registered in `agent/langgraph.json`. Both servers read the root `.env`.
 
-## Working agreement
+## Where things live
 
-These are process rules for how we collaborate on this project, not code style preferences
-— follow them on every change, not just when convenient.
+- `agent/src/agent.ts` — graph entry point.
+- `agent/src/tools/emails/tools.ts` — the reference tool pattern (`tool()` + `Command` /
+  `ToolMessage` returns, `zodState` for shared state). Copy this shape for new tools.
+- `agent/src/compose-reply/` — the reference subgraph pattern (`state.ts` / `nodes.ts` / `index.ts`).
+- `agent/src/memory/` — contact profiles, history, working context.
+- `src/app/layout.tsx` and `src/app/api/copilotkit/[[...slug]]/route.ts` — CopilotKit wiring.
+- Inbox and contact profiles are in Postgres (`agent/src/db/`); graph checkpoints are in
+  LangGraph's own storage. [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) explains why that
+  split is forced rather than chosen.
 
-1. **Follow existing patterns before inventing new ones.** This boilerplate already has
-   working conventions: `Command`-based tool state updates (see `agent/src/tools/emails/tools.ts`),
-   `zodState` for shared state fields, the a2ui catalog for generative UI. Reuse them; don't
-   introduce a second way to do the same thing without a reason.
-2. **Update the docs on every big change.** "Big" = a new tool, a new agent node/edge, a
-   shipped feature, or a phase boundary (e.g. moving from `createAgent` to `StateGraph`).
-   Progress/scope go in [docs/ROADMAP.md](./docs/ROADMAP.md), structural changes go in
-   [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — keep `README.md` itself a stable
-   quickstart, not a running log. Small internal refactors don't need a docs entry.
-3. **Comment the *why*, not the *what*.** Every non-trivial change gets a short comment
-   explaining the non-obvious reasoning — a constraint, a workaround, why an interrupt is
-   gated a certain way. Skip comments that just restate the code; those go stale and add
-   noise instead of clarity.
-4. **Verify before calling something done.** Actually run the flow (agent + UI) for the
-   feature just built — classify an email, trigger the approval interrupt, etc. — rather
-   than asserting it works because the code looks right. Note in your response what you
-   verified and what you didn't.
-5. **Match scope to the day's plan; flag deviations instead of absorbing them silently.**
-   If a task is trending over its estimated hours or needs something outside that day's
-   scope, say so when it happens, not after the fact. [docs/ESTIMATION.md](./docs/ESTIMATION.md)
-   tracks the original per-task hour estimate against actual status — update it whenever a
-   task's status changes, so drift is visible instead of discovered later.
-6. **Small, descriptive commits tied to the task.** e.g. `Day 2: wire email classification
-   into shared state` rather than one giant end-of-day commit. Only commit when asked.
-7. **Never let secrets leak.** `.env` stays untracked; if a new env var is introduced,
-   add it to `.env.example` in the same change.
-8. **Typecheck/lint clean before a task is considered finished.** Don't leave a task
-   "working but red."
-9. **Don't duplicate prompt text — every instruction has one home.** A tool description, the
-   system prompt, and a tool-result/`respond()` payload are all sent to the model and cost
-   tokens on every call. State each rule once, where it's most effective, and don't repeat it
-   elsewhere: tool-specific usage and constraints live in that tool's `description` (the model
-   sees them bound to the tool); cross-cutting behaviour and response style live in the system
-   prompt; a decision's follow-up lives in that decision's payload. Before adding a line to a
-   prompt, check it isn't already covered by a tool description or another block. If two places
-   would say the same thing, cut one — the tool schema/description is usually the canonical home
-   for anything about that tool.
-10. **Tear down anything you started to verify.** Verifying often means spinning up a
-    background process — a `langgraph dev` agent (port 8123), a Next dev server (port 3000), a
-    monitor, a probe script. Stop it once you have your answer. An orphaned server holds its
-    port and collides with the next run or the user's own `npm run dev`, and background
-    processes pile up invisibly until something mysteriously won't start. If you started it,
-    you kill it — free the ports and delete any temp probe scripts; don't leave them for the
-    user to hunt down.
+## Rules
 
-## Definition of done (per task/day)
+These are how we work on this project, not style preferences. Follow them on every change.
 
-- [ ] Code follows an existing pattern in the repo, or the deviation is justified
-- [ ] docs/ROADMAP.md and/or docs/ARCHITECTURE.md updated if the change is "big" per rule 2
-- [ ] docs/ESTIMATION.md status updated for the task(s) just finished
-- [ ] Non-obvious logic has a why-comment
-- [ ] Feature manually exercised end-to-end (not just typechecked)
-- [ ] `.env.example` in sync if env vars changed
-- [ ] No secrets staged
+1. **Reuse the patterns above before inventing new ones.** Don't introduce a second way to do
+   something that already has one without saying why.
+2. **Comment the why, not the what.** Non-trivial changes get a short comment on the non-obvious
+   reason — a constraint, a workaround, why an interrupt is gated the way it is. Comments that
+   restate the code go stale and add noise; skip them.
+3. **YOU MUST exercise the feature before calling it done.** Not "the code looks right" — run it.
+   Say in your response what you verified and what you didn't. See the `verify-feature` skill.
+4. **Tear down anything you started.** Agent (:8123), Next dev server (:3000), monitors, probe
+   scripts. An orphaned server holds its port and collides with the user's next `npm run dev`.
+5. **Never let secrets leak.** `.env` stays untracked; a new env var goes into `.env.example` in
+   the same change.
+6. **Commit only when asked**, then small and task-scoped: `Day 2: wire email classification into
+   shared state`, not one end-of-day dump.
+7. **Flag scope deviations when they happen**, not after. If a task is running past its estimate
+   or needs something outside the day's plan, say so mid-task.
+
+## Workflows
+
+Invoke these skills instead of improvising the workflow:
+
+- `verify-feature` — bringing the stack up, exercising a change end-to-end, tearing it down.
+- `finish-task` — the docs/estimation updates and done-checklist when wrapping up a task or day.
+- `agent-prompt-authoring` — where a given instruction belongs (tool description vs. system
+  prompt vs. `respond()` payload). Read it before editing any prompt or tool description.

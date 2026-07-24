@@ -83,6 +83,7 @@ The following scripts can also be run using your preferred package manager:
 - `dev:debug` - Starts development servers with debug logging enabled
 - `dev:ui` - Starts only the Next.js UI server
 - `dev:agent` - Starts only the LangGraph agent server
+- `typecheck` - Type-checks the Next.js app (`npm run typecheck --prefix agent` for the agent)
 - `build` - Builds the Next.js application for production
 - `start` - Starts the production server
 - `install:agent` - Installs agent (Node) dependencies
