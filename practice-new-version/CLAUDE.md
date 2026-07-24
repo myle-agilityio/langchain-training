@@ -1,0 +1,62 @@
+# AI Email Assistant — practice project (restart)
+
+CopilotKit + LangGraph.js inbox-triage assistant for a high-school math teacher. This is a
+fresh restart of the `practice/` project: the UI, test scenarios, and configuration were
+carried over; **the agent is being rebuilt from scratch** (the old `agent/src` code is not a
+reference — don't copy patterns from `practice/`'s agent without deciding they're right).
+
+## Commands
+
+- `npm run dev` — UI on :3000 + agent on :8123 together. `dev:ui` / `dev:agent` to isolate one.
+- `npm run typecheck` (Next app) and `npm run typecheck --prefix agent` — both must be clean
+  before a task is done. **The root check has 3 pre-existing errors**, all in
+  `src/app/declarative-generative-ui/renderers.tsx` (untouched boilerplate). That is the
+  baseline: don't add to it, and don't fix them as a side quest.
+- The agent runs under `langgraphjs dev`; the graph entry is registered in
+  `agent/langgraph.json`. Both servers read the root `.env`.
+
+## Where things live
+
+Agent (`agent/src/`), organized by role:
+
+- `graphs/` — graph definitions; `graphs/index.ts:graph` is the entry registered in
+  `agent/langgraph.json`, `graphs/composeEmailSubgraph.ts` the compose pipeline.
+- `nodes/` — node implementations; `prompts/` — every prompt string; `tools/` — tool
+  definitions; `state/` — StateSchema definitions; `types/` — zod schemas + interfaces.
+- `db/` — Postgres pool + queries, `PostgresSaver` checkpointer, `PostgresStore` memory store.
+- `rag/` — pgvector knowledge base (`ensureIndexed` seeds `kb_documents` on first boot,
+  `searchKnowledge` is the semantic search everything uses).
+- `config/` — env validation + model instances; `constants/` — tool names; `utils/` — helpers.
+
+Frontend:
+
+- `src/app/layout.tsx` and `src/app/api/copilotkit/[[...slug]]/route.ts` — CopilotKit wiring.
+- `src/components/email-inbox/` — the inbox UI; `src/hooks/use-shared-inbox.tsx` is its data
+  provider (reads `/api/emails`, which talks to Postgres directly).
+
+Everything persistent is in the one Postgres behind `DATABASE_URL`: the inbox (`emails`,
+`contact_profiles`), the embedded KB (`kb_documents`), graph checkpoints (`checkpoints*`) and
+the cross-thread store (`store*`).
+
+## Rules
+
+These are how we work on this project, not style preferences. Follow them on every change.
+
+1. **Reuse the patterns above before inventing new ones.** Don't introduce a second way to do
+   something that already has one without saying why.
+2. **Comment shortly about the code** Comment 1 line
+3. **YOU MUST exercise the feature before calling it done.** Not "the code looks right" — run it.
+   Say in your response what you verified and what you didn't. See the `verify-feature` skill.
+4. **Tear down anything you started.** Agent (:8123), Next dev server (:3000), monitors, probe
+   scripts. An orphaned server holds its port and collides with the user's next `npm run dev`.
+5. **Never let secrets leak.** `.env` stays untracked; a new env var goes into `.env.example` in
+   the same change.
+
+## Workflows
+
+Invoke these skills instead of improvising the workflow:
+
+- `verify-feature` — bringing the stack up, exercising a change end-to-end, tearing it down.
+- `finish-task` — the docs updates and done-checklist when wrapping up a task or day.
+- `agent-prompt-authoring` — where a given instruction belongs (tool description vs. system
+  prompt vs. `respond()` payload). Read it before editing any prompt or tool description.
