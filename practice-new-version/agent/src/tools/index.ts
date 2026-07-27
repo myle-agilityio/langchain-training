@@ -1,8 +1,10 @@
 import { z } from "zod";
 import { tool } from "@langchain/core/tools";
 
+import { plainModel } from "../config/model.js";
 import { TOOL } from "../constants/index.js";
-import { aggregateEmails, listEmails, updateEmail } from "../db/index.js";
+import { aggregateEmails, getEmail, listEmails, updateEmail } from "../db/index.js";
+import { classifyPrompt } from "../prompts/index.js";
 import { searchKnowledge } from "../rag/index.js";
 import { ClassificationSchema, EmailFilterSchema, EmailGroupBySchema } from "../types/index.js";
 import { generate_a2ui } from "./a2ui.js";
@@ -48,20 +50,53 @@ export const count_emails = tool(
   },
 );
 
+// Classifies by reading each email's real content itself, so the caller only ever passes ids —
+// never fields it might have guessed. One structured-output call per email, run in parallel.
+export const classify_emails = tool(
+  async (input: { ids: string[] }) => {
+    const results = await Promise.all(
+      input.ids.map(async (id) => {
+        const email = await getEmail(id);
+        if (!email) return { id, ok: false as const, error: "no such email" };
+        const classification = await plainModel
+          .withStructuredOutput(ClassificationSchema)
+          .invoke(classifyPrompt(email));
+        await updateEmail(id, { classification });
+        return { id, ok: true as const, classification };
+      }),
+    );
+    const failed = results.filter((r) => !r.ok);
+    return JSON.stringify({
+      results,
+      ...(failed.length
+        ? { recovery: "Call get_emails for current ids, then retry the failed ids." }
+        : {}),
+    });
+  },
+  {
+    name: TOOL.CLASSIFY_EMAILS,
+    description:
+      "Classify one or more emails by id — it reads each email's actual current subject/body " +
+      "itself and writes topic/course/workType/urgency to the inbox; you never compute or pass " +
+      "the classification. Ids must be real: call get_emails first if the teacher described the " +
+      "emails rather than naming exact ids. Batch every email you're classifying into one call.",
+    schema: z.object({ ids: z.array(z.string()) }),
+  },
+);
+
 // Omitting "replied" makes "mark it replied" unreachable — only a sent reply sets that.
 const ManageableStatusSchema = z.enum(["unread", "read", "flagged_for_followup"]);
 
-const EmailPatchSchema = z.object({
+const StatusPatchSchema = z.object({
   id: z.string(),
-  status: ManageableStatusSchema.optional(),
-  classification: ClassificationSchema.optional(),
+  status: ManageableStatusSchema,
 });
 
-export const manage_emails = tool(
-  async (input: { patches: z.infer<typeof EmailPatchSchema>[] }) => {
+export const update_email_status = tool(
+  async (input: { patches: z.infer<typeof StatusPatchSchema>[] }) => {
     const results = await Promise.all(
       input.patches.map(async (patch) => {
-        const email = await updateEmail(patch.id, patch);
+        const email = await updateEmail(patch.id, { status: patch.status });
         return email
           ? { id: patch.id, ok: true as const, status: email.status }
           : { id: patch.id, ok: false as const, error: "no such email" };
@@ -76,17 +111,12 @@ export const manage_emails = tool(
     });
   },
   {
-    name: TOOL.MANAGE_EMAILS,
+    name: TOOL.UPDATE_EMAIL_STATUS,
     description:
-      "Record classification and/or status on one or more emails. Every classification must be " +
-      "read off that email's actual subject/body from get_emails, not guessed from a name or a " +
-      "topic the teacher mentioned — call get_emails first for any email you're about to " +
-      "classify that you haven't just fetched, especially when classifying more than one at " +
-      "once. Batch every email you are triaging into a single call rather than one call each. " +
-      "When you classify, set all four classification fields together — a partial " +
-      "classification renders as a half-filled badge row in the inbox UI. Cannot mark an email " +
-      "replied: only sending a reply does that.",
-    schema: z.object({ patches: z.array(EmailPatchSchema) }),
+      "Set status (unread/read/flagged_for_followup) on one or more emails. Batch every email " +
+      "into a single call rather than one call each. Cannot mark an email replied: only sending " +
+      "a reply does that.",
+    schema: z.object({ patches: z.array(StatusPatchSchema) }),
   },
 );
 
@@ -125,7 +155,8 @@ export { generate_a2ui };
 export const modelTools = [
   get_emails,
   count_emails,
-  manage_emails,
+  classify_emails,
+  update_email_status,
   search_knowledge_base,
   generate_a2ui,
   reply_to_email,
@@ -135,7 +166,8 @@ export const modelTools = [
 export const executableTools = [
   get_emails,
   count_emails,
-  manage_emails,
+  classify_emails,
+  update_email_status,
   search_knowledge_base,
   generate_a2ui,
 ];

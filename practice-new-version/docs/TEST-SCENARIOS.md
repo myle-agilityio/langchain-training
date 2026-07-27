@@ -14,7 +14,7 @@ result in the **Result** line. Status key: ⬜ not run · ✅ pass · ⚠️ par
 ## 1. Triage & classification
 
 - [ ] **1.1 Bulk triage** — Type: `Classify all the unread emails.`
-  - Expect: `get_emails` → `manage_emails`; every row gets topic/course/urgency badges (workType too in the detail pane). Inbox colour-codes itself.
+  - Expect: `get_emails` → `classify_emails`; every row gets topic/course/urgency badges (workType too in the detail pane). Inbox colour-codes itself.
   - Result:
 
 - [ ] **1.2 Course inferred from the math, not the grade** — Type: `What's Angelina's quiz question about, and which class is it?`

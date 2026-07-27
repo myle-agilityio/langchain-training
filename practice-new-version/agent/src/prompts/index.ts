@@ -1,7 +1,7 @@
 import type { Email } from "../types/index.js";
 import { renderEmail } from "../utils/index.js";
 
-// Shared by the system prompt and the classify node, so both describe the fields the same way.
+// Shared by classifyPrompt and triagePrompt, so both describe the fields the same way.
 export const CLASSIFICATION_GUIDE = `
   - topic: what the email is asking for. Use "complex" only when it genuinely spans several
     (e.g. an absence AND a grade dispute AND a meeting request) — not merely because it is long.
@@ -34,8 +34,6 @@ export const SYSTEM_PROMPT = `
   acting or answering, even if you already fetched one earlier in this conversation: the inbox
   changes independently of this chat, so an earlier result can be stale.
 
-  When you classify emails, fill all four fields together:
-${CLASSIFICATION_GUIDE}
   Each tool's description says when to use it; don't re-derive that here.
 `;
 
@@ -51,25 +49,22 @@ export function currentDateLine(now = new Date()): string {
 // since it's a decision made before call_model ever sees the request, not a behavior call_model
 // itself needs to know (it never has to explain a decline it didn't make).
 const SCOPE_GUIDE = `
-  This assistant triages one teacher's inbox: list/count/search emails, classify them, answer
-  school policy and curriculum questions (grounded in the knowledge base, whether or not the
-  question names a specific email), and draft a reply to ONE email at a time (always shown to
-  the teacher for approval before sending).
+  This assistant triages one teacher's inbox: list/count/search emails, classify them, set an
+  email's status (unread/read/flagged for follow-up), answer school policy and curriculum
+  questions (grounded in the knowledge base, whether or not the question names a specific
+  email), and draft a reply to ONE email at a time (always shown to the teacher for approval
+  before sending).
 
   Out of scope — do not attempt these, decline instead:
   - Replying to more than one email in a single request (e.g. "reply to everyone who...").
-  - Composing a new email that isn't a reply to something already in the inbox.
-  - Editing an email's subject/body, or deleting/restoring one — only status and classification
-    can be changed.
   - Sending a reply without the teacher reviewing it first, or pre-approving future replies.
-  - Saving new facts or preferences about a sender for later use.
-  - Changing an actual student grade, or anything gradebook-related.
   - Adding to or editing the school policy knowledge base.
   - Anything unrelated to this inbox or the teacher's two math courses (general chit-chat,
     unrelated subjects, tasks with nothing to do with the inbox).
 
-  Reading/listing/counting/classifying multiple emails, or replying to one email chosen from
-  several, are both in scope — only replying to more than one in the same request is not.
+  Reading/listing/counting/classifying/setting status on multiple emails at once are all in
+  scope — replying is the ONLY action limited to one email per request; don't extend that limit
+  to anything else just because it also mentions multiple emails.
 `;
 
 export function scopeCheckPrompt(request: string): string {
@@ -83,11 +78,24 @@ export function scopeCheckPrompt(request: string): string {
   );
 }
 
-export function classifyPrompt(email: Email): string {
+function classificationInstructions(): string {
   return (
     `Classify this email from a high school mathematics teacher's inbox. The teacher ` +
     `teaches Grade 11 math (algebra 2 / precalculus) and Grade 12 math (calculus).\n` +
-    `${CLASSIFICATION_GUIDE}\n\n` +
+    `${CLASSIFICATION_GUIDE}`
+  );
+}
+
+// Used by classify_emails — plain classification, no research decision attached.
+export function classifyPrompt(email: Email): string {
+  return `${classificationInstructions()}\n\n${renderEmail(email)}`;
+}
+
+// Used by the compose subgraph's triage node — classification plus the KB-research routing
+// decision, since that pipeline needs both from one call.
+export function triagePrompt(email: Email): string {
+  return (
+    `${classificationInstructions()}\n\n` +
     `Also set needsResearch: true when the reply must ground itself in school policy or ` +
     `curriculum (late-work/re-grade policy, absence/makeup rules, grade weighting, calculator ` +
     `rules, deadlines or penalties, common unit errors). false for mail a reply can handle from ` +

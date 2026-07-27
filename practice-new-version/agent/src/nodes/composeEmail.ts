@@ -4,7 +4,7 @@ import { END, interrupt } from "@langchain/langgraph";
 import { plainModel } from "../config/model.js";
 import { COMPOSE_REPLY_ACTION } from "../constants/index.js";
 import { getContactProfile, getEmail, updateEmail } from "../db/index.js";
-import { classifyPrompt, draftPrompt } from "../prompts/index.js";
+import { draftPrompt, triagePrompt } from "../prompts/index.js";
 import { searchKnowledge } from "../rag/index.js";
 import { DraftSchema, TriageSchema, type Draft } from "../types/index.js";
 import { findReplyCall } from "../utils/index.js";
@@ -41,7 +41,7 @@ export async function triage(state: State) {
 
   const { needsResearch, ...classification } = await plainModel
     .withStructuredOutput(TriageSchema)
-    .invoke(classifyPrompt(email));
+    .invoke(triagePrompt(email));
 
   await updateEmail(email.id, { classification });
   return { emailId: email.id, needsResearch };
