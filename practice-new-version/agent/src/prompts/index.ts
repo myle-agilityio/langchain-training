@@ -38,7 +38,12 @@ export function classifyPrompt(email: Email): string {
   return (
     `Classify this email from a high school mathematics teacher's inbox. The teacher ` +
     `teaches Grade 11 math (algebra 2 / precalculus) and Grade 12 math (calculus).\n` +
-    `${CLASSIFICATION_GUIDE}\n\n${renderEmail(email)}`
+    `${CLASSIFICATION_GUIDE}\n\n` +
+    `Also set needsResearch: true when the reply must ground itself in school policy or ` +
+    `curriculum (late-work/re-grade policy, absence/makeup rules, grade weighting, calculator ` +
+    `rules, deadlines or penalties, common unit errors). false for mail a reply can handle from ` +
+    `the email alone, with no policy or curriculum claim to ground (e.g. a scheduling ack, a ` +
+    `plain FYI, a yes/no with nothing at stake).\n\n${renderEmail(email)}`
   );
 }
 

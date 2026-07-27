@@ -13,6 +13,7 @@ export const AgentState = new StateSchema({
 export const ComposeEmailState = new StateSchema({
   ...CopilotKitStateSchema.fields,
   emailId: zodState(z.string().default(() => "")),
+  needsResearch: zodState(z.boolean().default(() => false)),
   kbContext: zodState(z.string().default(() => "")),
   senderContext: zodState(z.string().default(() => "")),
   draft: zodState(DraftSchema.optional()),

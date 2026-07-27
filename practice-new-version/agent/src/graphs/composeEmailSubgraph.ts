@@ -9,10 +9,11 @@ import {
 } from "../nodes/composeEmail.js";
 import { ComposeEmailState } from "../state/index.js";
 
-// Prompt-chaining pipeline; fixed nodes guarantee classify → research → draft on every reply.
+// Prompt-chaining pipeline; fixed nodes guarantee classify → (research) → draft on every reply.
 //
-//   triage ──(found)──▶ research ──▶ write_draft ──▶ request_approval ──▶ (interrupt)
-//      └────(not found)──────────────────────────────────────────────────▶ END
+//   triage ──(needs research)──▶ research ──▶ write_draft ──▶ request_approval ──▶ (interrupt)
+//      ├────(no research needed)──────────────▶ write_draft
+//      └────(email not found)───────────────────────────────────────────────────▶ END
 //
 // Ends at the interrupt on purpose (CopilotKit resumes with a new run). No own checkpointer —
 // a subgraph composed as a node shares the parent's, which lets the interrupt reach the run.
@@ -24,6 +25,7 @@ const composeEmailWorkflow = new StateGraph(ComposeEmailState)
   .addEdge(START, "triage")
   .addConditionalEdges("triage", afterTriage, {
     research: "research",
+    write_draft: "write_draft",
     __end__: END,
   })
   .addEdge("research", "write_draft")

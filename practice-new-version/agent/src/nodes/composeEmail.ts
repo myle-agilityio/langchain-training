@@ -6,12 +6,13 @@ import { COMPOSE_REPLY_ACTION } from "../constants/index.js";
 import { getContactProfile, getEmail, updateEmail } from "../db/index.js";
 import { classifyPrompt, draftPrompt } from "../prompts/index.js";
 import { searchKnowledge } from "../rag/index.js";
-import { ClassificationSchema, DraftSchema, type Draft } from "../types/index.js";
+import { DraftSchema, TriageSchema, type Draft } from "../types/index.js";
 import { findReplyCall } from "../utils/index.js";
 
 type State = {
   messages: BaseMessage[];
   emailId: string;
+  needsResearch: boolean;
   kbContext: string;
   senderContext: string;
   draft?: Draft;
@@ -38,16 +39,17 @@ export async function triage(state: State) {
     };
   }
 
-  const classification = await plainModel
-    .withStructuredOutput(ClassificationSchema)
+  const { needsResearch, ...classification } = await plainModel
+    .withStructuredOutput(TriageSchema)
     .invoke(classifyPrompt(email));
 
   await updateEmail(email.id, { classification });
-  return { emailId: email.id };
+  return { emailId: email.id, needsResearch };
 }
 
 export function afterTriage(state: State) {
-  return state.emailId ? "research" : END;
+  if (!state.emailId) return END;
+  return state.needsResearch ? "research" : "write_draft";
 }
 
 // research — pgvector search for the policy the draft must not invent, plus sender profile.

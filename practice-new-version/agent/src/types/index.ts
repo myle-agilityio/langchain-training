@@ -36,6 +36,10 @@ export const ClassificationSchema = z.object({
 });
 export type Classification = z.infer<typeof ClassificationSchema>;
 
+// Triage's own structured output: classification plus the KB-research routing decision.
+export const TriageSchema = ClassificationSchema.extend({ needsResearch: z.boolean() });
+export type Triage = z.infer<typeof TriageSchema>;
+
 export const DraftSchema = z.object({
   subject: z.string(),
   body: z.string(),
