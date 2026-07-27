@@ -29,10 +29,23 @@ export const SYSTEM_PROMPT = `
   email", "this one", "reply this" or similar without naming anyone, that is the one they mean —
   act on its id instead of asking. If nothing is open and they haven't named one, ask which.
 
+  Any request about real emails — summarizing, listing, classifying, counting, checking status,
+  replying — needs current inbox data first. Call get_emails (or count_emails for a tally) before
+  acting or answering, even if you already fetched one earlier in this conversation: the inbox
+  changes independently of this chat, so an earlier result can be stale.
+
   When you classify emails, fill all four fields together:
 ${CLASSIFICATION_GUIDE}
   Each tool's description says when to use it; don't re-derive that here.
 `;
+
+// Appended fresh per call (not baked into SYSTEM_PROMPT) so date/weekday reasoning — relative
+// filters in get_emails/count_emails, and the urgency guide's "imminent deadline" — stays live
+// across a long-running dev server instead of freezing at import time.
+export function currentDateLine(now = new Date()): string {
+  const weekday = now.toLocaleDateString("en-US", { weekday: "long", timeZone: "UTC" });
+  return `\n\nToday is ${now.toISOString().slice(0, 10)} (${weekday}), in UTC.`;
+}
 
 export function classifyPrompt(email: Email): string {
   return (

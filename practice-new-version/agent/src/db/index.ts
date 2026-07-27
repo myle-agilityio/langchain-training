@@ -1,7 +1,13 @@
 import pg from "pg";
 
 import { getPgConnectionOptions } from "../config/env.js";
-import type { Classification, ContactProfile, Email } from "../types/index.js";
+import type {
+  Classification,
+  ContactProfile,
+  Email,
+  EmailFilter,
+  EmailGroupBy,
+} from "../types/index.js";
 
 // Same database the Next side reads (src/lib/db.ts) — that's what makes the inbox shared.
 
@@ -53,9 +59,53 @@ function toEmail(row: EmailRow): Email {
   };
 }
 
-export async function listEmails(): Promise<Email[]> {
+// Maps filter/groupBy keys (camelCase, matching Classification) to their DB columns.
+const FILTER_COLUMNS = {
+  status: "status",
+  topic: "topic",
+  course: "course",
+  workType: "work_type",
+  urgency: "urgency",
+} as const;
+
+// Shared by listEmails and aggregateEmails so a filter means the same thing in both.
+function buildWhere(filter: EmailFilter): { clause: string; params: unknown[] } {
+  const conditions: string[] = [];
+  const params: unknown[] = [];
+
+  for (const key of ["status", "topic", "course", "workType", "urgency"] as const) {
+    const value = filter[key];
+    if (value !== undefined) {
+      params.push(value);
+      conditions.push(`${FILTER_COLUMNS[key]} = $${params.length}`);
+    }
+  }
+  if (filter.unclassified) conditions.push(`topic IS NULL`);
+  if (filter.sender) {
+    params.push(`%${filter.sender}%`);
+    conditions.push(`(from_name ILIKE $${params.length} OR from_email ILIKE $${params.length})`);
+  }
+  if (filter.search) {
+    params.push(`%${filter.search}%`);
+    conditions.push(`(subject ILIKE $${params.length} OR body ILIKE $${params.length})`);
+  }
+  if (filter.receivedAfter) {
+    params.push(filter.receivedAfter);
+    conditions.push(`received_at >= $${params.length}`);
+  }
+  if (filter.receivedBefore) {
+    params.push(filter.receivedBefore);
+    conditions.push(`received_at <= $${params.length}`);
+  }
+
+  return { clause: conditions.length ? `WHERE ${conditions.join(" AND ")}` : "", params };
+}
+
+export async function listEmails(filter: EmailFilter = {}): Promise<Email[]> {
+  const { clause, params } = buildWhere(filter);
   const { rows } = await getPool().query<EmailRow>(
-    `SELECT ${COLUMNS} FROM emails ORDER BY received_at DESC`,
+    `SELECT ${COLUMNS} FROM emails ${clause} ORDER BY received_at DESC`,
+    params,
   );
   return rows.map(toEmail);
 }
@@ -68,12 +118,31 @@ export async function getEmail(id: string): Promise<Email | null> {
   return rows[0] ? toEmail(rows[0]) : null;
 }
 
-// Counted in SQL so the model never tallies an array itself.
-export async function countsByStatus(): Promise<Record<string, number>> {
-  const { rows } = await getPool().query<{ status: string; n: string }>(
-    `SELECT status, count(*) AS n FROM emails GROUP BY status`,
+// Counted in SQL so the model never tallies get_emails' array itself. groupBy splits the
+// filtered count by that field; unclassified rows group under "unclassified" rather than null.
+export async function aggregateEmails(
+  filter: EmailFilter,
+  groupBy?: EmailGroupBy,
+): Promise<{ total: number; byGroup?: Record<string, number> }> {
+  const { clause, params } = buildWhere(filter);
+
+  if (!groupBy) {
+    const { rows } = await getPool().query<{ n: string }>(
+      `SELECT count(*) AS n FROM emails ${clause}`,
+      params,
+    );
+    return { total: Number(rows[0].n) };
+  }
+
+  const column = FILTER_COLUMNS[groupBy];
+  const { rows } = await getPool().query<{ group_value: string | null; n: string }>(
+    `SELECT ${column} AS group_value, count(*) AS n FROM emails ${clause} GROUP BY ${column}`,
+    params,
   );
-  return Object.fromEntries(rows.map((r) => [r.status, Number(r.n)]));
+  const byGroup = Object.fromEntries(
+    rows.map((r) => [r.group_value ?? "unclassified", Number(r.n)]),
+  );
+  return { total: rows.reduce((sum, r) => sum + Number(r.n), 0), byGroup };
 }
 
 // COALESCE keeps unsent fields untouched — a real partial update.

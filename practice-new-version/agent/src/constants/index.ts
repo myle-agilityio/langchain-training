@@ -1,6 +1,7 @@
 // Tool names, in one place so the router and the tool definitions can't drift.
 export const TOOL = {
   GET_EMAILS: "get_emails",
+  COUNT_EMAILS: "count_emails",
   MANAGE_EMAILS: "manage_emails",
   SEARCH_KNOWLEDGE_BASE: "search_knowledge_base",
   REPLY_TO_EMAIL: "reply_to_email",

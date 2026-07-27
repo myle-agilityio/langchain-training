@@ -2,25 +2,49 @@ import { z } from "zod";
 import { tool } from "@langchain/core/tools";
 
 import { TOOL } from "../constants/index.js";
-import { countsByStatus, listEmails, updateEmail } from "../db/index.js";
+import { aggregateEmails, listEmails, updateEmail } from "../db/index.js";
 import { searchKnowledge } from "../rag/index.js";
-import { ClassificationSchema } from "../types/index.js";
+import { ClassificationSchema, EmailFilterSchema, EmailGroupBySchema } from "../types/index.js";
 import { generate_a2ui } from "./a2ui.js";
 
+// Shared description of the filter shape, so get_emails and count_emails don't drift.
+const FILTER_DESCRIPTION =
+  "filter narrows by any combination of: status, topic, course, workType, urgency (each an " +
+  "exact match on that classification field), unclassified (true for emails never classified), " +
+  "sender (partial match on name or address), search (partial match on subject or body), and " +
+  "receivedAfter/receivedBefore (ISO date or datetime, inclusive — resolve relative dates like " +
+  "'this week' or a weekday name against today's date before calling). There is no field for " +
+  "the sender's role (parent/student/staff) — infer that from sender/body instead. Omit filter " +
+  "for the whole inbox.";
+
 export const get_emails = tool(
-  async () => {
-    const [emails, counts] = await Promise.all([listEmails(), countsByStatus()]);
-    return JSON.stringify({ emails, countsByStatus: counts });
+  async (input: { filter?: z.infer<typeof EmailFilterSchema> }) => {
+    const emails = await listEmails(input.filter);
+    return JSON.stringify({ emails, count: emails.length });
   },
   {
     name: TOOL.GET_EMAILS,
     description:
-      "Read the inbox. Returns every email with its id, sender, subject, body, status and " +
-      "classification, plus countsByStatus — read counts from that field rather than tallying " +
-      "the array, which is where counting goes wrong. The inbox is shared and changes between " +
-      "turns independently of this chat, so call this again for any question about current " +
-      "counts or status instead of reusing an earlier result.",
-    schema: z.object({}),
+      "List emails (id, sender, subject, body, status, classification), optionally filtered. " +
+      `${FILTER_DESCRIPTION} For any 'how many' question use count_emails instead of counting ` +
+      "this array yourself.",
+    schema: z.object({ filter: EmailFilterSchema.optional() }),
+  },
+);
+
+export const count_emails = tool(
+  async (input: {
+    filter?: z.infer<typeof EmailFilterSchema>;
+    groupBy?: z.infer<typeof EmailGroupBySchema>;
+  }) => JSON.stringify(await aggregateEmails(input.filter ?? {}, input.groupBy)),
+  {
+    name: TOOL.COUNT_EMAILS,
+    description:
+      "Count emails matching a filter, without fetching the emails themselves. Always use this " +
+      `for 'how many' questions instead of counting get_emails' array. ${FILTER_DESCRIPTION} ` +
+      "groupBy splits the count by that field (e.g. groupBy: \"status\" for a per-status " +
+      "breakdown of the filtered set); omit it for a single total.",
+    schema: z.object({ filter: EmailFilterSchema.optional(), groupBy: EmailGroupBySchema.optional() }),
   },
 );
 
@@ -96,6 +120,7 @@ export { generate_a2ui };
 // Tools the model may call; reply_to_email is routing-only.
 export const modelTools = [
   get_emails,
+  count_emails,
   manage_emails,
   search_knowledge_base,
   generate_a2ui,
@@ -105,6 +130,7 @@ export const modelTools = [
 // Tools the ToolNode actually runs.
 export const executableTools = [
   get_emails,
+  count_emails,
   manage_emails,
   search_knowledge_base,
   generate_a2ui,

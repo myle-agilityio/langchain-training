@@ -46,6 +46,30 @@ export const DraftSchema = z.object({
 });
 export type Draft = z.infer<typeof DraftSchema>;
 
+// get_emails / count_emails share this filter shape.
+export const EmailFilterSchema = z.object({
+  status: StatusSchema.optional(),
+  topic: TopicSchema.optional(),
+  course: CourseSchema.optional(),
+  workType: WorkTypeSchema.optional(),
+  urgency: UrgencySchema.optional(),
+  unclassified: z.boolean().optional(),
+  sender: z.string().optional(),
+  search: z.string().optional(),
+  receivedAfter: z.string().optional(),
+  receivedBefore: z.string().optional(),
+});
+export type EmailFilter = z.infer<typeof EmailFilterSchema>;
+
+export const EmailGroupBySchema = z.enum([
+  "status",
+  "topic",
+  "course",
+  "workType",
+  "urgency",
+]);
+export type EmailGroupBy = z.infer<typeof EmailGroupBySchema>;
+
 export interface Email {
   id: string;
   from: { name: string; email: string };

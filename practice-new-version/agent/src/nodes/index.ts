@@ -3,7 +3,7 @@ import { END, type LangGraphRunnableConfig } from "@langchain/langgraph";
 
 import { model } from "../config/model.js";
 import { TOOL } from "../constants/index.js";
-import { SYSTEM_PROMPT } from "../prompts/index.js";
+import { currentDateLine, SYSTEM_PROMPT } from "../prompts/index.js";
 import { executableTools, modelTools } from "../tools/index.js";
 
 type CopilotKitEntry = { description?: string; value?: unknown };
@@ -46,7 +46,7 @@ export async function callModel(
   state: AgentStateShape,
   config: LangGraphRunnableConfig,
 ) {
-  const prompt = SYSTEM_PROMPT + renderFrontendContext(state);
+  const prompt = SYSTEM_PROMPT + currentDateLine() + renderFrontendContext(state);
   const bound = model.bindTools!([...modelTools, ...frontendTools(state)]);
   // config threaded through so token callbacks stream assistant text into the chat UI.
   const response = await bound.invoke(
