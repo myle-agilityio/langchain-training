@@ -1,11 +1,12 @@
-import { AIMessage, HumanMessage, SystemMessage, type BaseMessage } from "@langchain/core/messages";
-import { END, type LangGraphRunnableConfig } from "@langchain/langgraph";
+import { AIMessage, HumanMessage, SystemMessage, ToolMessage, type BaseMessage } from "@langchain/core/messages";
+import { END, type LangGraphRunnableConfig, type NodeError } from "@langchain/langgraph";
 
 import { model, plainModel } from "../config/model.js";
 import { TOOL } from "../constants/index.js";
 import { currentDateLine, scopeCheckPrompt, SYSTEM_PROMPT } from "../prompts/index.js";
 import { executableTools, modelTools } from "../tools/index.js";
 import { ScopeCheckSchema } from "../types/index.js";
+import { findReplyCall } from "../utils/index.js";
 
 type CopilotKitEntry = { description?: string; value?: unknown };
 type CopilotKitAction = { name: string; description?: string; parameters?: unknown };
@@ -37,6 +38,38 @@ export async function validateRequest(state: AgentStateShape) {
 
 export function afterValidate(state: AgentStateShape) {
   return state.outOfScope ? END : "call_model";
+}
+
+// validate_request's errorHandler — runs only once its retryPolicy is exhausted (a persistently
+// broken scope check, e.g. an OpenAI outage). Fails open rather than crashing the run: treat the
+// request as in-scope and let call_model (with its own retries) take the normal turn, instead of
+// the teacher seeing a dead chat over a guardrail that couldn't even run.
+export function validateRequestErrorHandler(_state: AgentStateShape, error: NodeError) {
+  console.error(`[validate_request] scope check failed after retries: ${error.error.message}`);
+  return { outOfScope: false };
+}
+
+// compose_email's errorHandler — the backstop once the subgraph's own inner-node retries (set in
+// composeEmailSubgraph.ts) are exhausted. interrupt() itself bypasses this entirely (per LangGraph:
+// interrupts skip both retries and error handlers), so a normal approval pause never lands here —
+// only a genuine failure (e.g. triage/research/write_draft erroring on every attempt) does.
+// Answers the dangling reply_to_email tool call so call_model's next turn has valid history,
+// instead of the whole run crashing on a transient drafting failure.
+export function composeEmailErrorHandler(state: AgentStateShape, error: NodeError) {
+  console.error(`[compose_email] failed after retries: ${error.error.message}`);
+  const call = findReplyCall(state.messages);
+  return {
+    messages: call
+      ? [
+          new ToolMessage({
+            tool_call_id: call.id ?? "unknown",
+            content:
+              "Drafting failed unexpectedly. Tell the teacher in one short line that the draft " +
+              "couldn't be prepared and to try again.",
+          }),
+        ]
+      : [],
+  };
 }
 
 // Readables the UI registered with useAgentContext arrive in state.copilotkit.context.

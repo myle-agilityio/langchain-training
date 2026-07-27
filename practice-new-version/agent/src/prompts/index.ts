@@ -49,29 +49,26 @@ export function currentDateLine(now = new Date()): string {
 // since it's a decision made before call_model ever sees the request, not a behavior call_model
 // itself needs to know (it never has to explain a decline it didn't make).
 const SCOPE_GUIDE = `
-  This assistant triages one teacher's inbox. Two kinds of action, split by how many emails
-  they touch:
+  This assistant triages one teacher's inbox. What's in scope depends on what the request does,
+  never on how many emails it names or how it's phrased:
 
-  - Any number at once, including "all" or "every" — no upper limit: list/search/count emails,
-    classify them, and set an email's status (unread/read/flagged for follow-up). "Mark all as
-    read", "flag everything from parents", "classify the last 20" are all in scope as-is.
-  - Exactly ONE email at a time, never more: drafting a reply. Always shown to the teacher for
-    approval before sending — never sent unreviewed, never pre-approved for future replies.
+  - list/search/count emails, classify them, or set an email's status (unread/read/flagged for
+    follow-up) — in scope for any number of emails at once, including "all" or "every".
+  - Drafting a reply — in scope for one named or selected email per request. Always shown to the
+    teacher for approval before sending; never sent unreviewed, never pre-approved for future
+    replies.
+  - Answering school policy/curriculum questions (grounded in the knowledge base) — in scope,
+    whether or not the question names a specific email.
 
-  Answering school policy/curriculum questions (grounded in the knowledge base) is in scope too,
-  whether or not the question names a specific email.
-
-  Out of scope — do not attempt these, decline instead:
-  - Replying to more than one email in a single request (e.g. "reply to everyone who...").
+  Out of scope — decline instead:
+  - Replying to more than one email in the same request (e.g. "reply to everyone who...").
   - Sending a reply without the teacher reviewing it first, or pre-approving future replies.
   - Adding to or editing the school policy knowledge base.
   - Anything unrelated to this inbox or the teacher's two math courses (general chit-chat,
     unrelated subjects, tasks with nothing to do with the inbox).
 
-  The one-email-per-request limit applies ONLY to drafting/sending a reply. It never applies to
-  listing, searching, counting, classifying, or setting status — those are in scope for any
-  number of emails, including the whole inbox, even though a request that also mentions "reply"
-  alongside them still can't reply to more than one.
+  A request that names or describes a single email — even spelling out its id, sender, or
+  subject — is an ordinary single-email request, not a violation of anything above.
 `;
 
 export function scopeCheckPrompt(request: string): string {

@@ -17,7 +17,17 @@ import { ComposeEmailState } from "../state/index.js";
 //
 // Ends at the interrupt on purpose (CopilotKit resumes with a new run). No own checkpointer —
 // a subgraph composed as a node shares the parent's, which lets the interrupt reach the run.
+//
+// setNodeDefaults isn't inherited from the parent graph, so retries/timeouts for triage,
+// research, and write_draft (each one LLM or DB call) are set here too. interrupt() inside
+// request_approval bypasses retries entirely, so applying the same defaults to it is harmless.
+// A failure that survives these retries bubbles out to the parent's compose_email node, whose
+// errorHandler (graphs/index.ts) is the backstop.
 const composeEmailWorkflow = new StateGraph(ComposeEmailState)
+  .setNodeDefaults({
+    retryPolicy: { maxAttempts: 3 },
+    timeout: { runTimeout: 45_000 },
+  })
   .addNode("triage", triage)
   .addNode("research", research)
   .addNode("write_draft", writeDraft)
