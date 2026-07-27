@@ -13,55 +13,55 @@ result in the **Result** line. Status key: ⬜ not run · ✅ pass · ⚠️ par
 
 ## 1. Triage & classification
 
-- [ ] **1.1 Bulk triage** — Type: `Classify all the unread emails.`
+- [x] **1.1 Bulk triage** — Type: `Classify all the unread emails.`
   - Expect: `get_emails` → `classify_emails`; every row gets topic/course/urgency badges (workType too in the detail pane). Inbox colour-codes itself.
   - Result:
 
-- [ ] **1.2 Course inferred from the math, not the grade** — Type: `What's Angelina's quiz question about, and which class is it?`
+- [x] **1.2 Course inferred from the math, not the grade** — Type: `What's Angelina's quiz question about, and which class is it?`
   - Expect: `math_12` inferred from the calculus content (ladder / implicit differentiation), even though the email never says "Grade 12". Repeat with **Marcus Mohr** (rational functions → `math_11`).
   - Result:
 
-- [ ] **1.3 The "complex" case** — Type: `Classify Flo Beahan's email.`
+- [x] **1.3 The "complex" case** — Type: `Classify Flo Beahan's email.`
   - Expect: `complex` — Flo is a parent whose email is part absence, part grade dispute, part meeting request. Forcing a single topic is a miss.
   - Result:
 
 ## 2. Counting & status (anti-hallucination path)
 
-- [ ] **2.1 Exact counts** — Type: `How many unread emails do I have, and how many are about Grade 12?`
+- [x] **2.1 Exact counts** — Type: `How many unread emails do I have, and how many are about Grade 12?`
   - Expect: exact numbers (computed via SQL `GROUP BY`, not eyeballing the list).
   - Result:
 
-- [ ] **2.2 Re-reads, doesn't trust stale answers** — Reply to one email in the UI, then ask the count again.
+- [x] **2.2 Re-reads, doesn't trust stale answers** — Reply to one email in the UI, then ask the count again.
   - Expect: the number drops; it calls `get_emails` again rather than reusing its earlier answer.
   - Result:
 
 ## 3. Drafting + human approval (core loop)
 
-- [ ] **3.1 Full draft flow** — Select **Ezra Konopelski** ("Absent today / test this afternoon") → **Ask AI to draft**.
+- [x] **3.1 Full draft flow** — Select **Ezra Konopelski** ("Absent today / test this afternoon") → **Ask AI to draft**.
   - Expect: `get_emails → classify → search_knowledge_base → compose_reply`, then an editable **approval card** in chat. Draft cites the *real* makeup policy (three school days, tutorial block), not an invented one.
   - Result:
 
-- [ ] **3.2 Reject doesn't re-draft** — On that card, click **Reject**.
+- [x] **3.2 Reject doesn't re-draft** — On that card, click **Reject**.
   - Expect: one short acknowledgement, **no second draft**. A new card appearing = regression.
   - Result:
 
-- [ ] **3.3 Approve is terse** — Draft another and click **Approve & Send**.
+- [x] **3.3 Approve is terse** — Draft another and click **Approve & Send**.
   - Expect: card flips to "Reply sent", inbox row shows a **Replied** badge, chat says ~"Sent." — not a re-recital of the draft.
   - Result:
 
-- [ ] **3.4 Classify-before-reply guard** — Pick an unclassified email and ask to reply to it directly.
+- [x] **3.4 Classify-before-reply guard** — Pick an unclassified email and ask to reply to it directly.
   - Expect: it classifies first (records topic/course/workType/urgency), then drafts — never composes an untriaged email.
   - Result:
 
 ## 4. Selection resolves "this email"
 
-- [ ] **4.1 Bare "reply this"** — Select **Felix Gislason** ("late project"), then type: `Reply this email.`
+- [x] **4.1 Bare "reply this"** — Select **Felix Gislason** ("late project"), then type: `Reply this email.`
   - Expect: drafts for Felix without you naming him; the late-work policy in the draft comes from the KB (10%/day, floor of 50%).
   - Result:
 
-- [ ] **4.2 Nothing selected** — With no email open, type: `Reply this email.`
+- [-] **4.2 Nothing selected** — With no email open, type: `Reply this email.`
   - Expect: it asks *which* email — does not guess.
-  - Result:
+  - Result: it says please select an email.
 
 ## 5. Short-term memory (best demo)
 
