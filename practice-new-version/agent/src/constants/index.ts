@@ -9,7 +9,7 @@ export const TOOL = {
   GENERATE_A2UI: "generate_a2ui",
 } as const;
 
-// Interrupt action name the frontend's useHumanInTheLoop listens for.
+// Discriminator in the interrupt() value the frontend's useInterrupt (use-email-agent.tsx) matches on.
 export const COMPOSE_REPLY_ACTION = "compose_reply";
 
 // pgvector table holding the embedded knowledge base.

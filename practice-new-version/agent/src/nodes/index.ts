@@ -29,7 +29,9 @@ export async function validateRequest(state: AgentStateShape) {
   if (check.inScope) return { outOfScope: false };
   return {
     outOfScope: true,
-    messages: [new AIMessage(check.declineMessage ?? "I can't help with that request.")],
+    messages: [
+      new AIMessage({ id: crypto.randomUUID(), content: check.declineMessage ?? "I can't help with that request." }),
+    ],
   };
 }
 
@@ -77,7 +79,6 @@ export async function callModel(
     [new SystemMessage(prompt), ...state.messages],
     config,
   );
-  console.log("callModel response", response);
   return { messages: [response] };
 }
 
@@ -86,7 +87,6 @@ const EXECUTABLE_NAMES = new Set<string>(executableTools.map((t) => t.name));
 // reply_to_email → compose subgraph; backend tool → tools; frontend tool or no call → END
 // (a run ending with a frontend tool call is how the browser knows to execute it).
 export function routeAfterModel(state: { messages: BaseMessage[] }) {
-  console.log("routeAfterModel", state.messages);
   const last = state.messages[state.messages.length - 1];
   if (!AIMessage.isInstance(last)) return END;
   const calls = last.tool_calls ?? [];

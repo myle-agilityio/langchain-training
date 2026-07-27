@@ -1,4 +1,4 @@
-import { AIMessage, ToolMessage, type BaseMessage } from "@langchain/core/messages";
+import { ToolMessage, type BaseMessage } from "@langchain/core/messages";
 import { END, interrupt } from "@langchain/langgraph";
 
 import { plainModel } from "../config/model.js";
@@ -107,20 +107,23 @@ export async function writeDraft(state: State) {
   return { draft };
 }
 
-// request_approval — CopilotKit's interrupt payload shape, so useHumanInTheLoop renders the
-// editable card. Resume starts a NEW run, so code after interrupt() never executes; the send
-// is applied by the card via PATCH /api/emails.
+// request_approval — pauses the graph; the frontend's useInterrupt (use-email-agent.tsx) matches
+// on `action` and renders the editable card. resolve() there sends `{decision, instruction}` as
+// the resume value, which interrupt() returns here — the send itself already happened via the
+// card's PATCH /api/emails, so this just answers the dangling reply_to_email tool call with the
+// teacher's decision so the next call_model turn has valid history.
 export async function requestApproval(state: State) {
   const draft = state.draft!;
   const args = { id: state.emailId, subject: draft.subject, body: draft.body };
-  interrupt({
-    __copilotkit_interrupt_value__: { action: COMPOSE_REPLY_ACTION, args },
-    __copilotkit_messages__: [
-      new AIMessage({
-        content: "",
-        tool_calls: [{ id: crypto.randomUUID(), name: COMPOSE_REPLY_ACTION, args }],
-      }),
-    ],
-  });
-  return {};
+  const resume = interrupt({ action: COMPOSE_REPLY_ACTION, args }) as {
+    decision: "approve" | "reject";
+    instruction: string;
+  };
+
+  const call = findReplyCall(state.messages);
+  return {
+    messages: call
+      ? [new ToolMessage({ tool_call_id: call.id ?? "unknown", content: resume.instruction })]
+      : [],
+  };
 }

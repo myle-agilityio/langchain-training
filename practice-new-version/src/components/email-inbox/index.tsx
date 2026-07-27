@@ -11,8 +11,8 @@ export function EmailInbox() {
   const { emails, isLoading, isRefreshing, refresh, patchEmail } = useSharedInbox();
   const { agent } = useAgent();
   // Run through the CopilotKit core, not agent.runAgent() directly: the core's runAgent is the
-  // same interrupt-aware path CopilotChat uses, so compose_reply's pause is routed to the
-  // useHumanInTheLoop card rather than left unhandled.
+  // same interrupt-aware path CopilotChat uses, so compose_reply's pause is routed to
+  // useEmailAgent's useInterrupt card rather than left unhandled.
   const { copilotkit } = useCopilotKit();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
