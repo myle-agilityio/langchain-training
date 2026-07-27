@@ -59,7 +59,7 @@ result in the **Result** line. Status key: ⬜ not run · ✅ pass · ⚠️ par
   - Expect: drafts for Felix without you naming him; the late-work policy in the draft comes from the KB (10%/day, floor of 50%).
   - Result:
 
-- [-] **4.2 Nothing selected** — With no email open, type: `Reply this email.`
+- [ ] **4.2 Nothing selected** — With no email open, type: `Reply this email.`
   - Expect: it asks *which* email — does not guess.
   - Result: it says please select an email.
 
