@@ -70,6 +70,16 @@ export const EmailGroupBySchema = z.enum([
 ]);
 export type EmailGroupBy = z.infer<typeof EmailGroupBySchema>;
 
+// validate_request's structured output: is the request something this assistant can do at all.
+// declineMessage is nullable, not optional — OpenAI's strict structured output requires every
+// field present, so "not applicable" has to be an explicit null rather than an omitted key.
+export const ScopeCheckSchema = z.object({
+  inScope: z.boolean(),
+  // One short sentence shown to the teacher verbatim; null when inScope is true.
+  declineMessage: z.string().nullable(),
+});
+export type ScopeCheck = z.infer<typeof ScopeCheckSchema>;
+
 export interface Email {
   id: string;
   from: { name: string; email: string };

@@ -7,6 +7,8 @@ import { DraftSchema } from "../types/index.js";
 // Parent graph state. The inbox itself lives in Postgres, not here.
 export const AgentState = new StateSchema({
   ...CopilotKitStateSchema.fields,
+  // Set by validate_request each run; routes straight to END when true.
+  outOfScope: zodState(z.boolean().default(() => false)),
 });
 
 // Compose-email state: `messages` is shared with the parent; the rest are private per entry.

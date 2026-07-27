@@ -3,7 +3,7 @@ import { ToolNode } from "@langchain/langgraph/prebuilt";
 
 import { getCheckpointer } from "../db/checkpointer.js";
 import { getMemoryStore } from "../db/memoryStore.js";
-import { callModel, routeAfterModel } from "../nodes/index.js";
+import { afterValidate, callModel, routeAfterModel, validateRequest } from "../nodes/index.js";
 import { ensureIndexed } from "../rag/index.js";
 import { AgentState } from "../state/index.js";
 import { executableTools } from "../tools/index.js";
@@ -12,12 +12,19 @@ import { composeEmailSubgraph } from "./composeEmailSubgraph.js";
 // Build the email assistant graph: a ReAct loop with the compose-email subgraph as a node.
 export async function buildGraph() {
   const workflow = new StateGraph(AgentState)
+    .addNode("validate_request", validateRequest)
     .addNode("call_model", callModel)
     // handleToolErrors default (true) rethrows GraphInterrupt, so the approval pause survives.
     .addNode("tools", new ToolNode(executableTools))
     .addNode("compose_email", composeEmailSubgraph)
 
-    .addEdge(START, "call_model")
+    .addEdge(START, "validate_request")
+
+    // Out-of-scope request → decline message, end; otherwise into the normal ReAct loop.
+    .addConditionalEdges("validate_request", afterValidate, {
+      call_model: "call_model",
+      __end__: END,
+    })
 
     // reply_to_email → subgraph; backend tool → tools; frontend tool or plain answer → end.
     .addConditionalEdges("call_model", routeAfterModel, {

@@ -1,17 +1,41 @@
-import { AIMessage, SystemMessage, type BaseMessage } from "@langchain/core/messages";
+import { AIMessage, HumanMessage, SystemMessage, type BaseMessage } from "@langchain/core/messages";
 import { END, type LangGraphRunnableConfig } from "@langchain/langgraph";
 
-import { model } from "../config/model.js";
+import { model, plainModel } from "../config/model.js";
 import { TOOL } from "../constants/index.js";
-import { currentDateLine, SYSTEM_PROMPT } from "../prompts/index.js";
+import { currentDateLine, scopeCheckPrompt, SYSTEM_PROMPT } from "../prompts/index.js";
 import { executableTools, modelTools } from "../tools/index.js";
+import { ScopeCheckSchema } from "../types/index.js";
 
 type CopilotKitEntry = { description?: string; value?: unknown };
 type CopilotKitAction = { name: string; description?: string; parameters?: unknown };
 type AgentStateShape = {
   messages: BaseMessage[];
+  outOfScope?: boolean;
   copilotkit?: { context?: CopilotKitEntry[]; actions?: CopilotKitAction[] };
 };
+
+// validate_request — gate on the teacher's newest message before call_model spends a turn (and
+// tool calls) on something this assistant can't do. Only judges when the run's latest message is
+// a fresh human ask; a run that resumes mid tool-loop or post-interrupt ends in something else,
+// so it passes through untouched rather than risk misjudging non-request input.
+export async function validateRequest(state: AgentStateShape) {
+  const last = state.messages[state.messages.length - 1];
+  if (!HumanMessage.isInstance(last)) return { outOfScope: false };
+
+  const request = typeof last.content === "string" ? last.content : JSON.stringify(last.content);
+  const check = await plainModel.withStructuredOutput(ScopeCheckSchema).invoke(scopeCheckPrompt(request));
+
+  if (check.inScope) return { outOfScope: false };
+  return {
+    outOfScope: true,
+    messages: [new AIMessage(check.declineMessage ?? "I can't help with that request.")],
+  };
+}
+
+export function afterValidate(state: AgentStateShape) {
+  return state.outOfScope ? END : "call_model";
+}
 
 // Readables the UI registered with useAgentContext arrive in state.copilotkit.context.
 function renderFrontendContext(state: AgentStateShape): string {
