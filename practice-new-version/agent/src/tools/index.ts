@@ -78,10 +78,14 @@ export const manage_emails = tool(
   {
     name: TOOL.MANAGE_EMAILS,
     description:
-      "Record classification and/or status on one or more emails. Batch every email you are " +
-      "triaging into a single call rather than one call each. When you classify, set all four " +
-      "classification fields together — a partial classification renders as a half-filled " +
-      "badge row in the inbox UI. Cannot mark an email replied: only sending a reply does that.",
+      "Record classification and/or status on one or more emails. Every classification must be " +
+      "read off that email's actual subject/body from get_emails, not guessed from a name or a " +
+      "topic the teacher mentioned — call get_emails first for any email you're about to " +
+      "classify that you haven't just fetched, especially when classifying more than one at " +
+      "once. Batch every email you are triaging into a single call rather than one call each. " +
+      "When you classify, set all four classification fields together — a partial " +
+      "classification renders as a half-filled badge row in the inbox UI. Cannot mark an email " +
+      "replied: only sending a reply does that.",
     schema: z.object({ patches: z.array(EmailPatchSchema) }),
   },
 );
