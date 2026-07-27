@@ -36,9 +36,10 @@ export const ClassificationSchema = z.object({
 });
 export type Classification = z.infer<typeof ClassificationSchema>;
 
-// Triage's own structured output: classification plus the KB-research routing decision.
-export const TriageSchema = ClassificationSchema.extend({ needsResearch: z.boolean() });
-export type Triage = z.infer<typeof TriageSchema>;
+// Triage's own structured output, decided separately from classification since classify_emails
+// (reused as-is by triage) has no notion of "does drafting a reply need KB grounding".
+export const NeedsResearchSchema = z.object({ needsResearch: z.boolean() });
+export type NeedsResearchCheck = z.infer<typeof NeedsResearchSchema>;
 
 export const DraftSchema = z.object({
   subject: z.string(),
@@ -48,6 +49,7 @@ export type Draft = z.infer<typeof DraftSchema>;
 
 // get_emails / count_emails share this filter shape.
 export const EmailFilterSchema = z.object({
+  id: z.string().optional(),
   status: StatusSchema.optional(),
   topic: TopicSchema.optional(),
   course: CourseSchema.optional(),

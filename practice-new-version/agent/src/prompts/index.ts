@@ -1,7 +1,7 @@
 import type { Email } from "../types/index.js";
 import { renderEmail } from "../utils/index.js";
 
-// Shared by classifyPrompt and triagePrompt, so both describe the fields the same way.
+// Used by classifyPrompt (classify_emails' own structured-output call).
 export const CLASSIFICATION_GUIDE = `
   - topic: what the email is asking for. Use "complex" only when it genuinely spans several
     (e.g. an absence AND a grade dispute AND a meeting request) — not merely because it is long.
@@ -62,9 +62,10 @@ const SCOPE_GUIDE = `
   - Anything unrelated to this inbox or the teacher's two math courses (general chit-chat,
     unrelated subjects, tasks with nothing to do with the inbox).
 
-  Reading/listing/counting/classifying/setting status on multiple emails at once are all in
-  scope — replying is the ONLY action limited to one email per request; don't extend that limit
-  to anything else just because it also mentions multiple emails.
+  Reading/listing/counting/classifying/setting status on multiple emails at once, or replying to
+  ONE email named or chosen from several, are all in scope — only a request to reply to more
+  than one email in the same call is not. Don't extend that one-email-per-reply limit to
+  anything else just because a request also mentions multiple emails.
 `;
 
 export function scopeCheckPrompt(request: string): string {
@@ -91,16 +92,16 @@ export function classifyPrompt(email: Email): string {
   return `${classificationInstructions()}\n\n${renderEmail(email)}`;
 }
 
-// Used by the compose subgraph's triage node — classification plus the KB-research routing
-// decision, since that pipeline needs both from one call.
-export function triagePrompt(email: Email): string {
+// Used by the compose subgraph's triage node, after classification is already on file (fresh or
+// pre-existing) — decides only the KB-research routing, not classification again.
+export function needsResearchPrompt(email: Email): string {
   return (
-    `${classificationInstructions()}\n\n` +
-    `Also set needsResearch: true when the reply must ground itself in school policy or ` +
-    `curriculum (late-work/re-grade policy, absence/makeup rules, grade weighting, calculator ` +
-    `rules, deadlines or penalties, common unit errors). false for mail a reply can handle from ` +
-    `the email alone, with no policy or curriculum claim to ground (e.g. a scheduling ack, a ` +
-    `plain FYI, a yes/no with nothing at stake).\n\n${renderEmail(email)}`
+    `Decide whether drafting a reply to this email needs to ground itself in school policy or ` +
+    `curriculum. Set needsResearch: true when it does (late-work/re-grade policy, absence/makeup ` +
+    `rules, grade weighting, calculator rules, deadlines or penalties, common unit errors). ` +
+    `false for mail a reply can handle from the email alone, with no policy or curriculum claim ` +
+    `to ground (e.g. a scheduling ack, a plain FYI, a yes/no with nothing at stake).\n\n` +
+    `${renderEmail(email)}`
   );
 }
 

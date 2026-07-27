@@ -73,6 +73,10 @@ function buildWhere(filter: EmailFilter): { clause: string; params: unknown[] } 
   const conditions: string[] = [];
   const params: unknown[] = [];
 
+  if (filter.id) {
+    params.push(filter.id);
+    conditions.push(`id = $${params.length}`);
+  }
   for (const key of ["status", "topic", "course", "workType", "urgency"] as const) {
     const value = filter[key];
     if (value !== undefined) {

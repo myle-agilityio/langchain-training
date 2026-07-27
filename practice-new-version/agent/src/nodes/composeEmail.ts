@@ -3,10 +3,10 @@ import { END, interrupt } from "@langchain/langgraph";
 
 import { plainModel } from "../config/model.js";
 import { COMPOSE_REPLY_ACTION } from "../constants/index.js";
-import { getContactProfile, getEmail, updateEmail } from "../db/index.js";
-import { draftPrompt, triagePrompt } from "../prompts/index.js";
-import { searchKnowledge } from "../rag/index.js";
-import { DraftSchema, TriageSchema, type Draft } from "../types/index.js";
+import { getContactProfile, getEmail } from "../db/index.js";
+import { draftPrompt, needsResearchPrompt } from "../prompts/index.js";
+import { classify_emails, get_emails, search_knowledge_base } from "../tools/index.js";
+import { DraftSchema, NeedsResearchSchema, type Draft, type Email, type KBArticle } from "../types/index.js";
 import { findReplyCall } from "../utils/index.js";
 
 type State = {
@@ -18,12 +18,20 @@ type State = {
   draft?: Draft;
 };
 
-// triage — resolve the email, classify it, persist the classification. A fixed node, not a
-// tool, so the model can't skip classification on a bare "reply this".
+// Reuses get_emails (rather than db/index.js's getEmail directly) so triage/research resolve an
+// id through the same path the model itself uses — one lookup implementation, not two.
+async function fetchEmailById(id: string): Promise<Email | null> {
+  const { emails } = JSON.parse(await get_emails.invoke({ filter: { id } })) as { emails: Email[] };
+  return emails[0] ?? null;
+}
+
+// triage — resolve the email, classify it (via classify_emails — skipped if already on file),
+// decide whether drafting needs KB research. A fixed node, not a tool, so the model can't skip
+// classification on a bare "reply this".
 export async function triage(state: State) {
   const call = findReplyCall(state.messages);
   const id = (call?.args as { id?: string } | undefined)?.id ?? "";
-  const email = id ? await getEmail(id) : null;
+  const email = id ? await fetchEmailById(id) : null;
 
   if (!email) {
     // Answer the dangling tool call so the model can recover.
@@ -39,11 +47,17 @@ export async function triage(state: State) {
     };
   }
 
-  const { needsResearch, ...classification } = await plainModel
-    .withStructuredOutput(TriageSchema)
-    .invoke(triagePrompt(email));
+  if (!email.classification) {
+    const { results } = JSON.parse(await classify_emails.invoke({ ids: [id] })) as {
+      results: { id: string; ok: boolean; classification?: Email["classification"] }[];
+    };
+    email.classification = results[0]?.classification;
+  }
 
-  await updateEmail(email.id, { classification });
+  const { needsResearch } = await plainModel
+    .withStructuredOutput(NeedsResearchSchema)
+    .invoke(needsResearchPrompt(email));
+
   return { emailId: email.id, needsResearch };
 }
 
@@ -52,14 +66,13 @@ export function afterTriage(state: State) {
   return state.needsResearch ? "research" : "write_draft";
 }
 
-// research — pgvector search for the policy the draft must not invent, plus sender profile.
+// research — search_knowledge_base for the policy the draft must not invent, plus sender profile.
 export async function research(state: State) {
-  const email = await getEmail(state.emailId);
+  const email = await fetchEmailById(state.emailId);
   if (!email) return { kbContext: "", senderContext: "" };
 
-  const articles = await searchKnowledge(
-    `${email.subject} ${email.body} ${Object.values(email.classification ?? {}).join(" ")}`,
-  );
+  const query = `${email.subject} ${email.body} ${Object.values(email.classification ?? {}).join(" ")}`;
+  const articles = JSON.parse(await search_knowledge_base.invoke({ query })) as KBArticle[];
   const kbContext = articles.length
     ? articles.map((a) => `## ${a.title}\n${a.content}`).join("\n\n")
     : "No relevant articles found. Do not state any policy you cannot ground here.";
