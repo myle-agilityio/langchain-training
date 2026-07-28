@@ -1,8 +1,11 @@
-# CopilotKit <> LangGraph Starter
+# AI Email Assistant — CopilotKit <> LangGraph (Practice, Restart)
 
-This is a starter template for building AI agents using [LangGraph](https://www.langchain.com/langgraph) and [CopilotKit](https://copilotkit.ai). It provides a modern Next.js application with an integrated LangGraph agent (TypeScript) to be built on top of.
+An inbox triage assistant for a high school math teacher, built with [LangGraph](https://www.langchain.com/langgraph) and [CopilotKit](https://copilotkit.ai). Classifies incoming email, grounds answers in a school-policy knowledge base, and drafts replies for the teacher to approve before anything sends.
 
-https://github.com/user-attachments/assets/47761912-d46a-4fb3-b9bd-cb41ddd02e34
+> **This is a from-scratch rebuild of the `practice/` project.** The UI, test scenarios, and
+> config were carried over; the agent was rebuilt. See [CLAUDE.md](./CLAUDE.md) for
+> collaboration rules and [docs/TEST-SCENARIOS.md](./docs/TEST-SCENARIOS.md) for what the
+> assistant is expected to handle.
 
 ## Prerequisites
 
@@ -13,6 +16,9 @@ https://github.com/user-attachments/assets/47761912-d46a-4fb3-b9bd-cb41ddd02e34
   - [yarn](https://classic.yarnpkg.com/lang/en/docs/install/)
   - [bun](https://bun.sh/)
 - OpenAI API Key (for the LangGraph agent)
+- A Postgres database with the `pgvector` extension available (local install, or hosted —
+  Neon/Supabase both support it). Neon enables `pgvector` by default; the app creates the
+  extension, tables, and indexes itself on first connect.
 
 ## Getting Started
 
@@ -32,7 +38,8 @@ yarn install
 bun install
 ```
 
-This also installs the agent dependencies via `npm install` inside `agent/`.
+This also installs the agent dependencies (via the `postinstall` script, which runs
+`npm install` inside `agent/`).
 
 2. Set up your environment variables:
 
@@ -40,11 +47,31 @@ This also installs the agent dependencies via `npm install` inside `agent/`.
 cp .env.example .env
 ```
 
-Then edit the `.env` file and add your OpenAI API key:
+Then edit the `.env` file and add your OpenAI API key and database URL:
 
 ```bash
 OPENAI_API_KEY=your-openai-api-key-here
+DATABASE_URL=postgresql://user:password@host:5432/dbname
 ```
+
+Everything persistent — the inbox, contact profiles, the embedded knowledge base, and graph
+checkpoints — lives in this one Postgres database. Tables, indexes, and the `vector`
+extension are created automatically on first connect; there's no migration step to run.
+
+#### Getting a `DATABASE_URL`
+
+Any Postgres with `pgvector` works. Pick one:
+
+- **Neon (hosted, recommended — free tier, no local install):**
+  1. Sign in at [console.neon.tech](https://console.neon.tech) and create a project.
+  2. Open the project's **Dashboard → Connection Details**.
+  3. Select the **pooled connection** (host contains `-pooler`) and copy the full
+     `postgresql://...` string — it already includes `sslmode=require`.
+  4. Paste it as `DATABASE_URL` in `.env`.
+- **Local Postgres:** install Postgres (with the `pgvector` extension available), create a
+  database, then use `postgresql://user:password@localhost:5432/dbname`.
+- **Supabase:** Project Settings → Database → Connection string (URI). Supabase ships
+  `pgvector` pre-installed.
 
 3. Start the development server:
 
@@ -62,7 +89,7 @@ yarn dev
 bun run dev
 ```
 
-This will start both the UI and agent servers concurrently.
+This will start both the UI (:3000) and agent (:8123) servers concurrently.
 
 ## Available Scripts
 
@@ -72,6 +99,8 @@ The following scripts can also be run using your preferred package manager:
 - `dev:debug` - Starts development servers with debug logging enabled
 - `dev:ui` - Starts only the Next.js UI server
 - `dev:agent` - Starts only the LangGraph agent server
+- `typecheck` - Type-checks the Next.js app (`npm run typecheck --prefix agent` for the agent)
+- `lint` - Lints the Next.js app
 - `build` - Builds the Next.js application for production
 - `start` - Starts the production server
 - `install:agent` - Installs agent (Node) dependencies
@@ -79,27 +108,36 @@ The following scripts can also be run using your preferred package manager:
 ## Project Structure
 
 ```
-├── src/                         # Next.js frontend source
+├── src/                              # Next.js frontend
 │   ├── app/
-│   │   ├── page.tsx             # Main page
-│   │   └── api/copilotkit/      # CopilotKit API route
+│   │   ├── page.tsx                  # Main page (chat + inbox side-by-side)
+│   │   ├── api/copilotkit/           # CopilotKit runtime route
+│   │   ├── api/emails/               # Reads the inbox directly from Postgres
+│   │   └── declarative-generative-ui/ # A2UI catalog: definitions + renderers
 │   ├── components/
-│   │   ├── example-canvas/      # Todo list UI
-│   │   ├── example-layout/      # Layout: chat + canvas side-by-side
-│   │   └── generative-ui/       # Example generative UI components
+│   │   ├── email-inbox/              # Inbox list, detail view, compose form
+│   │   ├── example-layout/           # Layout: chat + canvas side-by-side
+│   │   └── generative-ui/            # Generative UI components
 │   └── hooks/
-├── agent/                       # LangGraph TypeScript agent
-│   ├── src/
-│   │   ├── agent.ts             # Agent entry point (createAgent)
-│   │   ├── todos.ts             # Todo tools and state schema
-│   │   ├── query.ts             # Example data query tool
-│   │   ├── a2ui.ts              # A2UI operation helpers
-│   │   ├── a2ui_fixed_schema.ts # Fixed-schema A2UI tool (flights)
-│   │   └── a2ui_dynamic_schema.ts # Dynamic-schema A2UI tool
-│   └── langgraph.json
-├── scripts/                     # Dev-server helper scripts
-│   └── copilotkit-dev-infra.mjs
-├── public/                      # Static assets
+│       └── use-shared-inbox.tsx      # Inbox data provider
+├── agent/                            # LangGraph TypeScript agent
+│   └── src/
+│       ├── agent.ts                  # Agent entry point
+│       ├── graphs/                   # Graph definitions (main graph, compose-email subgraph)
+│       ├── nodes/                    # Node implementations
+│       ├── prompts/                  # Every prompt string
+│       ├── tools/                    # Tool definitions (emails, knowledge base, A2UI)
+│       ├── state/                    # StateSchema definitions
+│       ├── types/                    # Zod schemas + interfaces
+│       ├── db/                       # Postgres pool, checkpointer, cross-thread store
+│       ├── rag/                      # pgvector knowledge base (seed + semantic search)
+│       ├── config/                   # Env validation + model instances
+│       ├── constants/                # Tool names, table names
+│       └── utils/
+├── docs/
+│   └── TEST-SCENARIOS.md             # Scenarios the assistant is expected to handle
+├── scripts/                          # Dev-server helper scripts
+├── public/                           # Static assets
 ├── next.config.ts
 ├── tsconfig.json
 └── package.json
@@ -107,36 +145,28 @@ The following scripts can also be run using your preferred package manager:
 
 ## A2UI — Agent-to-User Interface
 
-This starter includes [A2UI](https://a2ui.org/specification/) support, allowing the agent to generate rich, interactive UI surfaces declaratively. Instead of returning plain text, the agent sends a JSON description of the UI it wants to render, and the frontend turns it into real components.
+The agent can generate rich, interactive UI surfaces declaratively via [A2UI](https://a2ui.org/specification/) instead of returning plain text: it sends a JSON description of the UI it wants, and the frontend turns it into real components.
 
 ### How it works
 
-A2UI uses three concepts:
+1. **Catalog** — component definitions (schema) paired with React renderers, registered once
+   in `layout.tsx` via `<CopilotKit a2ui={{ catalog: demonstrationCatalog }}>`.
+2. **Surface** — a rendered UI instance the agent creates and binds data to.
+3. **Operations** — the agent's `generate_a2ui` tool (`agent/src/tools/a2ui.ts`) returns
+   `render(operations=[...])`, streamed to the frontend via helpers in `agent/src/utils/a2ui.ts`.
 
-1. **Catalog** — a set of component definitions (schema) paired with React renderers. Registered once in `layout.tsx` via `<CopilotKitProvider a2ui={{ catalog: demonstrationCatalog }}>`.
-2. **Surface** — a rendered UI instance. The agent creates a surface, sets its components, and binds data to it.
-3. **Operations** — the agent returns `render(operations=[...])` from a tool, which the middleware streams to the frontend.
-
-### Two patterns
-
-| Pattern            | Description                                                                   | Agent tool       | Frontend                                    |
-| ------------------ | ----------------------------------------------------------------------------- | ---------------- | ------------------------------------------- |
-| **Fixed schema**   | Pre-defined component layout. Only the data changes per invocation.           | `search_flights` | Schema in `a2ui/schemas/flight_schema.json` |
-| **Dynamic schema** | A secondary LLM generates both components and data based on the conversation. | `generate_a2ui`  | Components decided at runtime               |
-
-Both patterns use the same catalog on the frontend — the difference is where the component tree comes from.
+Components and data are decided at runtime by the agent — there's no fixed-schema variant in
+this project.
 
 ### Key files
 
 | Purpose                              | Path                                               |
-| ------------------------------------ | -------------------------------------------------- |
+| ------------------------------------ | --------------------------------------------------- |
 | Catalog definitions (Zod schemas)    | `src/app/declarative-generative-ui/definitions.ts` |
 | Catalog renderers (React components) | `src/app/declarative-generative-ui/renderers.tsx`  |
 | Catalog registration                 | `src/app/layout.tsx`                               |
-| Fixed-schema agent tool              | `agent/src/a2ui_fixed_schema.ts`                   |
-| Dynamic-schema agent tool            | `agent/src/a2ui_dynamic_schema.ts`                 |
-| Flight schema JSON                   | `agent/src/a2ui/schemas/flight_schema.json`        |
-| Showcase config                      | `showcase.json`                                    |
+| A2UI agent tool                      | `agent/src/tools/a2ui.ts`                          |
+| A2UI operation helpers               | `agent/src/utils/a2ui.ts`                          |
 
 ### Adding a custom component
 
@@ -159,16 +189,7 @@ Both patterns use the same catalog on the frontend — the difference is where t
 
    Renderers are type-checked against the definitions — TypeScript will error if props don't match.
 
-3. **Use it** from the agent. The component is automatically available to both fixed-schema templates and the dynamic-schema LLM.
-
-### Adding a new fixed-schema tool
-
-1. Create a JSON schema file in `agent/src/a2ui/schemas/` describing the component tree.
-2. Create a TypeScript tool that loads the schema with `loadSchema()` and returns `render([...])` with your data. See `a2ui_fixed_schema.ts` for the pattern.
-
-### Showcase mode
-
-`showcase.json` controls which suggestion pills are visually highlighted. Set `"showcase": "a2ui"` to highlight the A2UI demos, or `"showcase": "default"` for no highlights. This is configured automatically when scaffolding via `npx copilotkit create --framework a2ui`.
+3. **Use it** from the agent — the component becomes available to `generate_a2ui` automatically.
 
 ### Further reading
 
@@ -177,6 +198,8 @@ Both patterns use the same catalog on the frontend — the difference is where t
 
 ## Documentation
 
+- [CLAUDE.md](./CLAUDE.md) - collaboration rules and where things live
+- [Test Scenarios](./docs/TEST-SCENARIOS.md) - scenarios the assistant is expected to handle
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraph/) - Learn more about LangGraph and its features
 - [CopilotKit Documentation](https://docs.copilotkit.ai) - Explore CopilotKit's capabilities
 
