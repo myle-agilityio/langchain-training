@@ -72,6 +72,8 @@ Any Postgres with `pgvector` works. Pick one:
   database, then use `postgresql://user:password@localhost:5432/dbname`.
 - **Supabase:** Project Settings → Database → Connection string (URI). Supabase ships
   `pgvector` pre-installed.
+- **Ask the project owner:** email My Le (my.le@asnet.com.vn) or Slack (my.le) for a shared    
+  dev `DATABASE_URL`.
 
 3. Start the development server:
 
