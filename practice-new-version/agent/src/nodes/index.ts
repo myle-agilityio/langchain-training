@@ -1,5 +1,5 @@
 import { AIMessage, HumanMessage, SystemMessage, ToolMessage, type BaseMessage } from "@langchain/core/messages";
-import { END, type LangGraphRunnableConfig, type NodeError } from "@langchain/langgraph";
+import { Command, END, type LangGraphRunnableConfig, type NodeError } from "@langchain/langgraph";
 
 import { model, plainModel } from "../config/model.js";
 import { TOOL } from "../constants/index.js";
@@ -16,10 +16,7 @@ type AgentStateShape = {
   copilotkit?: { context?: CopilotKitEntry[]; actions?: CopilotKitAction[] };
 };
 
-// validate_request — gate on the teacher's newest message before call_model spends a turn (and
-// tool calls) on something this assistant can't do. Only judges when the run's latest message is
-// a fresh human ask; a run that resumes mid tool-loop or post-interrupt ends in something else,
-// so it passes through untouched rather than risk misjudging non-request input.
+// Validates if the request is within scope before processing
 export async function validateRequest(state: AgentStateShape) {
   const last = state.messages[state.messages.length - 1];
   if (!HumanMessage.isInstance(last)) return { outOfScope: false };
@@ -36,6 +33,7 @@ export async function validateRequest(state: AgentStateShape) {
   };
 }
 
+// Routes to model or ends if out of scope
 export function afterValidate(state: AgentStateShape) {
   return state.outOfScope ? END : "call_model";
 }
@@ -61,7 +59,7 @@ export function composeEmailErrorHandler(state: AgentStateShape, error: NodeErro
   });
 }
 
-// Readables the UI registered with useAgentContext arrive in state.copilotkit.context.
+// Formats UI context for the prompt
 function renderFrontendContext(state: AgentStateShape): string {
   const entries = state.copilotkit?.context ?? [];
   if (entries.length === 0) return "";
@@ -72,8 +70,7 @@ function renderFrontendContext(state: AgentStateShape): string {
   return `\n\nContext from the app UI:\n${lines.join("\n")}`;
 }
 
-// Frontend tools (toggleTheme, enableAppMode, ...) arrive as JSON-schema actions; wrap them
-// in OpenAI tool format so bindTools accepts them alongside the backend tools.
+// Wraps frontend actions in OpenAI tool format
 function frontendTools(state: AgentStateShape) {
   return (state.copilotkit?.actions ?? []).map((a) =>
     "function" in a
@@ -89,7 +86,7 @@ function frontendTools(state: AgentStateShape) {
   );
 }
 
-// The model node: system prompt + UI context, backend tools + frontend tools, one invoke.
+// Invokes model with system prompt, context, and available tools
 export async function callModel(
   state: AgentStateShape,
   config: LangGraphRunnableConfig,
@@ -106,8 +103,7 @@ export async function callModel(
 
 const EXECUTABLE_NAMES = new Set<string>(executableTools.map((t) => t.name));
 
-// reply_to_email → compose subgraph; backend tool → tools; frontend tool or no call → END
-// (a run ending with a frontend tool call is how the browser knows to execute it).
+// Routes tool calls to compose_email, tools, or END
 export function routeAfterModel(state: { messages: BaseMessage[] }) {
   const last = state.messages[state.messages.length - 1];
   if (!AIMessage.isInstance(last)) return END;
