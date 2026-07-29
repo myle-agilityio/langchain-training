@@ -1,4 +1,5 @@
-import { AIMessage, HumanMessage, SystemMessage, ToolMessage, type BaseMessage } from "@langchain/core/messages";
+import { AIMessage, HumanMessage, ToolMessage, type BaseMessage } from "@langchain/core/messages";
+import { ChatPromptTemplate, MessagesPlaceholder } from "@langchain/core/prompts";
 import { Command, END, type LangGraphRunnableConfig, type NodeError } from "@langchain/langgraph";
 
 import { model, plainModel } from "../config/model.js";
@@ -86,16 +87,27 @@ function frontendTools(state: AgentStateShape) {
   );
 }
 
+// System prompt + message history, as a template rather than manual array-spreading — the
+// placeholder marks exactly where state.messages goes, instead of `[new SystemMessage(...), ...]`.
+const callModelPrompt = ChatPromptTemplate.fromMessages([
+  ["system", SYSTEM_PROMPT + "{dateLine}{frontendContext}"],
+  new MessagesPlaceholder("messages"),
+]);
+
 // Invokes model with system prompt, context, and available tools
 export async function callModel(
   state: AgentStateShape,
   config: LangGraphRunnableConfig,
 ) {
-  const prompt = SYSTEM_PROMPT + currentDateLine() + renderFrontendContext(state);
   const bound = model.bindTools!([...modelTools, ...frontendTools(state)]);
+  const chain = callModelPrompt.pipe(bound);
   // config threaded through so token callbacks stream assistant text into the chat UI.
-  const response = await bound.invoke(
-    [new SystemMessage(prompt), ...state.messages],
+  const response = await chain.invoke(
+    {
+      dateLine: currentDateLine(),
+      frontendContext: renderFrontendContext(state),
+      messages: state.messages,
+    },
     config,
   );
   return { messages: [response] };
