@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAgent, useAgentContext, useCopilotKit } from "@copilotkit/react-core/v2";
 import type { Email } from "@/types/email";
 import { useSharedInbox } from "@/hooks/use-shared-inbox";
@@ -57,10 +57,21 @@ export function EmailInbox() {
     copilotkit.runAgent({ agent });
   };
 
-  // Block a second draft while the agent is mid-run OR paused on an unresolved interrupt:
-  // after the pause the run has finished (isRunning is false), but pendingInterrupts stays
-  // populated until the approval card is answered.
-  const awaitingApproval = (agent.pendingInterrupts?.length ?? 0) > 0;
+  // Block a second draft while the agent is mid-run OR paused on an unresolved interrupt. Can't
+  // use agent.pendingInterrupts here — the LangGraph bridge signals interrupts via a CUSTOM
+  // "on_interrupt" event (see use-email-agent.tsx), never via RUN_FINISHED's outcome field, so
+  // that property never populates. Track the same event ourselves instead.
+  const [awaitingApproval, setAwaitingApproval] = useState(false);
+  useEffect(() => {
+    const subscription = agent.subscribe({
+      onCustomEvent: ({ event }) => {
+        if (event.name === "on_interrupt") setAwaitingApproval(true);
+      },
+      onRunStartedEvent: () => setAwaitingApproval(false),
+      onRunFailed: () => setAwaitingApproval(false),
+    });
+    return () => subscription.unsubscribe();
+  }, [agent]);
   const agentBusy = agent.isRunning || awaitingApproval;
 
   return (
