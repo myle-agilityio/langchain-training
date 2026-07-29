@@ -55,7 +55,7 @@ export function composeEmailErrorHandler(state: AgentStateShape, error: NodeErro
           ]
         : [],
     },
-    goto: "call_model",
+    goto: END,
   });
 }
 
