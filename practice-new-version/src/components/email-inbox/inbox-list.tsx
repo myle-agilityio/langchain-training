@@ -290,7 +290,7 @@ export function InboxList({
                         Mark as read
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        disabled={isUnread}
+                        disabled={isUnread || email.status === "replied"}
                         onSelect={() => onToggleRead(email)}
                       >
                         <Mail className="h-3.5 w-3.5" />

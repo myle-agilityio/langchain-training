@@ -93,10 +93,10 @@ export function EmailInbox() {
     }
   };
 
-  // Per-row toggle: flip exactly between unread/read. A replied or flagged_for_followup email
-  // reverts to unread (mirrors marking a handled thread as needing attention again), matching
-  // how Gmail-style clients treat "mark unread" as always available, not read-state-only.
+  // Per-row toggle: flip between unread/read. A replied email can't go back to unread (the
+  // reply already happened); flagged_for_followup still can.
   const toggleRead = (email: Email) => {
+    if (email.status === "replied") return;
     patchEmail(email.id, { status: email.status === "unread" ? "read" : "unread" });
   };
 

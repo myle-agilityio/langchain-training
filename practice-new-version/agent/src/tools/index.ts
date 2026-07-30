@@ -96,6 +96,15 @@ export const update_email_status = tool(
   async (input: { patches: z.infer<typeof StatusPatchSchema>[] }) => {
     const results = await Promise.all(
       input.patches.map(async (patch) => {
+        const current = await getEmail(patch.id);
+        if (!current) return { id: patch.id, ok: false as const, error: "no such email" };
+        if (current.status === "replied" && patch.status === "unread") {
+          return {
+            id: patch.id,
+            ok: false as const,
+            error: "already replied — a replied email cannot be marked unread",
+          };
+        }
         const email = await updateEmail(patch.id, { status: patch.status });
         return email
           ? { id: patch.id, ok: true as const, status: email.status }
@@ -115,7 +124,7 @@ export const update_email_status = tool(
     description:
       "Set status (unread/read/flagged_for_followup) on one or more emails. Batch every email " +
       "into a single call rather than one call each. Cannot mark an email replied: only sending " +
-      "a reply does that.",
+      "a reply does that. A replied email cannot be marked unread.",
     schema: z.object({ patches: z.array(StatusPatchSchema) }),
   },
 );
