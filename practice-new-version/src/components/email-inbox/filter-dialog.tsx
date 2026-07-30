@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Course, EmailTopic, Urgency, WorkType } from "@/types/email";
+import type { Course, EmailStatus, EmailTopic, Urgency, WorkType } from "@/types/email";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,13 @@ const URGENCY_LABEL: Record<Urgency, string> = {
   high: "High",
   medium: "Medium",
   low: "Low",
+};
+
+const STATUS_LABEL: Record<EmailStatus, string> = {
+  unread: "Unread",
+  read: "Read",
+  replied: "Replied",
+  flagged_for_followup: "Follow up",
 };
 
 // Native <select>/<option> popups need an explicit, opaque background + text color — they don't
@@ -73,7 +80,23 @@ export function FilterDialog({ open, onOpenChange, filters, onApply }: FilterDia
         </DialogHeader>
 
         <div className="space-y-3">
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2">
+            <Field label="Status">
+              <select
+                value={draft.status ?? ""}
+                onChange={(e) => set("status", (e.target.value || undefined) as EmailStatus)}
+                className={selectClassName}
+              >
+                <option value="" className={optionClassName}>
+                  Any
+                </option>
+                {(Object.keys(STATUS_LABEL) as EmailStatus[]).map((s) => (
+                  <option key={s} value={s} className={optionClassName}>
+                    {STATUS_LABEL[s]}
+                  </option>
+                ))}
+              </select>
+            </Field>
             <Field label="Urgency">
               <select
                 value={draft.urgency ?? ""}

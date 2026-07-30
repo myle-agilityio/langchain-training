@@ -33,8 +33,10 @@ export function EmailInbox() {
         "to filter their view; don't just list the emails in chat. Each call replaces the " +
         "current filters with exactly the fields given; call with no fields to clear all " +
         "filters. Dates are ISO (YYYY-MM-DD), inclusive. This only changes what the teacher " +
-        "sees on screen — to read emails yourself, use get_emails instead.",
+        "sees on screen — to read emails yourself, use get_emails instead. When" +
+        "the teacher ask about unreplied emails, filter the read emails, not unread ones.",
       parameters: z.object({
+        status: z.enum(["unread", "read", "replied", "flagged_for_followup"]).optional(),
         urgency: z.enum(["low", "medium", "high"]).optional(),
         course: z.enum(["math_11", "math_12"]).optional(),
         topic: z

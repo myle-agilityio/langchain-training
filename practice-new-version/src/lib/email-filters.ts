@@ -1,6 +1,7 @@
-import type { Course, Email, EmailTopic, Urgency, WorkType } from "@/types/email";
+import type { Course, Email, EmailStatus, EmailTopic, Urgency, WorkType } from "@/types/email";
 
 export interface EmailFilters {
+  status?: EmailStatus;
   urgency?: Urgency;
   course?: Course;
   topic?: EmailTopic;
@@ -24,6 +25,7 @@ function includes(haystack: string, needle: string): boolean {
 
 export function filterEmails(emails: Email[], filters: EmailFilters): Email[] {
   return emails.filter((email) => {
+    if (filters.status && email.status !== filters.status) return false;
     if (filters.urgency && email.classification?.urgency !== filters.urgency) return false;
     if (filters.course && email.classification?.course !== filters.course) return false;
     if (filters.topic && email.classification?.topic !== filters.topic) return false;
