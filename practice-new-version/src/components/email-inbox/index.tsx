@@ -8,7 +8,7 @@ import { InboxList } from "./inbox-list";
 import { EmailDetail } from "./email-detail";
 
 export function EmailInbox() {
-  const { emails, isLoading, isRefreshing, refresh, patchEmail } = useSharedInbox();
+  const { emails, isLoading, isRefreshing, refresh, patchEmail, patchEmails } = useSharedInbox();
   const { agent } = useAgent();
   // Run through the CopilotKit core, not agent.runAgent() directly: the core's runAgent is the
   // same interrupt-aware path CopilotChat uses, so compose_reply's pause is routed to
@@ -35,6 +35,25 @@ export function EmailInbox() {
     if (email.status === "unread") {
       patchEmail(email.id, { status: "read" });
     }
+  };
+
+  // Per-row toggle: flip exactly between unread/read. A replied or flagged_for_followup email
+  // reverts to unread (mirrors marking a handled thread as needing attention again), matching
+  // how Gmail-style clients treat "mark unread" as always available, not read-state-only.
+  const toggleRead = (email: Email) => {
+    patchEmail(email.id, { status: email.status === "unread" ? "read" : "unread" });
+  };
+
+  // Bulk actions only ever move emails between unread and read — never touch replied/flagged
+  // ones, so clicking either button can't silently erase a reply/follow-up badge in bulk.
+  const markAllRead = () => {
+    const ids = emails.filter((e) => e.status === "unread").map((e) => e.id);
+    patchEmails(ids, { status: "read" });
+  };
+
+  const markAllUnread = () => {
+    const ids = emails.filter((e) => e.status === "read").map((e) => e.id);
+    patchEmails(ids, { status: "unread" });
   };
 
   const sendManualReply = (id: string, subject: string, body: string) => {
@@ -84,6 +103,9 @@ export function EmailInbox() {
           onRefresh={refresh}
           selectedId={selectedId}
           onSelect={selectEmail}
+          onToggleRead={toggleRead}
+          onMarkAllRead={markAllRead}
+          onMarkAllUnread={markAllUnread}
         />
       </div>
       <div className="flex-1 min-w-0 overflow-y-auto">

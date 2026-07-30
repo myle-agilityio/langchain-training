@@ -44,10 +44,22 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
-  const { id, patch } = (await request.json()) as {
-    id: string;
-    patch: Partial<Email>;
-  };
+  const body = (await request.json()) as
+    | { ids: string[]; patch: Partial<Email> }
+    | { id: string; patch: Partial<Email> };
+
+  // Bulk path — mark all as read/unread from the inbox toolbar. Status-only on purpose: a
+  // classification/reply patch always targets one specific email, never a batch.
+  if ("ids" in body) {
+    const { ids, patch } = body;
+    const { rows: updated } = await query<EmailRow>(
+      `UPDATE emails SET status = $1 WHERE id = ANY($2::text[]) RETURNING ${EMAIL_COLUMNS}`,
+      [patch.status, ids],
+    );
+    return NextResponse.json({ emails: updated.map(toEmail) });
+  }
+
+  const { id, patch } = body;
 
   const { rows } = await query<EmailRow>(
     `UPDATE emails SET

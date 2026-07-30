@@ -19,6 +19,7 @@ interface SharedInboxValue {
   isRefreshing: boolean;
   refresh: () => Promise<void>;
   patchEmail: (id: string, patch: Partial<Email>) => Promise<void>;
+  patchEmails: (ids: string[], patch: Partial<Email>) => Promise<void>;
 }
 
 const SharedInboxContext = createContext<SharedInboxValue | null>(null);
@@ -100,6 +101,26 @@ export function SharedInboxProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Bulk sibling of patchEmail — one PATCH for the whole "mark all as read/unread" action
+  // instead of N racing requests, one per row.
+  const patchEmails = useCallback(async (ids: string[], patch: Partial<Email>) => {
+    if (ids.length === 0) return;
+    const idSet = new Set(ids);
+    setEmails((current) =>
+      current.map((email) => (idSet.has(email.id) ? { ...email, ...patch } : email)),
+    );
+    const res = await fetch("/api/emails", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids, patch }),
+    });
+    if (res.ok) {
+      const data = (await res.json()) as { emails: Email[] };
+      const updated = new Map(data.emails.map((email) => [email.id, email]));
+      setEmails((current) => current.map((email) => updated.get(email.id) ?? email));
+    }
+  }, []);
+
   const value = useMemo(
     () => ({
       emails,
@@ -107,8 +128,9 @@ export function SharedInboxProvider({ children }: { children: ReactNode }) {
       isRefreshing,
       refresh: refreshManually,
       patchEmail,
+      patchEmails,
     }),
-    [emails, isLoading, isRefreshing, refreshManually, patchEmail],
+    [emails, isLoading, isRefreshing, refreshManually, patchEmail, patchEmails],
   );
 
   return (
