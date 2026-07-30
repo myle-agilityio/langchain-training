@@ -99,6 +99,8 @@ export const IN_SCOPE_GUIDE = `
     anything, not changing what an email says), it's in scope.
   - Updating an email's status (unread/read/flagged for follow-up) — in scope for any number of
     emails at once, same as above.
+  - Controlling the inbox view — applying or clearing the on-screen filters (by urgency, grade,
+    topic, sender, dates, or text) — in scope.
   - Drafting a reply — in scope for one named or selected email per request. Always shown to the
     teacher for approval before sending; never sent unreviewed, never pre-approved for future
     replies.

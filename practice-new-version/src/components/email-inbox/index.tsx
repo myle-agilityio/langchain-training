@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useAgent, useAgentContext, useCopilotKit } from "@copilotkit/react-core/v2";
+import { z } from "zod";
+import { useAgent, useAgentContext, useCopilotKit, useFrontendTool } from "@copilotkit/react-core/v2";
 import type { Email } from "@/types/email";
 import { useSharedInbox } from "@/hooks/use-shared-inbox";
 import { EMPTY_FILTERS, filterEmails, hasActiveFilters, type EmailFilters } from "@/lib/email-filters";
@@ -21,6 +22,55 @@ export function EmailInbox() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const isFiltered = hasActiveFilters(filters);
   const visibleEmails = useMemo(() => filterEmails(emails, filters), [emails, filters]);
+
+  // Same fields the filter dialog offers, so the agent can do anything the teacher can here.
+  useFrontendTool(
+    {
+      name: "filterInbox",
+      description:
+        "Set the filters on the inbox list the teacher is looking at. When they ask to SEE a " +
+        "subset of the inbox — \"show me...\", \"only show...\", \"let me see...\" — call this " +
+        "to filter their view; don't just list the emails in chat. Each call replaces the " +
+        "current filters with exactly the fields given; call with no fields to clear all " +
+        "filters. Dates are ISO (YYYY-MM-DD), inclusive. This only changes what the teacher " +
+        "sees on screen — to read emails yourself, use get_emails instead.",
+      parameters: z.object({
+        urgency: z.enum(["low", "medium", "high"]).optional(),
+        course: z.enum(["math_11", "math_12"]).optional(),
+        topic: z
+          .enum([
+            "question",
+            "submission",
+            "review_request",
+            "grade_dispute",
+            "absence",
+            "scheduling",
+            "admin",
+            "complex",
+          ])
+          .optional(),
+        workType: z
+          .enum(["practice", "exercise", "homework", "quiz", "test", "project"])
+          .optional(),
+        from: z.string().optional(),
+        subject: z.string().optional(),
+        hasWords: z.string().optional(),
+        receivedAfter: z.string().optional(),
+        receivedBefore: z.string().optional(),
+      }),
+      handler: async (args) => {
+        const next = Object.fromEntries(
+          Object.entries(args).filter(([, v]) => v !== undefined && v !== ""),
+        ) as EmailFilters;
+        setFilters(next);
+        const visible = filterEmails(emails, next);
+        return hasActiveFilters(next)
+          ? `Filters applied — ${visible.length} of ${emails.length} emails visible.`
+          : "Filters cleared — all emails visible.";
+      },
+    },
+    [emails],
+  );
 
   const selected = emails.find((e) => e.id === selectedId) ?? null;
 
