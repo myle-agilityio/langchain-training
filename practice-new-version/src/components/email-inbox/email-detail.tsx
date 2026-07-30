@@ -52,7 +52,7 @@ export function EmailDetail({
 
   return (
     // pt-20 clears the fixed Chat/App toggle pinned at the panel's top-right.
-    <div className="max-w-2xl mx-auto px-8 pb-8 pt-20">
+    <div className="mx-auto px-8 pb-8 pt-20">
       <div className="mb-6">
         <h1 className="text-xl font-bold text-[var(--foreground)]">
           {email.subject}

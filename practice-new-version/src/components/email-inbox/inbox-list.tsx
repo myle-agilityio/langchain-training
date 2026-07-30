@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail, MailOpen, MoreVertical, RefreshCw } from "lucide-react";
+import { Filter, Mail, MailOpen, MoreVertical, RefreshCw } from "lucide-react";
 import type { Course, Email, EmailTopic, Urgency, WorkType } from "@/types/email";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -71,6 +71,7 @@ const URGENCY_VARIANT: Record<Urgency, "tone" | "toneSolid"> = {
 
 interface InboxListProps {
   emails: Email[];
+  totalCount: number;
   isLoading: boolean;
   isRefreshing: boolean;
   onRefresh: () => void;
@@ -79,6 +80,8 @@ interface InboxListProps {
   onToggleRead: (email: Email) => void;
   onMarkAllRead: () => void;
   onMarkAllUnread: () => void;
+  isFiltered: boolean;
+  onOpenFilters: () => void;
 }
 
 function InboxSkeleton() {
@@ -104,6 +107,7 @@ function InboxSkeleton() {
 
 export function InboxList({
   emails,
+  totalCount,
   isLoading,
   isRefreshing,
   onRefresh,
@@ -112,6 +116,8 @@ export function InboxList({
   onToggleRead,
   onMarkAllRead,
   onMarkAllUnread,
+  isFiltered,
+  onOpenFilters,
 }: InboxListProps) {
   const hasUnread = emails.some((e) => e.status === "unread");
   const hasRead = emails.some((e) => e.status === "read");
@@ -129,10 +135,31 @@ export function InboxList({
             <span className="text-[var(--muted-foreground)] font-normal">
               {/* A count of 0 while loading reads as "empty inbox", a different claim
                   than "not known yet". */}
-              {isLoading ? "…" : `(${emails.length})`}
+              {isLoading
+                ? "…"
+                : isFiltered
+                  ? `(${emails.length} of ${totalCount})`
+                  : `(${emails.length})`}
             </span>
           </h2>
           <div className="flex items-center gap-0.5">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-7 w-7 relative",
+                isFiltered ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]",
+              )}
+              onClick={onOpenFilters}
+              disabled={isLoading}
+              title="Filter inbox"
+              aria-label="Filter inbox"
+            >
+              <Filter className="h-3.5 w-3.5" />
+              {isFiltered && (
+                <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
+              )}
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button

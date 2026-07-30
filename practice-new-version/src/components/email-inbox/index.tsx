@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAgent, useAgentContext, useCopilotKit } from "@copilotkit/react-core/v2";
 import type { Email } from "@/types/email";
 import { useSharedInbox } from "@/hooks/use-shared-inbox";
+import { EMPTY_FILTERS, filterEmails, hasActiveFilters, type EmailFilters } from "@/lib/email-filters";
 import { InboxList } from "./inbox-list";
 import { EmailDetail } from "./email-detail";
+import { FilterDialog } from "./filter-dialog";
 
 export function EmailInbox() {
   const { emails, isLoading, isRefreshing, refresh, patchEmail, patchEmails } = useSharedInbox();
@@ -15,6 +17,10 @@ export function EmailInbox() {
   // useEmailAgent's useInterrupt card rather than left unhandled.
   const { copilotkit } = useCopilotKit();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [filters, setFilters] = useState<EmailFilters>(EMPTY_FILTERS);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const isFiltered = hasActiveFilters(filters);
+  const visibleEmails = useMemo(() => filterEmails(emails, filters), [emails, filters]);
 
   const selected = emails.find((e) => e.id === selectedId) ?? null;
 
@@ -45,14 +51,15 @@ export function EmailInbox() {
   };
 
   // Bulk actions only ever move emails between unread and read — never touch replied/flagged
-  // ones, so clicking either button can't silently erase a reply/follow-up badge in bulk.
+  // ones, so clicking either button can't silently erase a reply/follow-up badge in bulk. Acts
+  // on visibleEmails (post-filter), not the whole inbox, so "mark all" means "all of these".
   const markAllRead = () => {
-    const ids = emails.filter((e) => e.status === "unread").map((e) => e.id);
+    const ids = visibleEmails.filter((e) => e.status === "unread").map((e) => e.id);
     patchEmails(ids, { status: "read" });
   };
 
   const markAllUnread = () => {
-    const ids = emails.filter((e) => e.status === "read").map((e) => e.id);
+    const ids = visibleEmails.filter((e) => e.status === "read").map((e) => e.id);
     patchEmails(ids, { status: "unread" });
   };
 
@@ -97,7 +104,8 @@ export function EmailInbox() {
     <div className="h-full flex">
       <div className="w-[360px] shrink-0 border-r border-[var(--border)] overflow-y-auto thin-scrollbar">
         <InboxList
-          emails={emails}
+          emails={visibleEmails}
+          totalCount={emails.length}
           isLoading={isLoading}
           isRefreshing={isRefreshing}
           onRefresh={refresh}
@@ -106,6 +114,14 @@ export function EmailInbox() {
           onToggleRead={toggleRead}
           onMarkAllRead={markAllRead}
           onMarkAllUnread={markAllUnread}
+          isFiltered={isFiltered}
+          onOpenFilters={() => setFiltersOpen(true)}
+        />
+        <FilterDialog
+          open={filtersOpen}
+          onOpenChange={setFiltersOpen}
+          filters={filters}
+          onApply={setFilters}
         />
       </div>
       <div className="flex-1 min-w-0 overflow-y-auto">
