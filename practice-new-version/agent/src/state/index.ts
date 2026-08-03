@@ -2,7 +2,7 @@ import { z } from "zod";
 import { StateSchema } from "@langchain/langgraph";
 import { CopilotKitStateSchema, zodState } from "@copilotkit/sdk-js/langgraph";
 
-import { DraftSchema } from "../types/index.js";
+import { ComplianceCheckSchema, DraftSchema } from "../types/index.js";
 
 // Parent graph state. The inbox itself lives in Postgres, not here.
 export const AgentState = new StateSchema({
@@ -20,4 +20,5 @@ export const ComposeEmailState = new StateSchema({
   kbContext: zodState(z.string().default(() => "")),
   senderContext: zodState(z.string().default(() => "")),
   draft: zodState(DraftSchema.optional()),
+  compliance: zodState(ComplianceCheckSchema.optional()),
 });

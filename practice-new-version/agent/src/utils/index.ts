@@ -36,12 +36,32 @@ export function collectRevisionNotes(messages: BaseMessage[], emailId: string): 
     .join("\n");
 }
 
+// Heuristic regexes, not NER — good enough to keep obvious PII out of every model call without
+// a dependency. Order matters: address before phone, since street numbers can look phone-ish.
+const EMAIL_RE = /[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}/g;
+const ADDRESS_RE =
+  /\b\d{1,5}\s+(?:[A-Za-z0-9.]+\s){1,4}(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Lane|Ln|Drive|Dr|Court|Ct|Place|Pl|Way|Circle|Cir|Terrace|Ter|Parkway|Pkwy|Highway|Hwy|Trail|Trl|Square|Sq)\.?\b/gi;
+const PHONE_RE = /(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]\d{3}[-.\s]\d{4}\b/g;
+
+// Strips emails/addresses/phone numbers before text reaches any model call — renderEmail is the
+// one place every prompt (classify, research, draft) pulls email content from, so scrubbing here
+// covers all of them. The model only ever needs the internal email id (from state), never the
+// sender's real contact details, to do its job.
+export function redactSensitiveInfo(text: string): string {
+  return text
+    .replace(EMAIL_RE, "[redacted email]")
+    .replace(ADDRESS_RE, "[redacted address]")
+    .replace(PHONE_RE, "[redacted phone]");
+}
+
 export function renderEmail(email: Email): string {
-  return [
-    `From: ${email.from.name} <${email.from.email}>`,
-    `Subject: ${email.subject}`,
-    `Received: ${email.receivedAt}`,
-    "",
-    email.body,
-  ].join("\n");
+  return redactSensitiveInfo(
+    [
+      `From: ${email.from.name} <${email.from.email}>`,
+      `Subject: ${email.subject}`,
+      `Received: ${email.receivedAt}`,
+      "",
+      email.body,
+    ].join("\n"),
+  );
 }

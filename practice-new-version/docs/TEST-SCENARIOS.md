@@ -87,6 +87,14 @@ result in the **Result** line. Status key: ⬜ not run · ✅ pass · ⚠️ par
   - Expect: the draft *offers the re-grade process* — never promises the score will change. "I'll raise her grade" is a serious miss.
   - Result:
 
+- [ ] **7.2 Sensitive data never reaches the model** — Draft a reply to any email, then check the LangSmith trace (or agent logs) for the `classify_emails`, `search_knowledge_base`, and `compose_reply` calls.
+  - Expect: every prompt built from `renderEmail()` shows `[redacted email]` / `[redacted phone]` / `[redacted address]` in place of any email address, phone number, or street address in the sender line or body — the model never sees the raw value, even though the actual send still goes to the real recipient (via the email's `id`, not model output).
+  - Result:
+
+- [ ] **7.3 Compliance flag on a risky draft** — Draft a reply to the Katrina Fisher grade-dispute email (or any email likely to produce grade-promise language) and watch the approval card.
+  - Expect: if `check_compliance` flags the draft, an amber warning banner appears above the editable fields listing each violation in plain language — Approve/Reject stay available either way, since this is advisory, not a hard block.
+  - Result:
+
 ## 8. Generative UI
 
 - [ ] **8.1 Dashboard** — Type: `Show me a dashboard of my inbox — a breakdown by topic and by urgency.`

@@ -4,9 +4,17 @@ import { END, interrupt } from "@langchain/langgraph";
 import { plainModel } from "../config/model.js";
 import { COMPOSE_REPLY_ACTION } from "../constants/index.js";
 import { getContactProfile, getEmail } from "../db/index.js";
-import { draftPrompt, needsResearchPrompt } from "../prompts/index.js";
+import { checkCompliancePrompt, draftPrompt, needsResearchPrompt } from "../prompts/index.js";
 import { classify_emails, get_emails, search_knowledge_base } from "../tools/index.js";
-import { DraftSchema, NeedsResearchSchema, type Draft, type Email, type KBArticle } from "../types/index.js";
+import {
+  ComplianceCheckSchema,
+  DraftSchema,
+  NeedsResearchSchema,
+  type ComplianceCheck,
+  type Draft,
+  type Email,
+  type KBArticle,
+} from "../types/index.js";
 import { collectRevisionNotes, findReplyCall } from "../utils/index.js";
 
 type State = {
@@ -16,6 +24,7 @@ type State = {
   kbContext: string;
   senderContext: string;
   draft?: Draft;
+  compliance?: ComplianceCheck;
 };
 
 // Reuses get_emails (rather than db/index.js's getEmail directly) so triage/research resolve an
@@ -108,14 +117,27 @@ export async function writeDraft(state: State) {
   return { draft };
 }
 
-// request_approval — pauses the graph; the frontend's useInterrupt (use-email-agent.tsx) matches
-// on `action` and renders the editable card. resolve() there sends `{decision, instruction}` as
-// the resume value, which interrupt() returns here — the send itself already happened via the
-// card's PATCH /api/emails, so this just answers the dangling reply_to_email tool call with the
-// teacher's decision so the next call_model turn has valid history.
+// check_compliance — guardrail run on every draft before the teacher ever sees it: flags tone or
+// policy violations (grade-change promises, another student's info, unprofessional tone, stray
+// PII) independently of draftPrompt's own instructions, so a drift in drafting doesn't ship
+// silently. Advisory only — the card shows the flag, the teacher still decides.
+export async function checkCompliance(state: State) {
+  const draft = state.draft!;
+  const compliance = await plainModel
+    .withStructuredOutput(ComplianceCheckSchema)
+    .invoke(checkCompliancePrompt(draft));
+  return { compliance };
+}
+
+// Pauses for the teacher's approval card, then answers the dangling reply_to_email tool call with their decision.
 export async function requestApproval(state: State) {
   const draft = state.draft!;
-  const args = { id: state.emailId, subject: draft.subject, body: draft.body };
+  const args = {
+    id: state.emailId,
+    subject: draft.subject,
+    body: draft.body,
+    compliance: state.compliance,
+  };
   const resume = interrupt({ action: COMPOSE_REPLY_ACTION, args }) as {
     decision: "approve" | "reject";
     instruction: string;

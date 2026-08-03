@@ -163,6 +163,28 @@ export function needsResearchPrompt(email: Email): string {
   );
 }
 
+// Used by checkCompliancePrompt — a guardrail check run on every draft before the approval card,
+// independent of draftPrompt's own "never promise a grade change" instruction (defense in depth:
+// this catches it even if the drafting call drifts).
+const COMPLIANCE_GUIDE = `
+  - Promises, guarantees, or states as already decided a grade change, exception, or reversal of
+    a school decision — offer the review/appeal process instead, never the outcome.
+  - Names or describes another student (grade, health, disciplinary, or accommodation details).
+  - Dismissive, sarcastic, or unprofessional tone toward a parent, student, or staff member.
+  - Legal, medical, or safety advice stated as fact.
+  - A phone number, home address, or email address that doesn't belong in a reply.
+`;
+
+export function checkCompliancePrompt(draft: { subject: string; body: string }): string {
+  return (
+    `Check this drafted email reply for compliance issues before the teacher approves it.\n` +
+    `Flag it (compliant: false) if it does any of the following:\n${COMPLIANCE_GUIDE}\n` +
+    `List every violation found in \`violations\`, one short sentence each — empty array and ` +
+    `compliant: true if none apply.\n\n` +
+    `Subject: ${draft.subject}\n\nBody:\n${draft.body}`
+  );
+}
+
 export function draftPrompt(args: {
   email: Email;
   kbContext: string;

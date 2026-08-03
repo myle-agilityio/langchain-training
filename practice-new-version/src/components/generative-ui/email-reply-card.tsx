@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Mail, Check, X } from "lucide-react";
+import { Mail, Check, X, TriangleAlert } from "lucide-react";
 import { useSharedInbox } from "@/hooks/use-shared-inbox";
 
 export interface EmailReplyCardProps {
@@ -13,6 +13,8 @@ export interface EmailReplyCardProps {
   id: string;
   subject: string;
   body: string;
+  // From check_compliance — a guardrail flag, not a hard block: the teacher still decides.
+  compliance?: { compliant: boolean; violations: string[] };
 }
 
 export function EmailReplyCard({
@@ -21,6 +23,7 @@ export function EmailReplyCard({
   id,
   subject: draftSubject,
   body: draftBody,
+  compliance,
 }: EmailReplyCardProps) {
   const { patchEmail } = useSharedInbox();
   const [subject, setSubject] = useState(draftSubject);
@@ -144,6 +147,19 @@ export function EmailReplyCard({
           </div>
         ) : (
           <div className="space-y-3">
+            {compliance && !compliance.compliant && (
+              <div className="flex gap-2 rounded-[var(--radius)] border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-400">
+                <TriangleAlert className="h-4 w-4 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium">Compliance check flagged this draft</p>
+                  <ul className="list-disc pl-4 mt-1 space-y-0.5">
+                    {compliance.violations.map((v) => (
+                      <li key={v}>{v}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
             <input
               value={subject}
               onChange={(e) => setSubject(e.target.value)}

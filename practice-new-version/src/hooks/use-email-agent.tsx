@@ -8,7 +8,12 @@ const COMPOSE_REPLY_ACTION = "compose_reply";
 
 interface ComposeReplyInterrupt {
   action: string;
-  args: { id: string; subject: string; body: string };
+  args: {
+    id: string;
+    subject: string;
+    body: string;
+    compliance?: { compliant: boolean; violations: string[] };
+  };
 }
 
 // The AG-UI/LangGraph bridge forwards interrupt() values as a JSON string on a generic
@@ -34,6 +39,7 @@ export const useEmailAgent = () => {
           id={args.id}
           subject={args.subject}
           body={args.body}
+          compliance={args.compliance}
         />
       );
     },

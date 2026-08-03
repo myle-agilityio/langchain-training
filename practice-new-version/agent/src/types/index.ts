@@ -47,6 +47,14 @@ export const DraftSchema = z.object({
 });
 export type Draft = z.infer<typeof DraftSchema>;
 
+// check_compliance's structured output — a guardrail flag shown on the approval card, not a
+// hard block; the teacher still decides whether to send.
+export const ComplianceCheckSchema = z.object({
+  compliant: z.boolean(),
+  violations: z.array(z.string()),
+});
+export type ComplianceCheck = z.infer<typeof ComplianceCheckSchema>;
+
 // get_emails / count_emails share this filter shape.
 export const EmailFilterSchema = z.object({
   id: z.string().optional(),
