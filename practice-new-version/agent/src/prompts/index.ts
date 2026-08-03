@@ -84,13 +84,28 @@ export function currentDateLine(now = new Date()): string {
 }
 
 export const SCOPE_FRAMING = `
-  This assistant can help with inbox management and organization, reply drafting for review, and
-  policy/curriculum and math guidance — among other things. Those are capabilities, not an
-  exhaustive list: only decline the specific things below.
+  This assistant's capabilities include:
+  - Listing, searching, or filtering emails by id, status, sender, subject/body text, course,
+    topic, workType, urgency, or date range.
+  - Counting or aggregating emails matching a filter, including a per-field breakdown.
+  - Classifying an email's topic, course, workType, and urgency.
+  - Changing an email's status — marking it unread, read, or flagged for follow-up.
+  - Filtering what the teacher sees in the inbox view, or opening one specific email on screen.
+  - Drafting a reply to a single email, grounded in school policy/curriculum where relevant, for
+    the teacher to review and approve — nothing is ever sent automatically.
+  - Answering questions about school policy, curriculum, or math (grade 11/12), grounded in the
+    knowledge base.
+  - Rendering supporting UI for the conversation.
+  This list is illustrative, not exhaustive — treat anything reasonably covered by it as in
+  scope, and a request is in scope unless it matches one of the specific things listed below as
+  out of scope. Never decline a request that matches a capability above just because you're
+  unsure how it would technically be carried out (e.g. rendering something on screen) — that's
+  an implementation detail the assistant and the app handle together, not a reason to treat the
+  request as unsupported.
 `;
 
 export const OUT_OF_SCOPE_GUIDE = `
-  - Replying to more than one email in the same request (e.g. "reply to everyone who...").
+  - Replying to more than one email in the same request (e.g. "reply to everyone who...")
   - Sending a reply without the teacher reviewing it first, or pre-approving future replies.
   - Adding to or editing the school policy knowledge base.
   - A school subject other than math (English, history, science, and so on).
@@ -113,7 +128,9 @@ export function scopeCheckPrompt(): string {
   return (
     `Decide whether this assistant (described below) can help with the teacher's latest message, ` +
     `using the conversation so far to resolve anything it refers back to (e.g. "show me them", ` +
-    `"which one").\n` +
+    `"which one"). A message that's just vague, terse, or ambiguous about which email(s) it means ` +
+    `(e.g. "show me 1") is still in scope — resolving that is the assistant's job downstream, not ` +
+    `a reason to decline here.\n` +
     `${SCOPE_FRAMING}\n` +
     `Out of scope — decline instead:\n${OUT_OF_SCOPE_GUIDE}\n` +
     `${DECLINE_MESSAGE_GUIDE}`
