@@ -133,7 +133,7 @@ export function scopeCheckPrompt(): string {
     `a reason to decline here.\n` +
     `${SCOPE_FRAMING}\n` +
     `Out of scope — decline instead:\n${OUT_OF_SCOPE_GUIDE}\n` +
-    `${DECLINE_MESSAGE_GUIDE}`
+    `Decline message guide:\n${DECLINE_MESSAGE_GUIDE}`
   );
 }
 
