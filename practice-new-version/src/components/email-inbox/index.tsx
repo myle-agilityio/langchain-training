@@ -95,6 +95,27 @@ export function EmailInbox() {
     }
   };
 
+  // Opens one email in the detail pane, same as the teacher clicking it in the list.
+  useFrontendTool(
+    {
+      name: "showEmail",
+      description:
+        "Open one email in the reading pane so the teacher can see it on screen. Call this " +
+        "whenever they ask about a SINGLE email — \"show me...\", \"open...\", \"let me see...\", " +
+        "or a bare reference to one email they named — instead of describing its contents in " +
+        "chat. Give the email's real id; call get_emails first if you only have a description. " +
+        "For more than one email use filterInbox instead.",
+      parameters: z.object({ id: z.string() }),
+      handler: async ({ id }) => {
+        const email = emails.find((e) => e.id === id);
+        if (!email) return `No email with id ${id} — call get_emails for current ids and retry.`;
+        selectEmail(email);
+        return `Opened "${email.subject}" from ${email.from.name} in the reading pane.`;
+      },
+    },
+    [emails],
+  );
+
   // Per-row toggle: flip between unread/read. A replied email can't go back to unread (the
   // reply already happened); flagged_for_followup still can.
   const toggleRead = (email: Email) => {
