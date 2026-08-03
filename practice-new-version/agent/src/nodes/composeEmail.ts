@@ -7,7 +7,7 @@ import { getContactProfile, getEmail } from "../db/index.js";
 import { draftPrompt, needsResearchPrompt } from "../prompts/index.js";
 import { classify_emails, get_emails, search_knowledge_base } from "../tools/index.js";
 import { DraftSchema, NeedsResearchSchema, type Draft, type Email, type KBArticle } from "../types/index.js";
-import { findReplyCall } from "../utils/index.js";
+import { collectRevisionNotes, findReplyCall } from "../utils/index.js";
 
 type State = {
   messages: BaseMessage[];
@@ -102,6 +102,7 @@ export async function writeDraft(state: State) {
         email,
         kbContext: state.kbContext,
         senderContext: state.senderContext,
+        revisionNotes: collectRevisionNotes(state.messages, state.emailId),
       }),
     );
   return { draft };

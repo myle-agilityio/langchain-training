@@ -167,6 +167,7 @@ export function draftPrompt(args: {
   email: Email;
   kbContext: string;
   senderContext: string;
+  revisionNotes: string;
 }): string {
   return `You are drafting a reply on behalf of a high school mathematics teacher. Write as the teacher, in first person.
 
@@ -175,6 +176,11 @@ export function draftPrompt(args: {
     - Never promise a grade will change. On a re-grade request, offer the process instead.
     - Warm and direct. No more than three short paragraphs. Sign off as "Ms. Lam".
     - The subject line replies to theirs (usually "Re: ...").
+    ${
+      args.revisionNotes
+        ? `- The teacher said this about this reply — follow it, even where it adds something the email itself didn't ask for:\n${args.revisionNotes}`
+        : ""
+    }
 
     Reference material (school policy and curriculum):
     ${args.kbContext}
