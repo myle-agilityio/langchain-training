@@ -17,13 +17,20 @@ type AgentStateShape = {
   copilotkit?: { context?: CopilotKitEntry[]; actions?: CopilotKitAction[] };
 };
 
+// System prompt + full history, so "show me them"/"which one" resolve against prior turns
+// instead of the scope check judging the latest message in isolation.
+const scopeCheckPromptTemplate = ChatPromptTemplate.fromMessages([
+  ["system", scopeCheckPrompt()],
+  new MessagesPlaceholder("messages"),
+]);
+
 // Validates if the request is within scope before processing
 export async function validateRequest(state: AgentStateShape) {
   const last = state.messages[state.messages.length - 1];
   if (!HumanMessage.isInstance(last)) return { outOfScope: false };
 
-  const request = typeof last.content === "string" ? last.content : JSON.stringify(last.content);
-  const check = await plainModel.withStructuredOutput(ScopeCheckSchema).invoke(scopeCheckPrompt(request));
+  const chain = scopeCheckPromptTemplate.pipe(plainModel.withStructuredOutput(ScopeCheckSchema));
+  const check = await chain.invoke({ messages: state.messages });
 
   if (check.inScope) return { outOfScope: false };
   return {

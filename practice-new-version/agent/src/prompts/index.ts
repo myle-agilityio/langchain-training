@@ -83,69 +83,40 @@ export function currentDateLine(now = new Date()): string {
   return `\n\nToday is ${now.toISOString().slice(0, 10)} (${weekday}), in UTC.`;
 }
 
-// Framing for the scope decision, for validate_request. Kept separate from SYSTEM_PROMPT since
-// it's a decision made before call_model ever sees the request, not a behavior call_model itself
-// needs to know (it never has to explain a decline it didn't make).
 export const SCOPE_FRAMING = `
-  This assistant triages one teacher's inbox. What's in scope depends on what the request does,
-  never on how many emails it names or how it's phrased.
-`;
-
-export const IN_SCOPE_GUIDE = `
-  - Any read-only look at the inbox — summarizing, listing, searching, counting, classifying,
-    checking status, or anything else that helps the teacher understand what's there — in scope
-    for any number of emails at once, including "all" or "every". Don't read this as a fixed
-    list of verbs: if it only involves looking at or organizing existing emails (not sending
-    anything, not changing what an email says), it's in scope.
-  - Updating an email's status (unread/read/flagged for follow-up) — in scope for any number of
-    emails at once, same as above.
-  - Controlling the inbox view — applying or clearing the on-screen filters (by urgency, grade,
-    topic, sender, dates, or text) — in scope.
-  - Drafting a reply — in scope for one named or selected email per request. Always shown to the
-    teacher for approval before sending; never sent unreviewed, never pre-approved for future
-    replies.
-  - Answering school policy/curriculum questions (grounded in the knowledge base) — in scope,
-    whether or not the question names a specific email.
-  - Questions about math itself, whether or not it's tied to a specific email. Answer these from your own math
-    knowledge; they don't need the knowledge base or inbox data.
-  - Questions about what this assistant can do (e.g. "what can you help me with?", "what are
-    you?") — in scope.
-  - General chit-chat, greetings, or small talk — in scope. Answer friendly.
+  This assistant can help with inbox management and organization, reply drafting for review, and
+  policy/curriculum and math guidance — among other things. Those are capabilities, not an
+  exhaustive list: only decline the specific things below.
 `;
 
 export const OUT_OF_SCOPE_GUIDE = `
   - Replying to more than one email in the same request (e.g. "reply to everyone who...").
   - Sending a reply without the teacher reviewing it first, or pre-approving future replies.
   - Adding to or editing the school policy knowledge base.
-`;
-
-// Guards against a false "out of scope" read when a request just spells out detail about one
-// email (id, sender, subject) rather than actually asking for something out of bounds.
-export const SINGLE_EMAIL_CLARIFICATION = `
-  A request that names or describes a single email — even spelling out its id, sender, or
-  subject — is an ordinary single-email request, not a violation of anything above.
+  - A school subject other than math (English, history, science, and so on).
 `;
 
 // Instructions for the declineMessage field itself — shown to the teacher verbatim, so its tone
 // and content rules live here rather than being re-derived at the call site.
 export const DECLINE_MESSAGE_GUIDE = `
-  - One short sentence — polite and never curt or blunt.
+  - Polite and never curt or blunt.
   - Say what this assistant can't do here, then point to what it can help with instead —
     inbox management and organization, reply drafting for review, or policy/curriculum and
     math guidance.
   - No apology padding, no filler — friendly and direct at once.
-  - Set it to null when inScope is true.
 `;
 
-export function scopeCheckPrompt(request: string): string {
+// Static text — the request itself arrives as conversation history (MessagesPlaceholder in
+// nodes/index.ts), not interpolated here, so the model can resolve "them"/"which one" against
+// prior turns instead of judging the latest message in isolation.
+export function scopeCheckPrompt(): string {
   return (
-    `Decide whether this assistant (described below) can help with the teacher's request.\n` +
+    `Decide whether this assistant (described below) can help with the teacher's latest message, ` +
+    `using the conversation so far to resolve anything it refers back to (e.g. "show me them", ` +
+    `"which one").\n` +
     `${SCOPE_FRAMING}\n` +
-    `In scope:\n${IN_SCOPE_GUIDE}\n` +
     `Out of scope — decline instead:\n${OUT_OF_SCOPE_GUIDE}\n` +
-    `${SINGLE_EMAIL_CLARIFICATION}\n` +
-    `${DECLINE_MESSAGE_GUIDE}\n\n` +
-    `Teacher's request: "${request}"`
+    `${DECLINE_MESSAGE_GUIDE}`
   );
 }
 
