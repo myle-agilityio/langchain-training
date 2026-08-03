@@ -117,10 +117,7 @@ export async function writeDraft(state: State) {
   return { draft };
 }
 
-// check_compliance — guardrail run on every draft before the teacher ever sees it: flags tone or
-// policy violations (grade-change promises, another student's info, unprofessional tone, stray
-// PII) independently of draftPrompt's own instructions, so a drift in drafting doesn't ship
-// silently. Advisory only — the card shows the flag, the teacher still decides.
+// Independent guardrail on every draft (tone, policy, PII) — advisory only, teacher decides.
 export async function checkCompliance(state: State) {
   const draft = state.draft!;
   const compliance = await plainModel
