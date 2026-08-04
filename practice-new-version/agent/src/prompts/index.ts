@@ -95,6 +95,7 @@ export const SCOPE_FRAMING = `
     the teacher to review and approve — nothing is ever sent automatically.
   - Answering questions about school policy, curriculum, or math (grade 11/12), grounded in the
     knowledge base.
+  - Toggling the app's light/dark theme.
   - Rendering supporting UI for the conversation.
   This list is illustrative, not exhaustive — treat anything reasonably covered by it as in
   scope, and a request is in scope unless it matches one of the specific things listed below as
