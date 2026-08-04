@@ -7,3 +7,7 @@ __pycache__/
 # LangGraph API
 .langgraph_api
 node_modules/
+
+# Cloudflare Workers
+.wrangler
+worker-configuration.d.ts
