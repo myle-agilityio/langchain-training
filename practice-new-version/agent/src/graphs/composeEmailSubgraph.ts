@@ -16,16 +16,13 @@ import { ComposeEmailState } from "../state/index.js";
 //   triage ──(needs research)──▶ research ──▶ write_draft ──▶ check_compliance ──▶ request_approval ──▶ (interrupt)
 //      ├────(no research needed)──────────────▶ write_draft
 //      └────(email not found)───────────────────────────────────────────────────▶ END
+const retryPolicy = { maxAttempts: 3 };
 const composeEmailWorkflow = new StateGraph(ComposeEmailState)
-  .setNodeDefaults({
-    retryPolicy: { maxAttempts: 3 },
-    timeout: { runTimeout: 45_000 },
-  })
-  .addNode("triage", triage)
-  .addNode("research", research)
-  .addNode("write_draft", writeDraft)
-  .addNode("check_compliance", checkCompliance)
-  .addNode("request_approval", requestApproval)
+  .addNode("triage", triage, { retryPolicy })
+  .addNode("research", research, { retryPolicy })
+  .addNode("write_draft", writeDraft, { retryPolicy })
+  .addNode("check_compliance", checkCompliance, { retryPolicy })
+  .addNode("request_approval", requestApproval, { retryPolicy })
   .addEdge(START, "triage")
   .addConditionalEdges("triage", afterTriage, {
     research: "research",

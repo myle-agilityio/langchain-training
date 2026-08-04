@@ -1,13 +1,12 @@
-import { AIMessage, HumanMessage, ToolMessage, type BaseMessage } from "@langchain/core/messages";
+import { AIMessage, isAIMessage, isHumanMessage, type BaseMessage } from "@langchain/core/messages";
 import { ChatPromptTemplate, MessagesPlaceholder } from "@langchain/core/prompts";
-import { Command, END, type LangGraphRunnableConfig, type NodeError } from "@langchain/langgraph";
+import { END, type LangGraphRunnableConfig } from "@langchain/langgraph";
 
 import { model, plainModel } from "../config/model.js";
 import { TOOL } from "../constants/index.js";
 import { currentDateLine, scopeCheckPrompt, SYSTEM_PROMPT } from "../prompts/index.js";
 import { executableTools, modelTools } from "../tools/index.js";
 import { ScopeCheckSchema } from "../types/index.js";
-import { findReplyCall } from "../utils/index.js";
 
 type CopilotKitEntry = { description?: string; value?: unknown };
 type CopilotKitAction = { name: string; description?: string; parameters?: unknown };
@@ -27,7 +26,7 @@ const scopeCheckPromptTemplate = ChatPromptTemplate.fromMessages([
 // Validates if the request is within scope before processing
 export async function validateRequest(state: AgentStateShape) {
   const last = state.messages[state.messages.length - 1];
-  if (!HumanMessage.isInstance(last)) return { outOfScope: false };
+  if (!last || !isHumanMessage(last)) return { outOfScope: false };
 
   const chain = scopeCheckPromptTemplate.pipe(plainModel.withStructuredOutput(ScopeCheckSchema));
   const check = await chain.invoke({ messages: state.messages });
@@ -44,27 +43,6 @@ export async function validateRequest(state: AgentStateShape) {
 // Routes to model or ends if out of scope
 export function afterValidate(state: AgentStateShape) {
   return state.outOfScope ? END : "call_model";
-}
-
-// Handles errors during email composition
-export function composeEmailErrorHandler(state: AgentStateShape, error: NodeError) {
-  console.error(`[compose_email] failed after retries: ${error.error.message}`);
-  const call = findReplyCall(state.messages);
-  return new Command({
-    update: {
-      messages: call
-        ? [
-            new ToolMessage({
-              tool_call_id: call.id ?? "unknown",
-              content:
-                "Drafting failed unexpectedly. Tell the teacher in one short line that the draft " +
-                "couldn't be prepared and to try again.",
-            }),
-          ]
-        : [],
-    },
-    goto: END,
-  });
 }
 
 // Formats UI context for the prompt
@@ -125,7 +103,7 @@ const EXECUTABLE_NAMES = new Set<string>(executableTools.map((t) => t.name));
 // Routes tool calls to compose_email, tools, or END
 export function routeAfterModel(state: { messages: BaseMessage[] }) {
   const last = state.messages[state.messages.length - 1];
-  if (!AIMessage.isInstance(last)) return END;
+  if (!last || !isAIMessage(last)) return END;
   const calls = last.tool_calls ?? [];
   if (calls.some((c) => c.name === TOOL.REPLY_TO_EMAIL)) return "compose_email";
   if (calls.some((c) => EXECUTABLE_NAMES.has(c.name))) return "tools";

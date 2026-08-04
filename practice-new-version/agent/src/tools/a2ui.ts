@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { tool, type ToolRuntime } from "@langchain/core/tools";
+import { tool } from "@langchain/core/tools";
 import { SystemMessage } from "@langchain/core/messages";
+import { getCurrentTaskInput } from "@langchain/langgraph";
 import { ChatOpenAI } from "@langchain/openai";
 import {
   createSurface,
@@ -25,25 +26,16 @@ const renderA2ui = tool(async () => "rendered", {
   schema: renderA2uiSchema,
 });
 
-const DynamicStateSchema = z.object({
-  messages: z.array(z.any()).default(() => []),
-  copilotkit: z
-    .object({
-      context: z
-        .array(z.object({ value: z.string().optional() }).passthrough())
-        .optional(),
-    })
-    .passthrough()
-    .optional(),
-});
+type DynamicState = {
+  messages?: unknown[];
+  copilotkit?: { context?: Array<{ value?: string }> };
+};
 
 export const generate_a2ui = tool(
-  async (
-    _input: Record<string, never>,
-    runtime: ToolRuntime<typeof DynamicStateSchema>,
-  ) => {
-    const messages = (runtime.state.messages ?? []).slice(0, -1);
-    const contextEntries = runtime.state.copilotkit?.context ?? [];
+  async () => {
+    const state = getCurrentTaskInput<DynamicState>();
+    const messages = (state.messages ?? []).slice(0, -1);
+    const contextEntries = state.copilotkit?.context ?? [];
     const contextText = contextEntries
       .map((e) => (e && typeof e === "object" ? (e.value ?? "") : ""))
       .filter(Boolean)
