@@ -11,9 +11,23 @@ services:
         sync: false
       - key: DATABASE_URL
         sync: false
+      # Same Postgres connection string as DATABASE_URL — the langgraph-api image's
+      # internal control plane (threads/runs bookkeeping) reads this name, not DATABASE_URL.
+      - key: DATABASE_URI
+        sync: false
+      - key: REDIS_URI
+        fromService:
+          type: keyvalue
+          name: ai-email-assistant-redis
+          property: connectionString
       - key: LANGSMITH_API_KEY
         sync: false
       - key: LANGSMITH_TRACING
         value: true
       - key: LANGSMITH_PROJECT
         value: ai-email-assistant
+
+  - type: keyvalue
+    name: ai-email-assistant-redis
+    plan: free
+    ipAllowList: [] # internal only — used by the agent service above
