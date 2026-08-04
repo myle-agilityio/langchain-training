@@ -1,0 +1,30 @@
+{
+  "name": "ai-email-assistant-agent",
+  "main": "./cloudflare/worker.ts",
+  "compatibility_date": "2026-08-04",
+  "observability": {
+    "enabled": true,
+  },
+  "containers": [
+    {
+      "image": "./Dockerfile",
+      "class_name": "AgentContainer",
+      "name": "agent-container",
+      "max_instances": 1,
+    },
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "class_name": "AgentContainer",
+        "name": "AGENT_CONTAINER",
+      },
+    ],
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["AgentContainer"],
+    },
+  ],
+}
