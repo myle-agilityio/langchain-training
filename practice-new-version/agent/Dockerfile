@@ -1,4 +1,4 @@
-FROM langchain/langgraphjs-api:rc-node20-wolfi
+FROM langchain/langgraphjs-api:20
 ADD . /deps/agent
 ENV LANGSERVE_GRAPHS='{"sample_agent":"./src/graphs/index.ts:graph"}'
 WORKDIR /deps/agent
