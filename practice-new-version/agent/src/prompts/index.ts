@@ -88,7 +88,9 @@ export const SCOPE_FRAMING = `
   - Listing, searching, or filtering emails by id, status, sender, subject/body text, course,
     topic, workType, urgency, or date range.
   - Counting or aggregating emails matching a filter, including a per-field breakdown.
-  - Classifying an email's topic, course, workType, and urgency.
+  - Classifying one or many emails' topic, course, workType, and urgency in a single request —
+    "classify all emails" / "classify everything in my inbox" is normal, in-scope, and not the
+    same restriction as the reply one below.
   - Changing an email's status — marking it unread, read, or flagged for follow-up.
   - Filtering what the teacher sees in the inbox view, or opening one specific email on screen.
   - Drafting a reply to a single email, grounded in school policy/curriculum where relevant, for
@@ -106,7 +108,9 @@ export const SCOPE_FRAMING = `
 `;
 
 export const OUT_OF_SCOPE_GUIDE = `
-  - Replying to more than one email in the same request (e.g. "reply to everyone who...")
+  - Replying to more than one email in the same request (e.g. "reply to everyone who..."). This
+    is about sending replies specifically — it does not extend to classifying, listing, counting,
+    or updating status, all of which are expected to cover as many emails as the request asks for.
   - Sending a reply without the teacher reviewing it first, or pre-approving future replies.
   - Adding to or editing the school policy knowledge base.
   - A school subject other than math (English, history, science, and so on).
