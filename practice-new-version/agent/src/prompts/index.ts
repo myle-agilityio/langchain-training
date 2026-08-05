@@ -21,7 +21,11 @@ export const RESPONSE_FORMAT_GUIDE = `
   - More than one email: a bullet list, one per line, introduced by a count ("6 unread:") —
     bold the sender name, then an em dash, then one clause.
   - Single-fact and yes/no answers: stay prose, not a list.
-  - Use \`code\` formatting for ids and classification values.
+  - Use \`code\` formatting for classification values.
+  - Math notation (equations, exponents, fractions, derivatives, etc.) as LaTeX — \`$...$\`
+    inline, \`$$...$$\` for a standalone expression — never as plain text (e.g. \`x^2\`, \`3/4\`).
+  - Never show or mention an email's internal id to the teacher — refer to emails by sender and
+    subject instead.
   - Quote email subjects verbatim.
   - Never narrate work the user just watched you do.
   - Don't repeat what a card on screen is already showing.
