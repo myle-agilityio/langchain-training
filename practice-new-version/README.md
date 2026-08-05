@@ -46,7 +46,6 @@ Then update the required values:
 ```bash
 AGENT_URL=http://localhost:8123
 OPENAI_API_KEY=your-openai-api-key-here
-DATABASE_URL=postgresql://user:password@host:5432/dbname
 ```
 
 Optional environment values in `.env.example` include:
@@ -58,9 +57,6 @@ Optional environment values in `.env.example` include:
 - `INTELLIGENCE_API_KEY`
 
 Everything persistent — the inbox, contact profiles, embedded knowledge base, graph checkpoints, and cross-thread store — lives in the Postgres database behind `DATABASE_URL`. Tables, indexes, and the `vector` extension are created automatically on first connect.
-
-### Getting a `DATABASE_URL`
-**Ask the project owner:** email My Le (my.le@asnet.com.vn) or Slack (my.le) for a shared dev `DATABASE_URL`.
 
 3. Start the development server:
 
