@@ -60,12 +60,7 @@ Optional environment values in `.env.example` include:
 Everything persistent — the inbox, contact profiles, embedded knowledge base, graph checkpoints, and cross-thread store — lives in the Postgres database behind `DATABASE_URL`. Tables, indexes, and the `vector` extension are created automatically on first connect.
 
 ### Getting a `DATABASE_URL`
-
-- **Neon (hosted, recommended):** create a project at [console.neon.tech](https://console.neon.tech), then copy the pooled connection string from Dashboard → Connection Details.
-- **Supabase:** use the database connection string from Project Settings → Database. Supabase includes `pgvector` by default.
-- **Local Postgres:** install Postgres with `pgvector`, create a database, and use `postgresql://user:password@localhost:5432/dbname`.
-- **Ask the project owner:** email My Le (my.le@asnet.com.vn) or Slack (my.le) for a shared    
-  dev `DATABASE_URL`.
+**Ask the project owner:** email My Le (my.le@asnet.com.vn) or Slack (my.le) for a shared dev `DATABASE_URL`.
 
 3. Start the development server:
 
@@ -145,6 +140,7 @@ npm run install:agent
 ## Documentation
 
 - [CLAUDE.md](./CLAUDE.md) - collaboration rules and where things live
+- [Architecture](./docs/ARCHITECTURE.md) - system, main graph, and `compose_email` subgraph diagrams
 - [Test Scenarios](./docs/TEST-SCENARIOS.md) - scenarios the assistant is expected to handle
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraph/) - Learn more about LangGraph and its features
 - [CopilotKit Documentation](https://docs.copilotkit.ai) - Explore CopilotKit's capabilities
