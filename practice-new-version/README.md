@@ -136,6 +136,7 @@ npm run install:agent
 ## Documentation
 
 - [CLAUDE.md](./CLAUDE.md) - collaboration rules and where things live
+- [Features](./docs/FEATURES.md) - what the assistant does, from the teacher's point of view
 - [Architecture](./docs/ARCHITECTURE.md) - system, main graph, and `compose_email` subgraph diagrams
 - [Test Scenarios](./docs/TEST-SCENARIOS.md) - scenarios the assistant is expected to handle
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraph/) - Learn more about LangGraph and its features
