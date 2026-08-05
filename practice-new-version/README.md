@@ -1,11 +1,8 @@
-# AI Email Assistant — CopilotKit <> LangGraph (Practice, Restart)
+# AI Email Assistant — CopilotKit <> LangGraph (Practice)
 
-An inbox triage assistant for a high school math teacher, built with [LangGraph](https://www.langchain.com/langgraph) and [CopilotKit](https://copilotkit.ai). Classifies incoming email, grounds answers in a school-policy knowledge base, and drafts replies for the teacher to approve before anything sends.
+An inbox triage assistant for a high school math teacher, built with [LangGraph](https://www.langchain.com/langgraph) and [CopilotKit](https://copilotkit.ai). It classifies incoming email, grounds answers in a school-policy knowledge base, and drafts replies for the teacher to approve before anything sends.
 
-> **This is a from-scratch rebuild of the `practice/` project.** The UI, test scenarios, and
-> config were carried over; the agent was rebuilt. See [CLAUDE.md](./CLAUDE.md) for
-> collaboration rules and [docs/TEST-SCENARIOS.md](./docs/TEST-SCENARIOS.md) for what the
-> assistant is expected to handle.
+> **This is a from-scratch rebuild of the `practice/` project.** The UI, test scenarios, and config were carried over; the agent was rebuilt. See [CLAUDE.md](./CLAUDE.md) for collaboration rules and [docs/TEST-SCENARIOS.md](./docs/TEST-SCENARIOS.md) for the scenarios the assistant is expected to handle.
 
 ## Prerequisites
 
@@ -15,10 +12,8 @@ An inbox triage assistant for a high school math teacher, built with [LangGraph]
   - [pnpm](https://pnpm.io/installation)
   - [yarn](https://classic.yarnpkg.com/lang/en/docs/install/)
   - [bun](https://bun.sh/)
-- OpenAI API Key (for the LangGraph agent)
-- A Postgres database with the `pgvector` extension available (local install, or hosted —
-  Neon/Supabase both support it). Neon enables `pgvector` by default; the app creates the
-  extension, tables, and indexes itself on first connect.
+- OpenAI API key for the LangGraph agent
+- A Postgres database with the `pgvector` extension available. Any Postgres works: local install, Neon, Supabase, etc.
 
 ## Getting Started
 
@@ -38,40 +33,37 @@ yarn install
 bun install
 ```
 
-This also installs the agent dependencies (via the `postinstall` script, which runs
-`npm install` inside `agent/`).
+The root install also runs the `postinstall` hook, which installs agent dependencies inside `agent/`.
 
-2. Set up your environment variables:
+2. Copy the example environment file and edit `.env`:
 
 ```bash
 cp .env.example .env
 ```
 
-Then edit the `.env` file and add your OpenAI API key and database URL:
+Then update the required values:
 
 ```bash
+AGENT_URL=http://localhost:8123
 OPENAI_API_KEY=your-openai-api-key-here
 DATABASE_URL=postgresql://user:password@host:5432/dbname
 ```
 
-Everything persistent — the inbox, contact profiles, the embedded knowledge base, and graph
-checkpoints — lives in this one Postgres database. Tables, indexes, and the `vector`
-extension are created automatically on first connect; there's no migration step to run.
+Optional environment values in `.env.example` include:
 
-#### Getting a `DATABASE_URL`
+- `LANGSMITH_API_KEY` / `LANGSMITH_TRACING` / `LANGSMITH_PROJECT`
+- `COPILOTKIT_LICENSE_TOKEN`
+- `INTELLIGENCE_API_URL`
+- `INTELLIGENCE_GATEWAY_WS_URL`
+- `INTELLIGENCE_API_KEY`
 
-Any Postgres with `pgvector` works. Pick one:
+Everything persistent — the inbox, contact profiles, embedded knowledge base, graph checkpoints, and cross-thread store — lives in the Postgres database behind `DATABASE_URL`. Tables, indexes, and the `vector` extension are created automatically on first connect.
 
-- **Neon (hosted, recommended — free tier, no local install):**
-  1. Sign in at [console.neon.tech](https://console.neon.tech) and create a project.
-  2. Open the project's **Dashboard → Connection Details**.
-  3. Select the **pooled connection** (host contains `-pooler`) and copy the full
-     `postgresql://...` string — it already includes `sslmode=require`.
-  4. Paste it as `DATABASE_URL` in `.env`.
-- **Local Postgres:** install Postgres (with the `pgvector` extension available), create a
-  database, then use `postgresql://user:password@localhost:5432/dbname`.
-- **Supabase:** Project Settings → Database → Connection string (URI). Supabase ships
-  `pgvector` pre-installed.
+### Getting a `DATABASE_URL`
+
+- **Neon (hosted, recommended):** create a project at [console.neon.tech](https://console.neon.tech), then copy the pooled connection string from Dashboard → Connection Details.
+- **Supabase:** use the database connection string from Project Settings → Database. Supabase includes `pgvector` by default.
+- **Local Postgres:** install Postgres with `pgvector`, create a database, and use `postgresql://user:password@localhost:5432/dbname`.
 - **Ask the project owner:** email My Le (my.le@asnet.com.vn) or Slack (my.le) for a shared    
   dev `DATABASE_URL`.
 
@@ -91,21 +83,26 @@ yarn dev
 bun run dev
 ```
 
-This will start both the UI (:3000) and agent (:8123) servers concurrently.
+This starts both the Next.js UI on port `3000` and the LangGraph agent on port `8123`.
 
 ## Available Scripts
 
-The following scripts can also be run using your preferred package manager:
-
 - `dev` - Starts both UI and agent servers in development mode
-- `dev:debug` - Starts development servers with debug logging enabled
+- `dev:debug` - Starts both development servers with debug logging enabled
 - `dev:ui` - Starts only the Next.js UI server
 - `dev:agent` - Starts only the LangGraph agent server
+- `dev:infra` - Starts CopilotKit development infrastructure
 - `typecheck` - Type-checks the Next.js app (`npm run typecheck --prefix agent` for the agent)
 - `lint` - Lints the Next.js app
 - `build` - Builds the Next.js application for production
 - `start` - Starts the production server
-- `install:agent` - Installs agent (Node) dependencies
+- `install:agent` - Installs agent dependencies inside `agent/`
+
+If agent dependencies fail to install automatically, run:
+
+```bash
+npm run install:agent
+```
 
 ## Project Structure
 
@@ -145,59 +142,6 @@ The following scripts can also be run using your preferred package manager:
 └── package.json
 ```
 
-## A2UI — Agent-to-User Interface
-
-The agent can generate rich, interactive UI surfaces declaratively via [A2UI](https://a2ui.org/specification/) instead of returning plain text: it sends a JSON description of the UI it wants, and the frontend turns it into real components.
-
-### How it works
-
-1. **Catalog** — component definitions (schema) paired with React renderers, registered once
-   in `layout.tsx` via `<CopilotKit a2ui={{ catalog: demonstrationCatalog }}>`.
-2. **Surface** — a rendered UI instance the agent creates and binds data to.
-3. **Operations** — the agent's `generate_a2ui` tool (`agent/src/tools/a2ui.ts`) returns
-   `render(operations=[...])`, streamed to the frontend via helpers in `agent/src/utils/a2ui.ts`.
-
-Components and data are decided at runtime by the agent — there's no fixed-schema variant in
-this project.
-
-### Key files
-
-| Purpose                              | Path                                               |
-| ------------------------------------ | --------------------------------------------------- |
-| Catalog definitions (Zod schemas)    | `src/app/declarative-generative-ui/definitions.ts` |
-| Catalog renderers (React components) | `src/app/declarative-generative-ui/renderers.tsx`  |
-| Catalog registration                 | `src/app/layout.tsx`                               |
-| A2UI agent tool                      | `agent/src/tools/a2ui.ts`                          |
-| A2UI operation helpers               | `agent/src/utils/a2ui.ts`                          |
-
-### Adding a custom component
-
-1. **Define** the component schema in `definitions.ts`:
-
-   ```typescript
-   MyWidget: {
-     description: "A brief description for the agent.",
-     props: z.object({ title: z.string(), value: z.number() }),
-   },
-   ```
-
-2. **Render** it in `renderers.tsx`:
-
-   ```typescript
-   MyWidget: ({ props }) => (
-     <div>{props.title}: {props.value}</div>
-   ),
-   ```
-
-   Renderers are type-checked against the definitions — TypeScript will error if props don't match.
-
-3. **Use it** from the agent — the component becomes available to `generate_a2ui` automatically.
-
-### Further reading
-
-- [A2UI Specification](https://a2ui.org/specification/)
-- [CopilotKit A2UI Documentation](https://docs.copilotkit.ai)
-
 ## Documentation
 
 - [CLAUDE.md](./CLAUDE.md) - collaboration rules and where things live
@@ -211,17 +155,18 @@ Feel free to submit issues and enhancement requests! This starter is designed to
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License — see the LICENSE file for details.
 
 ## Troubleshooting
 
 ### Agent Connection Issues
 
-If you see "I'm having trouble connecting to my tools", make sure:
+If the agent reports tool connection problems, make sure:
 
-1. The LangGraph agent is running on port 8123
-2. Your OpenAI API key is set correctly
-3. Both servers started successfully
+1. The LangGraph agent is running on port `8123`
+2. Your OpenAI API key is set correctly in `.env`
+3. `DATABASE_URL` is set to a Postgres database with `pgvector`
+4. Both servers started successfully
 
 ### Agent Dependencies
 
@@ -233,13 +178,11 @@ npm run install:agent
 
 ## CopilotKit Intelligence
 
-This app is connected to the CopilotKit Intelligence project **practice-new-version**
-(recorded in `.copilotkit/project.json`). Intelligence adds durable threads,
-message & event persistence, and analytics for your agent.
+This app is connected to the CopilotKit Intelligence project **practice-new-version**.
+The project details are recorded in `.copilotkit/project.json`.
 
-- **License:** a token is stored as `COPILOTKIT_LICENSE_TOKEN` in your `.env`.
-- **Switch project:** run `copilotkit project select` from this directory.
-- **Run it:** follow "Getting Started" above — install dependencies, set your
-  keys in `.env`, then `npm run dev`.
+- **License:** a token can be stored in `COPILOTKIT_LICENSE_TOKEN` in `.env`
+- **Run it:** install dependencies, set your env vars, then `npm run dev`
+- **Switch project:** run `copilotkit project select` from this directory
 
 Learn more at https://docs.copilotkit.ai.
