@@ -86,7 +86,8 @@ graph TD
 ## Tools available to `call_model`
 
 `modelTools` (`agent/src/tools/index.ts`); all but `reply_to_email` run through the `tools`
-node — `reply_to_email` is routing-only and never executes.
+node — `reply_to_email` is routing-only and never executes. Frontend tools (below) are bound
+in alongside these, so the model picks from one combined list.
 
 ```mermaid
 graph TD
@@ -107,4 +108,35 @@ graph TD
     search_knowledge_base["search_knowledge_base"]
     generate_a2ui["generate_a2ui"]
     reply_to_email["reply_to_email\n(routes to compose_email, not executed)"]
+```
+
+## Frontend tools
+
+UI components register tools with `useFrontendTool` (`@copilotkit/react-core/v2`). CopilotKit
+sends them up as `copilotkit.actions` on agent state; `callModel` (`agent/src/nodes/index.ts`)
+converts each into OpenAI tool format and binds it alongside `modelTools` for that invocation
+only — they are not in `executableTools`, so `routeAfterModel` never sends their calls to the
+`tools` node. A call to one ends the graph turn; CopilotKit's frontend runtime matches it back
+to the registered handler and runs it in the browser (e.g. filtering the inbox list, opening an
+email, toggling the theme), then resumes the thread with the result.
+
+```mermaid
+graph TD
+    subgraph Frontend["Next.js — :3000"]
+        FilterInbox["filterInbox\n(email-inbox/index.tsx)"]
+        ShowEmail["showEmail\n(email-inbox/index.tsx)"]
+        ToggleTheme["toggleTheme\n(use-generative-ui-examples.tsx)"]
+        EnableAppMode["enableAppMode\n(example-layout/index.tsx)"]
+        EnableChatMode["enableChatMode\n(example-layout/index.tsx)"]
+    end
+
+    FilterInbox -- "useFrontendTool" --> CopilotRoute["/api/copilotkit/[[...slug]]"]
+    ShowEmail -- "useFrontendTool" --> CopilotRoute
+    ToggleTheme -- "useFrontendTool" --> CopilotRoute
+    EnableAppMode -- "useFrontendTool" --> CopilotRoute
+    EnableChatMode -- "useFrontendTool" --> CopilotRoute
+
+    CopilotRoute -- "copilotkit.actions on state" --> call_model["call_model"]
+    call_model -- "tool call for a frontend tool" --> END(["END\n(turn ends)"])
+    END -- "runtime matches call to handler,\nruns it in the browser, resumes thread" --> CopilotRoute
 ```
