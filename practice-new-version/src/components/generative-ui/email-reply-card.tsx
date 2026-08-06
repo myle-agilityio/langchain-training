@@ -55,7 +55,7 @@ export function EmailReplyCard({
           "The teacher approved this draft and it has been sent. The UI already shows a " +
           "'Reply sent' confirmation with the subject. Do NOT repeat the draft body, the " +
           "subject, the classification, or anything from the knowledge base. Reply with one " +
-          "short line confirming it was sent, then stop.",
+          "friendly line confirming it was sent, then stop.",
       }),
     );
   };
@@ -72,7 +72,7 @@ export function EmailReplyCard({
         instruction:
           "The teacher rejected this draft and nothing was sent. Do NOT write another " +
           "draft and do NOT call compose_reply again unless they explicitly ask. Reply " +
-          "with one short line acknowledging it, then stop.",
+          "with one polite line acknowledging it, then stop.",
       }),
     );
   };
