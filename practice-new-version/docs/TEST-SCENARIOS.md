@@ -15,58 +15,58 @@ result in the **Result** line. Status key: ⬜ not run · ✅ pass · ⚠️ par
 
 - [x] **1.1 Bulk triage** — Type: `Classify all the unread emails.`
   - Expect: `get_emails` → `classify_emails`; every row gets topic/course/urgency badges (workType too in the detail pane). Inbox colour-codes itself.
-  - Result:
+  - Result:  ✅ pass
 
 - [x] **1.2 Course inferred from the math, not the grade** — Type: `What's Angelina's quiz question about, and which class is it?`
   - Expect: `math_12` inferred from the calculus content (ladder / implicit differentiation), even though the email never says "Grade 12". Repeat with **Marcus Mohr** (rational functions → `math_11`).
-  - Result:
+  - Result:  ✅ pass
 
 - [x] **1.3 The "complex" case** — Type: `Classify Flo Beahan's email.`
   - Expect: `complex` — Flo is a parent whose email is part absence, part grade dispute, part meeting request. Forcing a single topic is a miss.
-  - Result:
+  - Result:  ✅ pass
 
 ## 2. Counting & status (anti-hallucination path)
 
 - [x] **2.1 Exact counts** — Type: `How many unread emails do I have, and how many are about Grade 12?`
   - Expect: exact numbers (computed via SQL `GROUP BY`, not eyeballing the list).
-  - Result:
+  - Result:  ✅ pass
 
 - [x] **2.2 Re-reads, doesn't trust stale answers** — Reply to one email in the UI, then ask the count again.
   - Expect: the number drops; it calls `get_emails` again rather than reusing its earlier answer.
-  - Result:
+  - Result:  ✅ pass
 
 ## 3. Drafting + human approval (core loop)
 
 - [x] **3.1 Full draft flow** — Select **Ezra Konopelski** ("Absent today / test this afternoon") → **Ask AI to draft**.
   - Expect: `get_emails → classify → search_knowledge_base → compose_reply`, then an editable **approval card** in chat. Draft cites the *real* makeup policy (three school days, tutorial block), not an invented one.
-  - Result:
+  - Result:  ✅ pass
 
 - [x] **3.2 Reject doesn't re-draft** — On that card, click **Reject**.
   - Expect: one short acknowledgement, **no second draft**. A new card appearing = regression.
-  - Result:
+  - Result:  ✅ pass
 
 - [x] **3.3 Approve is terse** — Draft another and click **Approve & Send**.
   - Expect: card flips to "Reply sent", inbox row shows a **Replied** badge, chat says ~"Sent." — not a re-recital of the draft.
-  - Result:
+  - Result:  ✅ pass
 
 - [x] **3.4 Classify-before-reply guard** — Pick an unclassified email and ask to reply to it directly.
   - Expect: it classifies first (records topic/course/workType/urgency), then drafts — never composes an untriaged email.
-  - Result:
+  - Result:  ✅ pass
 
 ## 4. Selection resolves "this email"
 
 - [x] **4.1 Bare "reply this"** — Select **Felix Gislason** ("late project"), then type: `Reply this email.`
   - Expect: drafts for Felix without you naming him; the late-work policy in the draft comes from the KB (10%/day, floor of 50%).
-  - Result:
+  - Result:  ✅ pass
 
 - [ ] **4.2 Nothing selected** — With no email open, type: `Reply this email.`
   - Expect: it asks *which* email — does not guess.
-  - Result: it says please select an email.
+  - Result: ✅ pass
 
 ## 5. Short-term memory (best demo)
 
 - [ ] **5.1 Draft survives a long thread** — In one chat thread, in order:
-  1. `Draft a reply to Ezra about the missed test.` → approve or reject the card
+  1. `Draft a reply to Ezra about the missed test.` → reject the card
   2. Ask 4–5 unrelated questions (`how many unread?`, `which are high urgency?`, `anything from parents?`, …) to push the thread past ~20 messages
   3. `Make that reply shorter and less formal.`
   - Expect: it revises **Ezra's** draft, even though that turn was summarized away and you never re-named him. "Which reply?" = focus not carried.
