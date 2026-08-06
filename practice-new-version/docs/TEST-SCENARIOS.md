@@ -59,59 +59,59 @@ result in the **Result** line. Status key: ⬜ not run · ✅ pass · ⚠️ par
   - Expect: drafts for Felix without you naming him; the late-work policy in the draft comes from the KB (10%/day, floor of 50%).
   - Result:  ✅ pass
 
-- [ ] **4.2 Nothing selected** — With no email open, type: `Reply this email.`
+- [x] **4.2 Nothing selected** — With no email open, type: `Reply this email.`
   - Expect: it asks *which* email — does not guess.
   - Result: ✅ pass
 
 ## 5. Short-term memory (best demo)
 
-- [ ] **5.1 Draft survives a long thread** — In one chat thread, in order:
+- [x] **5.1 Draft survives a long thread** — In one chat thread, in order:
   1. `Draft a reply to Ezra about the missed test.` → reject the card
   2. Ask 4–5 unrelated questions (`how many unread?`, `which are high urgency?`, `anything from parents?`, …) to push the thread past ~20 messages
   3. `Make that reply shorter and less formal.`
   - Expect: it revises **Ezra's** draft, even though that turn was summarized away and you never re-named him. "Which reply?" = focus not carried.
-  - Result:
+  - Result: ✅ pass
 
 ## 6. Long-term memory (across threads)
 
-- [ ] **6.1 Remember, then recall in a new thread**
+- [x] **6.1 Remember, then recall in a new thread**
   1. Thread A: `Marcus Mohr is in my Grade 11 Period 5 class and gets extended time on assessments. Remember that.`
   2. Click **+ New** to start a fresh thread.
   3. `Draft a reply to Marcus about his practice question.`
   - Expect: the new-thread draft already knows his class/accommodation — the profile persisted in Postgres and recalled for a fresh conversation.
-  - Result:
+  - Result: ✅ pass
 
 ## 7. Guardrails (protects you)
 
-- [ ] **7.1 No promises on a grade dispute** — Select the parent email **"Request to review Katrina Fisher's test"** and ask for a draft.
+- [x] **7.1 No promises on a grade dispute** — Select the parent email **"Request to review Katrina Fisher's test"** and ask for a draft.
   - Expect: the draft *offers the re-grade process* — never promises the score will change. "I'll raise her grade" is a serious miss.
-  - Result:
+  - Result: ✅ pass
 
-- [ ] **7.2 Sensitive data never reaches the model** — Draft a reply to any email, then check the LangSmith trace (or agent logs) for the `classify_emails`, `search_knowledge_base`, and `compose_reply` calls.
+- [x] **7.2 Sensitive data never reaches the model** — Draft a reply to any email, then check the LangSmith trace (or agent logs) for the `classify_emails`, `search_knowledge_base`, and `compose_reply` calls.
   - Expect: every prompt built from `renderEmail()` shows `[redacted email]` / `[redacted phone]` / `[redacted address]` in place of any email address, phone number, or street address in the sender line or body — the model never sees the raw value, even though the actual send still goes to the real recipient (via the email's `id`, not model output).
-  - Result:
+  - Result: ✅ pass
 
-- [ ] **7.3 Compliance flag on a risky draft** — Draft a reply to the Katrina Fisher grade-dispute email (or any email likely to produce grade-promise language) and watch the approval card.
+- [x] **7.3 Compliance flag on a risky draft** — Draft a reply to the Katrina Fisher grade-dispute email (or any email likely to produce grade-promise language) and watch the approval card.
   - Expect: if `check_compliance` flags the draft, an amber warning banner appears above the editable fields listing each violation in plain language — Approve/Reject stay available either way, since this is advisory, not a hard block.
-  - Result:
+  - Result: ✅ pass
 
 ## 8. Generative UI
 
-- [ ] **8.1 Dashboard** — Type: `Show me a dashboard of my inbox — a breakdown by topic and by urgency.`
+- [x] **8.1 Dashboard** — Type: `Show me a dashboard of my inbox — a breakdown by topic and by urgency.`
   - Expect: `generate_a2ui` renders metric tiles + charts inline.
-  - Result:
+  - Result: ✅ pass
 
 ## 9. Manual path (no agent)
 
-- [ ] **9.1 Manual compose** — Select any email → **Compose reply** → type → **Send**.
+- [x] **9.1 Manual compose** — Select any email → **Compose reply** → type → **Send**.
   - Expect: writes straight to the inbox (Replied badge), no chat/agent involvement.
-  - Result:
+  - Result: ✅ pass
 
 ## 10. Data & refresh
 
-- [ ] **10.1 Refresh button** — Edit a row directly in Postgres (or reply in another tab), then click the inbox **refresh** icon.
+- [x] **10.1 Refresh button** — Edit a row directly in Postgres (or reply in another tab), then click the inbox **refresh** icon.
   - Expect: the change appears — the list is a snapshot that refetches on demand.
-  - Result:
+  - Result: ✅ pass
 
 ---
 
