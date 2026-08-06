@@ -15,3 +15,6 @@ export const COMPOSE_REPLY_ACTION = "compose_reply";
 
 // pgvector table holding the embedded knowledge base.
 export const KB_TABLE = "kb_documents";
+
+// BaseStore namespace for sender profiles; the key within it is the sender's email address.
+export const CONTACT_PROFILE_NAMESPACE = ["contact_profiles"];

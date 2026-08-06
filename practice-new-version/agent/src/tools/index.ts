@@ -1,12 +1,14 @@
 import { z } from "zod";
 import { tool } from "@langchain/core/tools";
+import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
 import { plainModel } from "../config/model.js";
-import { TOOL } from "../constants/index.js";
-import { aggregateEmails, getEmail, listEmails, updateEmail, upsertContactProfile } from "../db/index.js";
+import { CONTACT_PROFILE_NAMESPACE, TOOL } from "../constants/index.js";
+import { aggregateEmails, getEmail, listEmails, updateEmail } from "../db/index.js";
 import { classifyPrompt } from "../prompts/index.js";
 import { searchKnowledge } from "../rag/index.js";
 import { ClassificationSchema, EmailFilterSchema, EmailGroupBySchema } from "../types/index.js";
+import type { ContactProfileValue } from "../types/index.js";
 import { generate_a2ui } from "./a2ui.js";
 
 // Shared description of the filter shape, so get_emails and count_emails don't drift.
@@ -149,7 +151,10 @@ export const search_knowledge_base = tool(
 // trusting a model-guessed address — "marcus.mohr@example.com" vs the real
 // "marcus.mohr52@yahoo.com" would silently file the memory where it can never be found again.
 export const update_contact_profile = tool(
-  async (input: { sender: string; tone?: string; facts?: string[] }) => {
+  async (
+    input: { sender: string; tone?: string; facts?: string[] },
+    config: LangGraphRunnableConfig,
+  ) => {
     const matches = await listEmails({ sender: input.sender });
     const addresses = [...new Set(matches.map((e) => e.from.email))];
     if (addresses.length === 0) {
@@ -169,8 +174,20 @@ export const update_contact_profile = tool(
     }
     const email = addresses[0];
     const name = matches.find((e) => e.from.email === email)!.from.name;
-    const profile = await upsertContactProfile(email, { name, tone: input.tone, facts: input.facts });
-    return JSON.stringify({ ok: true, profile });
+
+    const store = config.store;
+    if (!store) throw new Error("BaseStore missing — graph must be compiled with a store.");
+    // Store.put replaces the whole value, so merge facts read-modify-write style.
+    const existing = (await store.get(CONTACT_PROFILE_NAMESPACE, email))?.value as
+      | ContactProfileValue
+      | undefined;
+    const profile: ContactProfileValue = {
+      name,
+      tone: input.tone ?? existing?.tone ?? null,
+      facts: [...new Set([...(existing?.facts ?? []), ...(input.facts ?? [])])],
+    };
+    await store.put(CONTACT_PROFILE_NAMESPACE, email, profile);
+    return JSON.stringify({ ok: true, profile: { email, ...profile } });
   },
   {
     name: TOOL.UPDATE_CONTACT_PROFILE,

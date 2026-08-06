@@ -1,9 +1,9 @@
 import { ToolMessage, type BaseMessage } from "@langchain/core/messages";
-import { END, interrupt } from "@langchain/langgraph";
+import { END, interrupt, type LangGraphRunnableConfig } from "@langchain/langgraph";
 
 import { plainModel } from "../config/model.js";
-import { COMPOSE_REPLY_ACTION } from "../constants/index.js";
-import { getContactProfile, getEmail } from "../db/index.js";
+import { COMPOSE_REPLY_ACTION, CONTACT_PROFILE_NAMESPACE } from "../constants/index.js";
+import { getEmail } from "../db/index.js";
 import { checkCompliancePrompt, draftPrompt, needsResearchPrompt } from "../prompts/index.js";
 import { classify_emails, get_emails, search_knowledge_base } from "../tools/index.js";
 import {
@@ -11,6 +11,7 @@ import {
   DraftSchema,
   NeedsResearchSchema,
   type ComplianceCheck,
+  type ContactProfileValue,
   type Draft,
   type Email,
   type KBArticle,
@@ -75,10 +76,10 @@ export function afterTriage(state: State) {
   return state.needsResearch ? "research" : "write_draft";
 }
 
-// research — search_knowledge_base for the policy the draft must not invent, plus sender profile.
+// research — search_knowledge_base for the policy the draft must not invent.
 export async function research(state: State) {
   const email = await fetchEmailById(state.emailId);
-  if (!email) return { kbContext: "", senderContext: "" };
+  if (!email) return { kbContext: "" };
 
   const query = `${email.subject} ${email.body} ${Object.values(email.classification ?? {}).join(" ")}`;
   const articles = JSON.parse(await search_knowledge_base.invoke({ query })) as KBArticle[];
@@ -86,7 +87,18 @@ export async function research(state: State) {
     ? articles.map((a) => `## ${a.title}\n${a.content}`).join("\n\n")
     : "No relevant articles found. Do not state any policy you cannot ground here.";
 
-  const profile = await getContactProfile(email.from.email);
+  return { kbContext };
+}
+
+// write_draft — email + researched context in, subject/body out. The sender profile is read here,
+// not in research: it's a cheap key lookup every draft should see, even when the KB isn't needed.
+export async function writeDraft(state: State, config: LangGraphRunnableConfig) {
+  const email = await getEmail(state.emailId);
+  if (!email) return {};
+
+  const profile = (await config.store?.get(CONTACT_PROFILE_NAMESPACE, email.from.email))?.value as
+    | ContactProfileValue
+    | undefined;
   const senderContext = profile
     ? [
         profile.name ? `Name: ${profile.name}` : "",
@@ -97,24 +109,17 @@ export async function research(state: State) {
         .join("\n")
     : "";
 
-  return { kbContext, senderContext };
-}
-
-// write_draft — email + researched context in, subject/body out.
-export async function writeDraft(state: State) {
-  const email = await getEmail(state.emailId);
-  if (!email) return {};
   const draft = await plainModel
     .withStructuredOutput(DraftSchema)
     .invoke(
       draftPrompt({
         email,
         kbContext: state.kbContext,
-        senderContext: state.senderContext,
+        senderContext,
         revisionNotes: collectRevisionNotes(state.messages, state.emailId),
       }),
     );
-  return { draft };
+  return { draft, senderContext };
 }
 
 // Independent guardrail on every draft (tone, policy, PII) — advisory only, teacher decides.
