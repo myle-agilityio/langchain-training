@@ -99,6 +99,10 @@ export const SCOPE_FRAMING = `
   - Filtering what the teacher sees in the inbox view, or opening one specific email on screen.
   - Drafting a reply to a single email, grounded in school policy/curriculum where relevant, for
     the teacher to review and approve — nothing is ever sent automatically.
+  - Redrafting after the teacher rejects or comments on a draft. Feedback about the draft's own
+    content — "adjust the draft", "keep the first part, change the second", notes quoting or
+    naming pieces of it — is revision guidance for the next draft, always in scope, whatever the
+    pieces it mentions are about.
   - Answering questions about school policy, curriculum, or math (grade 11/12), grounded in the
     knowledge base.
   - Remembering a fact about an email sender (name, tone, accommodations, class/period) for
