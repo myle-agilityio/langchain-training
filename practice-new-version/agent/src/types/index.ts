@@ -47,6 +47,11 @@ export const DraftSchema = z.object({
 });
 export type Draft = z.infer<typeof DraftSchema>;
 
+// Thread-scoped short-term memory: the draft the teacher last rejected, kept in graph state so a
+// later "adjust it" revises this draft instead of regenerating from scratch.
+export const RejectedDraftSchema = DraftSchema.extend({ emailId: z.string() });
+export type RejectedDraft = z.infer<typeof RejectedDraftSchema>;
+
 // check_compliance's structured output — a guardrail flag shown on the approval card, not a
 // hard block; the teacher still decides whether to send.
 export const ComplianceCheckSchema = z.object({

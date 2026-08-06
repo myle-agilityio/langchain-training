@@ -69,6 +69,9 @@ export function EmailReplyCard({
     respond?.(
       JSON.stringify({
         decision: "reject",
+        // The draft as last seen (edits included) — the agent keeps it for a later "adjust it".
+        subject,
+        body,
         instruction:
           "The teacher rejected this draft and nothing was sent. Do NOT write another " +
           "draft and do NOT call compose_reply again unless they explicitly ask. Reply " +

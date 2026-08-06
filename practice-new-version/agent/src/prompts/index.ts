@@ -205,6 +205,7 @@ export function draftPrompt(args: {
   kbContext: string;
   senderContext: string;
   revisionNotes: string;
+  previousDraft?: { subject: string; body: string };
 }): string {
   return `You are drafting a reply on behalf of a high school mathematics teacher. Write as the teacher, in first person.
 
@@ -216,6 +217,11 @@ export function draftPrompt(args: {
     ${
       args.revisionNotes
         ? `- The teacher said this about this reply — follow it, even where it adds something the email itself didn't ask for:\n${args.revisionNotes}`
+        : ""
+    }
+    ${
+      args.previousDraft
+        ? `\nThe teacher rejected this earlier draft. Revise it according to their notes above — keep everything they didn't ask to change, rather than writing a new reply from scratch:\nSubject: ${args.previousDraft.subject}\nBody:\n${args.previousDraft.body}\n`
         : ""
     }
 

@@ -15,6 +15,7 @@ import {
   type Draft,
   type Email,
   type KBArticle,
+  type RejectedDraft,
 } from "../types/index.js";
 import { collectRevisionNotes, findReplyCall } from "../utils/index.js";
 
@@ -26,6 +27,7 @@ type State = {
   senderContext: string;
   draft?: Draft;
   compliance?: ComplianceCheck;
+  lastRejectedDraft: RejectedDraft | null;
 };
 
 // Reuses get_emails (rather than db/index.js's getEmail directly) so triage/research resolve an
@@ -109,6 +111,10 @@ export async function writeDraft(state: State, config: LangGraphRunnableConfig) 
         .join("\n")
     : "";
 
+  // Only revise the rejected draft when this compose is for the same email.
+  const previousDraft =
+    state.lastRejectedDraft?.emailId === state.emailId ? state.lastRejectedDraft : undefined;
+
   const draft = await plainModel
     .withStructuredOutput(DraftSchema)
     .invoke(
@@ -117,6 +123,7 @@ export async function writeDraft(state: State, config: LangGraphRunnableConfig) 
         kbContext: state.kbContext,
         senderContext,
         revisionNotes: collectRevisionNotes(state.messages, state.emailId),
+        previousDraft,
       }),
     );
   return { draft, senderContext };
@@ -143,10 +150,24 @@ export async function requestApproval(state: State) {
   const resume = interrupt({ action: COMPOSE_REPLY_ACTION, args }) as {
     decision: "approve" | "reject";
     instruction: string;
+    subject?: string;
+    body?: string;
   };
+
+  // On reject, keep the draft the teacher last saw (card edits included) as short-term memory
+  // for a later "adjust it"; an approve clears it so it never bleeds into the next compose.
+  const lastRejectedDraft: RejectedDraft | null =
+    resume.decision === "reject"
+      ? {
+          emailId: state.emailId,
+          subject: resume.subject ?? draft.subject,
+          body: resume.body ?? draft.body,
+        }
+      : null;
 
   const call = findReplyCall(state.messages);
   return {
+    lastRejectedDraft,
     messages: call
       ? [new ToolMessage({ tool_call_id: call.id ?? "unknown", content: resume.instruction })]
       : [],
