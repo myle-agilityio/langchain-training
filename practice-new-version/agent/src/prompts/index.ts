@@ -101,6 +101,8 @@ export const SCOPE_FRAMING = `
     the teacher to review and approve — nothing is ever sent automatically.
   - Answering questions about school policy, curriculum, or math (grade 11/12), grounded in the
     knowledge base.
+  - Remembering a fact about an email sender (name, tone, accommodations, class/period) for
+    future replies, across conversations — not just this one.
   - Toggling the app's light/dark theme.
   - Rendering supporting UI for the conversation.
   This list is illustrative, not exhaustive — treat anything reasonably covered by it as in

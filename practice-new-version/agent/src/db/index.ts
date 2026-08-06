@@ -185,3 +185,26 @@ export async function getContactProfile(
   );
   return rows[0] ?? null;
 }
+
+// Written by update_contact_profile — the only write path onto contact_profiles. New facts are
+// merged into what's on file (deduped), not replaced; name/tone overwrite when given.
+export async function upsertContactProfile(
+  email: string,
+  patch: { name?: string; tone?: string; facts?: string[] },
+): Promise<ContactProfile> {
+  const { rows } = await getPool().query<ContactProfile>(
+    `INSERT INTO contact_profiles (email, name, tone, facts, updated_at)
+     VALUES ($1, $2, $3, COALESCE($4, '[]'::jsonb), now())
+     ON CONFLICT (email) DO UPDATE SET
+       name = COALESCE(EXCLUDED.name, contact_profiles.name),
+       tone = COALESCE(EXCLUDED.tone, contact_profiles.tone),
+       facts = COALESCE((
+         SELECT jsonb_agg(DISTINCT fact)
+         FROM jsonb_array_elements_text(contact_profiles.facts || EXCLUDED.facts) AS fact
+       ), contact_profiles.facts),
+       updated_at = now()
+     RETURNING email, name, tone, facts`,
+    [email, patch.name ?? null, patch.tone ?? null, patch.facts ? JSON.stringify(patch.facts) : null],
+  );
+  return rows[0];
+}

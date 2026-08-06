@@ -3,7 +3,7 @@ import { tool } from "@langchain/core/tools";
 
 import { plainModel } from "../config/model.js";
 import { TOOL } from "../constants/index.js";
-import { aggregateEmails, getEmail, listEmails, updateEmail } from "../db/index.js";
+import { aggregateEmails, getEmail, listEmails, updateEmail, upsertContactProfile } from "../db/index.js";
 import { classifyPrompt } from "../prompts/index.js";
 import { searchKnowledge } from "../rag/index.js";
 import { ClassificationSchema, EmailFilterSchema, EmailGroupBySchema } from "../types/index.js";
@@ -145,6 +145,52 @@ export const search_knowledge_base = tool(
   },
 );
 
+// Resolves sender against real inbox data itself (like classify_emails resolves ids) instead of
+// trusting a model-guessed address — "marcus.mohr@example.com" vs the real
+// "marcus.mohr52@yahoo.com" would silently file the memory where it can never be found again.
+export const update_contact_profile = tool(
+  async (input: { sender: string; tone?: string; facts?: string[] }) => {
+    const matches = await listEmails({ sender: input.sender });
+    const addresses = [...new Set(matches.map((e) => e.from.email))];
+    if (addresses.length === 0) {
+      return JSON.stringify({
+        ok: false,
+        error: "no sender matches",
+        recovery: "Call get_emails to find the right name or address, then retry.",
+      });
+    }
+    if (addresses.length > 1) {
+      return JSON.stringify({
+        ok: false,
+        error: "ambiguous sender — more than one address matches",
+        matches: matches.map((e) => ({ name: e.from.name, email: e.from.email })),
+        recovery: "Retry with the exact name or address for the one the teacher means.",
+      });
+    }
+    const email = addresses[0];
+    const name = matches.find((e) => e.from.email === email)!.from.name;
+    const profile = await upsertContactProfile(email, { name, tone: input.tone, facts: input.facts });
+    return JSON.stringify({ ok: true, profile });
+  },
+  {
+    name: TOOL.UPDATE_CONTACT_PROFILE,
+    description:
+      "Save or update durable, cross-conversation memory about one email sender — their " +
+      "preferred reply tone, or standing facts (accommodations, class/period, recurring context) " +
+      "worth recalling in any future thread. Call this whenever the teacher asks you to remember " +
+      "something about a person, even offhand ('remember that', 'keep in mind', 'note that'). " +
+      "facts are merged into what's already on file, not replaced — pass only the new fact(s), " +
+      "not the full list. sender is whatever the teacher called them (name or address) — this " +
+      "tool resolves it against the real inbox itself, so never guess or construct an address. " +
+      "Not for facts about a single email — that belongs in the reply itself, not the profile.",
+    schema: z.object({
+      sender: z.string(),
+      tone: z.string().optional(),
+      facts: z.array(z.string()).optional(),
+    }),
+  },
+);
+
 // Never executed as a tool — the router turns this call into a compose-email subgraph entry.
 export const reply_to_email = tool(
   async () => "",
@@ -168,6 +214,7 @@ export const modelTools = [
   classify_emails,
   update_email_status,
   search_knowledge_base,
+  update_contact_profile,
   generate_a2ui,
   reply_to_email,
 ];
@@ -179,5 +226,6 @@ export const executableTools = [
   classify_emails,
   update_email_status,
   search_knowledge_base,
+  update_contact_profile,
   generate_a2ui,
 ];
