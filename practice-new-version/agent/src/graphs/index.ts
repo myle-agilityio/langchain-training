@@ -61,5 +61,3 @@ export async function buildGraph() {
 
   return workflow.compile({ checkpointer, store });
 }
-
-export const graph = await buildGraph();
