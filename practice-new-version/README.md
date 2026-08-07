@@ -124,47 +124,10 @@ If agent dependencies fail to install automatically, run:
 npm run install:agent
 ```
 
-## Project Structure
-
-```
-├── src/                              # Next.js frontend
-│   ├── app/
-│   │   ├── page.tsx                  # Main page (chat + inbox side-by-side)
-│   │   ├── api/copilotkit/           # CopilotKit runtime route
-│   │   ├── api/emails/               # Reads the inbox directly from Postgres
-│   │   └── declarative-generative-ui/ # A2UI catalog: definitions + renderers
-│   ├── components/
-│   │   ├── email-inbox/              # Inbox list, detail view, compose form
-│   │   ├── example-layout/           # Layout: chat + canvas side-by-side
-│   │   └── generative-ui/            # Generative UI components
-│   └── hooks/
-│       └── use-shared-inbox.tsx      # Inbox data provider
-├── agent/                            # LangGraph TypeScript agent
-│   └── src/
-│       ├── agent.ts                  # Agent entry point
-│       ├── graphs/                   # Graph definitions (main graph, compose-email subgraph)
-│       ├── nodes/                    # Node implementations
-│       ├── prompts/                  # Every prompt string
-│       ├── tools/                    # Tool definitions (emails, knowledge base, A2UI)
-│       ├── state/                    # StateSchema definitions
-│       ├── types/                    # Zod schemas + interfaces
-│       ├── db/                       # Postgres pool, checkpointer, cross-thread store
-│       ├── rag/                      # pgvector knowledge base (seed + semantic search)
-│       ├── config/                   # Env validation + model instances
-│       ├── constants/                # Tool names, table names
-│       └── utils/
-├── docs/
-│   └── TEST-SCENARIOS.md             # Scenarios the assistant is expected to handle
-├── scripts/                          # Dev-server helper scripts
-├── public/                           # Static assets
-├── next.config.ts
-├── tsconfig.json
-└── package.json
-```
-
 ## Documentation
 
 - [CLAUDE.md](./CLAUDE.md) - collaboration rules and where things live
+- [Project Structure & Tech Stack](./docs/PROJECT-STRUCTURE.md) - directory layout, technical stack, and development tools with versions
 - [Features](./docs/FEATURES.md) - what the assistant does, from the teacher's point of view
 - [Architecture](./docs/ARCHITECTURE.md) - system, main graph, and `compose_email` subgraph diagrams
 - [Test Scenarios](./docs/TEST-SCENARIOS.md) - scenarios the assistant is expected to handle
