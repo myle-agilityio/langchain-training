@@ -2,18 +2,47 @@
 
 An inbox triage assistant for a high school math teacher, built with [LangGraph](https://www.langchain.com/langgraph) and [CopilotKit](https://copilotkit.ai). It classifies incoming email, grounds answers in a school-policy knowledge base, and drafts replies for the teacher to approve before anything sends.
 
-> **This is a from-scratch rebuild of the `practice/` project.** The UI, test scenarios, and config were carried over; the agent was rebuilt. See [CLAUDE.md](./CLAUDE.md) for collaboration rules and [docs/TEST-SCENARIOS.md](./docs/TEST-SCENARIOS.md) for the scenarios the assistant is expected to handle.
+## Team Size
+1 Developer
+
+## Timeline
+16 Days
+
+## Author
+My Le
+
+## Plan
+[LangChain/LangGraph Practice Plan - AI Inbox Mangement Assistant Application](https://docs.google.com/document/d/1x160_wm8LfrehY8Z4oTn0ErbDq93LimBUgjF_c6KNeY/edit?usp=sharing)
+
+## Key Features
+
+- 🤖 **AI Chat Assistant** — conversational inbox-triage assistant for classifying, drafting, and sending replies (CopilotKit + LangGraph ReAct agent)
+- 📧 **Email Classification** — auto-tags topic, course, work type, and urgency via structured LLM output (Zod + `withStructuredOutput`)
+- ✅ **Human-in-the-Loop Approval** — editable draft cards with approve/reject before anything sends, using LangGraph `interrupt()` + `Command(resume)` pattern
+- 🔀 **Compose-Email Subgraph** — dedicated triage → research → draft → compliance pipeline as a nested `StateGraph`, so every reply is grounded and checked
+- 📚 **RAG-Grounded Replies** — policy and curriculum answers pulled from a pgvector knowledge base via semantic search (`PGVectorStore` + `text-embedding-3-small`)
+- 🛡️ **Guardrails** — advisory compliance check on every draft plus regex-based PII redaction before any model call
+- 🎨 **Generative UI** — dynamic dashboards and approval cards rendered live in chat via A2UI, `useInterrupt`, and `useFrontendTool`
+- 🧠 **Cross-thread Memory** — remembers sender tone and facts across conversations via a Postgres-backed `BaseStore`
+- 🔁 **Thread Durability** — resumable, restart-safe agent runs via a `PostgresSaver` checkpointer
+- 💾 **PostgreSQL Persistence** — inbox, checkpoints, vector KB, and cross-thread store all live in one Postgres via a shared `pg.Pool`
 
 ## Prerequisites
 
-- Node.js 20+
-- Any of the following package managers:
-  - npm (default)
-  - [pnpm](https://pnpm.io/installation)
-  - [yarn](https://classic.yarnpkg.com/lang/en/docs/install/)
-  - [bun](https://bun.sh/)
-- OpenAI API key for the LangGraph agent
-- A Postgres database with the `pgvector` extension available. Any Postgres works: local install, Neon, Supabase, etc.
+[![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-pgvector-4169E1?logo=postgresql&logoColor=white)](https://github.com/pgvector/pgvector)
+[![OpenAI](https://img.shields.io/badge/OpenAI-API_key-412991?logo=openai&logoColor=white)](https://platform.openai.com/)
+
+Package manager (pick one):
+
+[![npm](https://img.shields.io/badge/npm-CB3837?logo=npm&logoColor=white)](https://www.npmjs.com/)
+[![pnpm](https://img.shields.io/badge/pnpm-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/installation)
+[![yarn](https://img.shields.io/badge/yarn-2C8EBB?logo=yarn&logoColor=white)](https://classic.yarnpkg.com/lang/en/docs/install/)
+[![bun](https://img.shields.io/badge/bun-000000?logo=bun&logoColor=white)](https://bun.sh/)
+
+- A Postgres database with the `pgvector` extension available — local install, Neon, Supabase, etc. all work.
+- OpenAI API key for the LangGraph agent.
 
 ## Getting Started
 
