@@ -42,6 +42,7 @@ Package manager (pick one):
 [![bun](https://img.shields.io/badge/bun-000000?logo=bun&logoColor=white)](https://bun.sh/)
 
 - A Postgres database with the `pgvector` extension available — local install, Neon, Supabase, etc. all work.
+  - Setting up your own is optional — please contact the author (My Le) to get a shared `DATABASE_URL`.
 - OpenAI API key for the LangGraph agent.
 
 ## Getting Started
