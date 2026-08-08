@@ -1,6 +1,7 @@
-FROM langchain/langgraphjs-api:20
-ADD . /deps/agent
-ENV LANGSERVE_GRAPHS='{"sample_agent":"./src/index.ts:graph"}'
-WORKDIR /deps/agent
+FROM node:20-slim
+WORKDIR /app
+COPY package*.json ./
 RUN npm ci
-RUN (test ! -f /api/langgraph_api/js/build.mts && echo "Prebuild script not found, skipping") || tsx /api/langgraph_api/js/build.mts
+COPY . .
+ENV NODE_ENV=production
+CMD npm run start

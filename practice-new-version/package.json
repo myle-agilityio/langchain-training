@@ -10,6 +10,7 @@
     "dev:agent": "npm run dev --prefix agent",
     "typecheck": "tsc --noEmit",
     "build": "next build",
+    "build:agent": "npm run build --prefix agent",
     "start": "next start",
     "lint": "next lint",
     "install:agent": "cd agent && npm install",
