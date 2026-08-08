@@ -2,7 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  serverExternalPackages: ["@copilotkit/runtime"],
   env: {
     // The public Threads UI flag is DERIVED from the server-side license token.
     // Set COPILOTKIT_LICENSE_TOKEN (only) to enable Threads — do not set this flag
