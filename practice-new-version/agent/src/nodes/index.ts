@@ -2,7 +2,7 @@ import { AIMessage, HumanMessage, ToolMessage, type BaseMessage } from "@langcha
 import { ChatPromptTemplate, MessagesPlaceholder } from "@langchain/core/prompts";
 import { Command, END, type LangGraphRunnableConfig, type NodeError } from "@langchain/langgraph";
 
-import { model, plainModel } from "../config/model.js";
+import { getModelForConfig, getPlainModelForConfig, MissingApiKeyError } from "../config/model.js";
 import { TOOL } from "../constants/index.js";
 import { currentDateLine, scopeCheckPrompt, SYSTEM_PROMPT } from "../prompts/index.js";
 import { executableTools, modelTools } from "../tools/index.js";
@@ -24,12 +24,35 @@ const scopeCheckPromptTemplate = ChatPromptTemplate.fromMessages([
   new MessagesPlaceholder("messages"),
 ]);
 
-// Validates if the request is within scope before processing
-export async function validateRequest(state: AgentStateShape) {
+// Validates if the request is within scope before processing. Also the one place that checks
+// for a visitor-supplied OpenAI key (BYOK — see config/model.ts) since every node downstream
+// shares this same run's config and can assume the key already checked out.
+export async function validateRequest(
+  state: AgentStateShape,
+  config: LangGraphRunnableConfig,
+) {
   const last = state.messages[state.messages.length - 1];
   if (!HumanMessage.isInstance(last)) return { outOfScope: false };
 
-  const chain = scopeCheckPromptTemplate.pipe(plainModel.withStructuredOutput(ScopeCheckSchema));
+  let scopedModel;
+  try {
+    scopedModel = getPlainModelForConfig(config);
+  } catch (error) {
+    if (!(error instanceof MissingApiKeyError)) throw error;
+    return {
+      outOfScope: true,
+      messages: [
+        new AIMessage({
+          id: crypto.randomUUID(),
+          content:
+            "I don't have an OpenAI API key to work with yet — enter yours in the box on " +
+            "screen, then try again.",
+        }),
+      ],
+    };
+  }
+
+  const chain = scopeCheckPromptTemplate.pipe(scopedModel.withStructuredOutput(ScopeCheckSchema));
   const check = await chain.invoke({ messages: state.messages });
 
   if (check.inScope) return { outOfScope: false };
@@ -106,7 +129,7 @@ export async function callModel(
   state: AgentStateShape,
   config: LangGraphRunnableConfig,
 ) {
-  const bound = model.bindTools!([...modelTools, ...frontendTools(state)]);
+  const bound = getModelForConfig(config).bindTools!([...modelTools, ...frontendTools(state)]);
   const chain = callModelPrompt.pipe(bound);
   // config threaded through so token callbacks stream assistant text into the chat UI.
   const response = await chain.invoke(

@@ -13,12 +13,14 @@ const TITLE_MODEL = "gpt-4o-mini";
 
 // Best-effort: a title is a nice-to-have, so any failure (missing key, network, rate limit)
 // just falls back to a truncated first message rather than blocking thread creation.
-async function generateTitle(firstMessage: string | undefined): Promise<string | null> {
+async function generateTitle(
+  firstMessage: string | undefined,
+  apiKey: string | undefined,
+): Promise<string | null> {
   const text = firstMessage?.trim();
   if (!text) return null;
   const fallback = text.length > 60 ? `${text.slice(0, 60)}…` : text;
 
-  const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return fallback;
 
   try {
@@ -73,8 +75,11 @@ export async function POST(request: Request) {
     `SELECT id FROM chat_threads WHERE id = $1`,
     [id],
   );
+  // Visitor's own key (BYOK — see agent/src/config/model.ts) first; process.env.OPENAI_API_KEY
+  // is only a leftover fallback for as long as it's still set on this deployment.
+  const apiKey = request.headers.get("x-openai-api-key") ?? process.env.OPENAI_API_KEY;
   // Only spend an LLM call the first time this thread is created, not on every touch.
-  const title = existing.length > 0 ? null : await generateTitle(firstMessage);
+  const title = existing.length > 0 ? null : await generateTitle(firstMessage, apiKey ?? undefined);
 
   const { rows } = await query<ChatThreadRow>(
     `INSERT INTO chat_threads (id, title)

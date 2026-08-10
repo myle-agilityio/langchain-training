@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { useAgent, useCopilotChatConfiguration } from "@copilotkit/react-core/v2";
+import { readStoredOpenAiKey } from "@/hooks/use-openai-key";
 import type { ChatThread } from "@/types/thread";
 
 interface SelfManagedThreadsValue {
@@ -85,9 +86,13 @@ export function SelfManagedThreadsProvider({ children }: { children: ReactNode }
       onRunFinalized: () => {
         const threadId = configRef.current?.threadId;
         if (!threadId) return;
+        const openaiKey = readStoredOpenAiKey();
         fetch("/api/threads", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...(openaiKey ? { "x-openai-api-key": openaiKey } : {}),
+          },
           body: JSON.stringify({ id: threadId, firstMessage: firstUserMessageText(agent) }),
         }).then(() => refreshRef.current());
       },

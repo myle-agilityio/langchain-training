@@ -5,6 +5,8 @@ import "@copilotkit/react-core/v2/styles.css";
 
 import { CopilotKit } from "@copilotkit/react-core/v2";
 import { ThemeProvider } from "@/hooks/use-theme";
+import { OpenAiKeyProvider, readStoredOpenAiKey } from "@/hooks/use-openai-key";
+import { OpenAiKeyGate } from "@/components/openai-key-gate";
 // A2UI catalog: definitions + renderers in ./declarative-generative-ui/
 import { demonstrationCatalog } from "./declarative-generative-ui/renderers";
 
@@ -43,15 +45,27 @@ export default function RootLayout({
       */}
       <body className={`antialiased`} suppressHydrationWarning>
         <ThemeProvider>
-          <CopilotKit
-            runtimeUrl="/api/copilotkit"
-            inspectorDefaultAnchor={{ horizontal: "right", vertical: "top" }}
-            a2ui={{ catalog: demonstrationCatalog }}
-            openGenerativeUI={{}}
-            useSingleEndpoint={false}
-          >
-            {children}
-          </CopilotKit>
+          <OpenAiKeyProvider>
+            <CopilotKit
+              runtimeUrl="/api/copilotkit"
+              // Read fresh per request rather than from React state, so saving a key in
+              // OpenAiKeyGate takes effect on the very next request with no remount — see
+              // agent/src/config/model.ts's getApiKeyFromConfig for where this lands
+              // server-side (config.configurable.copilotkit_forwarded_headers).
+              headers={() => {
+                const key = readStoredOpenAiKey();
+                const headers: Record<string, string> = {};
+                if (key) headers["x-openai-api-key"] = key;
+                return headers;
+              }}
+              inspectorDefaultAnchor={{ horizontal: "right", vertical: "top" }}
+              a2ui={{ catalog: demonstrationCatalog }}
+              openGenerativeUI={{}}
+              useSingleEndpoint={false}
+            >
+              <OpenAiKeyGate>{children}</OpenAiKeyGate>
+            </CopilotKit>
+          </OpenAiKeyProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { tool } from "@langchain/core/tools";
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
-import { plainModel } from "../config/model.js";
+import { getPlainModelForConfig } from "../config/model.js";
 import { CONTACT_PROFILE_NAMESPACE, TOOL } from "../constants/index.js";
 import { aggregateEmails, getEmail, listEmails, updateEmail } from "../db/index.js";
 import { classifyPrompt } from "../prompts/index.js";
@@ -56,12 +56,12 @@ export const count_emails = tool(
 // Classifies by reading each email's real content itself, so the caller only ever passes ids —
 // never fields it might have guessed. One structured-output call per email, run in parallel.
 export const classify_emails = tool(
-  async (input: { ids: string[] }) => {
+  async (input: { ids: string[] }, config: LangGraphRunnableConfig) => {
     const results = await Promise.all(
       input.ids.map(async (id) => {
         const email = await getEmail(id);
         if (!email) return { id, ok: false as const, error: "no such email" };
-        const classification = await plainModel
+        const classification = await getPlainModelForConfig(config)
           .withStructuredOutput(ClassificationSchema)
           .invoke(classifyPrompt(email));
         await updateEmail(id, { classification });
@@ -133,7 +133,8 @@ export const update_email_status = tool(
 );
 
 export const search_knowledge_base = tool(
-  async (input: { query: string }) => JSON.stringify(await searchKnowledge(input.query)),
+  async (input: { query: string }, config: LangGraphRunnableConfig) =>
+    JSON.stringify(await searchKnowledge(input.query, config)),
   {
     name: TOOL.SEARCH_KNOWLEDGE_BASE,
     description:

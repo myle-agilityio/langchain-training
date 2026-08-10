@@ -26,6 +26,7 @@ My Le
 - 🧠 **Cross-thread Memory** — remembers sender tone and facts across conversations via a Postgres-backed `BaseStore`
 - 🔁 **Thread Durability** — resumable, restart-safe agent runs via a `PostgresSaver` checkpointer
 - 💾 **PostgreSQL Persistence** — inbox, checkpoints, vector KB, and cross-thread store all live in one Postgres via a shared `pg.Pool`
+- 🔑 **Bring Your Own Key** — each visitor supplies their own OpenAI key in the browser (`localStorage`, forwarded per-request via CopilotKit's `copilotkit_forwarded_headers`); no shared server-side key required for chat/classify/draft/RAG
 
 ## Prerequisites
 
@@ -43,7 +44,10 @@ Package manager (pick one):
 
 - A Postgres database with the `pgvector` extension available — local install, Neon, Supabase, etc. all work.
   - Setting up your own is optional — please contact the author (My Le) to get a shared `DATABASE_URL`.
-- OpenAI API key for the LangGraph agent.
+- An OpenAI API key — BYOK: each visitor pastes their own into the browser prompt on first
+  load (stored only in that browser's `localStorage`), so you don't need to set one up front to
+  run the app. `.env`'s `OPENAI_API_KEY` is now optional, used only to seed the shared
+  knowledge base on a brand-new database and as a fallback for `/api/threads`' title generation.
 
 ## Getting Started
 
@@ -75,11 +79,15 @@ Then update the required values:
 
 ```bash
 AGENT_URL=http://localhost:8123
-OPENAI_API_KEY=your-openai-api-key-here
+DATABASE_URL=your-postgres-connection-string
 ```
+
+You'll be prompted for an OpenAI key in the browser the first time you open the app — that's
+what actually powers chat/classify/draft/RAG, not anything in `.env`.
 
 Optional environment values in `.env.example` include:
 
+- `OPENAI_API_KEY` — bootstrap-only now (see "Prerequisites" above)
 - `LANGSMITH_API_KEY` / `LANGSMITH_TRACING` / `LANGSMITH_PROJECT`
 - `COPILOTKIT_LICENSE_TOKEN`
 - `INTELLIGENCE_API_URL`
@@ -152,7 +160,8 @@ This project is licensed under the MIT License — see the LICENSE file for deta
 If the agent reports tool connection problems, make sure:
 
 1. The LangGraph agent is running on port `8123`
-2. Your OpenAI API key is set correctly in `.env`
+2. You've entered a valid OpenAI key in the browser prompt (BYOK — `.env`'s `OPENAI_API_KEY`
+   no longer powers chat, only KB seeding)
 3. `DATABASE_URL` is set to a Postgres database with `pgvector`
 4. Both servers started successfully
 

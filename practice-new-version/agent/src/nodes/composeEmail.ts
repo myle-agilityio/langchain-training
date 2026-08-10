@@ -1,7 +1,7 @@
 import { ToolMessage, type BaseMessage } from "@langchain/core/messages";
 import { END, interrupt, type LangGraphRunnableConfig } from "@langchain/langgraph";
 
-import { plainModel } from "../config/model.js";
+import { getPlainModelForConfig } from "../config/model.js";
 import { COMPOSE_REPLY_ACTION, CONTACT_PROFILE_NAMESPACE } from "../constants/index.js";
 import { getEmail } from "../db/index.js";
 import { checkCompliancePrompt, draftPrompt, needsResearchPrompt } from "../prompts/index.js";
@@ -40,7 +40,7 @@ async function fetchEmailById(id: string): Promise<Email | null> {
 // triage — resolve the email, classify it (via classify_emails — skipped if already on file),
 // decide whether drafting needs KB research. A fixed node, not a tool, so the model can't skip
 // classification on a bare "reply this".
-export async function triage(state: State) {
+export async function triage(state: State, config: LangGraphRunnableConfig) {
   const call = findReplyCall(state.messages);
   const id = (call?.args as { id?: string } | undefined)?.id ?? "";
   const email = id ? await fetchEmailById(id) : null;
@@ -60,13 +60,15 @@ export async function triage(state: State) {
   }
 
   if (!email.classification) {
-    const { results } = JSON.parse(await classify_emails.invoke({ ids: [id] })) as {
+    const { results } = JSON.parse(
+      await classify_emails.invoke({ ids: [id] }, config),
+    ) as {
       results: { id: string; ok: boolean; classification?: Email["classification"] }[];
     };
     email.classification = results[0]?.classification;
   }
 
-  const { needsResearch } = await plainModel
+  const { needsResearch } = await getPlainModelForConfig(config)
     .withStructuredOutput(NeedsResearchSchema)
     .invoke(needsResearchPrompt(email));
 
@@ -79,12 +81,14 @@ export function afterTriage(state: State) {
 }
 
 // research — search_knowledge_base for the policy the draft must not invent.
-export async function research(state: State) {
+export async function research(state: State, config: LangGraphRunnableConfig) {
   const email = await fetchEmailById(state.emailId);
   if (!email) return { kbContext: "" };
 
   const query = `${email.subject} ${email.body} ${Object.values(email.classification ?? {}).join(" ")}`;
-  const articles = JSON.parse(await search_knowledge_base.invoke({ query })) as KBArticle[];
+  const articles = JSON.parse(
+    await search_knowledge_base.invoke({ query }, config),
+  ) as KBArticle[];
   const kbContext = articles.length
     ? articles.map((a) => `## ${a.title}\n${a.content}`).join("\n\n")
     : "No relevant articles found. Do not state any policy you cannot ground here.";
@@ -115,7 +119,7 @@ export async function writeDraft(state: State, config: LangGraphRunnableConfig) 
   const previousDraft =
     state.lastRejectedDraft?.emailId === state.emailId ? state.lastRejectedDraft : undefined;
 
-  const draft = await plainModel
+  const draft = await getPlainModelForConfig(config)
     .withStructuredOutput(DraftSchema)
     .invoke(
       draftPrompt({
@@ -130,9 +134,9 @@ export async function writeDraft(state: State, config: LangGraphRunnableConfig) 
 }
 
 // Independent guardrail on every draft (tone, policy, PII) — advisory only, teacher decides.
-export async function checkCompliance(state: State) {
+export async function checkCompliance(state: State, config: LangGraphRunnableConfig) {
   const draft = state.draft!;
-  const compliance = await plainModel
+  const compliance = await getPlainModelForConfig(config)
     .withStructuredOutput(ComplianceCheckSchema)
     .invoke(checkCompliancePrompt(draft));
   return { compliance };
