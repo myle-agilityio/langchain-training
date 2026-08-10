@@ -12,7 +12,7 @@ const defaultAgent = new LangGraphAgent({
     process.env.AGENT_URL ||
     process.env.LANGGRAPH_DEPLOYMENT_URL ||
     "http://localhost:8123",
-  graphId: "email_assistant",
+  graphId: "inbox_assistant",
   langsmithApiKey: process.env.LANGSMITH_API_KEY || "",
 });
 
