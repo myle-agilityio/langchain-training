@@ -17,11 +17,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <title>CopilotKit</title>
-        <link
-          rel="icon"
-          type="image/svg+xml"
-          href="/copilotkit-logo-mark.svg"
-        />
+        {/* Favicon comes from src/app/icon.svg via Next's file-convention metadata handling —
+            no manual <link rel="icon"> needed (and one here would just add a second, competing
+            icon tag). */}
         {/*
           Set the theme class BEFORE first paint to avoid a white→dark flash.
           ThemeProvider applies the theme in a useEffect (post-hydration), so
