@@ -1,7 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { PanelRightClose, PanelRightOpen } from "lucide-react";
 import { useFrontendTool } from "@copilotkit/react-core/v2";
 import { Button } from "@/components/ui/button";
@@ -11,16 +11,43 @@ interface ChatSidebarProps {
   children: ReactNode;
 }
 
-// Collapsible chat sidebar on the right; EmailInbox is the main/left content now, so this no
-// longer needs to compete for width via ExampleLayout's old resizable 50/50 split.
+const DEFAULT_WIDTH = 420;
+const MIN_WIDTH = 320;
+const MAX_WIDTH = 640;
+
+// Collapsible, resizable chat sidebar on the right; EmailInbox is the main/left content now, so
+// this no longer needs to compete for width via ExampleLayout's old resizable 50/50 split — it
+// just needs its own drag handle on its left edge.
 export function ChatSidebar({ threadsMenu, children }: ChatSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const [width, setWidth] = useState(DEFAULT_WIDTH);
+  const [isResizing, setIsResizing] = useState(false);
 
   // Mobile starts collapsed so the inbox is what teachers land on — matches the old default
   // "app" mode. Effect-based (like ThemeProvider) to avoid a hydration mismatch.
   useEffect(() => {
     if (window.matchMedia("(max-width: 1023px)").matches) setCollapsed(true);
   }, []);
+
+  // The sidebar's right edge sits flush against the viewport edge (it's the last flex child in
+  // page.tsx, no gutter), so its width is just how far the drag point is from that edge. Also
+  // keeps at least 320px for the inbox, so dragging can't squeeze it away entirely.
+  const clampWidth = useCallback(
+    (px: number) => Math.min(MAX_WIDTH, window.innerWidth - 320, Math.max(MIN_WIDTH, px)),
+    [],
+  );
+  const resizeTo = useCallback(
+    (clientX: number) => setWidth(clampWidth(window.innerWidth - clientX)),
+    [clampWidth],
+  );
+
+  // While dragging, prevent text selection under the pointer for the whole page, not just the
+  // handle — the pointer sweeps across the chat panel too.
+  useEffect(() => {
+    if (!isResizing) return;
+    document.body.classList.add("select-none", "cursor-col-resize");
+    return () => document.body.classList.remove("select-none", "cursor-col-resize");
+  }, [isResizing]);
 
   useFrontendTool({
     name: "enableChatMode",
@@ -51,14 +78,48 @@ export function ChatSidebar({ threadsMenu, children }: ChatSidebarProps) {
       <div
         className={[
           "fixed inset-0 z-40 flex h-full flex-col bg-[var(--background)] dark:bg-stone-950",
-          "transition-transform duration-200 ease-in-out",
+          isResizing ? "" : "transition-transform duration-200 ease-in-out",
           collapsed ? "translate-x-full" : "translate-x-0",
-          "lg:static lg:z-auto lg:translate-x-0 lg:border-l lg:border-[var(--border)]",
-          "lg:transition-[width] lg:duration-200 lg:ease-in-out lg:overflow-hidden",
-          collapsed ? "lg:w-0 lg:border-l-0" : "lg:w-[420px]",
+          "lg:relative lg:z-auto lg:translate-x-0 lg:border-l lg:border-[var(--border)]",
+          isResizing ? "" : "lg:transition-[width] lg:duration-200 lg:ease-in-out",
+          "lg:overflow-hidden",
+          collapsed ? "lg:w-0 lg:border-l-0" : "lg:w-[var(--chat-sidebar-width)]",
         ].join(" ")}
+        style={{ "--chat-sidebar-width": `${width}px` } as CSSProperties}
       >
-        <div className="flex h-full w-full flex-col lg:w-[420px]">
+        {!collapsed && (
+          <div
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize chat sidebar"
+            aria-valuenow={Math.round(width)}
+            aria-valuemin={MIN_WIDTH}
+            aria-valuemax={MAX_WIDTH}
+            tabIndex={0}
+            title="Drag to resize — double-click to reset"
+            onPointerDown={(e) => {
+              e.currentTarget.setPointerCapture(e.pointerId);
+              setIsResizing(true);
+            }}
+            onPointerMove={(e) => {
+              if (e.buttons !== 0) resizeTo(e.clientX);
+            }}
+            onPointerUp={(e) => {
+              e.currentTarget.releasePointerCapture(e.pointerId);
+              setIsResizing(false);
+            }}
+            onDoubleClick={() => setWidth(DEFAULT_WIDTH)}
+            onKeyDown={(e) => {
+              if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+              e.preventDefault();
+              setWidth((w) => clampWidth(w + (e.key === "ArrowLeft" ? 24 : -24)));
+            }}
+            className="hidden lg:block absolute left-0 inset-y-0 z-10 w-1.5 -translate-x-1/2 cursor-col-resize touch-none group focus:outline-none"
+          >
+            <span className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-transparent transition-colors group-hover:bg-[var(--muted-foreground)] group-focus:bg-[var(--muted-foreground)]" />
+          </div>
+        )}
+        <div className="flex h-full w-full flex-col lg:w-[var(--chat-sidebar-width)]">
           <div className="shrink-0 flex items-center justify-between gap-2 px-4 pt-4 pb-2">
             <div className="flex items-center gap-1.5 min-w-0">
               <span className="font-extrabold text-xl truncate">CopilotKit</span>
