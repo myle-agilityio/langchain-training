@@ -16,7 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <title>CopilotKit</title>
+        <title>Inbox Assistant</title>
         {/* Favicon comes from src/app/icon.svg via Next's file-convention metadata handling —
             no manual <link rel="icon"> needed (and one here would just add a second, competing
             icon tag). */}
