@@ -1,0 +1,14 @@
+node_modules
+.next
+.turbo
+*.tsbuildinfo
+.langgraph_api
+.env
+.env.*
+!.env.example
+
+# This Vercel project's Root Directory is practice-new-version — the sibling projects in this
+# monorepo are unrelated (and one has a >100MB local dev artifact that breaks the upload).
+practice
+examples
+copilotkit-integration

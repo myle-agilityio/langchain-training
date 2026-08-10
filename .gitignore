@@ -1,2 +1,7 @@
 node_modules
 .env
+.vercel
+.next
+.turbo
+*.tsbuildinfo
+.langgraph_api
