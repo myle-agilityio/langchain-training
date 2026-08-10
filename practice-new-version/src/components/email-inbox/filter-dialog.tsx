@@ -79,8 +79,8 @@ export function FilterDialog({ open, onOpenChange, filters, onApply }: FilterDia
           <DialogTitle>Filter inbox</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
             <Field label="Status">
               <select
                 value={draft.status ?? ""}
@@ -167,7 +167,7 @@ export function FilterDialog({ open, onOpenChange, filters, onApply }: FilterDia
             </select>
           </Field>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-3">
             <Field label="From">
               <Input
                 value={draft.from ?? ""}
@@ -192,7 +192,7 @@ export function FilterDialog({ open, onOpenChange, filters, onApply }: FilterDia
             />
           </Field>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-3">
             <Field label="Received after">
               <Input
                 type="date"

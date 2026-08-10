@@ -51,13 +51,14 @@ export function EmailDetail({
   }
 
   return (
-    // pt-20 clears the fixed Chat/App toggle pinned at the panel's top-right.
+    // pt-20 clears the ChatSidebar's floating "Open chat" button (fixed top-4 right-4) that
+    // appears in this corner when the sidebar is collapsed and the inbox goes full-width.
     <div className="mx-auto px-8 pb-8 pt-20">
-      <div className="mb-6">
-        <h1 className="text-xl font-bold text-[var(--foreground)]">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">
           {email.subject}
         </h1>
-        <div className="flex flex-wrap items-center gap-2 mt-2 text-sm text-[var(--muted-foreground)]">
+        <div className="flex flex-wrap items-center gap-2 mt-3 text-sm text-[var(--muted-foreground)]">
           <span className="font-medium text-[var(--foreground)]">
             {email.from.name}
           </span>
@@ -68,7 +69,7 @@ export function EmailDetail({
           </time>
         </div>
         {email.classification && (
-          <div className="flex flex-wrap gap-1.5 mt-3">
+          <div className="flex flex-wrap gap-1.5 mt-4">
             <Badge
               variant="tone"
               className={TOPIC_TONE[email.classification.topic]}
@@ -95,17 +96,17 @@ export function EmailDetail({
         )}
       </div>
 
-      <p className="text-sm leading-relaxed whitespace-pre-wrap text-[var(--foreground)]">
+      <p className="text-[15px] leading-relaxed whitespace-pre-wrap text-[var(--foreground)]">
         {email.body}
       </p>
 
-      <div className="mt-8 pt-6 border-t border-[var(--border)]">
+      <div className="mt-10 pt-8 border-t border-[var(--border)]">
         {email.reply ? (
           <div className="tone-green">
             <p className="text-xs font-semibold text-[var(--tone)] mb-2">
               Your reply — sent {new Date(email.reply.sentAt).toLocaleString()}
             </p>
-            <div className="rounded-[var(--radius)] border border-[color-mix(in_srgb,var(--tone)_28%,transparent)] bg-[color-mix(in_srgb,var(--tone)_8%,var(--background))] p-4">
+            <div className="rounded-[var(--radius)] border border-[color-mix(in_srgb,var(--tone)_28%,transparent)] bg-[color-mix(in_srgb,var(--tone)_8%,var(--background))] p-5 shadow-sm">
               <p className="text-sm font-medium text-[var(--foreground)]">
                 {email.reply.subject}
               </p>

@@ -21,16 +21,16 @@ export function ComposeForm({ initialSubject, onSend, onCancel }: ComposeFormPro
         value={subject}
         onChange={(e) => setSubject(e.target.value)}
         placeholder="Subject"
-        className="w-full rounded-[var(--radius)] border border-[var(--border)]
-          bg-[var(--background)] px-3 py-2 text-sm font-medium text-[var(--foreground)]"
+        className="w-full rounded-[var(--radius)] border border-[var(--border)] shadow-sm
+          bg-[var(--background)] px-3.5 py-2.5 text-sm font-medium text-[var(--foreground)]"
       />
       <textarea
         value={body}
         onChange={(e) => setBody(e.target.value)}
         placeholder="Write your reply…"
         rows={8}
-        className="w-full rounded-[var(--radius)] border border-[var(--border)]
-          bg-[var(--background)] px-3 py-2 text-sm resize-none text-[var(--foreground)]"
+        className="w-full rounded-[var(--radius)] border border-[var(--border)] shadow-sm
+          bg-[var(--background)] px-3.5 py-2.5 text-sm resize-none text-[var(--foreground)]"
       />
       <div className="flex gap-2 justify-end">
         <Button variant="outline" size="sm" onClick={onCancel}>

@@ -124,11 +124,7 @@ export function InboxList({
 
   return (
     <div>
-      <div className="sticky top-0 z-10 relative bg-[var(--card)] border-b border-[var(--border)] px-4 py-3">
-        <div
-          className="absolute inset-x-0 top-0 h-0.5"
-          style={{ background: "var(--cpk-ambient-gradient)" }}
-        />
+      <div className="sticky top-0 z-10 bg-[var(--card)] border-b border-[var(--border)] px-4 py-3">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-sm font-bold text-[var(--foreground)]">
             Inbox{" "}
@@ -231,11 +227,11 @@ export function InboxList({
                 }
               }}
               className={cn(
-                "group w-full text-left px-4 py-3 border-b border-[var(--border)] transition-colors cursor-pointer",
+                "group w-full text-left px-4 py-3.5 transition-colors cursor-pointer",
                 railTone,
                 isSelected
-                  ? "row-accent bg-[color-mix(in_srgb,var(--tone)_8%,var(--background))]"
-                  : "hover:bg-[var(--secondary)]/50",
+                  ? "row-accent mx-2 my-1 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] shadow-sm"
+                  : "border-b border-[var(--border)] hover:bg-[var(--secondary)]/50",
               )}
             >
               <div className="flex items-center justify-between gap-2">
@@ -314,27 +310,27 @@ export function InboxList({
                 {email.body}
               </p>
               {(email.classification || email.status !== "unread") && (
-                <div className="flex gap-1.5 mt-2 flex-wrap">
+                <div className="flex gap-2 mt-2.5 flex-wrap">
                   {email.classification && (
                     <>
                       <Badge
                         variant="tone"
                         className={cn(
-                          "text-[10px]",
+                          "text-[11px]",
                           TOPIC_TONE[email.classification.topic],
                         )}
                       >
                         {TOPIC_LABEL[email.classification.topic]}
                       </Badge>
                       {email.classification.course !== "none" && (
-                        <Badge variant="outline" className="text-[10px]">
+                        <Badge variant="outline" className="text-[11px]">
                           {COURSE_LABEL[email.classification.course]}
                         </Badge>
                       )}
                       <Badge
                         variant={URGENCY_VARIANT[email.classification.urgency]}
                         className={cn(
-                          "text-[10px]",
+                          "text-[11px]",
                           URGENCY_TONE[email.classification.urgency],
                         )}
                       >
@@ -343,12 +339,12 @@ export function InboxList({
                     </>
                   )}
                   {email.status === "replied" && (
-                    <Badge variant="tone" className="text-[10px] tone-green">
+                    <Badge variant="tone" className="text-[11px] tone-green">
                       Replied
                     </Badge>
                   )}
                   {email.status === "flagged_for_followup" && (
-                    <Badge variant="tone" className="text-[10px] tone-amber">
+                    <Badge variant="tone" className="text-[11px] tone-amber">
                       Follow up
                     </Badge>
                   )}
