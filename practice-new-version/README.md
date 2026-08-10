@@ -86,6 +86,8 @@ Optional environment values in `.env.example` include:
 - `INTELLIGENCE_GATEWAY_WS_URL`
 - `INTELLIGENCE_API_KEY`
 
+The Intelligence ones are commented out by default — see "CopilotKit Intelligence" below for why.
+
 Everything persistent — the inbox, contact profiles, embedded knowledge base, graph checkpoints, and cross-thread store — lives in the Postgres database behind `DATABASE_URL`. Tables, indexes, and the `vector` extension are created automatically on first connect.
 
 3. Start the development server:
@@ -168,6 +170,16 @@ This app is connected to the CopilotKit Intelligence project **practice-new-vers
 The project details are recorded in `.copilotkit/project.json`.
 
 - **License:** a token can be stored in `COPILOTKIT_LICENSE_TOKEN` in `.env`
+- **Currently disabled:** the token is commented out in `.env`. Enabling it hits an unresolved
+  upstream bug in `IntelligenceAgent.connectAgent`'s realtime WebSocket transport (`verifyEvents`
+  rejects the first event), which drops runs in production with `RUNNER_CONNECTION_DROPPED`.
+  Leave it commented out until CopilotKit fixes this.
+- **Threads without it:** with the token unset, `NEXT_PUBLIC_COPILOTKIT_THREADS_ENABLED`
+  (`next.config.ts`) resolves to `false` and the UI falls back to a self-managed thread list —
+  `src/app/api/threads`, `src/hooks/use-self-managed-threads.tsx`,
+  `src/components/self-managed-threads` — backed by our own Postgres (a `chat_threads` table)
+  instead of the Intelligence platform. Message history itself still comes from the graph's
+  `PostgresSaver` checkpointer either way; this only replaces the list/rename/delete UI.
 - **Run it:** install dependencies, set your env vars, then `npm run dev`
 - **Switch project:** run `copilotkit project select` from this directory
 

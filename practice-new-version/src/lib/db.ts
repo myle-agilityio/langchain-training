@@ -1,5 +1,6 @@
 import pg from "pg";
 import type { Email } from "@/types/email";
+import type { ChatThread } from "@/types/thread";
 
 const globalForPg = globalThis as unknown as { inboxPool?: pg.Pool };
 
@@ -69,4 +70,39 @@ export function toEmail(row: EmailRow): Email {
       : undefined,
     reply: row.reply ?? undefined,
   };
+}
+
+export interface ChatThreadRow {
+  id: string;
+  title: string | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export const CHAT_THREAD_COLUMNS = `id, title, created_at, updated_at`;
+
+export function toChatThread(row: ChatThreadRow): ChatThread {
+  return {
+    id: row.id,
+    title: row.title,
+    createdAt: row.created_at.toISOString(),
+    updatedAt: row.updated_at.toISOString(),
+  };
+}
+
+let threadsSchemaReady: Promise<void> | undefined;
+
+// Self-managed thread list, standing in for CopilotKit's Intelligence-only useThreads (see
+// NEXT_PUBLIC_COPILOTKIT_THREADS_ENABLED in next.config.ts). Created lazily since, unlike
+// `emails`, this table isn't pre-provisioned in the database.
+export function ensureThreadsSchema(): Promise<void> {
+  threadsSchemaReady ??= query(
+    `CREATE TABLE IF NOT EXISTS chat_threads (
+       id TEXT PRIMARY KEY,
+       title TEXT,
+       created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+       updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+     )`,
+  ).then(() => undefined);
+  return threadsSchemaReady;
 }

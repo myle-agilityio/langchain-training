@@ -2,11 +2,13 @@
 
 import { ExampleLayout } from "@/components/example-layout";
 import { EmailInbox } from "@/components/email-inbox";
+import { SelfManagedThreadsDrawer } from "@/components/self-managed-threads";
 import {
   useGenerativeUIExamples,
   useExampleSuggestions,
   useEmailAgent,
   SharedInboxProvider,
+  SelfManagedThreadsProvider,
 } from "@/hooks";
 
 import {
@@ -17,17 +19,48 @@ import {
 
 import styles from "./page.module.css";
 
+// Mirrors next.config.ts: the SDK drawer needs Intelligence mode, which is currently broken
+// in production (see the COPILOTKIT_LICENSE_TOKEN comment in .env) — fall back to a
+// self-managed thread list backed by our own Postgres instead of the Intelligence platform.
+const THREADS_LICENSED = process.env.NEXT_PUBLIC_COPILOTKIT_THREADS_ENABLED === "true";
+
 export default function HomePage() {
   useGenerativeUIExamples();
   useExampleSuggestions();
   useEmailAgent();
 
+  const body = (
+    <div className={styles.layout}>
+      {/*
+        SDK threads drawer when Intelligence mode is licensed and working (SSR-safe,
+        license-gated); otherwise our own drawer, reading/writing chat_threads via
+        /api/threads. Either way it fills the same reserved grid column.
+      */}
+      {THREADS_LICENSED ? (
+        <CopilotThreadsDrawer agentId="default" />
+      ) : (
+        <SelfManagedThreadsDrawer />
+      )}
+      <div className={styles.mainPanel}>
+        <ExampleLayout
+          chatContent={
+            <CopilotChat
+              attachments={{ enabled: true }}
+              input={{ disclaimer: () => null, className: "pb-6" }}
+            />
+          }
+          appContent={<EmailInbox />}
+        />
+      </div>
+    </div>
+  );
+
   return (
     /*
       One CopilotChatConfigurationProvider owns the active thread for the whole
-      surface. It is UNCONTROLLED (no `threadId` prop): the SDK <CopilotThreadsDrawer>
-      drives it directly — picking a row sets the active thread, "+ New" resets
-      to a fresh thread (clearing the chat), all with no host wiring. The chat
+      surface. It is UNCONTROLLED (no `threadId` prop): the threads drawer (SDK or
+      self-managed) drives it directly — picking a row sets the active thread, "+ New"
+      resets to a fresh thread (clearing the chat), all with no host wiring. The chat
       and the canvas read the same active thread from the provider (the canvas's
       `useAgent()` falls back to it), so they stay on the same per-thread agent
       clone the chat's /connect replay populates.
@@ -44,25 +77,11 @@ export default function HomePage() {
         same common inbox regardless of which one triggered the change.
       */}
       <SharedInboxProvider>
-        <div className={styles.layout}>
-          {/*
-            SDK threads drawer (replaces the former hand-rolled fork). SSR-safe and
-            license-gated (shows its own locked view when threads aren't licensed), so it
-            needs no example-level gate.
-          */}
-          <CopilotThreadsDrawer agentId="default" />
-          <div className={styles.mainPanel}>
-            <ExampleLayout
-              chatContent={
-                <CopilotChat
-                  attachments={{ enabled: true }}
-                  input={{ disclaimer: () => null, className: "pb-6" }}
-                />
-              }
-              appContent={<EmailInbox />}
-            />
-          </div>
-        </div>
+        {THREADS_LICENSED ? (
+          body
+        ) : (
+          <SelfManagedThreadsProvider>{body}</SelfManagedThreadsProvider>
+        )}
       </SharedInboxProvider>
     </CopilotChatConfigurationProvider>
   );
