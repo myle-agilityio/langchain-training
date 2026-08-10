@@ -5,13 +5,14 @@
 ```
 ├── src/                              # Next.js frontend
 │   ├── app/
-│   │   ├── page.tsx                  # Main page (chat + inbox side-by-side)
+│   │   ├── page.tsx                  # Main page (inbox main area + collapsible chat sidebar)
 │   │   ├── api/copilotkit/           # CopilotKit runtime route
 │   │   ├── api/emails/               # Reads the inbox directly from Postgres
 │   │   └── declarative-generative-ui/ # A2UI catalog: definitions + renderers
 │   ├── components/
 │   │   ├── email-inbox/              # Inbox list, detail view, compose form
-│   │   ├── example-layout/           # Layout: chat + canvas side-by-side
+│   │   ├── chat-sidebar/             # Collapsible right-hand chat sidebar
+│   │   ├── threads-menu/             # Clock-icon dropdown: conversation history
 │   │   └── generative-ui/            # Generative UI components
 │   └── hooks/
 │       └── use-shared-inbox.tsx      # Inbox data provider

@@ -58,7 +58,10 @@ export default function RootLayout({
                 if (key) headers["x-openai-api-key"] = key;
                 return headers;
               }}
-              inspectorDefaultAnchor={{ horizontal: "right", vertical: "top" }}
+              // Actual positioning is forced via the cpk-web-inspector CSS override in
+              // globals.css — this prop is inert (see that comment for why) but left in place
+              // to state the intent and in case CopilotKit fixes the underlying bug.
+              inspectorDefaultAnchor={{ horizontal: "left", vertical: "bottom" }}
               a2ui={{ catalog: demonstrationCatalog }}
               openGenerativeUI={{}}
               useSingleEndpoint={false}

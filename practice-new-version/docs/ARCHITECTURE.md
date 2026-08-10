@@ -126,8 +126,8 @@ graph TD
         FilterInbox["filterInbox\n(email-inbox/index.tsx)"]
         ShowEmail["showEmail\n(email-inbox/index.tsx)"]
         ToggleTheme["toggleTheme\n(use-generative-ui-examples.tsx)"]
-        EnableAppMode["enableAppMode\n(example-layout/index.tsx)"]
-        EnableChatMode["enableChatMode\n(example-layout/index.tsx)"]
+        EnableAppMode["enableAppMode\n(chat-sidebar/index.tsx)"]
+        EnableChatMode["enableChatMode\n(chat-sidebar/index.tsx)"]
     end
 
     FilterInbox -- "useFrontendTool" --> CopilotRoute["/api/copilotkit/[[...slug]]"]
