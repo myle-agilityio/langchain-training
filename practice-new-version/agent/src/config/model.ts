@@ -15,6 +15,8 @@ export class MissingApiKeyError extends Error {
 // headers={...}>); CopilotKit forwards arbitrary client headers into
 // config.configurable.copilotkit_forwarded_headers automatically, no runtime-side wiring
 // needed. Every model call below pulls the key from here instead of process.env.
+// Falls back to process.env.OPENAI_API_KEY when no header is present (e.g. running the graph
+// directly from LangSmith Studio, which bypasses CopilotKit and never sets the header).
 export function getApiKeyFromConfig(config: LangGraphRunnableConfig): string {
   const headers = config.configurable?.copilotkit_forwarded_headers as
     | Record<string, string>
@@ -22,8 +24,9 @@ export function getApiKeyFromConfig(config: LangGraphRunnableConfig): string {
   const key = headers
     ? Object.entries(headers).find(([name]) => name.toLowerCase() === "x-openai-api-key")?.[1]
     : undefined;
-  if (!key) throw new MissingApiKeyError();
-  return key;
+  const resolved = key ?? process.env.OPENAI_API_KEY;
+  if (!resolved) throw new MissingApiKeyError();
+  return resolved;
 }
 
 // One tool call per turn, which the router relies on.
