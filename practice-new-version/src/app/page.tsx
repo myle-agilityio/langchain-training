@@ -17,11 +17,6 @@ import {
   CopilotThreadsDrawer,
 } from "@copilotkit/react-core/v2";
 
-// Mirrors next.config.ts: the SDK drawer needs Intelligence mode, which is currently broken
-// in production (see the COPILOTKIT_LICENSE_TOKEN comment in .env) — fall back to a
-// self-managed thread list backed by our own Postgres instead of the Intelligence platform.
-const THREADS_LICENSED = process.env.NEXT_PUBLIC_COPILOTKIT_THREADS_ENABLED === "true";
-
 export default function HomePage() {
   useGenerativeUIExamples();
   useExampleSuggestions();
@@ -29,17 +24,10 @@ export default function HomePage() {
 
   const body = (
     <div className="flex h-dvh w-full overflow-hidden">
-      {/*
-        SDK threads drawer when Intelligence mode is licensed and working — it isn't in this
-        env (see THREADS_LICENSED above), so this path is currently dead and left unstyled
-        rather than reworked for the sidebar layout below; it self-positions via its own
-        fixed/off-canvas launcher regardless of where it's mounted.
-      */}
-      {THREADS_LICENSED && <CopilotThreadsDrawer agentId="default" />}
       <div className="flex-1 min-w-0 h-full overflow-auto">
         <EmailInbox />
       </div>
-      <ChatSidebar threadsMenu={THREADS_LICENSED ? undefined : <ThreadsMenu />}>
+      <ChatSidebar threadsMenu={<ThreadsMenu />}>
         <CopilotChat
           attachments={{ enabled: true }}
           input={{ disclaimer: () => null, className: "pb-6" }}
@@ -66,11 +54,7 @@ export default function HomePage() {
         same common inbox regardless of which one triggered the change.
       */}
       <SharedInboxProvider>
-        {THREADS_LICENSED ? (
-          body
-        ) : (
-          <SelfManagedThreadsProvider>{body}</SelfManagedThreadsProvider>
-        )}
+        <SelfManagedThreadsProvider>{body}</SelfManagedThreadsProvider>
       </SharedInboxProvider>
     </CopilotChatConfigurationProvider>
   );
