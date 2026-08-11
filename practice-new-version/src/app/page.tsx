@@ -14,7 +14,6 @@ import {
 import {
   CopilotChat,
   CopilotChatConfigurationProvider,
-  CopilotThreadsDrawer,
 } from "@copilotkit/react-core/v2";
 
 export default function HomePage() {
