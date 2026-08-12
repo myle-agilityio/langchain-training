@@ -3,9 +3,9 @@ import { Document } from "@langchain/core/documents";
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 import type { OpenAIEmbeddings } from "@langchain/openai";
 
-import { getEmbeddingsForConfig, getServerEmbeddings } from "../config/model.js";
-import { KB_TABLE } from "../constants/index.js";
-import { getPool } from "../db/index.js";
+import { getEmbeddingsForConfig, getServerEmbeddings } from "@/config/model.js";
+import { KB_TABLE } from "@/constants/index.js";
+import { getPool } from "@/db/index.js";
 import { knowledgeBase } from "./knowledge-base.js";
 
 // initialize() creates the vector extension + table on first use (idempotent — IF NOT EXISTS —

@@ -1,18 +1,18 @@
 import { StateGraph, START, END, type LangGraphRunnableConfig } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 
-import { getCheckpointer } from "../db/checkpointer.js";
-import { getMemoryStore } from "../db/memoryStore.js";
+import { getCheckpointer } from "@/db/checkpointer.js";
+import { getMemoryStore } from "@/db/memoryStore.js";
 import {
   afterValidate,
   callModel,
   composeEmailErrorHandler,
   routeAfterModel,
   validateRequest,
-} from "../nodes/index.js";
-import { ensureIndexed } from "../rag/index.js";
-import { AgentState } from "../state/index.js";
-import { executableTools } from "../tools/index.js";
+} from "@/nodes/index.js";
+import { ensureIndexed } from "@/rag/index.js";
+import { AgentState } from "@/state/index.js";
+import { executableTools } from "@/tools/index.js";
 import { composeEmailSubgraph } from "./composeEmailSubgraph.js";
 
 // A compiled subgraph passed directly as an addNode action doesn't type-check together with a

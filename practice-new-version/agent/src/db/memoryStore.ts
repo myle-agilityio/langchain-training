@@ -1,6 +1,6 @@
 import { PostgresStore } from "@langchain/langgraph-checkpoint-postgres/store";
 
-import { getPgConnectionOptions } from "../config/env.js";
+import { getPgConnectionOptions } from "@/config/env.js";
 
 let store: PostgresStore | undefined;
 

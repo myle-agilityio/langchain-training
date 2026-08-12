@@ -7,7 +7,7 @@ import {
   render,
   updateComponents,
   updateDataModel,
-} from "../utils/a2ui.js";
+} from "@/utils/a2ui.js";
 
 // Must match createCatalog's catalogId in src/app/declarative-generative-ui/renderers.tsx —
 // the frontend only knows how to render surfaces tagged with this id.

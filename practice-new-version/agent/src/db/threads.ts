@@ -1,5 +1,5 @@
 import { getPool } from "./index.js";
-import type { ChatThread } from "../types/thread.js";
+import type { ChatThread } from "@/types/thread.js";
 
 interface ChatThreadRow {
   id: string;
