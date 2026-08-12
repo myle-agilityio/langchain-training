@@ -3,7 +3,8 @@
   "dockerfile_lines": [],
   "dependencies": ["."],
   "graphs": {
-    "inbox_assistant": "./src/index.ts:graph"
+    "inbox_assistant": "./src/index.ts:graph",
+    "compose_email_debug": "./src/graphs/composeEmailSubgraph.ts:composeEmailSubgraph"
   },
   "http": {
     "app": "./src/http/index.ts:app"
