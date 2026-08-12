@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "routes": [
+    { "src": "/api/(.*)", "dest": "${AGENT_URL}/api/$1", "env": ["AGENT_URL"] },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
