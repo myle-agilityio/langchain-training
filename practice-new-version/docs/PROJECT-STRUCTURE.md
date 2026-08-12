@@ -82,7 +82,7 @@
 | Tool | Version | Purpose |
 | --- | --- | --- |
 | Node.js | 20+ | JS runtime for both the Next.js app and the agent |
-| pnpm | 10.30.3 (pinned via `packageManager`) | Primary package manager — npm/yarn/bun also supported |
-| `tsc` (`npm run typecheck`) | TypeScript ^5 / ^5.6.3 | Type-checks the Next.js app and the agent separately |
+| pnpm | 10.30.3 (pinned via `packageManager`) | Package manager — required (root + `agent/` are one pnpm workspace) |
+| `tsc` (`pnpm typecheck`) | TypeScript ^5 / ^5.6.3 | Type-checks the Next.js app and the agent separately |
 | `next lint` | Next.js 16.1.6 | Lints the Next.js app |
 | LangGraph Studio (`langgraphjs dev`) | LangGraph CLI 1.4.3 | Local agent server + graph debugger on port `8123` |

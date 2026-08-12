@@ -18,11 +18,11 @@ fine and then fails on the first inbox tool call, which is easy to misread as a 
 
 Start the narrowest thing that can prove the change, in the background:
 
-- Agent only (tool logic, graph wiring, state shape): `npm run dev:agent` → :8123.
+- Agent only (tool logic, graph wiring, state shape): `pnpm dev:agent` → :8123.
   Hit `http://localhost:8123/ok` to confirm it's up before assuming a failure is yours.
-- Agent + UI (generative UI, interrupts, anything the user sees): `npm run dev` → :3000 and :8123.
+- Agent + UI (generative UI, interrupts, anything the user sees): `pnpm dev` → :3000 and :8123.
 
-Use `LOG_LEVEL=debug` (or `npm run dev:debug`) when you need to see the agent's own tracing from
+Use `LOG_LEVEL=debug` (or `pnpm dev:debug`) when you need to see the agent's own tracing from
 `agent/src/debug.ts`.
 
 ## 3. Exercise the actual path
@@ -56,4 +56,4 @@ Get-NetTCPConnection -LocalPort 8123,3000 -State Listen -ErrorAction SilentlyCon
 ```
 
 Delete any temp probe scripts you wrote. Leftover servers hold their ports and break the user's
-next `npm run dev` in a way that looks unrelated to your change.
+next `pnpm dev` in a way that looks unrelated to your change.

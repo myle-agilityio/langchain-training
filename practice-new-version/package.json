@@ -7,12 +7,10 @@
     "dev": "node scripts/dev.mjs",
     "dev:debug": "node scripts/dev.mjs --debug",
     "dev:ui": "vite",
-    "dev:agent": "npm run dev --prefix agent",
+    "dev:agent": "pnpm --filter agent dev",
     "typecheck": "tsc --noEmit",
     "build": "vite build",
-    "build:agent": "npm run build --prefix agent",
-    "install:agent": "cd agent && npm install",
-    "postinstall": "npm run install:agent",
+    "build:agent": "pnpm --filter agent build",
     "dev:infra": "node scripts/copilotkit-dev-infra.mjs"
   },
   "dependencies": {

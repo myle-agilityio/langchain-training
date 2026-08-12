@@ -35,12 +35,10 @@ My Le
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-pgvector-4169E1?logo=postgresql&logoColor=white)](https://github.com/pgvector/pgvector)
 [![OpenAI](https://img.shields.io/badge/OpenAI-API_key-412991?logo=openai&logoColor=white)](https://platform.openai.com/)
 
-Package manager (pick one):
-
-[![npm](https://img.shields.io/badge/npm-CB3837?logo=npm&logoColor=white)](https://www.npmjs.com/)
 [![pnpm](https://img.shields.io/badge/pnpm-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/installation)
-[![yarn](https://img.shields.io/badge/yarn-2C8EBB?logo=yarn&logoColor=white)](https://classic.yarnpkg.com/lang/en/docs/install/)
-[![bun](https://img.shields.io/badge/bun-000000?logo=bun&logoColor=white)](https://bun.sh/)
+
+Root and `agent/` are one [pnpm workspace](https://pnpm.io/workspaces) — pnpm is required, not
+just preferred (npm/yarn won't resolve the workspace lockfile).
 
 - A Postgres database with the `pgvector` extension available — local install, Neon, Supabase, etc. all work.
   - Setting up your own is optional — please contact the author (My Le) to get a shared `DATABASE_URL`.
@@ -51,23 +49,13 @@ Package manager (pick one):
 
 ## Getting Started
 
-1. Install dependencies using your preferred package manager:
+1. Install dependencies:
 
 ```bash
-# Using npm (default)
-npm install
-
-# Using pnpm
 pnpm install
-
-# Using yarn
-yarn install
-
-# Using bun
-bun install
 ```
 
-The root install also runs the `postinstall` hook, which installs agent dependencies inside `agent/`.
+This installs both the root Vite app and `agent/` in one pass — they're a single pnpm workspace.
 
 2. Copy the example environment file and edit `.env`:
 
@@ -101,17 +89,7 @@ Everything persistent — the inbox, contact profiles, embedded knowledge base, 
 3. Start the development server:
 
 ```bash
-# Using npm (default)
-npm run dev
-
-# Using pnpm
 pnpm dev
-
-# Using yarn
-yarn dev
-
-# Using bun
-bun run dev
 ```
 
 This starts both the Next.js UI on port `3000` and the LangGraph agent on port `8123`.
@@ -123,16 +101,15 @@ This starts both the Next.js UI on port `3000` and the LangGraph agent on port `
 - `dev:ui` - Starts only the Next.js UI server
 - `dev:agent` - Starts only the LangGraph agent server
 - `dev:infra` - Starts CopilotKit development infrastructure
-- `typecheck` - Type-checks the Next.js app (`npm run typecheck --prefix agent` for the agent)
+- `typecheck` - Type-checks the Next.js app (`pnpm --filter agent typecheck` for the agent)
 - `lint` - Lints the Next.js app
 - `build` - Builds the Next.js application for production
 - `start` - Starts the production server
-- `install:agent` - Installs agent dependencies inside `agent/`
 
 If agent dependencies fail to install automatically, run:
 
 ```bash
-npm run install:agent
+pnpm install
 ```
 
 ## Documentation
@@ -170,7 +147,7 @@ If the agent reports tool connection problems, make sure:
 If you encounter agent import errors:
 
 ```bash
-npm run install:agent
+pnpm install
 ```
 
 ## CopilotKit Intelligence
@@ -189,7 +166,7 @@ The project details are recorded in `.copilotkit/project.json`.
   `src/components/self-managed-threads` — backed by our own Postgres (a `chat_threads` table)
   instead of the Intelligence platform. Message history itself still comes from the graph's
   `PostgresSaver` checkpointer either way; this only replaces the list/rename/delete UI.
-- **Run it:** install dependencies, set your env vars, then `npm run dev`
+- **Run it:** install dependencies, set your env vars, then `pnpm dev`
 - **Switch project:** run `copilotkit project select` from this directory
 
 Learn more at https://docs.copilotkit.ai.

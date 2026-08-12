@@ -7,8 +7,8 @@ reference — don't copy patterns from `practice/`'s agent without deciding they
 
 ## Commands
 
-- `npm run dev` — UI on :3000 + agent on :8123 together. `dev:ui` / `dev:agent` to isolate one.
-- `npm run typecheck` (Vite app) and `npm run typecheck --prefix agent` — both must be clean
+- `pnpm dev` — UI on :3000 + agent on :8123 together. `dev:ui` / `dev:agent` to isolate one.
+- `pnpm typecheck` (Vite app) and `pnpm --filter agent typecheck` — both must be clean
   before a task is done. **The root check has 3 pre-existing errors**, all in
   `src/app/declarative-generative-ui/renderers.tsx` (untouched boilerplate). That is the
   baseline: don't add to it, and don't fix them as a side quest.
@@ -55,7 +55,7 @@ These are how we work on this project, not style preferences. Follow them on eve
 3. **YOU MUST exercise the feature before calling it done.** Not "the code looks right" — run it.
    Say in your response what you verified and what you didn't. See the `verify-feature` skill.
 4. **Tear down anything you started.** Agent (:8123), Vite dev server (:3000), monitors, probe
-   scripts. An orphaned server holds its port and collides with the user's next `npm run dev`.
+   scripts. An orphaned server holds its port and collides with the user's next `pnpm dev`.
 5. **Never let secrets leak.** `.env` stays untracked; a new env var goes into `.env.example` in
    the same change.
 

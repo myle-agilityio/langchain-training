@@ -3,7 +3,7 @@
 A click-through checklist for exercising the assistant end-to-end, from a teacher's point of
 view. Scenarios use the real seed inbox (sender names are real), so you can follow along.
 
-**How to use:** run `npm run dev`, then work through each scenario. Mark the box, and jot the
+**How to use:** run `pnpm dev`, then work through each scenario. Mark the box, and jot the
 result in the **Result** line. Status key: ⬜ not run · ✅ pass · ⚠️ partial / flaky · ❌ fail.
 
 > Model note: this runs on `gpt-4o-mini`. Small-model drift is expected on a few of these —

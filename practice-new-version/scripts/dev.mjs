@@ -10,7 +10,7 @@ spawnSync(process.execPath, ["scripts/copilotkit-dev-infra.mjs"], { stdio: "inhe
 
 const tasks = {
   ui: "vite",
-  agent: "npm run dev --prefix agent",
+  agent: "pnpm --filter agent dev",
 };
 
 const env = process.argv.includes("--debug")
