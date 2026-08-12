@@ -5,5 +5,8 @@
   "graphs": {
     "inbox_assistant": "./src/index.ts:graph"
   },
+  "http": {
+    "app": "./src/http/index.ts:app"
+  },
   "env": "../.env"
 }

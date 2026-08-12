@@ -5,8 +5,9 @@ import {
   InMemoryAgentRunner,
 } from "@copilotkit/runtime/v2";
 import { LangGraphAgent } from "@copilotkit/runtime/langgraph";
-import { handle } from "hono/vercel";
 
+// Talks to the graph over HTTP like any LangGraph Platform deployment would — it happens to be
+// the same server this app is mounted on, via agent/langgraph.json's "http.app".
 const defaultAgent = new LangGraphAgent({
   deploymentUrl:
     process.env.AGENT_URL ||
@@ -40,12 +41,7 @@ const runtime = new CopilotRuntime({
   },
 });
 
-const app = createCopilotEndpoint({
+export const copilotkitApp = createCopilotEndpoint({
   runtime,
   basePath: "/api/copilotkit",
 });
-
-export const GET = handle(app);
-export const POST = handle(app);
-export const PATCH = handle(app);
-export const DELETE = handle(app);

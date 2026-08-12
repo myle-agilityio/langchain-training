@@ -6,13 +6,11 @@
   "scripts": {
     "dev": "node scripts/dev.mjs",
     "dev:debug": "node scripts/dev.mjs --debug",
-    "dev:ui": "next dev --turbopack",
+    "dev:ui": "vite",
     "dev:agent": "npm run dev --prefix agent",
     "typecheck": "tsc --noEmit",
-    "build": "next build",
+    "build": "vite build",
     "build:agent": "npm run build --prefix agent",
-    "start": "next start",
-    "lint": "next lint",
     "install:agent": "cd agent && npm install",
     "postinstall": "npm run install:agent",
     "dev:infra": "node scripts/copilotkit-dev-infra.mjs"
@@ -20,7 +18,6 @@
   "dependencies": {
     "@copilotkit/a2ui-renderer": "1.62.3",
     "@copilotkit/react-core": "1.62.3",
-    "@copilotkit/runtime": "1.62.3",
     "@langchain/langgraph-sdk": "^1.9.27",
     "@radix-ui/react-dialog": "^1.1.23",
     "@radix-ui/react-dropdown-menu": "^2.1.24",
@@ -28,10 +25,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^17.4.2",
-    "hono": "^4.12.10",
     "lucide-react": "^0.577.0",
-    "next": "16.1.6",
-    "pg": "^8.22.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "recharts": "^3.7.0",
@@ -39,13 +33,14 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/vite": "^4",
     "@types/node": "^20",
-    "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^5",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite": "^7"
   },
   "overrides": {
     "@langchain/core": "1.1.44",

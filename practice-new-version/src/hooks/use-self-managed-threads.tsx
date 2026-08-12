@@ -45,7 +45,7 @@ function firstUserMessageText(agent: AgentWithMessages): string | undefined {
 }
 
 // Stands in for CopilotKit's <CopilotThreadsDrawer>/useThreads, which require Intelligence
-// mode (see next.config.ts's NEXT_PUBLIC_COPILOTKIT_THREADS_ENABLED and the
+// mode (see vite.config.ts's VITE_COPILOTKIT_THREADS_ENABLED and the
 // COPILOTKIT_LICENSE_TOKEN note in .env — that transport currently drops runs in production).
 // Thread history itself already survives via the graph's Postgres checkpointer; this only adds
 // the list/rename/delete UI on top, backed by a lightweight chat_threads table.
