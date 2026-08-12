@@ -9,7 +9,7 @@ FROM base AS build
 WORKDIR /usr/src/app
 COPY . .
 RUN pnpm install --frozen-lockfile
-RUN pnpm deploy --filter=agent --prod /prod/agent
+RUN pnpm deploy --filter=agent --prod --legacy /prod/agent
 
 FROM base
 WORKDIR /app
