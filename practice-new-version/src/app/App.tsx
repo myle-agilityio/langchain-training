@@ -1,5 +1,11 @@
-"use client";
-
+import { CopilotKit } from "@copilotkit/react-core/v2";
+import {
+  CopilotChat,
+  CopilotChatConfigurationProvider,
+} from "@copilotkit/react-core/v2";
+import { ThemeProvider } from "@/hooks/use-theme";
+import { OpenAiKeyProvider, readStoredOpenAiKey } from "@/hooks/use-openai-key";
+import { OpenAiKeyGate } from "@/components/openai-key-gate";
 import { ChatSidebar } from "@/components/chat-sidebar";
 import { EmailInbox } from "@/components/email-inbox";
 import { ThreadsMenu } from "@/components/threads-menu";
@@ -10,13 +16,10 @@ import {
   SharedInboxProvider,
   SelfManagedThreadsProvider,
 } from "@/hooks";
+// A2UI catalog: definitions + renderers in ./declarative-generative-ui/
+import { demonstrationCatalog } from "./declarative-generative-ui/renderers";
 
-import {
-  CopilotChat,
-  CopilotChatConfigurationProvider,
-} from "@copilotkit/react-core/v2";
-
-export default function HomePage() {
+function Inbox() {
   useGenerativeUIExamples();
   useExampleSuggestions();
   useEmailAgent();
@@ -56,5 +59,38 @@ export default function HomePage() {
         <SelfManagedThreadsProvider>{body}</SelfManagedThreadsProvider>
       </SharedInboxProvider>
     </CopilotChatConfigurationProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <OpenAiKeyProvider>
+        <CopilotKit
+          runtimeUrl="/api/copilotkit"
+          // Read fresh per request rather than from React state, so saving a key in
+          // OpenAiKeyGate takes effect on the very next request with no remount — see
+          // agent/src/config/model.ts's getApiKeyFromConfig for where this lands
+          // server-side (config.configurable.copilotkit_forwarded_headers).
+          headers={() => {
+            const key = readStoredOpenAiKey();
+            const headers: Record<string, string> = {};
+            if (key) headers["x-openai-api-key"] = key;
+            return headers;
+          }}
+          // Actual positioning is forced via the cpk-web-inspector CSS override in
+          // globals.css — this prop is inert (see that comment for why) but left in place
+          // to state the intent and in case CopilotKit fixes the underlying bug.
+          inspectorDefaultAnchor={{ horizontal: "left", vertical: "bottom" }}
+          a2ui={{ catalog: demonstrationCatalog }}
+          openGenerativeUI={{}}
+          useSingleEndpoint={false}
+        >
+          <OpenAiKeyGate>
+            <Inbox />
+          </OpenAiKeyGate>
+        </CopilotKit>
+      </OpenAiKeyProvider>
+    </ThemeProvider>
   );
 }

@@ -10,7 +10,6 @@
  * The assembled catalog is registered in layout.tsx via
  * <CopilotKit a2ui={{ catalog: demonstrationCatalog }}>.
  */
-"use client";
 
 import React, { useState } from "react";
 import {

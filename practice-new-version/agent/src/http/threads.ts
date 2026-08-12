@@ -1,15 +1,13 @@
-import { NextResponse } from "next/server";
+import { Hono } from "hono";
+import { MODEL } from "../config/model.js";
 import {
-  CHAT_THREAD_COLUMNS,
   ensureThreadsSchema,
-  query,
-  toChatThread,
-  type ChatThreadRow,
-} from "@/lib/db";
-
-// Matches agent/src/config/model.ts's MODEL — same tier CopilotKit Intelligence's own
-// auto-titling would use, just called directly since we don't have that platform here.
-const TITLE_MODEL = "gpt-4o-mini";
+  listThreads,
+  upsertThread,
+  threadExists,
+  renameThread,
+  deleteThread,
+} from "../db/threads.js";
 
 // Best-effort: a title is a nice-to-have, so any failure (missing key, network, rate limit)
 // just falls back to a truncated first message rather than blocking thread creation.
@@ -28,7 +26,7 @@ async function generateTitle(
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: TITLE_MODEL,
+        model: MODEL,
         messages: [
           {
             role: "system",
@@ -53,64 +51,51 @@ async function generateTitle(
   }
 }
 
-export async function GET() {
+export const threadsApp = new Hono();
+
+threadsApp.get("/", async (c) => {
   await ensureThreadsSchema();
-  const { rows } = await query<ChatThreadRow>(
-    `SELECT ${CHAT_THREAD_COLUMNS} FROM chat_threads ORDER BY updated_at DESC`,
-  );
-  return NextResponse.json({ threads: rows.map(toChatThread) });
-}
+  const threads = await listThreads();
+  return c.json({ threads });
+});
 
 // Upsert: creates the row the first time a thread is touched (e.g. a run finalizing on a
 // brand-new thread), generating its title from firstMessage — and just bumps updated_at on
 // every later touch, without ever clobbering a title (LLM-generated or teacher-renamed).
-export async function POST(request: Request) {
+threadsApp.post("/", async (c) => {
   await ensureThreadsSchema();
-  const { id, firstMessage } = (await request.json()) as {
+  const { id, firstMessage } = (await c.req.json()) as {
     id: string;
     firstMessage?: string;
   };
 
-  const { rows: existing } = await query<{ id: string }>(
-    `SELECT id FROM chat_threads WHERE id = $1`,
-    [id],
-  );
+  const exists = await threadExists(id);
   // Visitor's own key (BYOK — see agent/src/config/model.ts) first; process.env.OPENAI_API_KEY
   // is only a leftover fallback for as long as it's still set on this deployment.
-  const apiKey = request.headers.get("x-openai-api-key") ?? process.env.OPENAI_API_KEY;
+  const apiKey = c.req.header("x-openai-api-key") ?? process.env.OPENAI_API_KEY;
   // Only spend an LLM call the first time this thread is created, not on every touch.
-  const title = existing.length > 0 ? null : await generateTitle(firstMessage, apiKey ?? undefined);
+  const title = exists ? null : await generateTitle(firstMessage, apiKey ?? undefined);
 
-  const { rows } = await query<ChatThreadRow>(
-    `INSERT INTO chat_threads (id, title)
-     VALUES ($1, $2)
-     ON CONFLICT (id) DO UPDATE SET updated_at = now()
-     RETURNING ${CHAT_THREAD_COLUMNS}`,
-    [id, title],
-  );
-  return NextResponse.json({ thread: toChatThread(rows[0]) });
-}
+  const thread = await upsertThread(id, title);
+  return c.json({ thread });
+});
 
-export async function PATCH(request: Request) {
+threadsApp.patch("/", async (c) => {
   await ensureThreadsSchema();
-  const { id, title } = (await request.json()) as { id: string; title: string };
-  const { rows } = await query<ChatThreadRow>(
-    `UPDATE chat_threads SET title = $2, updated_at = now() WHERE id = $1
-     RETURNING ${CHAT_THREAD_COLUMNS}`,
-    [id, title],
-  );
-  if (!rows[0]) {
-    return NextResponse.json({ error: `No thread with id ${id}` }, { status: 404 });
+  const { id, title } = (await c.req.json()) as { id: string; title: string };
+  const thread = await renameThread(id, title);
+  if (!thread) {
+    return c.json({ error: `No thread with id ${id}` }, 404);
   }
-  return NextResponse.json({ thread: toChatThread(rows[0]) });
-}
+  return c.json({ thread });
+});
 
-export async function DELETE(request: Request) {
+threadsApp.delete("/", async (c) => {
   await ensureThreadsSchema();
-  const id = new URL(request.url).searchParams.get("id");
+  const id = c.req.query("id");
   if (!id) {
-    return NextResponse.json({ error: "id is required" }, { status: 400 });
+    return c.json({ error: "id is required" }, 400);
   }
-  await query(`DELETE FROM chat_threads WHERE id = $1`, [id]);
-  return NextResponse.json({ ok: true });
-}
+  await deleteThread(id);
+  return c.json({ ok: true });
+});
