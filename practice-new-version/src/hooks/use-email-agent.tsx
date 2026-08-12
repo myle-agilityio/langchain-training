@@ -1,5 +1,3 @@
-"use client";
-
 import { useInterrupt } from "@copilotkit/react-core/v2";
 import { EmailReplyCard } from "@/components/generative-ui/email-reply-card";
 

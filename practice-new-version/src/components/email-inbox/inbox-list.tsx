@@ -1,5 +1,3 @@
-"use client";
-
 import { Filter, Mail, MailOpen, MoreVertical, RefreshCw } from "lucide-react";
 import type { Course, Email, EmailTopic, Urgency, WorkType } from "@/types/email";
 import { Badge } from "@/components/ui/badge";

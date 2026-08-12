@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import type { Email } from "@/types/email";
 import { Badge } from "@/components/ui/badge";

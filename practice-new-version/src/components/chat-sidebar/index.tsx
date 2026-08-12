@@ -1,5 +1,3 @@
-"use client";
-
 import type { CSSProperties, ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { PanelRightClose, PanelRightOpen } from "lucide-react";
