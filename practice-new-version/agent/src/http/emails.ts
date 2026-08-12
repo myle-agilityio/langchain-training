@@ -1,6 +1,6 @@
-import { Hono } from "hono";
-import type { Email } from "@/types/index.js";
-import { listEmailsSeeded, updateEmailsStatus, patchEmail } from "@/db/inbox.js";
+﻿import { Hono } from "hono";
+import type { Email } from "@/types/index";
+import { listEmailsSeeded, updateEmailsStatus, patchEmail } from "@/db/inbox";
 
 export const emailsApp = new Hono();
 

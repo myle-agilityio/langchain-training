@@ -1,6 +1,6 @@
-import { AIMessage, HumanMessage, type BaseMessage } from "@langchain/core/messages";
+﻿import { AIMessage, HumanMessage, type BaseMessage } from "@langchain/core/messages";
 
-import type { Email } from "@/types/index.js";
+import type { Email } from "@/types/index";
 
 // Finds the most recent reply_to_email call — the one this entry into the subgraph answers.
 export function findReplyCall(messages: BaseMessage[]) {

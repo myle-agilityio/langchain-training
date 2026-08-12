@@ -1,8 +1,8 @@
-import { z } from "zod";
+﻿import { z } from "zod";
 import { StateSchema } from "@langchain/langgraph";
 import { CopilotKitStateSchema, zodState } from "@copilotkit/sdk-js/langgraph";
 
-import { ComplianceCheckSchema, DraftSchema, RejectedDraftSchema } from "@/types/index.js";
+import { ComplianceCheckSchema, DraftSchema, RejectedDraftSchema } from "@/types/index";
 
 // Parent graph state. The inbox itself lives in Postgres, not here.
 export const AgentState = new StateSchema({

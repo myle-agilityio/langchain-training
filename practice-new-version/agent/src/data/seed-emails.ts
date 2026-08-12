@@ -1,4 +1,4 @@
-import type { Email } from "@/types/index.js";
+﻿import type { Email } from "@/types/index";
 
 
 export const seedEmails: Email[] = [

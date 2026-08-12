@@ -1,15 +1,15 @@
-import { z } from "zod";
+﻿import { z } from "zod";
 import { tool } from "@langchain/core/tools";
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
-import { getPlainModelForConfig } from "@/config/model.js";
-import { CONTACT_PROFILE_NAMESPACE, TOOL } from "@/constants/index.js";
-import { aggregateEmails, getEmail, listEmails, updateEmail } from "@/db/index.js";
-import { classifyPrompt } from "@/prompts/index.js";
-import { searchKnowledge } from "@/rag/index.js";
-import { ClassificationSchema, EmailFilterSchema, EmailGroupBySchema } from "@/types/index.js";
-import type { ContactProfileValue } from "@/types/index.js";
-import { generate_a2ui } from "./a2ui.js";
+import { getPlainModelForConfig } from "@/config/model";
+import { CONTACT_PROFILE_NAMESPACE, TOOL } from "@/constants/index";
+import { aggregateEmails, getEmail, listEmails, updateEmail } from "@/db/index";
+import { classifyPrompt } from "@/prompts/index";
+import { searchKnowledge } from "@/rag/index";
+import { ClassificationSchema, EmailFilterSchema, EmailGroupBySchema } from "@/types/index";
+import type { ContactProfileValue } from "@/types/index";
+import { generate_a2ui } from "./a2ui";
 
 // Shared description of the filter shape, so get_emails and count_emails don't drift.
 const FILTER_DESCRIPTION =

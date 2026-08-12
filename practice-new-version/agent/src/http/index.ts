@@ -1,7 +1,7 @@
-import { Hono } from "hono";
-import { copilotkitApp } from "./copilotkit.js";
-import { emailsApp } from "./emails.js";
-import { threadsApp } from "./threads.js";
+﻿import { Hono } from "hono";
+import { copilotkitApp } from "./copilotkit";
+import { emailsApp } from "./emails";
+import { threadsApp } from "./threads";
 
 // Mounted onto the langgraphjs dev server via langgraph.json's "http.app" — merges with the
 // built-in graph/assistants/threads/runs routes rather than replacing them.

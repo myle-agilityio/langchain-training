@@ -1,12 +1,12 @@
-import pg from "pg";
+﻿import pg from "pg";
 
-import { getPgConnectionOptions } from "@/config/env.js";
+import { getPgConnectionOptions } from "@/config/env";
 import type {
   Classification,
   Email,
   EmailFilter,
   EmailGroupBy,
-} from "@/types/index.js";
+} from "@/types/index";
 
 export interface EmailRow {
   id: string;

@@ -1,13 +1,13 @@
-import { AIMessage, HumanMessage, ToolMessage, type BaseMessage } from "@langchain/core/messages";
+﻿import { AIMessage, HumanMessage, ToolMessage, type BaseMessage } from "@langchain/core/messages";
 import { ChatPromptTemplate, MessagesPlaceholder } from "@langchain/core/prompts";
 import { Command, END, type LangGraphRunnableConfig, type NodeError } from "@langchain/langgraph";
 
-import { getModelForConfig, getPlainModelForConfig, MissingApiKeyError } from "@/config/model.js";
-import { TOOL } from "@/constants/index.js";
-import { currentDateLine, scopeCheckPrompt, SYSTEM_PROMPT } from "@/prompts/index.js";
-import { executableTools, modelTools } from "@/tools/index.js";
-import { ScopeCheckSchema } from "@/types/index.js";
-import { findReplyCall } from "@/utils/index.js";
+import { getModelForConfig, getPlainModelForConfig, MissingApiKeyError } from "@/config/model";
+import { TOOL } from "@/constants/index";
+import { currentDateLine, scopeCheckPrompt, SYSTEM_PROMPT } from "@/prompts/index";
+import { executableTools, modelTools } from "@/tools/index";
+import { ScopeCheckSchema } from "@/types/index";
+import { findReplyCall } from "@/utils/index";
 
 type CopilotKitEntry = { description?: string; value?: unknown };
 type CopilotKitAction = { name: string; description?: string; parameters?: unknown };
