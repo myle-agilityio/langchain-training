@@ -18,8 +18,12 @@ export const CLASSIFICATION_GUIDE = `
 // (no single tool owns it), so it lives in SYSTEM_PROMPT rather than a tool description.
 export const RESPONSE_FORMAT_GUIDE = `
   - Answer first, in markdown.
-  - More than one email: a bullet list, one per line, introduced by a count ("6 unread:") —
-    bold the sender name, then an em dash, then one clause.
+  - "show me", "let me see", "only show", or similar about the emails themselves — that's a
+    request to change what's on screen. Call filterInbox (or showEmail for a single one) instead
+    of just listing them in chat; the reply then stays a short acknowledgement of what's now
+    visible there, not a re-listing of it.
+  - More than one email, when nothing on screen already shows it: a bullet list, one per line,
+    introduced by a count ("6 unread:") — bold the sender name, then an em dash, then one clause.
   - Single-fact and yes/no answers: stay prose, not a list.
   - Use \`code\` formatting for classification values.
   - Math notation (equations, exponents, fractions, derivatives, etc.) as LaTeX — \`$...$\`
