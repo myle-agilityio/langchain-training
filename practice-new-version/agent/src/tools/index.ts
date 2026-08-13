@@ -9,6 +9,7 @@ import { classifyPrompt } from "@/prompts/index";
 import { searchKnowledge } from "@/rag/index";
 import { ClassificationSchema, EmailFilterSchema, EmailGroupBySchema } from "@/types/index";
 import type { ContactProfileValue } from "@/types/index";
+import { redactEmailForModel } from "@/utils/index";
 import { generate_a2ui } from "./a2ui";
 
 // Shared description of the filter shape, so get_emails and count_emails don't drift.
@@ -24,7 +25,7 @@ const FILTER_DESCRIPTION =
 export const get_emails = tool(
   async (input: { filter?: z.infer<typeof EmailFilterSchema> }) => {
     const emails = await listEmails(input.filter);
-    return JSON.stringify({ emails, count: emails.length });
+    return JSON.stringify({ emails: emails.map(redactEmailForModel), count: emails.length });
   },
   {
     name: TOOL.GET_EMAILS,
