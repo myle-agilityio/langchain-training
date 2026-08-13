@@ -244,6 +244,9 @@ export function InboxList({
                   {email.from.name}
                 </span>
                 <div className="flex items-center gap-1 shrink-0">
+                  {isUnread && (
+                    <span className="h-2 w-2 rounded-full bg-[var(--tone)]" />
+                  )}
                   <time
                     dateTime={email.receivedAt}
                     title={formatReceivedAtFull(email.receivedAt)}
@@ -257,9 +260,6 @@ export function InboxList({
                   >
                     {formatReceivedAt(email.receivedAt)}
                   </time>
-                  {isUnread && (
-                    <span className="h-2 w-2 rounded-full bg-[var(--tone)]" />
-                  )}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button
