@@ -267,7 +267,7 @@ export function InboxList({
                         onClick={(e) => e.stopPropagation()}
                         title="Email actions"
                         aria-label="Email actions"
-                        className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 group-focus-within:opacity-100 data-[state=open]:opacity-100 h-5 w-5 -my-1 flex items-center justify-center rounded hover:bg-[var(--secondary)] text-[var(--muted-foreground)] transition-opacity cursor-pointer"
+                        className="h-5 w-5 -my-1 flex items-center justify-center rounded hover:bg-[var(--secondary)] text-[var(--muted-foreground)] cursor-pointer"
                       >
                         <MoreVertical className="h-3 w-3" />
                       </button>
