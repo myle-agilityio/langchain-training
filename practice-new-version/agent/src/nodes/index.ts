@@ -1,19 +1,72 @@
-﻿import { AIMessage, ToolMessage, type BaseMessage } from "@langchain/core/messages";
+﻿import { AIMessage, HumanMessage, ToolMessage, type BaseMessage } from "@langchain/core/messages";
 import { ChatPromptTemplate, MessagesPlaceholder } from "@langchain/core/prompts";
 import { Command, END, type LangGraphRunnableConfig, type NodeError } from "@langchain/langgraph";
 
-import { getModelForConfig, MissingApiKeyError } from "@/config/model";
+import { getModelForConfig, getPlainModelForConfig, MissingApiKeyError } from "@/config/model";
 import { TOOL } from "@/constants/index";
-import { currentDateLine, SYSTEM_PROMPT } from "@/prompts/index";
+import { currentDateLine, moderationPrompt, SYSTEM_PROMPT } from "@/prompts/index";
 import { executableTools, modelTools } from "@/tools/index";
+import { ModerationCheckSchema } from "@/types/index";
 import { findReplyCall } from "@/utils/index";
 
 type CopilotKitEntry = { description?: string; value?: unknown };
 type CopilotKitAction = { name: string; description?: string; parameters?: unknown };
 type AgentStateShape = {
   messages: BaseMessage[];
+  blocked?: boolean;
   copilotkit?: { context?: CopilotKitEntry[]; actions?: CopilotKitAction[] };
 };
+
+// System prompt + full history, so a jailbreak attempt built up gradually across turns is still
+// visible, not just judged from the latest message in isolation.
+const moderationPromptTemplate = ChatPromptTemplate.fromMessages([
+  ["system", moderationPrompt()],
+  new MessagesPlaceholder("messages"),
+]);
+
+// Flags unsafe/abusive chat input before it reaches call_model. Distinct from SCOPE_GUIDE
+// (capability boundaries, checked inline in call_model) and check_compliance (drafted replies).
+export async function moderator(state: AgentStateShape, config: LangGraphRunnableConfig) {
+  const last = state.messages[state.messages.length - 1];
+  if (!HumanMessage.isInstance(last)) return { blocked: false };
+
+  let plainModel;
+  try {
+    plainModel = getPlainModelForConfig(config);
+  } catch (error) {
+    if (!(error instanceof MissingApiKeyError)) throw error;
+    return {
+      blocked: true,
+      messages: [
+        new AIMessage({
+          id: crypto.randomUUID(),
+          content:
+            "I don't have an OpenAI API key to work with yet — enter yours in the box on " +
+            "screen, then try again.",
+        }),
+      ],
+    };
+  }
+
+  const chain = moderationPromptTemplate.pipe(plainModel.withStructuredOutput(ModerationCheckSchema));
+  const check = await chain.invoke({ messages: state.messages });
+
+  if (!check.flagged) return { blocked: false };
+  return {
+    blocked: true,
+    messages: [
+      new AIMessage({
+        id: crypto.randomUUID(),
+        content: check.declineMessage ?? "I can't help with that.",
+      }),
+    ],
+  };
+}
+
+// Routes to call_model or ends if the message was flagged
+export function afterModeration(state: AgentStateShape) {
+  return state.blocked ? END : "call_model";
+}
 
 // Handles errors during email composition
 export function composeEmailErrorHandler(state: AgentStateShape, error: NodeError) {

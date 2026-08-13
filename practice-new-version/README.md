@@ -21,7 +21,7 @@ My Le
 - ✅ **Human-in-the-Loop Approval** — editable draft cards with approve/reject before anything sends, using LangGraph `interrupt()` + `Command(resume)` pattern
 - 🔀 **Compose-Email Subgraph** — dedicated triage → research → draft → compliance pipeline as a nested `StateGraph`, so every reply is grounded and checked
 - 📚 **RAG-Grounded Replies** — policy and curriculum answers pulled from a pgvector knowledge base via semantic search (`PGVectorStore` + `text-embedding-3-small`)
-- 🛡️ **Guardrails** — advisory compliance check on every draft plus regex-based PII redaction before any model call
+- 🛡️ **Guardrails** — a `moderator` node hard-blocks unsafe/abusive chat input before it reaches the model, plus an advisory compliance check on every draft and regex-based PII redaction before any model call
 - 🎨 **Generative UI** — dynamic dashboards and approval cards rendered live in chat via A2UI, `useInterrupt`, and `useFrontendTool`
 - 🧠 **Cross-thread Memory** — remembers sender tone and facts across conversations via a Postgres-backed `BaseStore`
 - 🔁 **Thread Durability** — resumable, restart-safe agent runs via a `PostgresSaver` checkpointer

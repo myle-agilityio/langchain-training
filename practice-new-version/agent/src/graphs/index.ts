@@ -3,7 +3,13 @@ import { ToolNode } from "@langchain/langgraph/prebuilt";
 
 import { getCheckpointer } from "@/db/checkpointer";
 import { getMemoryStore } from "@/db/memoryStore";
-import { callModel, composeEmailErrorHandler, routeAfterModel } from "@/nodes/index";
+import {
+  afterModeration,
+  callModel,
+  composeEmailErrorHandler,
+  moderator,
+  routeAfterModel,
+} from "@/nodes/index";
 import { ensureIndexed } from "@/rag/index";
 import { AgentState } from "@/state/index";
 import { executableTools } from "@/tools/index";
@@ -22,11 +28,18 @@ export async function buildGraph() {
       retryPolicy: { maxAttempts: 3 },
       timeout: { runTimeout: 60_000 },
     })
+    .addNode("moderator", moderator)
     .addNode("call_model", callModel)
     .addNode("tools", new ToolNode(executableTools), { timeout: { runTimeout: 90_000 } })
     .addNode("compose_email", runComposeEmail, { errorHandler: composeEmailErrorHandler })
 
-    .addEdge(START, "call_model")
+    .addEdge(START, "moderator")
+
+    // Flagged message → decline message, end; otherwise into the normal ReAct loop.
+    .addConditionalEdges("moderator", afterModeration, {
+      call_model: "call_model",
+      __end__: END,
+    })
 
     // reply_to_email → subgraph; backend tool → tools; frontend tool or plain answer → end.
     .addConditionalEdges("call_model", routeAfterModel, {

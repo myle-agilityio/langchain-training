@@ -42,15 +42,18 @@ graph TD
 
 ## Main agent graph (`agent/src/graphs/index.ts`)
 
-A ReAct loop; `compose_email` is a subgraph node (detailed below).
+A ReAct loop gated by a `moderator` node; `compose_email` is a subgraph node (detailed below).
+`moderator` hard-blocks unsafe/abusive chat input before it reaches `call_model` — distinct from
+`call_model`'s own `SCOPE_GUIDE` (declines out-of-scope-but-safe requests) and `check_compliance`
+below (checks outgoing drafts, not chat input).
 
 ```mermaid
 graph TD
-    START(["START"]) --> validate_request
+    START(["START"]) --> moderator
 
-    validate_request{{"validate_request"}}
-    validate_request -- "out of scope" --> END_scope(["END"])
-    validate_request -- "in scope" --> call_model
+    moderator{{"moderator"}}
+    moderator -- "flagged" --> END_blocked(["END"])
+    moderator -- "not flagged" --> call_model
 
     call_model["call_model"]
     call_model -- "reply_to_email call" --> compose_email

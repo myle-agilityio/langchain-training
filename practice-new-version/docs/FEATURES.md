@@ -58,6 +58,16 @@ language without proofreading every draft themselves.
 - A flagged draft shows an amber banner listing each violation in plain language.
 - The check is advisory — Approve/Reject stay available either way.
 
+## Guardrail: blocks unsafe or abusive input
+
+**Teacher (and the assistant) can** be protected from abusive, threatening, or manipulative chat
+messages, **so that** a bad-faith message never reaches the model's normal reasoning or tools.
+
+- Harassment, threats, sexual content, or an attempt to override the assistant's instructions is
+  blocked before `call_model` runs, with a short decline message in its place.
+- A blunt or frustrated tone, venting, or an ordinary out-of-scope request is **not** flagged —
+  only genuine abuse is.
+
 ## Guardrail: no PII sent to the model
 
 **Teacher can** trust that contact details are kept out of the model's prompts, **so that**
