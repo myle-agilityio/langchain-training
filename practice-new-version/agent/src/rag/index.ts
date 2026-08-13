@@ -3,6 +3,7 @@ import { Document } from "@langchain/core/documents";
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 import type { OpenAIEmbeddings } from "@langchain/openai";
 
+import { getRagScoreThreshold } from "../config/env.js";
 import { getEmbeddingsForConfig, getServerEmbeddings } from "../config/model.js";
 import { KB_TABLE } from "../constants/index.js";
 import { getPool } from "../db/index.js";
@@ -40,6 +41,12 @@ export async function ensureIndexed(): Promise<void> {
   );
 }
 
+// PGVectorStore's default scoreNormalization returns raw cosine distance (0=identical, 2=opposite);
+// convert to similarity (0-1, higher=better) so the threshold reads the way a relevance score should.
+function distanceToSimilarity(distance: number): number {
+  return 1 - distance / 2;
+}
+
 // Semantic search over the embedded KB — replaces the old keyword matcher. Embeds the query
 // with the visitor's own key (BYOK, via getEmbeddingsForConfig), not the seed-time server key.
 export async function searchKnowledge(
@@ -48,9 +55,12 @@ export async function searchKnowledge(
   k = 3,
 ): Promise<{ title: string; content: string }[]> {
   const store = await getVectorStore(getEmbeddingsForConfig(config));
-  const docs = await store.similaritySearch(query, k);
-  return docs.map((d) => ({
-    title: String(d.metadata.title ?? ""),
-    content: d.pageContent,
-  }));
+  const results = await store.similaritySearchWithScore(query, k);
+  const threshold = getRagScoreThreshold();
+  return results
+    .filter(([, distance]) => distanceToSimilarity(distance) >= threshold)
+    .map(([d]) => ({
+      title: String(d.metadata.title ?? ""),
+      content: d.pageContent,
+    }));
 }
