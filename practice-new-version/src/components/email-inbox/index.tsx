@@ -172,22 +172,24 @@ export function EmailInbox() {
   const agentBusy = agent.isRunning || awaitingApproval;
 
   return (
-    <div className="h-full flex">
-      <div className="w-[360px] shrink-0 border-r border-[var(--border)] overflow-y-auto thin-scrollbar">
-        <InboxList
-          emails={visibleEmails}
-          totalCount={emails.length}
-          isLoading={isLoading}
-          isRefreshing={isRefreshing}
-          onRefresh={refresh}
-          selectedId={selectedId}
-          onSelect={selectEmail}
-          onToggleRead={toggleRead}
-          onMarkAllRead={markAllRead}
-          onMarkAllUnread={markAllUnread}
-          isFiltered={isFiltered}
-          onOpenFilters={() => setFiltersOpen(true)}
-        />
+    <div className="h-full flex gap-3">
+      <div className="w-[360px] shrink-0 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] overflow-hidden flex flex-col">
+        <div className="flex-1 min-h-0 overflow-y-auto thin-scrollbar">
+          <InboxList
+            emails={visibleEmails}
+            totalCount={emails.length}
+            isLoading={isLoading}
+            isRefreshing={isRefreshing}
+            onRefresh={refresh}
+            selectedId={selectedId}
+            onSelect={selectEmail}
+            onToggleRead={toggleRead}
+            onMarkAllRead={markAllRead}
+            onMarkAllUnread={markAllUnread}
+            isFiltered={isFiltered}
+            onOpenFilters={() => setFiltersOpen(true)}
+          />
+        </div>
         <FilterDialog
           open={filtersOpen}
           onOpenChange={setFiltersOpen}
@@ -195,7 +197,7 @@ export function EmailInbox() {
           onApply={setFilters}
         />
       </div>
-      <div className="flex-1 min-w-0 overflow-y-auto">
+      <div className="flex-1 min-w-0 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] overflow-y-auto">
         <EmailDetail
           email={selected}
           isLoading={isLoading}

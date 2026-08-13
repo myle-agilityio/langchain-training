@@ -6,7 +6,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #ffffff;
+  --background: #f1f8fd;
   --foreground: #010507;
 
   /* Semantic tokens — CopilotKit brand */
@@ -70,7 +70,7 @@
 
 :root.dark,
 .dark {
-  --background: #010507;
+  --background: #031118;
   --foreground: #ffffff;
 
   --card: #191a1e;
