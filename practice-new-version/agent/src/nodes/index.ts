@@ -124,12 +124,30 @@ const callModelPrompt = ChatPromptTemplate.fromMessages([
   new MessagesPlaceholder("messages"),
 ]);
 
-// Invokes model with system prompt, context, and available tools
+// Invokes model with system prompt, context, and available tools. Also the one place that
+// checks for a visitor-supplied OpenAI key (BYOK — see config/model.ts).
 export async function callModel(
   state: AgentStateShape,
   config: LangGraphRunnableConfig,
 ) {
-  const bound = getModelForConfig(config).bindTools!([...modelTools, ...frontendTools(state)]);
+  let model;
+  try {
+    model = getModelForConfig(config);
+  } catch (error) {
+    if (!(error instanceof MissingApiKeyError)) throw error;
+    return {
+      messages: [
+        new AIMessage({
+          id: crypto.randomUUID(),
+          content:
+            "I don't have an OpenAI API key to work with yet — enter yours in the box on " +
+            "screen, then try again.",
+        }),
+      ],
+    };
+  }
+
+  const bound = model.bindTools!([...modelTools, ...frontendTools(state)]);
   const chain = callModelPrompt.pipe(bound);
   // config threaded through so token callbacks stream assistant text into the chat UI.
   const response = await chain.invoke(
