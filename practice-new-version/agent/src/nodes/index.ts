@@ -1,73 +1,19 @@
-﻿import { AIMessage, HumanMessage, ToolMessage, type BaseMessage } from "@langchain/core/messages";
+﻿import { AIMessage, ToolMessage, type BaseMessage } from "@langchain/core/messages";
 import { ChatPromptTemplate, MessagesPlaceholder } from "@langchain/core/prompts";
 import { Command, END, type LangGraphRunnableConfig, type NodeError } from "@langchain/langgraph";
 
-import { getModelForConfig, getPlainModelForConfig, MissingApiKeyError } from "@/config/model";
+import { getModelForConfig, MissingApiKeyError } from "@/config/model";
 import { TOOL } from "@/constants/index";
-import { currentDateLine, scopeCheckPrompt, SYSTEM_PROMPT } from "@/prompts/index";
+import { currentDateLine, SYSTEM_PROMPT } from "@/prompts/index";
 import { executableTools, modelTools } from "@/tools/index";
-import { ScopeCheckSchema } from "@/types/index";
 import { findReplyCall } from "@/utils/index";
 
 type CopilotKitEntry = { description?: string; value?: unknown };
 type CopilotKitAction = { name: string; description?: string; parameters?: unknown };
 type AgentStateShape = {
   messages: BaseMessage[];
-  outOfScope?: boolean;
   copilotkit?: { context?: CopilotKitEntry[]; actions?: CopilotKitAction[] };
 };
-
-// System prompt + full history, so "show me them"/"which one" resolve against prior turns
-// instead of the scope check judging the latest message in isolation.
-const scopeCheckPromptTemplate = ChatPromptTemplate.fromMessages([
-  ["system", scopeCheckPrompt()],
-  new MessagesPlaceholder("messages"),
-]);
-
-// Validates if the request is within scope before processing. Also the one place that checks
-// for a visitor-supplied OpenAI key (BYOK — see config/model.ts) since every node downstream
-// shares this same run's config and can assume the key already checked out.
-export async function validateRequest(
-  state: AgentStateShape,
-  config: LangGraphRunnableConfig,
-) {
-  const last = state.messages[state.messages.length - 1];
-  if (!HumanMessage.isInstance(last)) return { outOfScope: false };
-
-  let scopedModel;
-  try {
-    scopedModel = getPlainModelForConfig(config);
-  } catch (error) {
-    if (!(error instanceof MissingApiKeyError)) throw error;
-    return {
-      outOfScope: true,
-      messages: [
-        new AIMessage({
-          id: crypto.randomUUID(),
-          content:
-            "I don't have an OpenAI API key to work with yet — enter yours in the box on " +
-            "screen, then try again.",
-        }),
-      ],
-    };
-  }
-
-  const chain = scopeCheckPromptTemplate.pipe(scopedModel.withStructuredOutput(ScopeCheckSchema));
-  const check = await chain.invoke({ messages: state.messages });
-
-  if (check.inScope) return { outOfScope: false };
-  return {
-    outOfScope: true,
-    messages: [
-      new AIMessage({ id: crypto.randomUUID(), content: check.declineMessage ?? "I can't help with that request." }),
-    ],
-  };
-}
-
-// Routes to model or ends if out of scope
-export function afterValidate(state: AgentStateShape) {
-  return state.outOfScope ? END : "call_model";
-}
 
 // Handles errors during email composition
 export function composeEmailErrorHandler(state: AgentStateShape, error: NodeError) {

@@ -7,8 +7,6 @@ import { ComplianceCheckSchema, DraftSchema, RejectedDraftSchema } from "@/types
 // Parent graph state. The inbox itself lives in Postgres, not here.
 export const AgentState = new StateSchema({
   ...CopilotKitStateSchema.fields,
-  // Set by validate_request each run; routes straight to END when true.
-  outOfScope: zodState(z.boolean().default(() => false)),
   summary: zodState(z.string().default(() => "")),
   // Survives across compose entries so a redraft can revise it; cleared on approve.
   lastRejectedDraft: zodState(RejectedDraftSchema.nullable().default(() => null)),
