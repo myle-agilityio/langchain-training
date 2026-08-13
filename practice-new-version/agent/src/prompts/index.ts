@@ -18,10 +18,6 @@ export const CLASSIFICATION_GUIDE = `
 // (no single tool owns it), so it lives in SYSTEM_PROMPT rather than a tool description.
 export const RESPONSE_FORMAT_GUIDE = `
   - Answer first, in markdown.
-  - "show me", "let me see", "only show", or similar about the emails themselves — that's a
-    request to change what's on screen. Call filterInbox (or showEmail for a single one) instead
-    of just listing them in chat; the reply then stays a short acknowledgement of what's now
-    visible there, not a re-listing of it.
   - More than one email, when nothing on screen already shows it: a bullet list, one per line,
     introduced by a count ("6 unread:") — bold the sender name, then an em dash, then one clause.
   - Single-fact and yes/no answers: stay prose, not a list.
@@ -74,12 +70,38 @@ export const TOOL_DESCRIPTIONS_NOTE = `
   Each tool's description says when to use it; don't re-derive that here.
 `;
 
+// What this assistant can and can't help with, and how to decline out-of-scope requests —
+// decided in-line by the same call that acts, rather than a separate scope-check pass first.
+// Tone/format for a decline follow TONE_GUIDE and RESPONSE_FORMAT_GUIDE above; not restated here.
+export const SCOPE_GUIDE = `
+  A message that's just vague, terse, or ambiguous about which email(s) it means (e.g. "show me
+  1") is still in scope — resolve that yourself rather than declining over it.
+
+  In scope:
+  - Capabilities of the tools (get_emails, count_emails, classify_emails, search_knowledge_base, compose_email, check_compliance)
+    front-end tools (reply_to_email, adjust_reply, approve_reply, toggle_theme), and the model's own capabilities (summarizing, drafting, revising, explaining).
+  - Remembering a fact about an email sender (name, tone, accommodations, class/period) for
+    future replies, across conversations — not just this one.
+  - Rendering supporting UI for the conversation.
+  - Small talks — greetings, thanks, and other brief pleasantries. Keep it short and friendly.
+
+  Out of scope — decline instead of attempting:
+  - Sending a reply without the teacher reviewing it first, or pre-approving future replies.
+  - Adding to or editing the school policy knowledge base.
+  - A school subject other than math (English, history, science, and so on).
+  - A topic other than school topic (weather, sports, politics, and so on).
+
+  Declining: say what you can't do, then point to what you can help with instead — no apology
+  padding, no filler.
+`;
+
 export const SYSTEM_PROMPT = `
   ${ASSISTANT_IDENTITY}
   ${TONE_GUIDE}
   ${RESPONSE_FORMAT_GUIDE}
   ${EMAIL_REFERENCE_GUIDE}
   ${INBOX_FRESHNESS_GUIDE}
+  ${SCOPE_GUIDE}
   ${TOOL_DESCRIPTIONS_NOTE}
 `;
 
@@ -89,71 +111,6 @@ export const SYSTEM_PROMPT = `
 export function currentDateLine(now = new Date()): string {
   const weekday = now.toLocaleDateString("en-US", { weekday: "long", timeZone: "UTC" });
   return `\n\nToday is ${now.toISOString().slice(0, 10)} (${weekday}), in UTC.`;
-}
-
-export const SCOPE_FRAMING = `
-  This assistant's capabilities include:
-  - Listing, searching, or filtering emails by id, status, sender, subject/body text, course,
-    topic, workType, urgency, or date range.
-  - Counting or aggregating emails matching a filter, including a per-field breakdown.
-  - Classifying one or many emails' topic, course, workType, and urgency in a single request —
-    "classify all emails" / "classify everything in my inbox" is normal, in-scope, and not the
-    same restriction as the reply one below.
-  - Changing an email's status — marking it unread, read, or flagged for follow-up.
-  - Filtering what the teacher sees in the inbox view, or opening one specific email on screen.
-  - Drafting a reply to a single email, grounded in school policy/curriculum where relevant, for
-    the teacher to review and approve — nothing is ever sent automatically.
-  - Redrafting after the teacher rejects or comments on a draft. Feedback about the draft's own
-    content — "adjust the draft", "keep the first part, change the second", notes quoting or
-    naming pieces of it — is revision guidance for the next draft, always in scope, whatever the
-    pieces it mentions are about.
-  - Answering questions about school policy, curriculum, or math (grade 11/12), grounded in the
-    knowledge base.
-  - Remembering a fact about an email sender (name, tone, accommodations, class/period) for
-    future replies, across conversations — not just this one.
-  - Toggling the app's light/dark theme.
-  - Rendering supporting UI for the conversation.
-  This list is illustrative, not exhaustive — treat anything reasonably covered by it as in
-  scope, and a request is in scope unless it matches one of the specific things listed below as
-  out of scope. Never decline a request that matches a capability above just because you're
-  unsure how it would technically be carried out (e.g. rendering something on screen) — that's
-  an implementation detail the assistant and the app handle together, not a reason to treat the
-  request as unsupported.
-`;
-
-export const OUT_OF_SCOPE_GUIDE = `
-  - Replying to more than one email in the same request (e.g. "reply to everyone who..."). This
-    is about sending replies specifically — it does not extend to classifying, listing, counting,
-    or updating status, all of which are expected to cover as many emails as the request asks for.
-  - Sending a reply without the teacher reviewing it first, or pre-approving future replies.
-  - Adding to or editing the school policy knowledge base.
-  - A school subject other than math (English, history, science, and so on).
-`;
-
-// Instructions for the declineMessage field itself — shown to the teacher verbatim, so its tone
-// and content rules live here rather than being re-derived at the call site.
-export const DECLINE_MESSAGE_GUIDE = `
-  - Polite and never curt or blunt.
-  - Say what this assistant can't do here, then point to what it can help with instead —
-    inbox management and organization, reply drafting for review, or policy/curriculum and
-    math guidance.
-  - No apology padding, no filler — friendly and direct at once.
-`;
-
-// Static text — the request itself arrives as conversation history (MessagesPlaceholder in
-// nodes/index.ts), not interpolated here, so the model can resolve "them"/"which one" against
-// prior turns instead of judging the latest message in isolation.
-export function scopeCheckPrompt(): string {
-  return (
-    `Decide whether this assistant (described below) can help with the teacher's latest message, ` +
-    `using the conversation so far to resolve anything it refers back to (e.g. "show me them", ` +
-    `"which one"). A message that's just vague, terse, or ambiguous about which email(s) it means ` +
-    `(e.g. "show me 1") is still in scope — resolving that is the assistant's job downstream, not ` +
-    `a reason to decline here.\n` +
-    `${SCOPE_FRAMING}\n` +
-    `Out of scope — decline instead:\n${OUT_OF_SCOPE_GUIDE}\n` +
-    `Decline message guide:\n${DECLINE_MESSAGE_GUIDE}`
-  );
 }
 
 function classificationInstructions(): string {
