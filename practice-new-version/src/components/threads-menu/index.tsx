@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { Clock, SquarePen } from "lucide-react";
 import { useCopilotChatConfiguration } from "@copilotkit/react-core/v2";

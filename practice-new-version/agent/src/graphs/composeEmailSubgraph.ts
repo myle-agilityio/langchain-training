@@ -1,4 +1,4 @@
-import { StateGraph, START, END } from "@langchain/langgraph";
+﻿import { StateGraph, START, END } from "@langchain/langgraph";
 
 import {
   triage,
@@ -7,8 +7,8 @@ import {
   writeDraft,
   checkCompliance,
   requestApproval,
-} from "../nodes/composeEmail.js";
-import { ComposeEmailState } from "../state/index.js";
+} from "@/nodes/composeEmail";
+import { ComposeEmailState } from "@/state/index";
 
 // Prompt-chaining pipeline; fixed nodes guarantee classify → (research) → draft → compliance
 // check on every reply.

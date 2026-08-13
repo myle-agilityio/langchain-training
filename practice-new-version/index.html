@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <title>Inbox Assistant</title>
+    <script>
+      // Set the theme class BEFORE first paint to avoid a white→dark flash.
+      // ThemeProvider applies the theme in a useEffect (post-hydration), so
+      // without this the page paints unthemed (light) first, then flips. This
+      // blocking inline script matches ThemeProvider's "system" default so
+      // there's no flash and no class mismatch when the provider re-applies.
+      (function(){try{var d=window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.classList.add(d?'dark':'light');}catch(e){}})();
+    </script>
+  </head>
+  <body class="antialiased">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,4 +1,4 @@
-import type { KBArticle } from "../types/index.js";
+﻿import type { KBArticle } from "@/types/index";
 
 // Seed articles for the pgvector knowledge base. Runtime search hits Postgres, not this array;
 // this file only exists to (re)seed it — see rag/index.ts ensureIndexed.

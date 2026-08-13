@@ -1,11 +1,11 @@
-import { ToolMessage, type BaseMessage } from "@langchain/core/messages";
+﻿import { ToolMessage, type BaseMessage } from "@langchain/core/messages";
 import { END, interrupt, type LangGraphRunnableConfig } from "@langchain/langgraph";
 
-import { getPlainModelForConfig } from "../config/model.js";
-import { COMPOSE_REPLY_ACTION, CONTACT_PROFILE_NAMESPACE } from "../constants/index.js";
-import { getEmail } from "../db/index.js";
-import { checkCompliancePrompt, draftPrompt, needsResearchPrompt } from "../prompts/index.js";
-import { classify_emails, get_emails, search_knowledge_base } from "../tools/index.js";
+import { getPlainModelForConfig } from "@/config/model";
+import { COMPOSE_REPLY_ACTION, CONTACT_PROFILE_NAMESPACE } from "@/constants/index";
+import { getEmail } from "@/db/index";
+import { checkCompliancePrompt, draftPrompt, needsResearchPrompt } from "@/prompts/index";
+import { classify_emails, get_emails, search_knowledge_base } from "@/tools/index";
 import {
   ComplianceCheckSchema,
   DraftSchema,
@@ -16,8 +16,8 @@ import {
   type Email,
   type KBArticle,
   type RejectedDraft,
-} from "../types/index.js";
-import { collectRevisionNotes, findReplyCall } from "../utils/index.js";
+} from "@/types/index";
+import { collectRevisionNotes, findReplyCall } from "@/utils/index";
 
 type State = {
   messages: BaseMessage[];

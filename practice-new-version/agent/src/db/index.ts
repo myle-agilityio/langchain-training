@@ -1,16 +1,14 @@
-import pg from "pg";
+﻿import pg from "pg";
 
-import { getPgConnectionOptions } from "../config/env.js";
+import { getPgConnectionOptions } from "@/config/env";
 import type {
   Classification,
   Email,
   EmailFilter,
   EmailGroupBy,
-} from "../types/index.js";
+} from "@/types/index";
 
-// Same database the Next side reads (src/lib/db.ts) — that's what makes the inbox shared.
-
-interface EmailRow {
+export interface EmailRow {
   id: string;
   from_name: string;
   from_email: string;
@@ -25,10 +23,12 @@ interface EmailRow {
   reply: Email["reply"] | null;
 }
 
-const COLUMNS = `
+export const EMAIL_COLUMNS = `
   id, from_name, from_email, subject, body, received_at, status,
   topic, course, work_type, urgency, reply
 `;
+// Alias kept short for the query strings below.
+const COLUMNS = EMAIL_COLUMNS;
 
 // Stashed on globalThis so dev-server reloads don't leak a pool per reload.
 const globalForPg = globalThis as unknown as { agentPool?: pg.Pool };
@@ -38,7 +38,7 @@ export function getPool(): pg.Pool {
   return globalForPg.agentPool;
 }
 
-function toEmail(row: EmailRow): Email {
+export function toEmail(row: EmailRow): Email {
   return {
     id: row.id,
     from: { name: row.from_name, email: row.from_email },

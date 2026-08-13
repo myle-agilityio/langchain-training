@@ -1,15 +1,15 @@
-import { z } from "zod";
+﻿import { z } from "zod";
 import { tool } from "@langchain/core/tools";
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
-import { getPlainModelForConfig } from "../config/model.js";
-import { CONTACT_PROFILE_NAMESPACE, TOOL } from "../constants/index.js";
-import { aggregateEmails, getEmail, listEmails, updateEmail } from "../db/index.js";
-import { classifyPrompt } from "../prompts/index.js";
-import { searchKnowledge } from "../rag/index.js";
-import { ClassificationSchema, EmailFilterSchema, EmailGroupBySchema } from "../types/index.js";
-import type { ContactProfileValue } from "../types/index.js";
-import { generate_a2ui } from "./a2ui.js";
+import { getPlainModelForConfig } from "@/config/model";
+import { CONTACT_PROFILE_NAMESPACE, TOOL } from "@/constants/index";
+import { aggregateEmails, getEmail, listEmails, updateEmail } from "@/db/index";
+import { classifyPrompt } from "@/prompts/index";
+import { searchKnowledge } from "@/rag/index";
+import { ClassificationSchema, EmailFilterSchema, EmailGroupBySchema } from "@/types/index";
+import type { ContactProfileValue } from "@/types/index";
+import { generate_a2ui } from "./a2ui";
 
 // Shared description of the filter shape, so get_emails and count_emails don't drift.
 const FILTER_DESCRIPTION =
@@ -82,7 +82,9 @@ export const classify_emails = tool(
       "Classify one or more emails by id — it reads each email's actual current subject/body " +
       "itself and writes topic/course/workType/urgency to the inbox; you never compute or pass " +
       "the classification. Ids must be real: call get_emails first if the teacher described the " +
-      "emails rather than naming exact ids. Batch every email you're classifying into one call.",
+      "emails rather than naming exact ids. Batch every email you're classifying into one call. " +
+      "Use this for any request to classify, triage, or tag email(s) — even 'classify this one' " +
+      "on a single email.",
     schema: z.object({ ids: z.array(z.string()) }),
   },
 );
@@ -216,8 +218,9 @@ export const reply_to_email = tool(
     name: TOOL.REPLY_TO_EMAIL,
     description:
       "Draft a reply to one email and show it to the teacher for approval. Give the email's " +
-      "id. This runs the whole pipeline itself — classify, look up policy, draft — so do not " +
-      "call the classify or knowledge-base tools first. Nothing is sent without the teacher " +
+      "id. Only for an explicit request to reply/draft/respond. When this tool is the " +
+      "right call, it runs the whole pipeline itself — classify, look up policy, draft — so do " +
+      "not call the classify or knowledge-base tools first. Nothing is sent without the teacher " +
       "approving the draft on screen.",
     schema: z.object({ id: z.string() }),
   },

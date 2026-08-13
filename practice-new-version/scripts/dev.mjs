@@ -9,8 +9,8 @@ import { spawn, spawnSync } from "node:child_process";
 spawnSync(process.execPath, ["scripts/copilotkit-dev-infra.mjs"], { stdio: "inherit" });
 
 const tasks = {
-  ui: "next dev --turbopack",
-  agent: "npm run dev --prefix agent",
+  ui: "vite",
+  agent: "pnpm --filter agent dev",
 };
 
 const env = process.argv.includes("--debug")

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Warns about missing LLM vendor API keys and missing CopilotKit Intelligence
-// configuration before `npm run dev`, then lets the dev server start anyway
+// configuration before `pnpm dev`, then lets the dev server start anyway
 // (chat/generations and Intelligence features fail until the values are set).
 // Written by `copilotkit init`; safe to delete if you manage env validation
 // yourself.
@@ -147,7 +147,7 @@ for (const entry of REQUIRED_ENV_KEYS) {
   const baseUrlValue = readDotenvValue(envFileContent, mockProvider.baseUrlVar);
   if (baseUrlValue === mockProvider.baseUrl) {
     console.warn(
-      `⚠ ${entry.key} looks like a real key, but ${mockProvider.baseUrlVar} still points at the local mock (${mockProvider.baseUrl}); requests go to the mock. Run copilotkit mock disable (or remove ${mockProvider.baseUrlVar}), then restart npm run dev.`,
+      `⚠ ${entry.key} looks like a real key, but ${mockProvider.baseUrlVar} still points at the local mock (${mockProvider.baseUrl}); requests go to the mock. Run copilotkit mock disable (or remove ${mockProvider.baseUrlVar}), then restart pnpm dev.`,
     );
   }
 }

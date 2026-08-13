@@ -1,5 +1,3 @@
-"use client";
-
 import { createContext, useContext, useEffect, useState } from "react";
 
 const STORAGE_KEY = "openai_api_key";

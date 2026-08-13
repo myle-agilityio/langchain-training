@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useRef } from "react";
 import { Wrench, Check, ChevronDown } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";

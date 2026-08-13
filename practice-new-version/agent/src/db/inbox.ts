@@ -1,17 +1,19 @@
-import { NextResponse } from "next/server";
-import type { Email } from "@/types/email";
+﻿import { getPool, EMAIL_COLUMNS, toEmail, type EmailRow } from "./index";
+import type { Email } from "@/types/index";
 import { seedEmails } from "@/data/seed-emails";
-import { EMAIL_COLUMNS, query, toEmail, type EmailRow } from "@/lib/db";
 
-export async function GET() {
-  const { rows } = await query<EmailRow>(
+// Queries used by the HTTP inbox routes (agent/src/http/emails.ts) — distinct from the
+// graph-tool queries above since these need shapes (bulk status update, reply patch, seeding)
+// the tools never do.
+
+export async function listEmailsSeeded(): Promise<Email[]> {
+  const { rows } = await getPool().query<EmailRow>(
     `SELECT ${EMAIL_COLUMNS} FROM emails ORDER BY received_at DESC`,
   );
-
   if (rows.length === 0) {
     await Promise.all(
       seedEmails.map((email) =>
-        query(
+        getPool().query(
           `INSERT INTO emails (${EMAIL_COLUMNS})
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
            ON CONFLICT (id) DO NOTHING`,
@@ -32,36 +34,23 @@ export async function GET() {
         ),
       ),
     );
-    return NextResponse.json({
-      emails: [...seedEmails].sort(
-        (a, b) =>
-          new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime(),
-      ),
-    });
+    return [...seedEmails].sort(
+      (a, b) => new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime(),
+    );
   }
-
-  return NextResponse.json({ emails: rows.map(toEmail) });
+  return rows.map(toEmail);
 }
 
-export async function PATCH(request: Request) {
-  const body = (await request.json()) as
-    | { ids: string[]; patch: Partial<Email> }
-    | { id: string; patch: Partial<Email> };
+export async function updateEmailsStatus(ids: string[], status: string): Promise<Email[]> {
+  const { rows } = await getPool().query<EmailRow>(
+    `UPDATE emails SET status = $1 WHERE id = ANY($2::text[]) RETURNING ${EMAIL_COLUMNS}`,
+    [status, ids],
+  );
+  return rows.map(toEmail);
+}
 
-  // Bulk path — mark all as read/unread from the inbox toolbar. Status-only on purpose: a
-  // classification/reply patch always targets one specific email, never a batch.
-  if ("ids" in body) {
-    const { ids, patch } = body;
-    const { rows: updated } = await query<EmailRow>(
-      `UPDATE emails SET status = $1 WHERE id = ANY($2::text[]) RETURNING ${EMAIL_COLUMNS}`,
-      [patch.status, ids],
-    );
-    return NextResponse.json({ emails: updated.map(toEmail) });
-  }
-
-  const { id, patch } = body;
-
-  const { rows } = await query<EmailRow>(
+export async function patchEmail(id: string, patch: Partial<Email>): Promise<Email | null> {
+  const { rows } = await getPool().query<EmailRow>(
     `UPDATE emails SET
        status    = COALESCE($2, status),
        topic     = COALESCE($3, topic),
@@ -81,9 +70,5 @@ export async function PATCH(request: Request) {
       patch.reply ? JSON.stringify(patch.reply) : null,
     ],
   );
-
-  if (!rows[0]) {
-    return NextResponse.json({ error: `No email with id ${id}` }, { status: 404 });
-  }
-  return NextResponse.json({ email: toEmail(rows[0]) });
+  return rows[0] ? toEmail(rows[0]) : null;
 }
