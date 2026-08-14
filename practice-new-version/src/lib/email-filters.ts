@@ -23,28 +23,25 @@ function includes(haystack: string, needle: string): boolean {
   return haystack.toLowerCase().includes(needle.toLowerCase());
 }
 
+type FilterCheck = (email: Email, filters: EmailFilters) => boolean;
+
+const FILTER_CHECKS: FilterCheck[] = [
+  (email, { status }) => !status || email.status === status,
+  (email, { urgency }) => !urgency || email.classification?.urgency === urgency,
+  (email, { course }) => !course || email.classification?.course === course,
+  (email, { topic }) => !topic || email.classification?.topic === topic,
+  (email, { workType }) => !workType || email.classification?.workType === workType,
+  (email, { from }) =>
+    !from || includes(email.from.name, from) || includes(email.from.email, from),
+  (email, { subject }) => !subject || includes(email.subject, subject),
+  (email, { hasWords }) => !hasWords || includes(email.body, hasWords),
+  (email, { receivedAfter }) => !receivedAfter || email.receivedAt >= receivedAfter,
+  // Exclusive-of-day-boundary would need end-of-day math; treating receivedBefore as an
+  // ISO date and comparing lexicographically is fine since receivedAt is also ISO 8601.
+  (email, { receivedBefore }) =>
+    !receivedBefore || email.receivedAt.slice(0, 10) <= receivedBefore,
+];
+
 export function filterEmails(emails: Email[], filters: EmailFilters): Email[] {
-  return emails.filter((email) => {
-    if (filters.status && email.status !== filters.status) return false;
-    if (filters.urgency && email.classification?.urgency !== filters.urgency) return false;
-    if (filters.course && email.classification?.course !== filters.course) return false;
-    if (filters.topic && email.classification?.topic !== filters.topic) return false;
-    if (filters.workType && email.classification?.workType !== filters.workType) return false;
-    if (
-      filters.from &&
-      !includes(email.from.name, filters.from) &&
-      !includes(email.from.email, filters.from)
-    ) {
-      return false;
-    }
-    if (filters.subject && !includes(email.subject, filters.subject)) return false;
-    if (filters.hasWords && !includes(email.body, filters.hasWords)) return false;
-    if (filters.receivedAfter && email.receivedAt < filters.receivedAfter) return false;
-    // Exclusive-of-day-boundary would need end-of-day math; treating receivedBefore as an
-    // ISO date and comparing lexicographically is fine since receivedAt is also ISO 8601.
-    if (filters.receivedBefore && email.receivedAt.slice(0, 10) > filters.receivedBefore) {
-      return false;
-    }
-    return true;
-  });
+  return emails.filter((email) => FILTER_CHECKS.every((check) => check(email, filters)));
 }
