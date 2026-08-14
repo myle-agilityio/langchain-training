@@ -44,11 +44,13 @@ export function SharedInboxProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     try {
       const res = await fetch("/api/emails");
-      if (!res.ok) return;
+      if (!res.ok) throw new Error(`GET /api/emails failed (${res.status})`);
       const data = (await res.json()) as { emails: Email[] };
       setEmails((current) =>
         sameEmails(current, data.emails) ? current : data.emails,
       );
+    } catch (error) {
+      console.error("Failed to refresh inbox:", error);
     } finally {
       setIsLoading(false);
     }
@@ -83,19 +85,25 @@ export function SharedInboxProvider({ children }: { children: ReactNode }) {
   }, [agent]);
 
   const patchEmail = useCallback(async (id: string, patch: Partial<Email>) => {
-    setEmails((current) =>
-      current.map((email) => (email.id === id ? { ...email, ...patch } : email)),
-    );
-    const res = await fetch("/api/emails", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, patch }),
+    let previous: Email[] = [];
+    setEmails((current) => {
+      previous = current;
+      return current.map((email) => (email.id === id ? { ...email, ...patch } : email));
     });
-    if (res.ok) {
+    try {
+      const res = await fetch("/api/emails", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, patch }),
+      });
+      if (!res.ok) throw new Error(`PATCH /api/emails failed (${res.status})`);
       const data = (await res.json()) as { email: Email };
       setEmails((current) =>
         current.map((email) => (email.id === id ? data.email : email)),
       );
+    } catch (error) {
+      console.error(`Failed to save update for email ${id}, reverting:`, error);
+      setEmails(previous);
     }
   }, []);
 
@@ -104,18 +112,24 @@ export function SharedInboxProvider({ children }: { children: ReactNode }) {
   const patchEmails = useCallback(async (ids: string[], patch: Partial<Email>) => {
     if (ids.length === 0) return;
     const idSet = new Set(ids);
-    setEmails((current) =>
-      current.map((email) => (idSet.has(email.id) ? { ...email, ...patch } : email)),
-    );
-    const res = await fetch("/api/emails", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids, patch }),
+    let previous: Email[] = [];
+    setEmails((current) => {
+      previous = current;
+      return current.map((email) => (idSet.has(email.id) ? { ...email, ...patch } : email));
     });
-    if (res.ok) {
+    try {
+      const res = await fetch("/api/emails", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids, patch }),
+      });
+      if (!res.ok) throw new Error(`PATCH /api/emails (bulk) failed (${res.status})`);
       const data = (await res.json()) as { emails: Email[] };
       const updated = new Map(data.emails.map((email) => [email.id, email]));
       setEmails((current) => current.map((email) => updated.get(email.id) ?? email));
+    } catch (error) {
+      console.error("Failed to save bulk email update, reverting:", error);
+      setEmails(previous);
     }
   }, []);
 

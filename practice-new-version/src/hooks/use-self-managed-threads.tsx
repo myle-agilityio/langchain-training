@@ -57,9 +57,11 @@ export function SelfManagedThreadsProvider({ children }: { children: ReactNode }
   const refresh = useCallback(async () => {
     try {
       const res = await fetch("/api/threads");
-      if (!res.ok) return;
+      if (!res.ok) throw new Error(`GET /api/threads failed (${res.status})`);
       const data = (await res.json()) as { threads: ChatThread[] };
       setThreads(data.threads);
+    } catch (error) {
+      console.error("Failed to refresh threads:", error);
     } finally {
       setIsLoading(false);
     }
@@ -92,25 +94,50 @@ export function SelfManagedThreadsProvider({ children }: { children: ReactNode }
             ...(openaiKey ? { "x-openai-api-key": openaiKey } : {}),
           },
           body: JSON.stringify({ id: threadId, firstMessage: firstUserMessageText(agent) }),
-        }).then(() => refreshRef.current());
+        })
+          .then((res) => {
+            if (!res.ok) throw new Error(`POST /api/threads failed (${res.status})`);
+          })
+          .catch((error) => console.error("Failed to save thread:", error))
+          .finally(() => refreshRef.current());
       },
     });
     return unsubscribe;
   }, [agent]);
 
   const renameThread = useCallback(async (id: string, title: string) => {
-    setThreads((current) => current.map((t) => (t.id === id ? { ...t, title } : t)));
-    await fetch("/api/threads", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, title }),
+    let previous: ChatThread[] = [];
+    setThreads((current) => {
+      previous = current;
+      return current.map((t) => (t.id === id ? { ...t, title } : t));
     });
-    await refreshRef.current();
+    try {
+      const res = await fetch("/api/threads", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, title }),
+      });
+      if (!res.ok) throw new Error(`PATCH /api/threads failed (${res.status})`);
+      await refreshRef.current();
+    } catch (error) {
+      console.error(`Failed to rename thread ${id}, reverting:`, error);
+      setThreads(previous);
+    }
   }, []);
 
   const deleteThread = useCallback(async (id: string) => {
-    setThreads((current) => current.filter((t) => t.id !== id));
-    await fetch(`/api/threads?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+    let previous: ChatThread[] = [];
+    setThreads((current) => {
+      previous = current;
+      return current.filter((t) => t.id !== id);
+    });
+    try {
+      const res = await fetch(`/api/threads?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(`DELETE /api/threads failed (${res.status})`);
+    } catch (error) {
+      console.error(`Failed to delete thread ${id}, reverting:`, error);
+      setThreads(previous);
+    }
   }, []);
 
   const value = useMemo(

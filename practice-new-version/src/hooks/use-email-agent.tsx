@@ -20,7 +20,10 @@ function parseComposeReply(raw: string): ComposeReplyInterrupt | null {
   try {
     const parsed = JSON.parse(raw);
     return parsed?.action === COMPOSE_REPLY_ACTION ? parsed : null;
-  } catch {
+  } catch (error) {
+    // The graph only ever interrupt()s with COMPOSE_REPLY_ACTION, so a parse failure here means
+    // the payload shape drifted from what this card expects, not routine routing.
+    console.error("on_interrupt payload was not valid JSON:", raw, error);
     return null;
   }
 }

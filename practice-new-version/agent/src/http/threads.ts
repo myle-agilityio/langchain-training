@@ -64,10 +64,16 @@ threadsApp.get("/", async (c) => {
 // every later touch, without ever clobbering a title (LLM-generated or teacher-renamed).
 threadsApp.post("/", async (c) => {
   await ensureThreadsSchema();
-  const { id, firstMessage } = (await c.req.json()) as {
-    id: string;
-    firstMessage?: string;
-  };
+  let body: { id: string; firstMessage?: string };
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: "Request body must be valid JSON" }, 400);
+  }
+  const { id, firstMessage } = body;
+  if (!id) {
+    return c.json({ error: "id is required" }, 400);
+  }
 
   const exists = await threadExists(id);
   // Visitor's own key (BYOK — see agent/src/config/model.ts) first; process.env.OPENAI_API_KEY
@@ -82,7 +88,16 @@ threadsApp.post("/", async (c) => {
 
 threadsApp.patch("/", async (c) => {
   await ensureThreadsSchema();
-  const { id, title } = (await c.req.json()) as { id: string; title: string };
+  let body: { id: string; title: string };
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: "Request body must be valid JSON" }, 400);
+  }
+  const { id, title } = body;
+  if (!id || !title) {
+    return c.json({ error: "id and title are required" }, 400);
+  }
   const thread = await renameThread(id, title);
   if (!thread) {
     return c.json({ error: `No thread with id ${id}` }, 404);
