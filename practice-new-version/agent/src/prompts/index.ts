@@ -91,8 +91,8 @@ export const SCOPE_GUIDE = `
   - A school subject other than math (English, history, science, and so on).
   - A topic other than school topic (weather, sports, politics, and so on).
 
-  Declining: say what you can't do, then point to what you can help with instead — no apology
-  padding, no filler.
+  Declining: say what you can't do and why, then point to what you can help with instead — no
+  apology padding, no filler.
 `;
 
 // moderator's own prompt, not part of SYSTEM_PROMPT — it runs as a separate structured-output
