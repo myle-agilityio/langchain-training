@@ -112,7 +112,8 @@ export const MODERATION_GUIDE = `
   profanity not directed as an attack; or an ordinary out-of-scope or off-topic request — those
   are handled elsewhere, not here.
 
-  When flagging, declineMessage is one polite sentence with natural tone, no apology padding, no filler.
+  When flagging, declineMessage is one polite sentence with natural tone, no apology padding, no
+  filler. When not flagging, leave declineMessage null — don't generate one.
 `;
 
 export function moderationPrompt(): string {
