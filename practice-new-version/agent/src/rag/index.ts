@@ -1,4 +1,6 @@
-﻿import { PGVectorStore } from "@langchain/community/vectorstores/pgvector";
+﻿import { join } from "node:path";
+
+import { PGVectorStore } from "@langchain/community/vectorstores/pgvector";
 import { Document } from "@langchain/core/documents";
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 import type { OpenAIEmbeddings } from "@langchain/openai";
@@ -8,6 +10,9 @@ import { getEmbeddingsForConfig, getServerEmbeddings } from "@/config/model";
 import { KB_TABLE } from "@/constants/index";
 import { getPool } from "@/db/index";
 import { knowledgeBase } from "./knowledge-base";
+import { loadDirectoryAsChunks } from "./loaders";
+
+const SAMPLE_DOCS_DIR = join(import.meta.dirname, "sample-docs");
 
 // initialize() creates the vector extension + table on first use (idempotent — IF NOT EXISTS —
 // so calling this per request, with whichever embeddings client the caller needs, is fine).
@@ -30,15 +35,15 @@ export async function ensureIndexed(): Promise<void> {
     return;
   }
   const store = await getVectorStore(embeddings);
-  await store.addDocuments(
-    knowledgeBase.map(
-      (a) =>
-        new Document({
-          pageContent: `${a.title}\n\n${a.content}`,
-          metadata: { id: a.id, title: a.title, tags: a.tags },
-        }),
-    ),
+  const seedDocs = knowledgeBase.map(
+    (a) =>
+      new Document({
+        pageContent: `${a.title}\n\n${a.content}`,
+        metadata: { id: a.id, title: a.title, tags: a.tags },
+      }),
   );
+  const fileDocs = await loadDirectoryAsChunks(SAMPLE_DOCS_DIR);
+  await store.addDocuments([...seedDocs, ...fileDocs]);
 }
 
 // PGVectorStore's default scoreNormalization returns raw cosine distance (0=identical, 2=opposite);
