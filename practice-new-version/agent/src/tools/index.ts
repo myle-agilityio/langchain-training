@@ -75,13 +75,26 @@ export async function classifyEmail(id: string, config: LangGraphRunnableConfig)
     return { id, ok: false as const, error: error instanceof Error ? error.message : String(error) };
   }
 }
+
+// Caps how many classifications run at once — classifying a large batch (e.g. "classify all 100
+// emails") would otherwise fire that many concurrent model calls and risk rate-limiting the
+// caller's own BYOK OpenAI key.
+const CLASSIFY_CONCURRENCY = 5;
+
+async function classifyEmailsBatched(ids: string[], config: LangGraphRunnableConfig) {
+  const results: Awaited<ReturnType<typeof classifyEmail>>[] = [];
+  for (let i = 0; i < ids.length; i += CLASSIFY_CONCURRENCY) {
+    const chunk = ids.slice(i, i + CLASSIFY_CONCURRENCY);
+    results.push(...(await Promise.all(chunk.map((id) => classifyEmail(id, config)))));
+  }
+  return results;
 }
 
 // Classifies by reading each email's real content itself, so the caller only ever passes ids —
-// never fields it might have guessed. One structured-output call per email, run in parallel.
+// never fields it might have guessed. One structured-output call per email, run in bounded-concurrency batches.
 export const classify_emails = tool(
   async (input: { ids: string[] }, config: LangGraphRunnableConfig) => {
-    const results = await Promise.all(input.ids.map((id) => classifyEmail(id, config)));
+    const results = await classifyEmailsBatched(input.ids, config);
     const failed = results.filter((r) => !r.ok);
     return JSON.stringify({
       results,
