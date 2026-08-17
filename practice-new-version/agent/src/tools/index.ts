@@ -54,21 +54,23 @@ export const count_emails = tool(
   },
 );
 
+// Exported so graph nodes classify by calling this directly — invoking the tool from inside a
+// node emits AG-UI TOOL_CALL events with no toolCallId, which kills the client event stream.
+export async function classifyEmail(id: string, config: LangGraphRunnableConfig) {
+  const email = await getEmail(id);
+  if (!email) return { id, ok: false as const, error: "no such email" };
+  const classification = await getPlainModelForConfig(config)
+    .withStructuredOutput(ClassificationSchema)
+    .invoke(classifyPrompt(email));
+  await updateEmail(id, { classification });
+  return { id, ok: true as const, classification };
+}
+
 // Classifies by reading each email's real content itself, so the caller only ever passes ids —
 // never fields it might have guessed. One structured-output call per email, run in parallel.
 export const classify_emails = tool(
   async (input: { ids: string[] }, config: LangGraphRunnableConfig) => {
-    const results = await Promise.all(
-      input.ids.map(async (id) => {
-        const email = await getEmail(id);
-        if (!email) return { id, ok: false as const, error: "no such email" };
-        const classification = await getPlainModelForConfig(config)
-          .withStructuredOutput(ClassificationSchema)
-          .invoke(classifyPrompt(email));
-        await updateEmail(id, { classification });
-        return { id, ok: true as const, classification };
-      }),
-    );
+    const results = await Promise.all(input.ids.map((id) => classifyEmail(id, config)));
     const failed = results.filter((r) => !r.ok);
     return JSON.stringify({
       results,

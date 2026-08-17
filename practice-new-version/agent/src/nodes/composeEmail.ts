@@ -5,7 +5,8 @@ import { getPlainModelForConfig } from "@/config/model";
 import { COMPOSE_REPLY_ACTION, CONTACT_PROFILE_NAMESPACE } from "@/constants/index";
 import { getEmail } from "@/db/index";
 import { checkCompliancePrompt, draftPrompt, needsResearchPrompt } from "@/prompts/index";
-import { classify_emails, get_emails, search_knowledge_base } from "@/tools/index";
+import { searchKnowledge } from "@/rag/index";
+import { classifyEmail } from "@/tools/index";
 import {
   ComplianceCheckSchema,
   DraftSchema,
@@ -30,11 +31,10 @@ type State = {
   lastRejectedDraft: RejectedDraft | null;
 };
 
-// Reuses get_emails (rather than db/index.js's getEmail directly) so triage/research resolve an
-// id through the same path the model itself uses — one lookup implementation, not two.
+// Nodes call db/rag functions directly, never tool.invoke() — a tool invoked inside a node emits
+// AG-UI TOOL_CALL events with no toolCallId, which kills the client's event stream mid-run.
 async function fetchEmailById(id: string): Promise<Email | null> {
-  const { emails } = JSON.parse(await get_emails.invoke({ filter: { id } })) as { emails: Email[] };
-  return emails[0] ?? null;
+  return (await getEmail(id)) ?? null;
 }
 
 // triage — resolve the email, classify it (via classify_emails — skipped if already on file),
@@ -60,12 +60,8 @@ export async function triage(state: State, config: LangGraphRunnableConfig) {
   }
 
   if (!email.classification) {
-    const { results } = JSON.parse(
-      await classify_emails.invoke({ ids: [id] }, config),
-    ) as {
-      results: { id: string; ok: boolean; classification?: Email["classification"] }[];
-    };
-    email.classification = results[0]?.classification;
+    const result = await classifyEmail(id, config);
+    email.classification = result.ok ? result.classification : undefined;
   }
 
   const { needsResearch } = await getPlainModelForConfig(config)
@@ -86,9 +82,7 @@ export async function research(state: State, config: LangGraphRunnableConfig) {
   if (!email) return { kbContext: "" };
 
   const query = `${email.subject} ${email.body} ${Object.values(email.classification ?? {}).join(" ")}`;
-  const articles = JSON.parse(
-    await search_knowledge_base.invoke({ query }, config),
-  ) as KBArticle[];
+  const articles = (await searchKnowledge(query, config)) as KBArticle[];
   const kbContext = articles.length
     ? articles.map((a) => `## ${a.title}\n${a.content}`).join("\n\n")
     : "No relevant articles found. Do not state any policy you cannot ground here.";
