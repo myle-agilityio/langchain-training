@@ -60,15 +60,21 @@ export const count_emails = tool(
 export async function classifyEmail(id: string, config: LangGraphRunnableConfig) {
   const email = await getEmail(id);
   if (!email) return { id, ok: false as const, error: "no such email" };
-        // Internal per-email classifier call — hide its forced tool call from the chat UI.
-  const classification = await getPlainModelForConfig(config)
-    .withStructuredOutput(ClassificationSchema)
-    .invoke(
-            classifyPrompt(email),
-            copilotkitCustomizeConfig(config, { emitMessages: false, emitToolCalls: false }),
-          );
-  await updateEmail(id, { classification });
-  return { id, ok: true as const, classification };
+  try {
+    // Internal per-email classifier call — hide its forced tool call from the chat UI.
+    const classification = await getPlainModelForConfig(config)
+      .withStructuredOutput(ClassificationSchema)
+      .invoke(
+        classifyPrompt(email),
+        copilotkitCustomizeConfig(config, { emitMessages: false, emitToolCalls: false }),
+      );
+    await updateEmail(id, { classification });
+    return { id, ok: true as const, classification };
+  } catch (error) {
+    // Never throw — one bad email (rate limit, parse failure) shouldn't sink the whole batch.
+    return { id, ok: false as const, error: error instanceof Error ? error.message : String(error) };
+  }
+}
 }
 
 // Classifies by reading each email's real content itself, so the caller only ever passes ids —
