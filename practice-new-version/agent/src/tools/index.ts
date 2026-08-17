@@ -98,6 +98,7 @@ export const classify_emails = tool(
     const failed = results.filter((r) => !r.ok);
     return JSON.stringify({
       results,
+      note: "The inbox UI already shows these classification tags — don't list topic/course/workType/urgency per email in your reply, just confirm briefly.",
       ...(failed.length
         ? { recovery: "Call get_emails for current ids, then retry the failed ids." }
         : {}),
