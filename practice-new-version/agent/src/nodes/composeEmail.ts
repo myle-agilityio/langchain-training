@@ -1,5 +1,6 @@
 ﻿import { ToolMessage, type BaseMessage } from "@langchain/core/messages";
 import { END, interrupt, type LangGraphRunnableConfig } from "@langchain/langgraph";
+import { copilotkitCustomizeConfig } from "@copilotkit/sdk-js/langgraph";
 
 import { getPlainModelForConfig } from "@/config/model";
 import { COMPOSE_REPLY_ACTION, CONTACT_PROFILE_NAMESPACE } from "@/constants/index";
@@ -19,6 +20,11 @@ import {
   type RejectedDraft,
 } from "@/types/index";
 import { collectRevisionNotes, findReplyCall } from "@/utils/index";
+
+// These internal structured-output calls are classifier/drafting steps, not chat replies — hide
+// their forced tool calls from the chat UI.
+const hidden = (config: LangGraphRunnableConfig) =>
+  copilotkitCustomizeConfig(config, { emitMessages: false, emitToolCalls: false });
 
 type State = {
   messages: BaseMessage[];
@@ -66,7 +72,7 @@ export async function triage(state: State, config: LangGraphRunnableConfig) {
 
   const { needsResearch } = await getPlainModelForConfig(config)
     .withStructuredOutput(NeedsResearchSchema)
-    .invoke(needsResearchPrompt(email));
+    .invoke(needsResearchPrompt(email), hidden(config));
 
   return { emailId: email.id, needsResearch };
 }
@@ -123,6 +129,7 @@ export async function writeDraft(state: State, config: LangGraphRunnableConfig) 
         revisionNotes: collectRevisionNotes(state.messages, state.emailId),
         previousDraft,
       }),
+      hidden(config),
     );
   return { draft, senderContext };
 }
@@ -132,7 +139,7 @@ export async function checkCompliance(state: State, config: LangGraphRunnableCon
   const draft = state.draft!;
   const compliance = await getPlainModelForConfig(config)
     .withStructuredOutput(ComplianceCheckSchema)
-    .invoke(checkCompliancePrompt(draft));
+    .invoke(checkCompliancePrompt(draft), hidden(config));
   return { compliance };
 }
 

@@ -1,6 +1,7 @@
 ﻿import { AIMessage, HumanMessage, ToolMessage, type BaseMessage } from "@langchain/core/messages";
 import { ChatPromptTemplate, MessagesPlaceholder } from "@langchain/core/prompts";
 import { Command, END, type LangGraphRunnableConfig, type NodeError } from "@langchain/langgraph";
+import { copilotkitCustomizeConfig } from "@copilotkit/sdk-js/langgraph";
 
 import { getModelForConfig, getPlainModelForConfig, MissingApiKeyError } from "@/config/model";
 import { TOOL } from "@/constants/index";
@@ -49,7 +50,9 @@ export async function moderator(state: AgentStateShape, config: LangGraphRunnabl
   }
 
   const chain = moderationPromptTemplate.pipe(plainModel.withStructuredOutput(ModerationCheckSchema));
-  const check = await chain.invoke({ messages: state.messages });
+  // withStructuredOutput is a forced tool call — hide it, or the raw {flagged, declineMessage} would stream to chat.
+  const runConfig = copilotkitCustomizeConfig(config, { emitMessages: false, emitToolCalls: false });
+  const check = await chain.invoke({ messages: state.messages }, runConfig);
 
   if (!check.flagged) return { blocked: false };
   return {

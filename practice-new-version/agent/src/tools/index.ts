@@ -1,6 +1,7 @@
 ﻿import { z } from "zod";
 import { tool } from "@langchain/core/tools";
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
+import { copilotkitCustomizeConfig } from "@copilotkit/sdk-js/langgraph";
 
 import { getPlainModelForConfig } from "@/config/model";
 import { CONTACT_PROFILE_NAMESPACE, TOOL } from "@/constants/index";
@@ -59,9 +60,13 @@ export const count_emails = tool(
 export async function classifyEmail(id: string, config: LangGraphRunnableConfig) {
   const email = await getEmail(id);
   if (!email) return { id, ok: false as const, error: "no such email" };
+        // Internal per-email classifier call — hide its forced tool call from the chat UI.
   const classification = await getPlainModelForConfig(config)
     .withStructuredOutput(ClassificationSchema)
-    .invoke(classifyPrompt(email));
+    .invoke(
+            classifyPrompt(email),
+            copilotkitCustomizeConfig(config, { emitMessages: false, emitToolCalls: false }),
+          );
   await updateEmail(id, { classification });
   return { id, ok: true as const, classification };
 }
