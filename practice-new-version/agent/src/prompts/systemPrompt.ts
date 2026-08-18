@@ -15,9 +15,8 @@ export const RESPONSE_FORMAT_GUIDE = `
   - Don't repeat what a card on screen is already showing.
 `;
 
-// Tone toward the teacher in chat — distinct from draftPrompt's tone, which is the teacher's own
-// voice to an email sender. Brevity above is about length, not warmth: short answers should still
-// read as a helpful colleague, not a terse status readout.
+// Tone toward the teacher in chat — distinct from draftPrompt's (the teacher's own voice to a
+// sender). Brevity is about length, not warmth: short answers should still read friendly.
 export const TONE_GUIDE = `
   - Talk to the teacher like a helpful, friendly colleague with natural tone — polite and never curt or
     robotic.
@@ -54,9 +53,8 @@ export const TOOL_DESCRIPTIONS_NOTE = `
   Each tool's description says when to use it; don't re-derive that here.
 `;
 
-// What this assistant can and can't help with, and how to decline out-of-scope requests —
-// decided in-line by the same call that acts, rather than a separate scope-check pass first.
-// Tone/format for a decline follow TONE_GUIDE and RESPONSE_FORMAT_GUIDE above; not restated here.
+// What this assistant can/can't help with, decided in-line by the same call that acts rather
+// than a separate scope-check pass. Decline tone/format follow TONE_GUIDE/RESPONSE_FORMAT_GUIDE.
 export const SCOPE_GUIDE = `
   A message that's just vague, terse, or ambiguous about which email(s) it means (e.g. "show me
   1") is still in scope — resolve that yourself rather than declining over it.
@@ -93,9 +91,8 @@ export const SYSTEM_PROMPT = `
   ${TOOL_DESCRIPTIONS_NOTE}
 `;
 
-// Appended fresh per call (not baked into SYSTEM_PROMPT) so date/weekday reasoning — relative
-// filters in get_emails/count_emails, and the urgency guide's "imminent deadline" — stays live
-// across a long-running dev server instead of freezing at import time.
+// Appended fresh per call, not baked into SYSTEM_PROMPT, so date/weekday reasoning (relative
+// filters, "imminent deadline") stays live instead of freezing at import time.
 export function currentDateLine(now = new Date()): string {
   const weekday = now.toLocaleDateString("en-US", {
     weekday: "long",

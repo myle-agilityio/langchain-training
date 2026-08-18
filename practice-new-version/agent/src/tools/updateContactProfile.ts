@@ -6,9 +6,8 @@ import { CONTACT_PROFILE_NAMESPACE, TOOL } from "@/constants/index";
 import { listEmails } from "@/db/index";
 import type { ContactProfileValue } from "@/types/index";
 
-// Resolves sender against real inbox data itself (like classify_emails resolves ids) instead of
-// trusting a model-guessed address — "marcus.mohr@example.com" vs the real
-// "marcus.mohr52@yahoo.com" would silently file the memory where it can never be found again.
+// Resolves sender against real inbox data (like classify_emails resolves ids) instead of trusting
+// a model-guessed address — a wrong guess would silently file the memory where it's never found.
 export const update_contact_profile = tool(
   async (
     input: { sender: string; tone?: string; facts?: string[] },

@@ -20,7 +20,5 @@ export const FILTER_DESCRIPTION =
   "today's date before calling). There is no field for the sender's role (parent/student/staff) " +
   "— infer that from sender/body instead. Omit filter for the whole inbox.";
 
-// Caps how many classify_emails calls run at once — classifying a large batch (e.g. "classify
-// all 100 emails") would otherwise fire that many concurrent model calls and risk rate-limiting
-// the caller's own BYOK OpenAI key.
+// Caps concurrent classify_emails model calls to avoid rate-limiting the caller's BYOK key.
 export const CLASSIFY_CONCURRENCY = 5;

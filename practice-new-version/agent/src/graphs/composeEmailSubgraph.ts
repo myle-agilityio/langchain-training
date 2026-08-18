@@ -10,12 +10,8 @@ import {
 } from "@/nodes/index";
 import { ComposeEmailState } from "@/state/index";
 
-// Prompt-chaining pipeline; fixed nodes guarantee classify → (research) → draft → compliance
-// check on every reply.
-//
-//   triage ──(needs research)──▶ research ──▶ write_draft ──▶ check_compliance ──▶ request_approval ──▶ (interrupt)
-//      ├────(no research needed)──────────────▶ write_draft
-//      └────(email not found)───────────────────────────────────────────────────▶ END
+// Prompt-chaining pipeline: triage → (research?) → write_draft → check_compliance →
+// request_approval → interrupt. Skips research when unneeded; ends early if not found.
 const composeEmailWorkflow = new StateGraph(ComposeEmailState)
   .setNodeDefaults({
     retryPolicy: { maxAttempts: 3 },

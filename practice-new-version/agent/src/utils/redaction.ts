@@ -8,9 +8,7 @@ const ADDRESS_RE =
 const PHONE_RE = /(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]\d{3}[-.\s]\d{4}\b/g;
 
 // Strips emails/addresses/phone numbers before text reaches any model call — renderEmail is the
-// one place every prompt (classify, research, draft) pulls email content from, so scrubbing here
-// covers all of them. The model only ever needs the internal email id (from state), never the
-// sender's real contact details, to do its job.
+// one place every prompt pulls email content from, so scrubbing here covers all of them.
 export function redactSensitiveInfo(text: string): string {
   return text
     .replace(EMAIL_RE, "[redacted email]")
@@ -30,11 +28,8 @@ export function renderEmail(email: Email): string {
   );
 }
 
-// get_emails' structured counterpart to renderEmail — the tool result becomes a ToolMessage that
-// stays in conversation history and is replayed to the model on every later turn, so it needs the
-// same scrubbing renderEmail gives one-shot prompts. Keeps the sender's name (the model matches
-// senders by name) but drops the address; the UI/http routes read listEmails directly and stay
-// unredacted since the teacher needs real contact details.
+// get_emails' structured counterpart to renderEmail — the ToolMessage stays in history and is
+// replayed every turn, so it needs the same scrubbing. Keeps the sender's name, drops the address.
 export function redactEmailForModel(email: Email): Omit<Email, "from"> & { from: { name: string } } {
   const { from, ...rest } = email;
   return {

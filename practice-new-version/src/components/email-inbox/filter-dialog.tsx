@@ -19,11 +19,8 @@ const STATUS_LABEL: Record<EmailStatus, string> = {
   flagged_for_followup: "Follow up",
 };
 
-// Native <select>/<option> popups need an explicit, opaque background + text color — they don't
-// reliably inherit CSS custom properties the way the closed control does, so "bg-transparent"
-// left the dropdown list's background at the browser default (often white) while the text still
-// inherited --foreground (white in dark mode): white-on-white, invisible. color-scheme tells the
-// browser which native palette to fall back to for whatever our CSS doesn't reach.
+// Native <select> popups don't reliably inherit CSS custom properties like the closed control
+// does — "bg-transparent" left white-on-white in dark mode; color-scheme fixes the fallback.
 const selectClassName =
   "flex h-9 w-full rounded-[var(--radius)] border border-[var(--input)] bg-[var(--background)] " +
   "text-[var(--foreground)] px-3 text-sm shadow-sm transition-colors focus-visible:outline-none " +

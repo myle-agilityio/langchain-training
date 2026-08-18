@@ -11,9 +11,8 @@ import { FilterDialog } from "./filter-dialog";
 export function EmailInbox() {
   const { emails, isLoading, isRefreshing, refresh, patchEmail, patchEmails } = useSharedInbox();
   const { agent } = useAgent();
-  // Run through the CopilotKit core, not agent.runAgent() directly: the core's runAgent is the
-  // same interrupt-aware path CopilotChat uses, so compose_reply's pause is routed to
-  // useEmailAgent's useInterrupt card rather than left unhandled.
+  // Run through the CopilotKit core, not agent.runAgent() directly — same interrupt-aware path
+  // CopilotChat uses, so compose_reply's pause routes to useEmailAgent's useInterrupt card.
   const { copilotkit } = useCopilotKit();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filters, setFilters] = useState<EmailFilters>(EMPTY_FILTERS);
@@ -121,9 +120,8 @@ export function EmailInbox() {
     patchEmail(email.id, { status: email.status === "unread" ? "read" : "unread" });
   };
 
-  // Bulk actions only ever move emails between unread and read — never touch replied/flagged
-  // ones, so clicking either button can't silently erase a reply/follow-up badge in bulk. Acts
-  // on visibleEmails (post-filter), not the whole inbox, so "mark all" means "all of these".
+  // Bulk actions only move emails between unread/read — never touch replied/flagged ones, so
+  // they can't erase those badges. Acts on visibleEmails (post-filter), not the whole inbox.
   const markAllRead = () => {
     const ids = visibleEmails.filter((e) => e.status === "unread").map((e) => e.id);
     patchEmails(ids, { status: "read" });
@@ -154,10 +152,8 @@ export function EmailInbox() {
     copilotkit.runAgent({ agent });
   };
 
-  // Block a second draft while the agent is mid-run OR paused on an unresolved interrupt. Can't
-  // use agent.pendingInterrupts here — the LangGraph bridge signals interrupts via a CUSTOM
-  // "on_interrupt" event (see use-email-agent.tsx), never via RUN_FINISHED's outcome field, so
-  // that property never populates. Track the same event ourselves instead.
+  // Block a second draft while mid-run or paused on an interrupt. agent.pendingInterrupts never
+  // populates — the LangGraph bridge signals via a CUSTOM "on_interrupt" event instead.
   const [awaitingApproval, setAwaitingApproval] = useState(false);
   useEffect(() => {
     const subscription = agent.subscribe({

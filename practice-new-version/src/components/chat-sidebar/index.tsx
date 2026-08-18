@@ -13,9 +13,8 @@ const DEFAULT_WIDTH = 420;
 const MIN_WIDTH = 320;
 const MAX_WIDTH = 640;
 
-// Collapsible, resizable chat sidebar on the right; EmailInbox is the main/left content now, so
-// this no longer needs to compete for width via ExampleLayout's old resizable 50/50 split — it
-// just needs its own drag handle on its left edge.
+// Collapsible, resizable chat sidebar on the right; EmailInbox is now the main/left content,
+// so this just needs its own drag handle on its left edge, not a 50/50 split.
 export function ChatSidebar({ threadsMenu, children }: ChatSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [width, setWidth] = useState(DEFAULT_WIDTH);
@@ -27,9 +26,8 @@ export function ChatSidebar({ threadsMenu, children }: ChatSidebarProps) {
     if (window.matchMedia("(max-width: 1023px)").matches) setCollapsed(true);
   }, []);
 
-  // The sidebar's right edge sits flush against the viewport edge (it's the last flex child in
-  // page.tsx, no gutter), so its width is just how far the drag point is from that edge. Also
-  // keeps at least 320px for the inbox, so dragging can't squeeze it away entirely.
+  // The sidebar's right edge sits flush against the viewport edge, so width is just how far the
+  // drag point is from that edge. Also keeps at least 320px for the inbox.
   const clampWidth = useCallback(
     (px: number) => Math.min(MAX_WIDTH, window.innerWidth - 320, Math.max(MIN_WIDTH, px)),
     [],

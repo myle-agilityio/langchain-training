@@ -12,12 +12,8 @@ export class MissingApiKeyError extends Error {
   }
 }
 
-// BYOK: the browser sends the visitor's own key per request (layout.tsx's <CopilotKit
-// headers={...}>); CopilotKit forwards arbitrary client headers into
-// config.configurable.copilotkit_forwarded_headers automatically, no runtime-side wiring
-// needed. Every model call below pulls the key from here instead of process.env.
-// Falls back to process.env.OPENAI_API_KEY when no header is present (e.g. running the graph
-// directly from LangSmith Studio, which bypasses CopilotKit and never sets the header).
+// BYOK: CopilotKit forwards the visitor's key via config.configurable.copilotkit_forwarded_headers.
+// Falls back to process.env.OPENAI_API_KEY when unset (e.g. running from LangSmith Studio).
 export function getApiKeyFromConfig(config: LangGraphRunnableConfig): string {
   const headers = config.configurable?.copilotkit_forwarded_headers as
     | Record<string, string>
@@ -57,10 +53,8 @@ export const hidden = (config: LangGraphRunnableConfig) =>
     emitToolCalls: false,
   });
 
-// Server-side key used ONLY to seed the shared knowledge base once at agent startup
-// (rag/index.ts's ensureIndexed) — that runs before any visitor request exists, so there's no
-// config to pull a key from. Every per-request call above uses the visitor's own key instead;
-// this one may be left unset once the KB is already seeded (ensureIndexed no-ops if so).
+// Server-side key used ONLY to seed the shared KB at startup (rag/index.ts's ensureIndexed),
+// before any visitor request exists to pull a key from. May be unset once already seeded.
 export function getServerEmbeddings(): OpenAIEmbeddings | undefined {
   const apiKey = process.env.OPENAI_API_KEY;
   return apiKey ? new OpenAIEmbeddings({ model: EMBEDDING_MODEL, apiKey }) : undefined;

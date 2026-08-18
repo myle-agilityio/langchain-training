@@ -11,9 +11,8 @@ export function findReplyCall(messages: BaseMessage[]) {
   return undefined;
 }
 
-// What the teacher actually said about this reply — the original request and, on a redraft, the
-// "try again, but..." note after a rejection. write_draft otherwise only sees the email and
-// researched context, never the teacher's own instructions, so a redraft repeats the same draft.
+// What the teacher actually said about this reply — original request, plus the "try again,
+// but..." note on a redraft. Without it, write_draft has no instructions and just repeats itself.
 export function collectRevisionNotes(messages: BaseMessage[], emailId: string): string {
   const callIndices = messages.reduce<number[]>((acc, message, i) => {
     if (!AIMessage.isInstance(message)) return acc;
