@@ -42,11 +42,8 @@ function firstUserMessageText(agent: AgentWithMessages): string | undefined {
   return undefined;
 }
 
-// Stands in for CopilotKit's <CopilotThreadsDrawer>/useThreads, which require Intelligence
-// mode (see vite.config.ts's VITE_COPILOTKIT_THREADS_ENABLED and the
-// COPILOTKIT_LICENSE_TOKEN note in .env — that transport currently drops runs in production).
-// Thread history itself already survives via the graph's Postgres checkpointer; this only adds
-// the list/rename/delete UI on top, backed by a lightweight chat_threads table.
+// Stands in for CopilotKit's <CopilotThreadsDrawer>/useThreads (Intelligence mode drops runs
+// in prod). History survives via the Postgres checkpointer; this just adds list/rename/delete UI.
 export function SelfManagedThreadsProvider({ children }: { children: ReactNode }) {
   // updates: [] — only need the agent handle to subscribe to run completion below.
   const { agent } = useAgent({ updates: [] });
@@ -77,10 +74,8 @@ export function SelfManagedThreadsProvider({ children }: { children: ReactNode }
   const configRef = useRef(config);
   configRef.current = config;
 
-  // Upsert the active thread every time a run on it finishes: creates its row on first use
-  // (so an unused "+ New chat" never litters the list), titling it from the first user
-  // message server-side, and bumps updated_at on every later turn so the list stays sorted
-  // by actual activity.
+  // Upsert the active thread when a run finishes: creates its row on first use (so an unused
+  // "+ New chat" never litters the list) and bumps updated_at so the list stays sorted by activity.
   useEffect(() => {
     const { unsubscribe } = agent.subscribe({
       onRunFinalized: () => {

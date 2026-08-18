@@ -32,9 +32,8 @@ async function loadFile(filePath: string): Promise<Document[]> {
   }
 }
 
-// Loads every file in `dir` (PDF/DOCX/DOC/CSV), tags each with a display title derived from its
-// filename, and splits into chunks sized for embedding — mirrors the seed articles' {title, content}
-// shape closely enough that searchKnowledge (rag/index.ts) needs no changes to read either source.
+// Loads every file in `dir` (PDF/DOCX/DOC/CSV), titles each from its filename, and chunks for
+// embedding — mirrors the seed articles' {title, content} shape so searchKnowledge needs no changes.
 export async function loadDirectoryAsChunks(dir: string): Promise<Document[]> {
   const files = await readdir(dir);
   const docs: Document[] = [];

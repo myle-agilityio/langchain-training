@@ -20,9 +20,8 @@ function getVectorStore(embeddings: OpenAIEmbeddings): Promise<PGVectorStore> {
   return PGVectorStore.initialize(embeddings, { pool: getPool(), tableName: KB_TABLE });
 }
 
-// Embed the seed articles once; a non-empty table means someone already seeded. Runs at agent
-// startup, before any visitor request/config exists, so it uses the server-side key
-// (config/model.ts's getServerEmbeddings) rather than a visitor's BYOK key.
+// Embeds the seed articles once (a non-empty table means already seeded). Runs at agent
+// startup, before any request exists, so it uses the server-side key, not a visitor's BYOK key.
 export async function ensureIndexed(): Promise<void> {
   const { rows } = await getPool().query<{ n: number }>(
     `SELECT count(*)::int AS n FROM ${KB_TABLE}`,

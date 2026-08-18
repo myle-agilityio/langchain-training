@@ -14,9 +14,8 @@ export function needsResearchPrompt(email: Email): string {
   );
 }
 
-// Used by checkCompliancePrompt — a guardrail check run on every draft before the approval card,
-// independent of draftPrompt's own "never promise a grade change" instruction (defense in depth:
-// this catches it even if the drafting call drifts).
+// Used by checkCompliancePrompt, a guardrail run on every draft before the approval card —
+// defense in depth alongside draftPrompt's own "never promise a grade change" instruction.
 const COMPLIANCE_GUIDE = `
   - Promises, guarantees, or states as already decided a grade change, exception, or reversal of
     a school decision — offer the review/appeal process instead, never the outcome.

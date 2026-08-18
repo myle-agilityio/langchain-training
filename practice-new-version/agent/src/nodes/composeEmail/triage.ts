@@ -10,9 +10,8 @@ import {
 } from "@/types/index";
 import { fetchEmailById, findReplyCall } from "@/utils/index";
 
-// triage — resolve the email, classify it (via classify_emails — skipped if already on file),
-// decide whether drafting needs KB research. A fixed node, not a tool, so the model can't skip
-// classification on a bare "reply this".
+// triage — resolve the email, classify it (skipped if already on file), decide if drafting
+// needs KB research. A fixed node, not a tool, so the model can't skip classification.
 export async function triage(
   state: ComposeEmailStateShape,
   config: LangGraphRunnableConfig,

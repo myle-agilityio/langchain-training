@@ -27,9 +27,8 @@ export const demonstrationCatalogDefinitions = {
     }),
   },
 
-  // Text: removed — the basic catalog's Text uses DynamicStringSchema
-  // which supports path bindings (e.g. { path: "flights[*].airline" }).
-  // Overriding it with z.string() breaks fixed-schema data binding.
+  // Text: removed — the basic catalog's Text uses DynamicStringSchema for path bindings
+  // (e.g. { path: "flights[*].airline" }); overriding it with z.string() breaks that.
 
   Row: {
     description: "Horizontal layout container.",
