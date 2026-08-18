@@ -2,16 +2,13 @@
 import { tool, type ToolRuntime } from "@langchain/core/tools";
 import { SystemMessage } from "@langchain/core/messages";
 import { ChatOpenAI } from "@langchain/openai";
+import { CUSTOM_CATALOG_ID } from "@/constants/index";
 import {
   createSurface,
   render,
   updateComponents,
   updateDataModel,
 } from "@/utils/a2ui";
-
-// Must match createCatalog's catalogId in src/app/declarative-generative-ui/renderers.tsx —
-// the frontend only knows how to render surfaces tagged with this id.
-const CUSTOM_CATALOG_ID = "copilotkit://app-dashboard-catalog";
 
 const renderA2uiSchema = z.object({
   surfaceId: z.string(),

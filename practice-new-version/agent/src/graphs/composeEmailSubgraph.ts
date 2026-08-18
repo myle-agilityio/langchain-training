@@ -7,7 +7,7 @@ import {
   writeDraft,
   checkCompliance,
   requestApproval,
-} from "@/nodes/composeEmail";
+} from "@/nodes/index";
 import { ComposeEmailState } from "@/state/index";
 
 // Prompt-chaining pipeline; fixed nodes guarantee classify → (research) → draft → compliance

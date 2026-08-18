@@ -1,5 +1,6 @@
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
+import { copilotkitCustomizeConfig } from "@copilotkit/sdk-js/langgraph";
 
 export const MODEL = "gpt-4o-mini";
 export const EMBEDDING_MODEL = "text-embedding-3-small";
@@ -47,6 +48,14 @@ export function getPlainModelForConfig(config: LangGraphRunnableConfig): ChatOpe
 export function getEmbeddingsForConfig(config: LangGraphRunnableConfig): OpenAIEmbeddings {
   return new OpenAIEmbeddings({ model: EMBEDDING_MODEL, apiKey: getApiKeyFromConfig(config) });
 }
+
+// These internal structured-output calls are classifier/drafting steps, not chat replies — hide
+// their forced tool calls from the chat UI.
+export const hidden = (config: LangGraphRunnableConfig) =>
+  copilotkitCustomizeConfig(config, {
+    emitMessages: false,
+    emitToolCalls: false,
+  });
 
 // Server-side key used ONLY to seed the shared knowledge base once at agent startup
 // (rag/index.ts's ensureIndexed) — that runs before any visitor request exists, so there's no
