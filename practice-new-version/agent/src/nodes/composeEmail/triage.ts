@@ -8,8 +8,7 @@ import {
   NeedsResearchSchema,
   type ComposeEmailStateShape,
 } from "@/types/index";
-import { findReplyCall } from "@/utils/index";
-import { fetchEmailById } from "./shared";
+import { fetchEmailById, findReplyCall } from "@/utils/index";
 
 // triage — resolve the email, classify it (via classify_emails — skipped if already on file),
 // decide whether drafting needs KB research. A fixed node, not a tool, so the model can't skip

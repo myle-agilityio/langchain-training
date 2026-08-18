@@ -2,7 +2,7 @@ import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
 import { searchKnowledge } from "@/rag/index";
 import type { ComposeEmailStateShape, KBArticle } from "@/types/index";
-import { fetchEmailById } from "./shared";
+import { fetchEmailById } from "@/utils/index";
 
 // research — search_knowledge_base for the policy the draft must not invent.
 export async function research(
