@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { BaseMessage } from "@langchain/core/messages";
 
 export const TopicSchema = z.enum([
   "question",
@@ -118,3 +119,15 @@ export interface KBArticle {
   tags: string[];
   content: string;
 }
+
+export type CopilotKitEntry = { description?: string; value?: unknown };
+export type CopilotKitAction = {
+  name: string;
+  description?: string;
+  parameters?: unknown;
+};
+export type AgentStateShape = {
+  messages: BaseMessage[];
+  blocked?: boolean;
+  copilotkit?: { context?: CopilotKitEntry[]; actions?: CopilotKitAction[] };
+};
