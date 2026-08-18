@@ -1,7 +1,7 @@
 import { ToolMessage } from "@langchain/core/messages";
 import { END, type LangGraphRunnableConfig } from "@langchain/langgraph";
 
-import { getPlainModelForConfig } from "@/config/model";
+import { getPlainModelForConfig, hidden } from "@/config/model";
 import { needsResearchPrompt } from "@/prompts/index";
 import { classifyEmail } from "@/tools/index";
 import {
@@ -9,7 +9,7 @@ import {
   type ComposeEmailStateShape,
 } from "@/types/index";
 import { findReplyCall } from "@/utils/index";
-import { fetchEmailById, hidden } from "./shared";
+import { fetchEmailById } from "./shared";
 
 // triage — resolve the email, classify it (via classify_emails — skipped if already on file),
 // decide whether drafting needs KB research. A fixed node, not a tool, so the model can't skip
