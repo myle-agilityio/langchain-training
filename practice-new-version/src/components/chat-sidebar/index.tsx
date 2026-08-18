@@ -22,7 +22,7 @@ export function ChatSidebar({ threadsMenu, children }: ChatSidebarProps) {
   const [isResizing, setIsResizing] = useState(false);
 
   // Mobile starts collapsed so the inbox is what teachers land on — matches the old default
-  // "app" mode. Effect-based (like ThemeProvider) to avoid a hydration mismatch.
+  // "app" mode. Effect-based (like useSyncTheme) to avoid a hydration mismatch.
   useEffect(() => {
     if (window.matchMedia("(max-width: 1023px)").matches) setCollapsed(true);
   }, []);

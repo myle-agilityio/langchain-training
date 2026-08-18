@@ -1,17 +1,21 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { useEffect } from "react";
+import { create } from "zustand";
 
 type Theme = "dark" | "light" | "system";
 
-const ThemeContext = createContext<{
+interface ThemeState {
   theme: Theme;
-  setTheme: (t: Theme) => void;
-}>({
-  theme: "system",
-  setTheme: () => {},
-});
+  setTheme: (theme: Theme) => void;
+}
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("system");
+export const useTheme = create<ThemeState>((set) => ({
+  theme: "system",
+  setTheme: (theme) => set({ theme }),
+}));
+
+// Applies the active theme to <html>; call once near the app root.
+export function useSyncTheme() {
+  const theme = useTheme((state) => state.theme);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -30,12 +34,4 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     root.classList.add(theme);
   }, [theme]);
-
-  return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
 }
-
-export const useTheme = () => useContext(ThemeContext);

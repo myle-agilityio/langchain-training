@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Mail, Check, X, TriangleAlert } from "lucide-react";
-import { useSharedInbox } from "@/hooks/use-shared-inbox";
+import { useSharedInbox } from "@/stores/use-shared-inbox";
 
 export interface EmailReplyCardProps {
   status: "inProgress" | "executing" | "complete";

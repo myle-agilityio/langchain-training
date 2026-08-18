@@ -1,26 +1,16 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useEffect, useRef } from "react";
+import { create } from "zustand";
 import { useAgent, useCopilotChatConfiguration } from "@copilotkit/react-core/v2";
-import { readStoredOpenAiKey } from "@/hooks/use-openai-key";
+import { readStoredOpenAiKey } from "@/stores/use-openai-key";
 import type { ChatThread } from "@/types/thread";
 
-interface SelfManagedThreadsValue {
+interface SelfManagedThreadsState {
   threads: ChatThread[];
   isLoading: boolean;
   refresh: () => Promise<void>;
   renameThread: (id: string, title: string) => Promise<void>;
   deleteThread: (id: string) => Promise<void>;
 }
-
-const SelfManagedThreadsContext = createContext<SelfManagedThreadsValue | null>(null);
 
 // Loose shape instead of importing AbstractAgent/Message from @ag-ui/client directly — that
 // package is only a transitive dependency here, not one of ours to import from.
@@ -47,28 +37,61 @@ function firstUserMessageText(agent: AgentWithMessages): string | undefined {
 // COPILOTKIT_LICENSE_TOKEN note in .env — that transport currently drops runs in production).
 // Thread history itself already survives via the graph's Postgres checkpointer; this only adds
 // the list/rename/delete UI on top, backed by a lightweight chat_threads table.
-export function SelfManagedThreadsProvider({ children }: { children: ReactNode }) {
-  // updates: [] — only need the agent handle to subscribe to run completion below.
-  const { agent } = useAgent({ updates: [] });
-  const config = useCopilotChatConfiguration();
-  const [threads, setThreads] = useState<ChatThread[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export const useSelfManagedThreads = create<SelfManagedThreadsState>((set, get) => ({
+  threads: [],
+  isLoading: true,
 
-  const refresh = useCallback(async () => {
+  refresh: async () => {
     try {
       const res = await fetch("/api/threads");
       if (!res.ok) throw new Error(`GET /api/threads failed (${res.status})`);
       const data = (await res.json()) as { threads: ChatThread[] };
-      setThreads(data.threads);
+      set({ threads: data.threads });
     } catch (error) {
       console.error("Failed to refresh threads:", error);
     } finally {
-      setIsLoading(false);
+      set({ isLoading: false });
     }
-  }, []);
+  },
 
-  const refreshRef = useRef(refresh);
-  refreshRef.current = refresh;
+  renameThread: async (id, title) => {
+    const previous = get().threads;
+    set({ threads: previous.map((t) => (t.id === id ? { ...t, title } : t)) });
+    try {
+      const res = await fetch("/api/threads", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, title }),
+      });
+      if (!res.ok) throw new Error(`PATCH /api/threads failed (${res.status})`);
+      await get().refresh();
+    } catch (error) {
+      console.error(`Failed to rename thread ${id}, reverting:`, error);
+      set({ threads: previous });
+    }
+  },
+
+  deleteThread: async (id) => {
+    const previous = get().threads;
+    set({ threads: previous.filter((t) => t.id !== id) });
+    try {
+      const res = await fetch(`/api/threads?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(`DELETE /api/threads failed (${res.status})`);
+    } catch (error) {
+      console.error(`Failed to delete thread ${id}, reverting:`, error);
+      set({ threads: previous });
+    }
+  },
+}));
+
+// Keeps the store in sync with the agent's run lifecycle. Needs useAgent()/
+// useCopilotChatConfiguration(), which only resolve inside CopilotChatConfigurationProvider —
+// call this once from a component in that subtree.
+export function useSyncSelfManagedThreadsWithAgent() {
+  // updates: [] — only need the agent handle to subscribe to run completion below.
+  const { agent } = useAgent({ updates: [] });
+  const config = useCopilotChatConfiguration();
+  const refresh = useSelfManagedThreads((state) => state.refresh);
 
   useEffect(() => {
     refresh();
@@ -99,63 +122,9 @@ export function SelfManagedThreadsProvider({ children }: { children: ReactNode }
             if (!res.ok) throw new Error(`POST /api/threads failed (${res.status})`);
           })
           .catch((error) => console.error("Failed to save thread:", error))
-          .finally(() => refreshRef.current());
+          .finally(() => refresh());
       },
     });
     return unsubscribe;
-  }, [agent]);
-
-  const renameThread = useCallback(async (id: string, title: string) => {
-    let previous: ChatThread[] = [];
-    setThreads((current) => {
-      previous = current;
-      return current.map((t) => (t.id === id ? { ...t, title } : t));
-    });
-    try {
-      const res = await fetch("/api/threads", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, title }),
-      });
-      if (!res.ok) throw new Error(`PATCH /api/threads failed (${res.status})`);
-      await refreshRef.current();
-    } catch (error) {
-      console.error(`Failed to rename thread ${id}, reverting:`, error);
-      setThreads(previous);
-    }
-  }, []);
-
-  const deleteThread = useCallback(async (id: string) => {
-    let previous: ChatThread[] = [];
-    setThreads((current) => {
-      previous = current;
-      return current.filter((t) => t.id !== id);
-    });
-    try {
-      const res = await fetch(`/api/threads?id=${encodeURIComponent(id)}`, { method: "DELETE" });
-      if (!res.ok) throw new Error(`DELETE /api/threads failed (${res.status})`);
-    } catch (error) {
-      console.error(`Failed to delete thread ${id}, reverting:`, error);
-      setThreads(previous);
-    }
-  }, []);
-
-  const value = useMemo(
-    () => ({ threads, isLoading, refresh, renameThread, deleteThread }),
-    [threads, isLoading, refresh, renameThread, deleteThread],
-  );
-
-  return (
-    <SelfManagedThreadsContext.Provider value={value}>
-      {children}
-    </SelfManagedThreadsContext.Provider>
-  );
-}
-
-export function useSelfManagedThreads(): SelfManagedThreadsValue {
-  const ctx = useContext(SelfManagedThreadsContext);
-  if (!ctx) {
-    throw new Error("useSelfManagedThreads must be used within a SelfManagedThreadsProvider");
-  }
-  return ctx;
+  }, [agent, refresh]);
 }
