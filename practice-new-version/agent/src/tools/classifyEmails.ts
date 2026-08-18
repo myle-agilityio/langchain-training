@@ -4,7 +4,7 @@ import { copilotkitCustomizeConfig } from "@copilotkit/sdk-js/langgraph";
 import { z } from "zod";
 
 import { getPlainModelForConfig } from "@/config/model";
-import { TOOL } from "@/constants/index";
+import { CLASSIFY_CONCURRENCY, TOOL } from "@/constants/index";
 import { getEmail, updateEmail } from "@/db/index";
 import { classifyPrompt } from "@/prompts/index";
 import { ClassificationSchema } from "@/types/index";
@@ -39,11 +39,6 @@ export async function classifyEmail(
     };
   }
 }
-
-// Caps how many classifications run at once — classifying a large batch (e.g. "classify all 100
-// emails") would otherwise fire that many concurrent model calls and risk rate-limiting the
-// caller's own BYOK OpenAI key.
-const CLASSIFY_CONCURRENCY = 5;
 
 async function classifyEmailsBatched(
   ids: string[],

@@ -1,11 +1,10 @@
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 
-import { TOOL } from "@/constants/index";
+import { FILTER_DESCRIPTION, TOOL } from "@/constants/index";
 import { listEmails } from "@/db/index";
 import { EmailFilterSchema } from "@/types/index";
 import { redactEmailForModel } from "@/utils/index";
-import { FILTER_DESCRIPTION } from "./const";
 
 export const get_emails = tool(
   async (input: { filter?: z.infer<typeof EmailFilterSchema> }) => {

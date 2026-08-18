@@ -1,6 +1,4 @@
-
-export const A2UI_OPERATIONS_KEY = "a2ui_operations";
-export const BASIC_CATALOG_ID = "copilotkit://basic-catalog";
+import { A2UI_OPERATIONS_KEY, BASIC_CATALOG_ID } from "@/constants/index";
 
 export type A2UIOperation = Record<string, unknown>;
 

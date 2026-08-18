@@ -1,10 +1,9 @@
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 
-import { TOOL } from "@/constants/index";
+import { FILTER_DESCRIPTION, TOOL } from "@/constants/index";
 import { aggregateEmails } from "@/db/index";
 import { EmailFilterSchema, EmailGroupBySchema } from "@/types/index";
-import { FILTER_DESCRIPTION } from "./const";
 
 export const count_emails = tool(
   async (input: {
