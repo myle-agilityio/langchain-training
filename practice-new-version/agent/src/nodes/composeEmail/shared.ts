@@ -1,25 +1,8 @@
-import type { BaseMessage } from "@langchain/core/messages";
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 import { copilotkitCustomizeConfig } from "@copilotkit/sdk-js/langgraph";
 
 import { getEmail } from "@/db/index";
-import type {
-  ComplianceCheck,
-  Draft,
-  Email,
-  RejectedDraft,
-} from "@/types/index";
-
-export type State = {
-  messages: BaseMessage[];
-  emailId: string;
-  needsResearch: boolean;
-  kbContext: string;
-  senderContext: string;
-  draft?: Draft;
-  compliance?: ComplianceCheck;
-  lastRejectedDraft: RejectedDraft | null;
-};
+import type { Email } from "@/types/index";
 
 // These internal structured-output calls are classifier/drafting steps, not chat replies — hide
 // their forced tool calls from the chat UI.

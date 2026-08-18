@@ -2,12 +2,11 @@ import { ToolMessage } from "@langchain/core/messages";
 import { interrupt } from "@langchain/langgraph";
 
 import { COMPOSE_REPLY_ACTION } from "@/constants/index";
-import type { RejectedDraft } from "@/types/index";
+import type { ComposeEmailStateShape, RejectedDraft } from "@/types/index";
 import { findReplyCall } from "@/utils/index";
-import type { State } from "./shared";
 
 // Pauses for the teacher's approval card, then answers the dangling reply_to_email tool call with their decision.
-export async function requestApproval(state: State) {
+export async function requestApproval(state: ComposeEmailStateShape) {
   const draft = state.draft!;
   const args = {
     id: state.emailId,

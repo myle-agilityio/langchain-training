@@ -4,14 +4,20 @@ import { END, type LangGraphRunnableConfig } from "@langchain/langgraph";
 import { getPlainModelForConfig } from "@/config/model";
 import { needsResearchPrompt } from "@/prompts/index";
 import { classifyEmail } from "@/tools/index";
-import { NeedsResearchSchema } from "@/types/index";
+import {
+  NeedsResearchSchema,
+  type ComposeEmailStateShape,
+} from "@/types/index";
 import { findReplyCall } from "@/utils/index";
-import { fetchEmailById, hidden, type State } from "./shared";
+import { fetchEmailById, hidden } from "./shared";
 
 // triage — resolve the email, classify it (via classify_emails — skipped if already on file),
 // decide whether drafting needs KB research. A fixed node, not a tool, so the model can't skip
 // classification on a bare "reply this".
-export async function triage(state: State, config: LangGraphRunnableConfig) {
+export async function triage(
+  state: ComposeEmailStateShape,
+  config: LangGraphRunnableConfig,
+) {
   const call = findReplyCall(state.messages);
   const id = (call?.args as { id?: string } | undefined)?.id ?? "";
   const email = id ? await fetchEmailById(id) : null;
@@ -42,7 +48,7 @@ export async function triage(state: State, config: LangGraphRunnableConfig) {
   return { emailId: email.id, needsResearch };
 }
 
-export function afterTriage(state: State) {
+export function afterTriage(state: ComposeEmailStateShape) {
   if (!state.emailId) return END;
   return state.needsResearch ? "research" : "write_draft";
 }
