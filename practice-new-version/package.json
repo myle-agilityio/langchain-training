@@ -11,7 +11,9 @@
     "typecheck": "tsc --noEmit",
     "build": "vite build",
     "build:agent": "pnpm --filter agent build",
-    "dev:infra": "node scripts/copilotkit-dev-infra.mjs"
+    "dev:infra": "node scripts/copilotkit-dev-infra.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@copilotkit/a2ui-renderer": "1.62.3",
@@ -37,6 +39,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^5",
+    "prettier": "^3.9.6",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vite": "^7"

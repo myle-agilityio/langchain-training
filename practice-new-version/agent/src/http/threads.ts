@@ -59,9 +59,8 @@ threadsApp.get("/", async (c) => {
   return c.json({ threads });
 });
 
-// Upsert: creates the row the first time a thread is touched (e.g. a run finalizing on a
-// brand-new thread), generating its title from firstMessage — and just bumps updated_at on
-// every later touch, without ever clobbering a title (LLM-generated or teacher-renamed).
+// Upsert: creates the row (title from firstMessage) on a thread's first touch, else just bumps
+// updated_at — never clobbers an existing title (LLM-generated or teacher-renamed).
 threadsApp.post("/", async (c) => {
   await ensureThreadsSchema();
   let body: { id: string; firstMessage?: string };

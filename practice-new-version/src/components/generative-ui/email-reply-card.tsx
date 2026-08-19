@@ -28,18 +28,15 @@ export function EmailReplyCard({
   const [body, setBody] = useState(draftBody);
   const [decision, setDecision] = useState<"approve" | "reject" | null>(null);
 
-  // The tool call's args arrive empty on the first ("inProgress") render and only populate at
-  // "executing" — useState's initializer only runs once, so without this the fields would stay
-  // permanently blank.
+  // Tool args arrive empty on the first ("inProgress") render, only populating at "executing" —
+  // useState's initializer runs once, so without this the fields would stay blank.
   useEffect(() => {
     setSubject(draftSubject);
     setBody(draftBody);
   }, [draftSubject, draftBody]);
 
-  // The interrupt's resume doesn't replay the backend tool to completion, so this card — not
-  // the backend — applies the state change, via patchEmail. The respond() payload carries an
-  // instruction because the model gets a turn either way; left bare it narrates the whole job
-  // back, all of which this card is already showing on screen.
+  // The interrupt's resume doesn't replay the backend tool, so this card applies the state
+  // change via patchEmail. respond()'s instruction stops the model narrating what's on screen.
   const handleApprove = () => {
     setDecision("approve");
     patchEmail(id, {
@@ -58,10 +55,8 @@ export function EmailReplyCard({
     );
   };
 
-  // `respond` is what clears the pending interrupt, and CopilotKit answers it by continuing the
-  // run — there's no exposed way to resolve an interrupt without the agent getting another
-  // turn. A bare `{"decision":"reject"}` reads to the model as "try again", and it would
-  // immediately produce a second card.
+  // `respond` clears the interrupt by continuing the run — no way to resolve one without the
+  // agent getting another turn. A bare `{"decision":"reject"}` reads as "try again" to the model.
   const handleReject = () => {
     setDecision("reject");
     respond?.(
@@ -152,7 +147,9 @@ export function EmailReplyCard({
               <div className="flex gap-2 rounded-[var(--radius)] border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-400">
                 <TriangleAlert className="h-4 w-4 shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-medium">Compliance check flagged this draft</p>
+                  <p className="font-medium">
+                    Compliance check flagged this draft
+                  </p>
                   <ul className="list-disc pl-4 mt-1 space-y-0.5">
                     {compliance.violations.map((v) => (
                       <li key={v}>{v}</li>

@@ -1,0 +1,3 @@
+{
+  "practice-new-version/**/*.{js,jsx,ts,tsx,json,css,md}": "npx --prefix practice-new-version prettier --write"
+}

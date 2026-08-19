@@ -1,25 +1,38 @@
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
-import { useAgent, useAgentContext, useCopilotKit, useFrontendTool } from "@copilotkit/react-core/v2";
+import {
+  useAgent,
+  useAgentContext,
+  useCopilotKit,
+  useFrontendTool,
+} from "@copilotkit/react-core/v2";
 import type { Email } from "@/types/email";
 import { useSharedInbox } from "@/stores/use-shared-inbox";
-import { EMPTY_FILTERS, filterEmails, hasActiveFilters, type EmailFilters } from "@/lib/email-filters";
+import {
+  EMPTY_FILTERS,
+  filterEmails,
+  hasActiveFilters,
+  type EmailFilters,
+} from "@/lib/email-filters";
 import { InboxList } from "./inbox-list";
 import { EmailDetail } from "./email-detail";
 import { FilterDialog } from "./filter-dialog";
 
 export function EmailInbox() {
-  const { emails, isLoading, isRefreshing, refresh, patchEmail, patchEmails } = useSharedInbox();
+  const { emails, isLoading, isRefreshing, refresh, patchEmail, patchEmails } =
+    useSharedInbox();
   const { agent } = useAgent();
-  // Run through the CopilotKit core, not agent.runAgent() directly: the core's runAgent is the
-  // same interrupt-aware path CopilotChat uses, so compose_reply's pause is routed to
-  // useEmailAgent's useInterrupt card rather than left unhandled.
+  // Run through the CopilotKit core, not agent.runAgent() directly — same interrupt-aware path
+  // CopilotChat uses, so compose_reply's pause routes to useEmailAgent's useInterrupt card.
   const { copilotkit } = useCopilotKit();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filters, setFilters] = useState<EmailFilters>(EMPTY_FILTERS);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const isFiltered = hasActiveFilters(filters);
-  const visibleEmails = useMemo(() => filterEmails(emails, filters), [emails, filters]);
+  const visibleEmails = useMemo(
+    () => filterEmails(emails, filters),
+    [emails, filters],
+  );
 
   // Same fields the filter dialog offers, so the agent can do anything the teacher can here.
   useFrontendTool(
@@ -27,14 +40,16 @@ export function EmailInbox() {
       name: "filterInbox",
       description:
         "Set the filters on the inbox list the teacher is looking at. When they ask to SEE a " +
-        "subset of the inbox — \"show me...\", \"only show...\", \"let me see...\" — call this " +
+        'subset of the inbox — "show me...", "only show...", "let me see..." — call this ' +
         "to filter their view; don't just list the emails in chat. Each call replaces the " +
         "current filters with exactly the fields given; call with no fields to clear all " +
         "filters. Dates are ISO (YYYY-MM-DD), inclusive. This only changes what the teacher " +
         "sees on screen — to read emails yourself, use get_emails instead. When" +
         "the teacher ask about unreplied emails, filter the read emails, not unread ones.",
       parameters: z.object({
-        status: z.enum(["unread", "read", "replied", "flagged_for_followup"]).optional(),
+        status: z
+          .enum(["unread", "read", "replied", "flagged_for_followup"])
+          .optional(),
         urgency: z.enum(["low", "medium", "high"]).optional(),
         course: z.enum(["math_11", "math_12"]).optional(),
         topic: z
@@ -99,14 +114,15 @@ export function EmailInbox() {
       name: "showEmail",
       description:
         "Open one email in the reading pane so the teacher can see it on screen. Call this " +
-        "whenever they ask about a SINGLE email — \"show me...\", \"open...\", \"let me see...\", " +
+        'whenever they ask about a SINGLE email — "show me...", "open...", "let me see...", ' +
         "or a bare reference to one email they named — instead of describing its contents in " +
         "chat. Give the email's real id; call get_emails first if you only have a description. " +
         "For more than one email use filterInbox instead.",
       parameters: z.object({ id: z.string() }),
       handler: async ({ id }) => {
         const email = emails.find((e) => e.id === id);
-        if (!email) return `No email with id ${id} — call get_emails for current ids and retry.`;
+        if (!email)
+          return `No email with id ${id} — call get_emails for current ids and retry.`;
         selectEmail(email);
         return `Opened "${email.subject}" from ${email.from.name} in the reading pane.`;
       },
@@ -118,19 +134,24 @@ export function EmailInbox() {
   // reply already happened); flagged_for_followup still can.
   const toggleRead = (email: Email) => {
     if (email.status === "replied") return;
-    patchEmail(email.id, { status: email.status === "unread" ? "read" : "unread" });
+    patchEmail(email.id, {
+      status: email.status === "unread" ? "read" : "unread",
+    });
   };
 
-  // Bulk actions only ever move emails between unread and read — never touch replied/flagged
-  // ones, so clicking either button can't silently erase a reply/follow-up badge in bulk. Acts
-  // on visibleEmails (post-filter), not the whole inbox, so "mark all" means "all of these".
+  // Bulk actions only move emails between unread/read — never touch replied/flagged ones, so
+  // they can't erase those badges. Acts on visibleEmails (post-filter), not the whole inbox.
   const markAllRead = () => {
-    const ids = visibleEmails.filter((e) => e.status === "unread").map((e) => e.id);
+    const ids = visibleEmails
+      .filter((e) => e.status === "unread")
+      .map((e) => e.id);
     patchEmails(ids, { status: "read" });
   };
 
   const markAllUnread = () => {
-    const ids = visibleEmails.filter((e) => e.status === "read").map((e) => e.id);
+    const ids = visibleEmails
+      .filter((e) => e.status === "read")
+      .map((e) => e.id);
     patchEmails(ids, { status: "unread" });
   };
 
@@ -154,10 +175,8 @@ export function EmailInbox() {
     copilotkit.runAgent({ agent });
   };
 
-  // Block a second draft while the agent is mid-run OR paused on an unresolved interrupt. Can't
-  // use agent.pendingInterrupts here — the LangGraph bridge signals interrupts via a CUSTOM
-  // "on_interrupt" event (see use-email-agent.tsx), never via RUN_FINISHED's outcome field, so
-  // that property never populates. Track the same event ourselves instead.
+  // Block a second draft while mid-run or paused on an interrupt. agent.pendingInterrupts never
+  // populates — the LangGraph bridge signals via a CUSTOM "on_interrupt" event instead.
   const [awaitingApproval, setAwaitingApproval] = useState(false);
   useEffect(() => {
     const subscription = agent.subscribe({

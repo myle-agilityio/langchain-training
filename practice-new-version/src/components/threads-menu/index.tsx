@@ -11,8 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 // Clock-icon trigger + dropdown replacement for the old full-height SelfManagedThreadsDrawer —
-// same data/actions (useSelfManagedThreads), just presented as a popover instead of a column.
-// Outside-click-to-close comes for free from Radix's DropdownMenu.Content.
+// same data/actions, just a popover; outside-click-to-close comes free from Radix.
 export function ThreadsMenu() {
   const config = useCopilotChatConfiguration();
   const { threads, renameThread, deleteThread } = useSelfManagedThreads();
@@ -37,7 +36,12 @@ export function ThreadsMenu() {
       }}
     >
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Conversation history" title="Conversation history">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Conversation history"
+          title="Conversation history"
+        >
           <Clock className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
@@ -56,16 +60,21 @@ export function ThreadsMenu() {
         </div>
         <div className="max-h-80 overflow-y-auto thin-scrollbar p-1">
           {threads.length === 0 && (
-            <p className="px-2 py-4 text-sm text-[var(--muted-foreground)]">No conversations yet.</p>
+            <p className="px-2 py-4 text-sm text-[var(--muted-foreground)]">
+              No conversations yet.
+            </p>
           )}
           <ul className="flex flex-col gap-0.5">
             {threads.map((thread) => {
-              const active = config.hasExplicitThreadId && config.threadId === thread.id;
+              const active =
+                config.hasExplicitThreadId && config.threadId === thread.id;
               return (
                 <li key={thread.id} className="group">
                   <div
                     className={`flex items-center gap-1 rounded-md px-2 py-2 cursor-pointer text-sm ${
-                      active ? "bg-[var(--secondary)]" : "hover:bg-[var(--secondary)]"
+                      active
+                        ? "bg-[var(--secondary)]"
+                        : "hover:bg-[var(--secondary)]"
                     }`}
                     onClick={() => {
                       config.setActiveThreadId(thread.id, { explicit: true });
@@ -88,7 +97,9 @@ export function ThreadsMenu() {
                         />
                       ) : (
                         <>
-                          <div className="truncate">{thread.title ?? "New conversation"}</div>
+                          <div className="truncate">
+                            {thread.title ?? "New conversation"}
+                          </div>
                           <div className="text-xs text-[var(--muted-foreground)]">
                             {formatRelative(thread.updatedAt)}
                           </div>

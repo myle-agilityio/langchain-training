@@ -18,9 +18,8 @@ interface EmailDetailProps {
   isLoading: boolean;
   onSendReply: (id: string, subject: string, body: string) => void;
   onAskAgent: (email: Email) => void;
-  // True while the agent is running at all, or paused awaiting approval. Deliberately just
-  // disables the button without relabelling it: the agent runs for plenty of reasons that
-  // aren't drafting, so a "Drafting…" label would routinely be a lie.
+  // True while the agent is running or paused awaiting approval. Deliberately just disables
+  // the button without relabelling it — a "Drafting…" label would often be a lie.
   agentBusy: boolean;
 }
 

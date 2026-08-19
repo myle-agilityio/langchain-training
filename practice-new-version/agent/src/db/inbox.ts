@@ -2,9 +2,8 @@
 import type { Email } from "@/types/index";
 import { seedEmails } from "@/data/seed-emails";
 
-// Queries used by the HTTP inbox routes (agent/src/http/emails.ts) — distinct from the
-// graph-tool queries above since these need shapes (bulk status update, reply patch, seeding)
-// the tools never do.
+// Queries for the HTTP inbox routes (http/emails.ts) — distinct from the graph-tool queries
+// above; these need shapes (bulk status update, reply patch, seeding) tools never do.
 
 export async function listEmailsSeeded(): Promise<Email[]> {
   const { rows } = await getPool().query<EmailRow>(

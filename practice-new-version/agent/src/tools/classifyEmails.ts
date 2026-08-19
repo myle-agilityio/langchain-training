@@ -1,0 +1,85 @@
+import { tool } from "@langchain/core/tools";
+import type { LangGraphRunnableConfig } from "@langchain/langgraph";
+import { copilotkitCustomizeConfig } from "@copilotkit/sdk-js/langgraph";
+import { z } from "zod";
+
+import { getPlainModelForConfig } from "@/config/model";
+import { CLASSIFY_CONCURRENCY, TOOL } from "@/constants/index";
+import { getEmail, updateEmail } from "@/db/index";
+import { classifyPrompt } from "@/prompts/index";
+import { ClassificationSchema } from "@/types/index";
+
+// Exported so graph nodes classify by calling this directly — invoking the tool from inside a
+// node emits AG-UI TOOL_CALL events with no toolCallId, which kills the client event stream.
+export async function classifyEmail(
+  id: string,
+  config: LangGraphRunnableConfig,
+) {
+  const email = await getEmail(id);
+  if (!email) return { id, ok: false as const, error: "no such email" };
+  try {
+    // Internal per-email classifier call — hide its forced tool call from the chat UI.
+    const classification = await getPlainModelForConfig(config)
+      .withStructuredOutput(ClassificationSchema)
+      .invoke(
+        classifyPrompt(email),
+        copilotkitCustomizeConfig(config, {
+          emitMessages: false,
+          emitToolCalls: false,
+        }),
+      );
+    await updateEmail(id, { classification });
+    return { id, ok: true as const, classification };
+  } catch (error) {
+    // Never throw — one bad email (rate limit, parse failure) shouldn't sink the whole batch.
+    return {
+      id,
+      ok: false as const,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+async function classifyEmailsBatched(
+  ids: string[],
+  config: LangGraphRunnableConfig,
+) {
+  const results: Awaited<ReturnType<typeof classifyEmail>>[] = [];
+  for (let i = 0; i < ids.length; i += CLASSIFY_CONCURRENCY) {
+    const chunk = ids.slice(i, i + CLASSIFY_CONCURRENCY);
+    results.push(
+      ...(await Promise.all(chunk.map((id) => classifyEmail(id, config)))),
+    );
+  }
+  return results;
+}
+
+// Classifies by reading each email's real content itself, so the caller only ever passes ids —
+// never fields it might have guessed. One structured-output call per email, run in bounded-concurrency batches.
+export const classify_emails = tool(
+  async (input: { ids: string[] }, config: LangGraphRunnableConfig) => {
+    const results = await classifyEmailsBatched(input.ids, config);
+    const failed = results.filter((r) => !r.ok);
+    return JSON.stringify({
+      results,
+      note: "The inbox UI already shows these classification tags — don't list topic/course/workType/urgency per email in your reply, just confirm briefly.",
+      ...(failed.length
+        ? {
+            recovery:
+              "Call get_emails for current ids, then retry the failed ids.",
+          }
+        : {}),
+    });
+  },
+  {
+    name: TOOL.CLASSIFY_EMAILS,
+    description:
+      "Classify one or more emails by id — it reads each email's actual current subject/body " +
+      "itself and writes topic/course/workType/urgency to the inbox; you never compute or pass " +
+      "the classification. Ids must be real: call get_emails first if the teacher described the " +
+      "emails rather than naming exact ids. Batch every email you're classifying into one call. " +
+      "Use this for any request to classify, triage, or tag email(s) — even 'classify this one' " +
+      "on a single email.",
+    schema: z.object({ ids: z.array(z.string()) }),
+  },
+);

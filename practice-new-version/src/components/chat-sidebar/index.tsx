@@ -13,9 +13,8 @@ const DEFAULT_WIDTH = 420;
 const MIN_WIDTH = 320;
 const MAX_WIDTH = 640;
 
-// Collapsible, resizable chat sidebar on the right; EmailInbox is the main/left content now, so
-// this no longer needs to compete for width via ExampleLayout's old resizable 50/50 split — it
-// just needs its own drag handle on its left edge.
+// Collapsible, resizable chat sidebar on the right; EmailInbox is now the main/left content,
+// so this just needs its own drag handle on its left edge, not a 50/50 split.
 export function ChatSidebar({ threadsMenu, children }: ChatSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [width, setWidth] = useState(DEFAULT_WIDTH);
@@ -27,11 +26,11 @@ export function ChatSidebar({ threadsMenu, children }: ChatSidebarProps) {
     if (window.matchMedia("(max-width: 1023px)").matches) setCollapsed(true);
   }, []);
 
-  // The sidebar's right edge sits flush against the viewport edge (it's the last flex child in
-  // page.tsx, no gutter), so its width is just how far the drag point is from that edge. Also
-  // keeps at least 320px for the inbox, so dragging can't squeeze it away entirely.
+  // The sidebar's right edge sits flush against the viewport edge, so width is just how far the
+  // drag point is from that edge. Also keeps at least 320px for the inbox.
   const clampWidth = useCallback(
-    (px: number) => Math.min(MAX_WIDTH, window.innerWidth - 320, Math.max(MIN_WIDTH, px)),
+    (px: number) =>
+      Math.min(MAX_WIDTH, window.innerWidth - 320, Math.max(MIN_WIDTH, px)),
     [],
   );
   const resizeTo = useCallback(
@@ -44,12 +43,14 @@ export function ChatSidebar({ threadsMenu, children }: ChatSidebarProps) {
   useEffect(() => {
     if (!isResizing) return;
     document.body.classList.add("select-none", "cursor-col-resize");
-    return () => document.body.classList.remove("select-none", "cursor-col-resize");
+    return () =>
+      document.body.classList.remove("select-none", "cursor-col-resize");
   }, [isResizing]);
 
   useFrontendTool({
     name: "enableChatMode",
-    description: "Open the chat sidebar so the teacher can see the conversation.",
+    description:
+      "Open the chat sidebar so the teacher can see the conversation.",
     handler: async () => setCollapsed(false),
   });
 
@@ -79,7 +80,9 @@ export function ChatSidebar({ threadsMenu, children }: ChatSidebarProps) {
           isResizing ? "" : "transition-transform duration-200 ease-in-out",
           collapsed ? "translate-x-full" : "translate-x-0",
           "lg:relative lg:z-auto lg:translate-x-0 lg:rounded-[var(--radius)] lg:border lg:border-[var(--border)] lg:bg-[var(--card)]",
-          isResizing ? "" : "lg:transition-[width] lg:duration-200 lg:ease-in-out",
+          isResizing
+            ? ""
+            : "lg:transition-[width] lg:duration-200 lg:ease-in-out",
           "lg:overflow-hidden",
           collapsed ? "lg:w-0 lg:border-0" : "lg:w-[var(--chat-sidebar-width)]",
         ].join(" ")}
@@ -110,7 +113,9 @@ export function ChatSidebar({ threadsMenu, children }: ChatSidebarProps) {
             onKeyDown={(e) => {
               if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
               e.preventDefault();
-              setWidth((w) => clampWidth(w + (e.key === "ArrowLeft" ? 24 : -24)));
+              setWidth((w) =>
+                clampWidth(w + (e.key === "ArrowLeft" ? 24 : -24)),
+              );
             }}
             className="hidden lg:block absolute left-0 inset-y-0 z-10 w-1.5 -translate-x-1/2 cursor-col-resize touch-none group focus:outline-none"
           >
@@ -120,8 +125,14 @@ export function ChatSidebar({ threadsMenu, children }: ChatSidebarProps) {
         <div className="flex h-full w-full flex-col lg:w-[var(--chat-sidebar-width)]">
           <div className="shrink-0 flex items-center justify-between gap-2 px-4 pt-4 pb-2">
             <div className="flex items-center gap-1.5 min-w-0">
-              <span className="font-extrabold text-xl truncate">CopilotKit</span>
-              <img src="/copilotkit-logo-mark.svg" alt="" className="h-6 shrink-0" />
+              <span className="font-extrabold text-xl truncate">
+                CopilotKit
+              </span>
+              <img
+                src="/copilotkit-logo-mark.svg"
+                alt=""
+                className="h-6 shrink-0"
+              />
             </div>
             <div className="flex items-center gap-1 shrink-0">
               {threadsMenu}

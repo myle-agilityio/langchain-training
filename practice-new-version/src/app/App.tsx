@@ -12,7 +12,11 @@ import { OpenAiKeyGate } from "@/components/openai-key-gate";
 import { ChatSidebar } from "@/components/chat-sidebar";
 import { EmailInbox } from "@/components/email-inbox";
 import { ThreadsMenu } from "@/components/threads-menu";
-import { useGenerativeUIExamples, useExampleSuggestions, useEmailAgent } from "@/hooks";
+import {
+  useGenerativeUIExamples,
+  useExampleSuggestions,
+  useEmailAgent,
+} from "@/hooks";
 // A2UI catalog: definitions + renderers in ./declarative-generative-ui/
 import { demonstrationCatalog } from "./declarative-generative-ui/renderers";
 
@@ -46,15 +50,8 @@ function Inbox() {
   );
 
   return (
-    /*
-      One CopilotChatConfigurationProvider owns the active thread for the whole
-      surface. It is UNCONTROLLED (no `threadId` prop): the threads menu (SDK
-      drawer or the self-managed dropdown) drives it directly — picking a row sets
-      the active thread, "+ New" resets to a fresh thread (clearing the chat), all
-      with no host wiring. The chat and the canvas read the same active thread from
-      the provider (the canvas's `useAgent()` falls back to it), so they stay on the
-      same per-thread agent clone the chat's /connect replay populates.
-    */
+    /* Uncontrolled provider: the threads menu drives the active thread directly (row picks it,
+       "+ New" resets it) — chat and canvas both read it via useAgent(), no host wiring needed. */
     <CopilotChatConfigurationProvider agentId="default">
       <AgentSync>{body}</AgentSync>
     </CopilotChatConfigurationProvider>

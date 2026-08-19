@@ -2,6 +2,7 @@
 import { tool, type ToolRuntime } from "@langchain/core/tools";
 import { SystemMessage } from "@langchain/core/messages";
 import { ChatOpenAI } from "@langchain/openai";
+import { CUSTOM_CATALOG_ID } from "@/constants/index";
 import {
   createSurface,
   render,
@@ -9,22 +10,14 @@ import {
   updateDataModel,
 } from "@/utils/a2ui";
 
-// Must match createCatalog's catalogId in src/app/declarative-generative-ui/renderers.tsx —
-// the frontend only knows how to render surfaces tagged with this id.
-const CUSTOM_CATALOG_ID = "copilotkit://app-dashboard-catalog";
-
 const renderA2uiSchema = z.object({
   surfaceId: z.string(),
   components: z.array(z.record(z.any())),
   data: z.record(z.any()).optional(),
 });
 
-// Wire shape (v0.9, flat): each entry is { id, component: "<Name>", ...props as sibling keys
-// (not nested) }. One entry must have id "root". "child"/"children" reference other entries'
-// ids (string, or string[]) — never itself, and the graph must be acyclic.
-//
-// This is the ONLY place the secondary LLM below learns what it can render — keep it in sync
-// with demonstrationCatalogDefinitions (src/app/declarative-generative-ui/definitions.ts).
+// Wire shape (v0.9, flat): each entry is { id, component, ...props as sibling keys }, one root id.
+// Only place the secondary LLM learns what it can render — keep in sync with definitions.ts.
 const renderA2ui = tool(async () => "rendered", {
   name: "render_a2ui",
   description: `Render a dynamic A2UI v0.9 surface. components is a flat array; exactly one \
