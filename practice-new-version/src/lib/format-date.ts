@@ -1,42 +1,43 @@
-const DAY_MS = 86_400_000;
+import {
+  differenceInCalendarDays,
+  differenceInMinutes,
+  format,
+  isValid,
+} from "date-fns";
 
-function startOfDay(d: Date): number {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-}
+const relativeTimeFormat = new Intl.RelativeTimeFormat(undefined, {
+  style: "narrow",
+  numeric: "always",
+});
 
 export function formatReceivedAt(iso: string, now: Date = new Date()): string {
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
+  if (!isValid(d)) return "";
 
-  const days = Math.round((startOfDay(now) - startOfDay(d)) / DAY_MS);
+  const days = differenceInCalendarDays(now, d);
 
-  if (days <= 0) {
-    return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
-  }
+  if (days <= 0) return format(d, "h:mm a");
   if (days === 1) return "Yesterday";
-  if (days < 7) return d.toLocaleDateString(undefined, { weekday: "short" });
+  if (days < 7) return format(d, "EEE");
 
-  return d.toLocaleDateString(
-    undefined,
-    d.getFullYear() === now.getFullYear()
-      ? { month: "short", day: "numeric" }
-      : { month: "short", day: "numeric", year: "numeric" },
-  );
+  return d.getFullYear() === now.getFullYear()
+    ? format(d, "MMM d")
+    : format(d, "MMM d, yyyy");
 }
 
 export function formatReceivedAtFull(iso: string): string {
   const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? "" : d.toLocaleString();
+  return isValid(d) ? d.toLocaleString() : "";
 }
 
 export function formatRelative(iso: string, now: Date = new Date()): string {
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
+  if (!isValid(d)) return "";
 
-  const minutes = Math.round((now.getTime() - d.getTime()) / 60_000);
+  const minutes = differenceInMinutes(now, d, { roundingMethod: "round" });
   if (minutes < 1) return "just now";
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 60) return relativeTimeFormat.format(-minutes, "minute");
   const hours = Math.round(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.round(hours / 24)}d ago`;
+  if (hours < 24) return relativeTimeFormat.format(-hours, "hour");
+  return relativeTimeFormat.format(-Math.round(hours / 24), "day");
 }
