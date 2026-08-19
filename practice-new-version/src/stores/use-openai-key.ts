@@ -2,9 +2,8 @@ import { create } from "zustand";
 
 const STORAGE_KEY = "openai_api_key";
 
-// Read directly (not through this store's state) by anything that needs the key outside React,
-// e.g. the CopilotKit `headers` callback and plain fetch() calls — see App.tsx and
-// use-self-managed-threads.ts.
+// Read directly (not via store state) by anything needing the key outside React,
+// e.g. CopilotKit's `headers` callback and plain fetch() calls.
 export function readStoredOpenAiKey(): string | null {
   if (typeof window === "undefined") return null;
   return window.localStorage.getItem(STORAGE_KEY);

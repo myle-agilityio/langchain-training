@@ -1,21 +1,10 @@
-/**
- * Demonstration Catalog — Component Definitions
- *
- * Platform-agnostic definitions: component names, props (Zod), descriptions.
- * This is the contract between the app and the AI agent. Agents receive these
- * definitions as context so they know what components are available.
- *
- * Renderers (React, React Native, etc.) import these definitions and provide
- * platform-specific implementations, type-checked against the Zod schemas.
- */
+// Demonstration Catalog: platform-agnostic component names, props (Zod), descriptions —
+// the contract renderers implement and agents read as context for what's available.
 
 import { z } from "zod";
 
-/**
- * Dynamic string: accepts either a literal string or a data-model path binding
- * like `{ path: "airline" }`. The GenericBinder resolves path bindings to the
- * actual value at render time.
- */
+// Literal string or a data-model path binding like `{ path: "airline" }`,
+// resolved to the actual value at render time by GenericBinder.
 const DynString = z.union([z.string(), z.object({ path: z.string() })]);
 
 export const demonstrationCatalogDefinitions = {

@@ -13,13 +13,8 @@ interface SharedInboxState {
   patchEmails: (ids: string[], patch: Partial<Email>) => Promise<void>;
 }
 
-/**
- * Whether a refetch actually changed anything. Load-bearing, not an optimization:
- * `onRunFinalized` fires a refetch at the moment an approval card mounts, and handing back a
- * fresh array reference there re-renders every subscriber — which can feed back into another
- * finalize cycle and trip "Maximum update depth exceeded". Keeping the previous reference lets
- * subscribers bail out of the re-render entirely.
- */
+// Load-bearing, not an optimization: a fresh reference here on onRunFinalized's
+// refetch can feed back into another finalize cycle and trip "Maximum update depth exceeded".
 function sameEmails(a: Email[], b: Email[]): boolean {
   return a.length === b.length && JSON.stringify(a) === JSON.stringify(b);
 }
@@ -37,7 +32,9 @@ export const useSharedInbox = create<SharedInboxState>((set, get) => ({
       if (!res.ok) throw new Error(`GET /api/emails failed (${res.status})`);
       const data = (await res.json()) as { emails: Email[] };
       set((state) => ({
-        emails: sameEmails(state.emails, data.emails) ? state.emails : data.emails,
+        emails: sameEmails(state.emails, data.emails)
+          ? state.emails
+          : data.emails,
       }));
     } catch (error) {
       console.error("Failed to refresh inbox:", error);
@@ -57,7 +54,11 @@ export const useSharedInbox = create<SharedInboxState>((set, get) => ({
 
   patchEmail: async (id, patch) => {
     const previous = get().emails;
-    set({ emails: previous.map((email) => (email.id === id ? { ...email, ...patch } : email)) });
+    set({
+      emails: previous.map((email) =>
+        email.id === id ? { ...email, ...patch } : email,
+      ),
+    });
     try {
       const res = await fetch("/api/emails", {
         method: "PATCH",
@@ -67,7 +68,9 @@ export const useSharedInbox = create<SharedInboxState>((set, get) => ({
       if (!res.ok) throw new Error(`PATCH /api/emails failed (${res.status})`);
       const data = (await res.json()) as { email: Email };
       set((state) => ({
-        emails: state.emails.map((email) => (email.id === id ? data.email : email)),
+        emails: state.emails.map((email) =>
+          email.id === id ? data.email : email,
+        ),
       }));
     } catch (error) {
       console.error(`Failed to save update for email ${id}, reverting:`, error);
@@ -82,7 +85,9 @@ export const useSharedInbox = create<SharedInboxState>((set, get) => ({
     const idSet = new Set(ids);
     const previous = get().emails;
     set({
-      emails: previous.map((email) => (idSet.has(email.id) ? { ...email, ...patch } : email)),
+      emails: previous.map((email) =>
+        idSet.has(email.id) ? { ...email, ...patch } : email,
+      ),
     });
     try {
       const res = await fetch("/api/emails", {
@@ -90,7 +95,8 @@ export const useSharedInbox = create<SharedInboxState>((set, get) => ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ids, patch }),
       });
-      if (!res.ok) throw new Error(`PATCH /api/emails (bulk) failed (${res.status})`);
+      if (!res.ok)
+        throw new Error(`PATCH /api/emails (bulk) failed (${res.status})`);
       const data = (await res.json()) as { emails: Email[] };
       const updated = new Map(data.emails.map((email) => [email.id, email]));
       set((state) => ({

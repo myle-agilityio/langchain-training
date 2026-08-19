@@ -54,11 +54,8 @@ const manageableStatusSchema = z.enum([
   "flagged_for_followup",
 ]);
 
-/**
- * Per-tool cards for the agent's inbox tools. A name-scoped renderer wins over the
- * wildcard in useGenerativeUIExamples, so anything not listed here still falls back
- * to the generic ToolReasoning card.
- */
+// Per-tool cards for the agent's inbox tools; a name-scoped renderer wins over the
+// wildcard in useGenerativeUIExamples, so unlisted tools fall back to ToolReasoning.
 export const useToolRenderers = () => {
   useRenderTool(
     {

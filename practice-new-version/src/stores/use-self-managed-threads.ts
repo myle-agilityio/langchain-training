@@ -95,9 +95,8 @@ export const useSelfManagedThreads = create<SelfManagedThreadsState>(
   }),
 );
 
-// Keeps the store in sync with the agent's run lifecycle. Needs useAgent()/
-// useCopilotChatConfiguration(), which only resolve inside CopilotChatConfigurationProvider —
-// call this once from a component in that subtree.
+// Keeps the store in sync with the agent's run lifecycle; call once from a
+// component inside CopilotChatConfigurationProvider.
 export function useSyncSelfManagedThreadsWithAgent() {
   // updates: [] — only need the agent handle to subscribe to run completion below.
   const { agent } = useAgent({ updates: [] });

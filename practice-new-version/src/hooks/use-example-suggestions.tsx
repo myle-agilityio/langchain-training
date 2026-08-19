@@ -1,11 +1,5 @@
-/**
- * Suggestion pills shown in the chat UI. These mirror the flows in
- * docs/TEST-SCENARIOS.md, so clicking through them exercises the assistant's
- * main paths.
- *
- * Showcase mode (showcase.json) controls which pills are visually highlighted.
- * Highlight styling: globals.css (.a2ui-highlight, .opengenui-highlight)
- */
+// Suggestion pills mirroring docs/TEST-SCENARIOS.md flows; showcase.json
+// controls which pills are highlighted (styling in globals.css).
 import { useConfigureSuggestions } from "@copilotkit/react-core/v2";
 import showcaseConfig from "../../showcase.json";
 
@@ -25,7 +19,8 @@ export const useExampleSuggestions = () => {
       },
       {
         title: "Draft a reply",
-        message: "Draft a reply to Ezra about the missed test, for my approval.",
+        message:
+          "Draft a reply to Ezra about the missed test, for my approval.",
       },
       {
         title: "Inbox dashboard (A2UI)",
