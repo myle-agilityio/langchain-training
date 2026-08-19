@@ -17,9 +17,10 @@ export const get_emails = tool(
   {
     name: TOOL.GET_EMAILS,
     description:
-      "List emails (id, sender, subject, body, status, classification), optionally filtered. " +
+      "List emails (id, sender, subject, body, status, classification) by the filter criteria. " +
       `${FILTER_DESCRIPTION} For any 'how many' question use count_emails instead of counting ` +
-      "this array yourself.",
+      "this array yourself. No need to list the emails in your reply — the result renders as a" +
+      "card listing sender and subject per email.",
     schema: z.object({ filter: EmailFilterSchema.optional() }),
   },
 );
