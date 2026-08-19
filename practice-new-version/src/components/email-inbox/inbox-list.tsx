@@ -61,7 +61,7 @@ export const URGENCY_TONE: Record<Urgency, string> = {
   low: "tone-teal",
 };
 
-const URGENCY_VARIANT: Record<Urgency, "tone" | "toneSolid"> = {
+export const URGENCY_VARIANT: Record<Urgency, "tone" | "toneSolid"> = {
   high: "toneSolid",
   medium: "tone",
   low: "tone",
