@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { useAgent, useAgentContext, useCopilotKit, useFrontendTool } from "@copilotkit/react-core/v2";
 import type { Email } from "@/types/email";
-import { useSharedInbox } from "@/hooks/use-shared-inbox";
+import { useSharedInbox } from "@/stores/use-shared-inbox";
 import { EMPTY_FILTERS, filterEmails, hasActiveFilters, type EmailFilters } from "@/lib/email-filters";
 import { InboxList } from "./inbox-list";
 import { EmailDetail } from "./email-detail";

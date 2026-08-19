@@ -1,15 +1,5 @@
-/**
- * A2UI Catalog — React Renderers
- *
- * Each renderer maps a component name from definitions.ts to a React
- * implementation. Props are type-checked against the Zod schemas.
- *
- * To add a component: define its schema in definitions.ts, then add a
- * renderer here. See README.md "Adding a custom component" for details.
- *
- * The assembled catalog is registered in layout.tsx via
- * <CopilotKit a2ui={{ catalog: demonstrationCatalog }}>.
- */
+// A2UI Catalog — React Renderers: each renderer maps a component name from
+// definitions.ts to a React implementation, registered via <CopilotKit a2ui={...}>.
 
 import React, { useState } from "react";
 import {

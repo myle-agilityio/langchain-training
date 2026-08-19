@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { create } from "zustand";
 import {
   useAgent,
   useCopilotChatConfiguration,
 } from "@copilotkit/react-core/v2";
-import { readStoredOpenAiKey } from "@/hooks/use-openai-key";
+import { readStoredOpenAiKey } from "@/stores/use-openai-key";
 import type { ChatThread } from "@/types/thread";
 
-interface SelfManagedThreadsValue {
+interface SelfManagedThreadsState {
   threads: ChatThread[];
   isLoading: boolean;
   refresh: () => Promise<void>;
@@ -39,28 +40,68 @@ function firstUserMessageText(agent: AgentWithMessages): string | undefined {
 
 // Stands in for CopilotKit's <CopilotThreadsDrawer>/useThreads (Intelligence mode drops runs
 // in prod). History survives via the Postgres checkpointer; this just adds list/rename/delete UI.
-export function useSelfManagedThreads(): SelfManagedThreadsValue {
+export const useSelfManagedThreads = create<SelfManagedThreadsState>(
+  (set, get) => ({
+    threads: [],
+    isLoading: true,
+
+    refresh: async () => {
+      try {
+        const res = await fetch("/api/threads");
+        if (!res.ok) throw new Error(`GET /api/threads failed (${res.status})`);
+        const data = (await res.json()) as { threads: ChatThread[] };
+        set({ threads: data.threads });
+      } catch (error) {
+        console.error("Failed to refresh threads:", error);
+      } finally {
+        set({ isLoading: false });
+      }
+    },
+
+    renameThread: async (id, title) => {
+      const previous = get().threads;
+      set({
+        threads: previous.map((t) => (t.id === id ? { ...t, title } : t)),
+      });
+      try {
+        const res = await fetch("/api/threads", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, title }),
+        });
+        if (!res.ok)
+          throw new Error(`PATCH /api/threads failed (${res.status})`);
+        await get().refresh();
+      } catch (error) {
+        console.error(`Failed to rename thread ${id}, reverting:`, error);
+        set({ threads: previous });
+      }
+    },
+
+    deleteThread: async (id) => {
+      const previous = get().threads;
+      set({ threads: previous.filter((t) => t.id !== id) });
+      try {
+        const res = await fetch(`/api/threads?id=${encodeURIComponent(id)}`, {
+          method: "DELETE",
+        });
+        if (!res.ok)
+          throw new Error(`DELETE /api/threads failed (${res.status})`);
+      } catch (error) {
+        console.error(`Failed to delete thread ${id}, reverting:`, error);
+        set({ threads: previous });
+      }
+    },
+  }),
+);
+
+// Keeps the store in sync with the agent's run lifecycle; call once from a
+// component inside CopilotChatConfigurationProvider.
+export function useSyncSelfManagedThreadsWithAgent() {
   // updates: [] — only need the agent handle to subscribe to run completion below.
   const { agent } = useAgent({ updates: [] });
   const config = useCopilotChatConfiguration();
-  const [threads, setThreads] = useState<ChatThread[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const refresh = useCallback(async () => {
-    try {
-      const res = await fetch("/api/threads");
-      if (!res.ok) throw new Error(`GET /api/threads failed (${res.status})`);
-      const data = (await res.json()) as { threads: ChatThread[] };
-      setThreads(data.threads);
-    } catch (error) {
-      console.error("Failed to refresh threads:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const refreshRef = useRef(refresh);
-  refreshRef.current = refresh;
+  const refresh = useSelfManagedThreads((state) => state.refresh);
 
   useEffect(() => {
     refresh();
@@ -93,52 +134,9 @@ export function useSelfManagedThreads(): SelfManagedThreadsValue {
               throw new Error(`POST /api/threads failed (${res.status})`);
           })
           .catch((error) => console.error("Failed to save thread:", error))
-          .finally(() => refreshRef.current());
+          .finally(() => refresh());
       },
     });
     return unsubscribe;
-  }, [agent]);
-
-  const renameThread = useCallback(async (id: string, title: string) => {
-    let previous: ChatThread[] = [];
-    setThreads((current) => {
-      previous = current;
-      return current.map((t) => (t.id === id ? { ...t, title } : t));
-    });
-    try {
-      const res = await fetch("/api/threads", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, title }),
-      });
-      if (!res.ok) throw new Error(`PATCH /api/threads failed (${res.status})`);
-      await refreshRef.current();
-    } catch (error) {
-      console.error(`Failed to rename thread ${id}, reverting:`, error);
-      setThreads(previous);
-    }
-  }, []);
-
-  const deleteThread = useCallback(async (id: string) => {
-    let previous: ChatThread[] = [];
-    setThreads((current) => {
-      previous = current;
-      return current.filter((t) => t.id !== id);
-    });
-    try {
-      const res = await fetch(`/api/threads?id=${encodeURIComponent(id)}`, {
-        method: "DELETE",
-      });
-      if (!res.ok)
-        throw new Error(`DELETE /api/threads failed (${res.status})`);
-    } catch (error) {
-      console.error(`Failed to delete thread ${id}, reverting:`, error);
-      setThreads(previous);
-    }
-  }, []);
-
-  return useMemo(
-    () => ({ threads, isLoading, refresh, renameThread, deleteThread }),
-    [threads, isLoading, refresh, renameThread, deleteThread],
-  );
+  }, [agent, refresh]);
 }

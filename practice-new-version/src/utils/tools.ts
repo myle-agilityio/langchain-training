@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useSharedInbox } from "@/hooks/use-shared-inbox";
+import { useSharedInbox } from "@/stores/use-shared-inbox";
 
 // Tools stringify their result, but a run can still be cut short mid-stream.
 export function parseResult<T>(result: string | undefined): T | null {

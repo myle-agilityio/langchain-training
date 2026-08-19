@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Clock, SquarePen } from "lucide-react";
 import { useCopilotChatConfiguration } from "@copilotkit/react-core/v2";
-import { useSelfManagedThreads } from "@/hooks/use-self-managed-threads";
+import { useSelfManagedThreads } from "@/stores/use-self-managed-threads";
 import { Button } from "@/components/ui/button";
 import { formatRelative } from "@/lib/format-date";
 import {

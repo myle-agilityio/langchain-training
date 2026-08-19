@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useOpenAiKey } from "@/hooks/use-openai-key";
+import { useOpenAiKey } from "@/stores/use-openai-key";
 
 // Deliberately not a Dialog: there's nothing to dismiss to — no close button, no
 // click-outside/Escape affordance — until a key is actually saved.
@@ -11,9 +11,6 @@ export function OpenAiKeyGate({ children }: { children: ReactNode }) {
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  // undefined = still reading localStorage on mount — render nothing rather than flashing
-  // the gate over content that turns out to already have a key.
-  if (apiKey === undefined) return null;
   if (apiKey) return <>{children}</>;
 
   const handleSubmit = (e: React.FormEvent) => {

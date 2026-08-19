@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { useTheme } from "@/hooks/use-theme";
+import { useTheme } from "@/stores/use-theme";
 
 import { useFrontendTool, useDefaultRenderTool } from "@copilotkit/react-core/v2";
 
