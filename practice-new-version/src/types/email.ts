@@ -19,6 +19,13 @@ export type WorkType =
   | "none";
 export type Urgency = "low" | "medium" | "high";
 
+export interface Classification {
+  topic: EmailTopic;
+  course: Course;
+  workType: WorkType;
+  urgency: Urgency;
+}
+
 export interface Email {
   id: string;
   from: { name: string; email: string };
@@ -26,11 +33,6 @@ export interface Email {
   body: string;
   receivedAt: string;
   status: EmailStatus;
-  classification?: {
-    topic: EmailTopic;
-    course: Course;
-    workType: WorkType;
-    urgency: Urgency;
-  };
+  classification?: Classification;
   reply?: { subject: string; body: string; sentAt: string };
 }

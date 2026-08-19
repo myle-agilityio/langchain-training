@@ -4,9 +4,13 @@ import { useTheme } from "@/hooks/use-theme";
 import { useFrontendTool, useDefaultRenderTool } from "@copilotkit/react-core/v2";
 
 import { ToolReasoning } from "@/components/tool-rendering";
+import { useToolRenderers } from "@/hooks/use-tool-renderers";
 
 export const useGenerativeUIExamples = () => {
   const { theme, setTheme } = useTheme();
+
+  // Named per-tool cards; they take precedence over the wildcard renderer below.
+  useToolRenderers();
 
   // Renders every backend tool call as a collapsible card in the chat, so the teacher can see
   // which inbox tools ran and with what arguments.
