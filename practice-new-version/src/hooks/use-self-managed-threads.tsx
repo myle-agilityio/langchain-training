@@ -1,14 +1,8 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
-import { useAgent, useCopilotChatConfiguration } from "@copilotkit/react-core/v2";
+  useAgent,
+  useCopilotChatConfiguration,
+} from "@copilotkit/react-core/v2";
 import { readStoredOpenAiKey } from "@/hooks/use-openai-key";
 import type { ChatThread } from "@/types/thread";
 
@@ -19,8 +13,6 @@ interface SelfManagedThreadsValue {
   renameThread: (id: string, title: string) => Promise<void>;
   deleteThread: (id: string) => Promise<void>;
 }
-
-const SelfManagedThreadsContext = createContext<SelfManagedThreadsValue | null>(null);
 
 // Loose shape instead of importing AbstractAgent/Message from @ag-ui/client directly — that
 // package is only a transitive dependency here, not one of ours to import from.
@@ -35,7 +27,10 @@ function firstUserMessageText(agent: AgentWithMessages): string | undefined {
   if (typeof content === "string") return content;
   if (Array.isArray(content)) {
     const textPart = content.find(
-      (part) => typeof part === "object" && part !== null && (part as { type?: unknown }).type === "text",
+      (part) =>
+        typeof part === "object" &&
+        part !== null &&
+        (part as { type?: unknown }).type === "text",
     ) as { text?: string } | undefined;
     return textPart?.text;
   }
@@ -44,7 +39,7 @@ function firstUserMessageText(agent: AgentWithMessages): string | undefined {
 
 // Stands in for CopilotKit's <CopilotThreadsDrawer>/useThreads (Intelligence mode drops runs
 // in prod). History survives via the Postgres checkpointer; this just adds list/rename/delete UI.
-export function SelfManagedThreadsProvider({ children }: { children: ReactNode }) {
+export function useSelfManagedThreads(): SelfManagedThreadsValue {
   // updates: [] — only need the agent handle to subscribe to run completion below.
   const { agent } = useAgent({ updates: [] });
   const config = useCopilotChatConfiguration();
@@ -88,10 +83,14 @@ export function SelfManagedThreadsProvider({ children }: { children: ReactNode }
             "Content-Type": "application/json",
             ...(openaiKey ? { "x-openai-api-key": openaiKey } : {}),
           },
-          body: JSON.stringify({ id: threadId, firstMessage: firstUserMessageText(agent) }),
+          body: JSON.stringify({
+            id: threadId,
+            firstMessage: firstUserMessageText(agent),
+          }),
         })
           .then((res) => {
-            if (!res.ok) throw new Error(`POST /api/threads failed (${res.status})`);
+            if (!res.ok)
+              throw new Error(`POST /api/threads failed (${res.status})`);
           })
           .catch((error) => console.error("Failed to save thread:", error))
           .finally(() => refreshRef.current());
@@ -127,30 +126,19 @@ export function SelfManagedThreadsProvider({ children }: { children: ReactNode }
       return current.filter((t) => t.id !== id);
     });
     try {
-      const res = await fetch(`/api/threads?id=${encodeURIComponent(id)}`, { method: "DELETE" });
-      if (!res.ok) throw new Error(`DELETE /api/threads failed (${res.status})`);
+      const res = await fetch(`/api/threads?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+      if (!res.ok)
+        throw new Error(`DELETE /api/threads failed (${res.status})`);
     } catch (error) {
       console.error(`Failed to delete thread ${id}, reverting:`, error);
       setThreads(previous);
     }
   }, []);
 
-  const value = useMemo(
+  return useMemo(
     () => ({ threads, isLoading, refresh, renameThread, deleteThread }),
     [threads, isLoading, refresh, renameThread, deleteThread],
   );
-
-  return (
-    <SelfManagedThreadsContext.Provider value={value}>
-      {children}
-    </SelfManagedThreadsContext.Provider>
-  );
-}
-
-export function useSelfManagedThreads(): SelfManagedThreadsValue {
-  const ctx = useContext(SelfManagedThreadsContext);
-  if (!ctx) {
-    throw new Error("useSelfManagedThreads must be used within a SelfManagedThreadsProvider");
-  }
-  return ctx;
 }

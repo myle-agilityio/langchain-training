@@ -14,7 +14,6 @@ import {
   useExampleSuggestions,
   useEmailAgent,
   SharedInboxProvider,
-  SelfManagedThreadsProvider,
 } from "@/hooks";
 // A2UI catalog: definitions + renderers in ./declarative-generative-ui/
 import { demonstrationCatalog } from "./declarative-generative-ui/renderers";
@@ -48,9 +47,7 @@ function Inbox() {
         inside CopilotChat) and the inbox panel, since they must read/write the
         same common inbox regardless of which one triggered the change.
       */}
-      <SharedInboxProvider>
-        <SelfManagedThreadsProvider>{body}</SelfManagedThreadsProvider>
-      </SharedInboxProvider>
+      <SharedInboxProvider>{body}</SharedInboxProvider>
     </CopilotChatConfigurationProvider>
   );
 }
