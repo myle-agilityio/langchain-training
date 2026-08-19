@@ -147,9 +147,7 @@ export function EmailReplyCard({
               <div className="flex gap-2 rounded-[var(--radius)] border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-400">
                 <TriangleAlert className="h-4 w-4 shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-medium">
-                    Compliance check flagged this draft
-                  </p>
+                  <p className="font-medium">Compliance check flagged this draft</p>
                   <ul className="list-disc pl-4 mt-1 space-y-0.5">
                     {compliance.violations.map((v) => (
                       <li key={v}>{v}</li>
