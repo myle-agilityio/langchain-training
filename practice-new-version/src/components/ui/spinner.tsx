@@ -11,7 +11,7 @@ const sizeMap = {
   lg: "h-8 w-8 border-3",
 };
 
-export function Spinner({ className, size = "md" }: SpinnerProps) {
+export const Spinner = ({ className, size = "md" }: SpinnerProps) => {
   return (
     <span
       className={cn(
@@ -21,4 +21,4 @@ export function Spinner({ className, size = "md" }: SpinnerProps) {
       )}
     />
   );
-}
+};

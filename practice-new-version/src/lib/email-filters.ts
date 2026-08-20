@@ -15,13 +15,13 @@ export interface EmailFilters {
 
 export const EMPTY_FILTERS: EmailFilters = {};
 
-export function hasActiveFilters(filters: EmailFilters): boolean {
+export const hasActiveFilters = (filters: EmailFilters): boolean => {
   return Object.values(filters).some((v) => v !== undefined && v !== "");
-}
+};
 
-function includes(haystack: string, needle: string): boolean {
+const includes = (haystack: string, needle: string): boolean => {
   return haystack.toLowerCase().includes(needle.toLowerCase());
-}
+};
 
 type FilterCheck = (email: Email, filters: EmailFilters) => boolean;
 
@@ -42,6 +42,6 @@ const FILTER_CHECKS: FilterCheck[] = [
     !receivedBefore || email.receivedAt.slice(0, 10) <= receivedBefore,
 ];
 
-export function filterEmails(emails: Email[], filters: EmailFilters): Email[] {
+export const filterEmails = (emails: Email[], filters: EmailFilters): Email[] => {
   return emails.filter((email) => FILTER_CHECKS.every((check) => check(email, filters)));
-}
+};

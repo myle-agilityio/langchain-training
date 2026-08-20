@@ -22,13 +22,13 @@ import { demonstrationCatalog } from "./declarative-generative-ui/renderers";
 
 // Needs useAgent()/useCopilotChatConfiguration(), which only resolve inside
 // CopilotChatConfigurationProvider — wraps both chat and inbox since both use it.
-function AgentSync({ children }: { children: ReactNode }) {
+const AgentSync = ({ children }: { children: ReactNode }) => {
   useSyncSharedInboxWithAgent();
   useSyncSelfManagedThreadsWithAgent();
   return <>{children}</>;
-}
+};
 
-function Inbox() {
+const Inbox = () => {
   useGenerativeUIExamples();
   useExampleSuggestions();
   useEmailAgent();
@@ -54,9 +54,9 @@ function Inbox() {
       <AgentSync>{body}</AgentSync>
     </CopilotChatConfigurationProvider>
   );
-}
+};
 
-export default function App() {
+const App = () => {
   useSyncTheme();
 
   return (
@@ -82,4 +82,6 @@ export default function App() {
       </OpenAiKeyGate>
     </CopilotKit>
   );
-}
+};
+
+export default App;

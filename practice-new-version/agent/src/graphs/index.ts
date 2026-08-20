@@ -17,12 +17,12 @@ import { composeEmailSubgraph } from "./composeEmailSubgraph";
 
 // A compiled subgraph passed directly as an addNode action doesn't type-check together with a
 // third options argument, so wrap it in a function that does the invoke() call instead.
-async function runComposeEmail(state: typeof AgentState.State, config: LangGraphRunnableConfig) {
+const runComposeEmail = async (state: typeof AgentState.State, config: LangGraphRunnableConfig) => {
   return composeEmailSubgraph.invoke(state, config);
-}
+};
 
 // Build the email assistant graph: a ReAct loop with the compose-email subgraph as a node.
-export async function buildGraph() {
+export const buildGraph = async () => {
   const workflow = new StateGraph(AgentState)
     .setNodeDefaults({
       retryPolicy: { maxAttempts: 3 },
@@ -60,4 +60,4 @@ export async function buildGraph() {
   ]);
 
   return workflow.compile({ checkpointer, store });
-}
+};

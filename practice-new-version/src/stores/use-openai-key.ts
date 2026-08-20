@@ -4,10 +4,10 @@ const STORAGE_KEY = "openai_api_key";
 
 // Read directly (not via store state) by anything needing the key outside React,
 // e.g. CopilotKit's `headers` callback and plain fetch() calls.
-export function readStoredOpenAiKey(): string | null {
+export const readStoredOpenAiKey = (): string | null => {
   if (typeof window === "undefined") return null;
   return window.localStorage.getItem(STORAGE_KEY);
-}
+};
 
 interface OpenAiKeyState {
   apiKey: string | null;

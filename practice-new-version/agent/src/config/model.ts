@@ -14,7 +14,7 @@ export class MissingApiKeyError extends Error {
 
 // BYOK: CopilotKit forwards the visitor's key via config.configurable.copilotkit_forwarded_headers.
 // Falls back to process.env.OPENAI_API_KEY when unset (e.g. running from LangSmith Studio).
-export function getApiKeyFromConfig(config: LangGraphRunnableConfig): string {
+export const getApiKeyFromConfig = (config: LangGraphRunnableConfig): string => {
   const headers = config.configurable?.copilotkit_forwarded_headers as
     | Record<string, string>
     | undefined;
@@ -24,26 +24,26 @@ export function getApiKeyFromConfig(config: LangGraphRunnableConfig): string {
   const resolved = key ?? process.env.OPENAI_API_KEY;
   if (!resolved) throw new MissingApiKeyError();
   return resolved;
-}
+};
 
 // One tool call per turn, which the router relies on.
-export function getModelForConfig(config: LangGraphRunnableConfig): ChatOpenAI {
+export const getModelForConfig = (config: LangGraphRunnableConfig): ChatOpenAI => {
   return new ChatOpenAI({
     model: MODEL,
     apiKey: getApiKeyFromConfig(config),
     modelKwargs: { parallel_tool_calls: false },
   });
-}
+};
 
 // No tool kwargs — withStructuredOutput 400s if parallel_tool_calls rides along.
-export function getPlainModelForConfig(config: LangGraphRunnableConfig): ChatOpenAI {
+export const getPlainModelForConfig = (config: LangGraphRunnableConfig): ChatOpenAI => {
   return new ChatOpenAI({ model: MODEL, apiKey: getApiKeyFromConfig(config) });
-}
+};
 
 // Embeddings for RAG queries against the shared pgvector knowledge base.
-export function getEmbeddingsForConfig(config: LangGraphRunnableConfig): OpenAIEmbeddings {
+export const getEmbeddingsForConfig = (config: LangGraphRunnableConfig): OpenAIEmbeddings => {
   return new OpenAIEmbeddings({ model: EMBEDDING_MODEL, apiKey: getApiKeyFromConfig(config) });
-}
+};
 
 // These internal structured-output calls are classifier/drafting steps, not chat replies — hide
 // their forced tool calls from the chat UI.
@@ -55,7 +55,7 @@ export const hidden = (config: LangGraphRunnableConfig) =>
 
 // Server-side key used ONLY to seed the shared KB at startup (rag/index.ts's ensureIndexed),
 // before any visitor request exists to pull a key from. May be unset once already seeded.
-export function getServerEmbeddings(): OpenAIEmbeddings | undefined {
+export const getServerEmbeddings = (): OpenAIEmbeddings | undefined => {
   const apiKey = process.env.OPENAI_API_KEY;
   return apiKey ? new OpenAIEmbeddings({ model: EMBEDDING_MODEL, apiKey }) : undefined;
-}
+};

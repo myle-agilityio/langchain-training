@@ -23,7 +23,7 @@ interface AgentWithMessages {
 
 // AG-UI user message content is either a plain string or an array of parts (text/image, for
 // attachments) — pull the first text part out of either shape.
-function firstUserMessageText(agent: AgentWithMessages): string | undefined {
+const firstUserMessageText = (agent: AgentWithMessages): string | undefined => {
   const { content } = agent.messages.find((m) => m.role === "user") ?? {};
   if (typeof content === "string") return content;
   if (Array.isArray(content)) {
@@ -36,7 +36,7 @@ function firstUserMessageText(agent: AgentWithMessages): string | undefined {
     return textPart?.text;
   }
   return undefined;
-}
+};
 
 // Stands in for CopilotKit's <CopilotThreadsDrawer>/useThreads (Intelligence mode drops runs
 // in prod). History survives via the Postgres checkpointer; this just adds list/rename/delete UI.
@@ -97,7 +97,7 @@ export const useSelfManagedThreads = create<SelfManagedThreadsState>(
 
 // Keeps the store in sync with the agent's run lifecycle; call once from a
 // component inside CopilotChatConfigurationProvider.
-export function useSyncSelfManagedThreadsWithAgent() {
+export const useSyncSelfManagedThreadsWithAgent = () => {
   // updates: [] — only need the agent handle to subscribe to run completion below.
   const { agent } = useAgent({ updates: [] });
   const config = useCopilotChatConfiguration();
@@ -139,4 +139,4 @@ export function useSyncSelfManagedThreadsWithAgent() {
     });
     return unsubscribe;
   }, [agent, refresh]);
-}
+};

@@ -14,15 +14,15 @@ const CLASSIFICATION_GUIDE = `
     low for FYI mail with no action attached.
 `;
 
-function classificationInstructions(): string {
+const classificationInstructions = (): string => {
   return (
     `Classify this email from a high school mathematics teacher's inbox. The teacher ` +
     `teaches Grade 11 math (algebra 2 / precalculus) and Grade 12 math (calculus).\n` +
     `${CLASSIFICATION_GUIDE}`
   );
-}
+};
 
 // Used by classify_emails — plain classification, no research decision attached.
-export function classifyPrompt(email: Email): string {
+export const classifyPrompt = (email: Email): string => {
   return `${classificationInstructions()}\n\n${renderEmail(email)}`;
-}
+};

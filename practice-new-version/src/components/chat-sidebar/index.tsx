@@ -15,7 +15,7 @@ const MAX_WIDTH = 640;
 
 // Collapsible, resizable chat sidebar on the right; EmailInbox is now the main/left content,
 // so this just needs its own drag handle on its left edge, not a 50/50 split.
-export function ChatSidebar({ threadsMenu, children }: ChatSidebarProps) {
+export const ChatSidebar = ({ threadsMenu, children }: ChatSidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const [width, setWidth] = useState(DEFAULT_WIDTH);
   const [isResizing, setIsResizing] = useState(false);
@@ -139,4 +139,4 @@ export function ChatSidebar({ threadsMenu, children }: ChatSidebarProps) {
       </div>
     </>
   );
-}
+};

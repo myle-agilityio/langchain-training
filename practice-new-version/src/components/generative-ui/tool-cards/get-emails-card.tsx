@@ -14,11 +14,11 @@ interface RedactedEmail {
 
 const MAX_ROWS = 4;
 
-export function GetEmailsCard({
+export const GetEmailsCard = ({
   status,
   parameters,
   result,
-}: ToolCardProps<{ filter?: EmailFilterArgs }>) {
+}: ToolCardProps<{ filter?: EmailFilterArgs }>) => {
   const filter = parameters.filter ?? {};
   const data = parseResult<{ emails: RedactedEmail[]; count: number }>(result);
 
@@ -69,4 +69,4 @@ export function GetEmailsCard({
       )}
     </Shell>
   );
-}
+};

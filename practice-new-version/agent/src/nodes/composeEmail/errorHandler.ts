@@ -5,10 +5,10 @@ import type { AgentStateShape } from "@/types/index";
 import { findReplyCall } from "@/utils/index";
 
 // Handles errors during email composition
-export function composeEmailErrorHandler(
+export const composeEmailErrorHandler = (
   state: AgentStateShape,
   error: NodeError,
-) {
+) => {
   console.error(`[compose_email] failed after retries: ${error.error.message}`);
   const call = findReplyCall(state.messages);
   return new Command({
@@ -26,4 +26,4 @@ export function composeEmailErrorHandler(
     },
     goto: END,
   });
-}
+};

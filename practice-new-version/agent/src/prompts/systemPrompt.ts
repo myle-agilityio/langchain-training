@@ -93,10 +93,10 @@ export const SYSTEM_PROMPT = `
 
 // Appended fresh per call, not baked into SYSTEM_PROMPT, so date/weekday reasoning (relative
 // filters, "imminent deadline") stays live instead of freezing at import time.
-export function currentDateLine(now = new Date()): string {
+export const currentDateLine = (now = new Date()): string => {
   const weekday = now.toLocaleDateString("en-US", {
     weekday: "long",
     timeZone: "UTC",
   });
   return `\n\nToday is ${now.toISOString().slice(0, 10)} (${weekday}), in UTC.`;
-}
+};

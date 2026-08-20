@@ -13,6 +13,4 @@ export const MODERATION_GUIDE = `
   filler. When not flagging, leave declineMessage null — don't generate one.
 `;
 
-export function moderationPrompt(): string {
-  return MODERATION_GUIDE;
-}
+export const moderationPrompt = (): string => MODERATION_GUIDE;

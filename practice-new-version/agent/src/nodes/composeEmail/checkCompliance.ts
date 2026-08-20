@@ -8,13 +8,13 @@ import {
 } from "@/types/index";
 
 // Independent guardrail on every draft (tone, policy, PII) — advisory only, teacher decides.
-export async function checkCompliance(
+export const checkCompliance = async (
   state: ComposeEmailStateShape,
   config: LangGraphRunnableConfig,
-) {
+) => {
   const draft = state.draft!;
   const compliance = await getPlainModelForConfig(config)
     .withStructuredOutput(ComplianceCheckSchema)
     .invoke(checkCompliancePrompt(draft), hidden(config));
   return { compliance };
-}
+};

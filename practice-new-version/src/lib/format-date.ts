@@ -10,7 +10,7 @@ const relativeTimeFormat = new Intl.RelativeTimeFormat(undefined, {
   numeric: "always",
 });
 
-export function formatReceivedAt(iso: string, now: Date = new Date()): string {
+export const formatReceivedAt = (iso: string, now: Date = new Date()): string => {
   const d = new Date(iso);
   if (!isValid(d)) return "";
 
@@ -23,14 +23,14 @@ export function formatReceivedAt(iso: string, now: Date = new Date()): string {
   return d.getFullYear() === now.getFullYear()
     ? format(d, "MMM d")
     : format(d, "MMM d, yyyy");
-}
+};
 
-export function formatReceivedAtFull(iso: string): string {
+export const formatReceivedAtFull = (iso: string): string => {
   const d = new Date(iso);
   return isValid(d) ? d.toLocaleString() : "";
-}
+};
 
-export function formatRelative(iso: string, now: Date = new Date()): string {
+export const formatRelative = (iso: string, now: Date = new Date()): string => {
   const d = new Date(iso);
   if (!isValid(d)) return "";
 
@@ -40,4 +40,4 @@ export function formatRelative(iso: string, now: Date = new Date()): string {
   const hours = Math.round(minutes / 60);
   if (hours < 24) return relativeTimeFormat.format(-hours, "hour");
   return relativeTimeFormat.format(-Math.round(hours / 24), "day");
-}
+};

@@ -34,7 +34,7 @@ interface FilterDialogProps {
   onApply: (filters: EmailFilters) => void;
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+const Field = ({ label, children }: { label: string; children: React.ReactNode }) => {
   return (
     <label className="block">
       <span className="block text-xs font-medium text-[var(--muted-foreground)] mb-1">
@@ -43,9 +43,9 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       {children}
     </label>
   );
-}
+};
 
-export function FilterDialog({ open, onOpenChange, filters, onApply }: FilterDialogProps) {
+export const FilterDialog = ({ open, onOpenChange, filters, onApply }: FilterDialogProps) => {
   // Draft state so Cancel/closing without Apply doesn't touch the active filters.
   const [draft, setDraft] = useState<EmailFilters>(filters);
 
@@ -221,4 +221,4 @@ export function FilterDialog({ open, onOpenChange, filters, onApply }: FilterDia
       </DialogContent>
     </Dialog>
   );
-}
+};

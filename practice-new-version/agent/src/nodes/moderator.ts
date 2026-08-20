@@ -19,10 +19,10 @@ const moderationPromptTemplate = ChatPromptTemplate.fromMessages([
 
 // Flags unsafe/abusive chat input before it reaches call_model. Distinct from SCOPE_GUIDE
 // (capability boundaries, checked inline in call_model) and check_compliance (drafted replies).
-export async function moderator(
+export const moderator = async (
   state: AgentStateShape,
   config: LangGraphRunnableConfig,
-) {
+) => {
   const last = state.messages[state.messages.length - 1];
   if (!HumanMessage.isInstance(last)) return { blocked: false };
 
@@ -64,9 +64,7 @@ export async function moderator(
       }),
     ],
   };
-}
+};
 
 // Routes to call_model or ends if the message was flagged
-export function afterModeration(state: AgentStateShape) {
-  return state.blocked ? END : "call_model";
-}
+export const afterModeration = (state: AgentStateShape) => state.blocked ? END : "call_model";

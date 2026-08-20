@@ -5,13 +5,13 @@ import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 
 const splitter = new RecursiveCharacterTextSplitter({ chunkSize: 800, chunkOverlap: 100 });
 
-function titleFromFilename(file: string): string {
+const titleFromFilename = (file: string): string => {
   return basename(file, extname(file))
     .replace(/[-_]+/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
-}
+};
 
-async function loadFile(filePath: string): Promise<Document[]> {
+const loadFile = async (filePath: string): Promise<Document[]> => {
   switch (extname(filePath).toLowerCase()) {
     case ".pdf": {
       const { PDFLoader } = await import("@langchain/community/document_loaders/fs/pdf");
@@ -30,11 +30,11 @@ async function loadFile(filePath: string): Promise<Document[]> {
     default:
       throw new Error(`Unsupported KB file type: ${filePath}`);
   }
-}
+};
 
 // Loads every file in `dir` (PDF/DOCX/DOC/CSV), titles each from its filename, and chunks for
 // embedding — mirrors the seed articles' {title, content} shape so searchKnowledge needs no changes.
-export async function loadDirectoryAsChunks(dir: string): Promise<Document[]> {
+export const loadDirectoryAsChunks = async (dir: string): Promise<Document[]> => {
   const files = await readdir(dir);
   const docs: Document[] = [];
   for (const file of files) {
@@ -45,4 +45,4 @@ export async function loadDirectoryAsChunks(dir: string): Promise<Document[]> {
     docs.push(...loaded);
   }
   return splitter.splitDocuments(docs);
-}
+};

@@ -3,7 +3,7 @@ import { renderEmail } from "@/utils/index";
 
 // Used by the compose subgraph's triage node, after classification is already on file (fresh or
 // pre-existing) — decides only the KB-research routing, not classification again.
-export function needsResearchPrompt(email: Email): string {
+export const needsResearchPrompt = (email: Email): string => {
   return (
     `Decide whether drafting a reply to this email needs to ground itself in school policy or ` +
     `curriculum. Set needsResearch: true when it does (late-work/re-grade policy, absence/makeup ` +
@@ -12,7 +12,7 @@ export function needsResearchPrompt(email: Email): string {
     `to ground (e.g. a scheduling ack, a plain FYI, a yes/no with nothing at stake).\n\n` +
     `${renderEmail(email)}`
   );
-}
+};
 
 // Used by checkCompliancePrompt, a guardrail run on every draft before the approval card —
 // defense in depth alongside draftPrompt's own "never promise a grade change" instruction.
@@ -25,10 +25,10 @@ const COMPLIANCE_GUIDE = `
   - A phone number, home address, or email address that doesn't belong in a reply.
 `;
 
-export function checkCompliancePrompt(draft: {
+export const checkCompliancePrompt = (draft: {
   subject: string;
   body: string;
-}): string {
+}): string => {
   return (
     `Check this drafted email reply for compliance issues before the teacher approves it.\n` +
     `Flag it (compliant: false) if it does any of the following:\n${COMPLIANCE_GUIDE}\n` +
@@ -36,15 +36,15 @@ export function checkCompliancePrompt(draft: {
     `compliant: true if none apply.\n\n` +
     `Subject: ${draft.subject}\n\nBody:\n${draft.body}`
   );
-}
+};
 
-export function draftPrompt(args: {
+export const draftPrompt = (args: {
   email: Email;
   kbContext: string;
   senderContext: string;
   revisionNotes: string;
   previousDraft?: { subject: string; body: string };
-}): string {
+}): string => {
   return `You are drafting a reply on behalf of a high school mathematics teacher. Write as the teacher, in first person.
 
     Rules:
@@ -68,4 +68,4 @@ export function draftPrompt(args: {
     ${args.senderContext ? `\nWhat we know about the sender:\n${args.senderContext}\n` : ""}
     Email to reply to:
     ${renderEmail(args.email)}`;
-}
+};

@@ -11,10 +11,10 @@ import { ClassificationSchema } from "@/types/index";
 
 // Exported so graph nodes classify by calling this directly — invoking the tool from inside a
 // node emits AG-UI TOOL_CALL events with no toolCallId, which kills the client event stream.
-export async function classifyEmail(
+export const classifyEmail = async (
   id: string,
   config: LangGraphRunnableConfig,
-) {
+) => {
   const email = await getEmail(id);
   if (!email) return { id, ok: false as const, error: "no such email" };
   try {
@@ -38,12 +38,12 @@ export async function classifyEmail(
       error: error instanceof Error ? error.message : String(error),
     };
   }
-}
+};
 
-async function classifyEmailsBatched(
+const classifyEmailsBatched = async (
   ids: string[],
   config: LangGraphRunnableConfig,
-) {
+) => {
   const results: Awaited<ReturnType<typeof classifyEmail>>[] = [];
   for (let i = 0; i < ids.length; i += CLASSIFY_CONCURRENCY) {
     const chunk = ids.slice(i, i + CLASSIFY_CONCURRENCY);
@@ -52,7 +52,7 @@ async function classifyEmailsBatched(
     );
   }
   return results;
-}
+};
 
 // Classifies by reading each email's real content itself, so the caller only ever passes ids —
 // never fields it might have guessed. One structured-output call per email, run in bounded-concurrency batches.

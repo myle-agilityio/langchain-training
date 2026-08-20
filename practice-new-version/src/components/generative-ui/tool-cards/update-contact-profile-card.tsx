@@ -10,11 +10,11 @@ interface ProfileResult {
   error?: string;
 }
 
-export function UpdateContactProfileCard({
+export const UpdateContactProfileCard = ({
   status,
   parameters,
   result,
-}: ToolCardProps<{ sender: string; tone?: string; facts?: string[] }>) {
+}: ToolCardProps<{ sender: string; tone?: string; facts?: string[] }>) => {
   const data = parseResult<ProfileResult>(result);
 
   return (
@@ -61,4 +61,4 @@ export function UpdateContactProfileCard({
       )}
     </Shell>
   );
-}
+};

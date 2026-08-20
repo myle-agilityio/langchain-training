@@ -32,7 +32,7 @@ const c = {
   btnDoneBg: "color-mix(in srgb, #22c55e 10%, var(--card))",
 };
 
-function ActionButton({
+const ActionButton = ({
   label,
   doneLabel,
   action,
@@ -42,7 +42,7 @@ function ActionButton({
   doneLabel: string;
   action: any;
   children?: React.ReactNode;
-}) {
+}) => {
   const [done, setDone] = useState(false);
   return (
     <button
@@ -87,7 +87,7 @@ function ActionButton({
       {done ? doneLabel : (child ?? label)}
     </button>
   );
-}
+};
 
 // ─── Renderers (type-checked against schema definitions) ────────────
 

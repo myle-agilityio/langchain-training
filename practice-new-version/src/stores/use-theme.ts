@@ -14,7 +14,7 @@ export const useTheme = create<ThemeState>((set) => ({
 }));
 
 // Applies the active theme to <html>; call once near the app root.
-export function useSyncTheme() {
+export const useSyncTheme = () => {
   const theme = useTheme((state) => state.theme);
 
   useEffect(() => {
@@ -34,4 +34,4 @@ export function useSyncTheme() {
 
     root.classList.add(theme);
   }, [theme]);
-}
+};

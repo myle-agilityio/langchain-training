@@ -9,14 +9,14 @@ const PHONE_RE = /(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]\d{3}[-.\s]\d{4}\b/g;
 
 // Strips emails/addresses/phone numbers before text reaches any model call — renderEmail is the
 // one place every prompt pulls email content from, so scrubbing here covers all of them.
-export function redactSensitiveInfo(text: string): string {
+export const redactSensitiveInfo = (text: string): string => {
   return text
     .replace(EMAIL_RE, "[redacted email]")
     .replace(ADDRESS_RE, "[redacted address]")
     .replace(PHONE_RE, "[redacted phone]");
-}
+};
 
-export function renderEmail(email: Email): string {
+export const renderEmail = (email: Email): string => {
   return redactSensitiveInfo(
     [
       `From: ${email.from.name} <${email.from.email}>`,
@@ -26,11 +26,11 @@ export function renderEmail(email: Email): string {
       email.body,
     ].join("\n"),
   );
-}
+};
 
 // get_emails' structured counterpart to renderEmail — the ToolMessage stays in history and is
 // replayed every turn, so it needs the same scrubbing. Keeps the sender's name, drops the address.
-export function redactEmailForModel(email: Email): Omit<Email, "from"> & { from: { name: string } } {
+export const redactEmailForModel = (email: Email): Omit<Email, "from"> & { from: { name: string } } => {
   const { from, ...rest } = email;
   return {
     ...rest,
@@ -47,4 +47,4 @@ export function redactEmailForModel(email: Email): Omit<Email, "from"> & { from:
         }
       : {}),
   };
-}
+};

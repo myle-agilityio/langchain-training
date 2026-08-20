@@ -23,13 +23,13 @@ interface EmailDetailProps {
   agentBusy: boolean;
 }
 
-export function EmailDetail({
+export const EmailDetail = ({
   email,
   isLoading,
   onSendReply,
   onAskAgent,
   agentBusy,
-}: EmailDetailProps) {
+}: EmailDetailProps) => {
   const [composing, setComposing] = useState(false);
 
   useEffect(() => {
@@ -137,4 +137,4 @@ export function EmailDetail({
       </div>
     </div>
   );
-}
+};

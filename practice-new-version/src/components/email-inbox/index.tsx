@@ -8,7 +8,7 @@ import { InboxList } from "./inbox-list";
 import { EmailDetail } from "./email-detail";
 import { FilterDialog } from "./filter-dialog";
 
-export function EmailInbox() {
+export const EmailInbox = () => {
   const { emails, isLoading, isRefreshing, refresh, patchEmail, patchEmails } = useSharedInbox();
   const { agent } = useAgent();
   // Run through the CopilotKit core, not agent.runAgent() directly — same interrupt-aware path
@@ -204,4 +204,4 @@ export function EmailInbox() {
       </div>
     </div>
   );
-}
+};

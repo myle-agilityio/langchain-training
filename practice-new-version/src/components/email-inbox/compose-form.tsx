@@ -7,7 +7,7 @@ interface ComposeFormProps {
   onCancel: () => void;
 }
 
-export function ComposeForm({ initialSubject, onSend, onCancel }: ComposeFormProps) {
+export const ComposeForm = ({ initialSubject, onSend, onCancel }: ComposeFormProps) => {
   const [subject, setSubject] = useState(initialSubject);
   const [body, setBody] = useState("");
 
@@ -40,4 +40,4 @@ export function ComposeForm({ initialSubject, onSend, onCancel }: ComposeFormPro
       </div>
     </div>
   );
-}
+};
