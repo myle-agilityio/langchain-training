@@ -31,12 +31,12 @@ export const UpdateContactProfileCard = ({
         <Failure text={data.error ?? "Could not save"} />
       ) : (
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-[var(--foreground)]">
+          <p className="text-xs font-semibold text-foreground">
             {data.profile.name}
           </p>
           {data.profile.tone && (
             <div className="flex items-center gap-1.5">
-              <span className="text-[11px] text-[var(--muted-foreground)]">
+              <span className="text-[11px] text-muted-foreground">
                 Tone
               </span>
               <Badge variant="secondary" className="text-[10px] font-normal">
@@ -49,9 +49,9 @@ export const UpdateContactProfileCard = ({
               {data.profile.facts.map((fact) => (
                 <li
                   key={fact}
-                  className="flex gap-1.5 text-[11px] text-[var(--muted-foreground)]"
+                  className="flex gap-1.5 text-[11px] text-muted-foreground"
                 >
-                  <span className="text-[var(--tone-green)]">•</span>
+                  <span className="text-tone-green">•</span>
                   {fact}
                 </li>
               ))}

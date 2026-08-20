@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input, Textarea } from "@/components/ui/field";
 import { Mail, Check, X, TriangleAlert } from "lucide-react";
 import { useSharedInbox } from "@/stores/use-shared-inbox";
 
@@ -78,14 +79,14 @@ export const EmailReplyCard = ({
       <Card className="max-w-md w-full mx-auto mb-4 overflow-hidden">
         <CardContent className="p-6">
           <div className="flex flex-col items-center text-center gap-3">
-            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-[#189370]">
+            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-tone-green">
               <Check className="h-5 w-5 text-white" strokeWidth={3} />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-[var(--foreground)]">
+              <h3 className="text-lg font-bold text-foreground">
                 Reply sent
               </h3>
-              <p className="text-sm text-[var(--muted-foreground)] mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 {subject}
               </p>
             </div>
@@ -100,14 +101,14 @@ export const EmailReplyCard = ({
       <Card className="max-w-md w-full mx-auto mb-4 overflow-hidden">
         <CardContent className="p-6">
           <div className="flex flex-col items-center text-center gap-3">
-            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-[var(--secondary)]">
-              <X className="h-6 w-6 text-[var(--muted-foreground)]" />
+            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-secondary">
+              <X className="h-6 w-6 text-muted-foreground" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-[var(--foreground)]">
+              <h3 className="text-lg font-bold text-foreground">
                 Reply rejected
               </h3>
-              <p className="text-sm text-[var(--muted-foreground)] mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Nothing was sent.
               </p>
             </div>
@@ -121,14 +122,14 @@ export const EmailReplyCard = ({
     <Card className="max-w-md w-full mx-auto mb-4 overflow-hidden">
       <CardContent className="p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="flex items-center justify-center h-9 w-9 rounded-full bg-[var(--accent)] shrink-0">
-            <Mail className="h-4 w-4 text-[#BEC2FF]" />
+          <div className="flex items-center justify-center h-9 w-9 rounded-full bg-accent shrink-0">
+            <Mail className="h-4 w-4 text-ring" />
           </div>
           <div className="min-w-0">
-            <h3 className="text-base font-bold text-[var(--foreground)]">
+            <h3 className="text-base font-bold text-foreground">
               Review reply
             </h3>
-            <p className="text-xs text-[var(--muted-foreground)]">
+            <p className="text-xs text-muted-foreground">
               Editable before sending
             </p>
           </div>
@@ -138,13 +139,13 @@ export const EmailReplyCard = ({
         </div>
 
         {status === "inProgress" ? (
-          <div className="text-sm text-[var(--muted-foreground)]">
+          <div className="text-sm text-muted-foreground">
             Drafting reply…
           </div>
         ) : (
           <div className="space-y-3">
             {compliance && !compliance.compliant && (
-              <div className="flex gap-2 rounded-[var(--radius)] border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-400">
+              <div className="flex gap-2 rounded-xl border border-tone-amber/30 bg-tone-amber/10 px-3 py-2 text-xs text-tone-amber">
                 <TriangleAlert className="h-4 w-4 shrink-0 mt-0.5" />
                 <div>
                   <p className="font-medium">Compliance check flagged this draft</p>
@@ -156,22 +157,17 @@ export const EmailReplyCard = ({
                 </div>
               </div>
             )}
-            <input
+            <Input
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               disabled={status !== "executing"}
-              className="w-full rounded-[var(--radius)] border border-[var(--border)]
-                bg-[var(--background)] px-3 py-2 text-sm font-medium
-                text-[var(--foreground)] disabled:opacity-70"
+              className="font-medium"
             />
-            <textarea
+            <Textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
               disabled={status !== "executing"}
               rows={6}
-              className="w-full rounded-[var(--radius)] border border-[var(--border)]
-                bg-[var(--background)] px-3 py-2 text-sm resize-none
-                text-[var(--foreground)] disabled:opacity-70"
             />
             <div className="flex gap-2 justify-end">
               <Button

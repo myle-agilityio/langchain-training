@@ -66,20 +66,20 @@ export const ChatSidebar = ({ threadsMenu, children }: ChatSidebarProps) => {
           size="icon"
           onClick={() => setCollapsed(false)}
           aria-label="Open chat"
-          className="fixed top-4 right-4 z-50 bg-[var(--card)] shadow-sm"
+          className="fixed top-4 right-4 z-50 bg-card shadow-sm"
         >
           <PanelRightOpen className="h-4 w-4" />
         </Button>
       )}
       <div
         className={[
-          "fixed inset-0 z-40 flex h-full flex-col bg-[var(--background)] dark:bg-stone-950",
+          "fixed inset-0 z-40 flex h-full flex-col bg-background",
           isResizing ? "" : "transition-transform duration-200 ease-in-out",
           collapsed ? "translate-x-full" : "translate-x-0",
-          "lg:relative lg:z-auto lg:translate-x-0 lg:rounded-[var(--radius)] lg:border lg:border-[var(--border)] lg:bg-[var(--card)]",
+          "lg:relative lg:z-auto lg:translate-x-0 lg:rounded-xl lg:border lg:border-border lg:bg-card",
           isResizing ? "" : "lg:transition-[width] lg:duration-200 lg:ease-in-out",
           "lg:overflow-hidden",
-          collapsed ? "lg:w-0 lg:border-0" : "lg:w-[var(--chat-sidebar-width)]",
+          collapsed ? "lg:w-0 lg:border-0" : "lg:w-(--chat-sidebar-width)",
         ].join(" ")}
         style={{ "--chat-sidebar-width": `${width}px` } as CSSProperties}
       >
@@ -112,10 +112,10 @@ export const ChatSidebar = ({ threadsMenu, children }: ChatSidebarProps) => {
             }}
             className="hidden lg:block absolute left-0 inset-y-0 z-10 w-1.5 -translate-x-1/2 cursor-col-resize touch-none group focus:outline-none"
           >
-            <span className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-transparent transition-colors group-hover:bg-[var(--muted-foreground)] group-focus:bg-[var(--muted-foreground)]" />
+            <span className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-transparent transition-colors group-hover:bg-muted-foreground group-focus:bg-muted-foreground" />
           </div>
         )}
-        <div className="flex h-full w-full flex-col lg:w-[var(--chat-sidebar-width)]">
+        <div className="flex h-full w-full flex-col lg:w-(--chat-sidebar-width)">
           <div className="shrink-0 flex items-center justify-between gap-2 px-4 pt-4 pb-2">
             <div className="flex items-center gap-1.5 min-w-0">
               <span className="font-extrabold text-xl truncate">CopilotKit</span>

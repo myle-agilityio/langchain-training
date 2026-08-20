@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { ComposeForm } from "./compose-form";
 import {
   COURSE_LABEL,
+  STATUS_TONE,
   TOPIC_LABEL,
   TOPIC_TONE,
   URGENCY_TONE,
+  URGENCY_VARIANT,
   WORK_TYPE_LABEL,
-} from "./inbox-list";
+} from "@/constants";
 import { formatReceivedAtFull } from "@/lib/format-date";
 import { Mail, Sparkles } from "lucide-react";
 
@@ -39,8 +41,8 @@ export const EmailDetail = ({
   if (!email) {
     return (
       <div className="h-full flex flex-col items-center justify-center gap-3 text-center px-6">
-        <Mail className="h-8 w-8 text-[var(--muted-foreground)]" />
-        <p className="text-sm text-[var(--muted-foreground)]">
+        <Mail className="h-8 w-8 text-muted-foreground" />
+        <p className="text-sm text-muted-foreground">
           {isLoading ? "Loading inbox…" : "Select an email to read it"}
         </p>
       </div>
@@ -52,11 +54,11 @@ export const EmailDetail = ({
     // appears in this corner when the sidebar is collapsed and the inbox goes full-width.
     <div className="mx-auto px-8 pb-8 pt-20">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
           {email.subject}
         </h1>
-        <div className="flex flex-wrap items-center gap-2 mt-3 text-sm text-[var(--muted-foreground)]">
-          <span className="font-medium text-[var(--foreground)]">
+        <div className="flex flex-wrap items-center gap-2 mt-3 text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">
             {email.from.name}
           </span>
           <span>&lt;{email.from.email}&gt;</span>
@@ -84,7 +86,7 @@ export const EmailDetail = ({
               </Badge>
             )}
             <Badge
-              variant={email.classification.urgency === "high" ? "toneSolid" : "tone"}
+              variant={URGENCY_VARIANT[email.classification.urgency]}
               className={URGENCY_TONE[email.classification.urgency]}
             >
               {email.classification.urgency} urgency
@@ -93,21 +95,21 @@ export const EmailDetail = ({
         )}
       </div>
 
-      <p className="text-[15px] leading-relaxed whitespace-pre-wrap text-[var(--foreground)]">
+      <p className="text-[15px] leading-relaxed whitespace-pre-wrap text-foreground">
         {email.body}
       </p>
 
-      <div className="mt-10 pt-8 border-t border-[var(--border)]">
+      <div className="mt-10 pt-8 border-t border-border">
         {email.reply ? (
-          <div className="tone-green">
-            <p className="text-xs font-semibold text-[var(--tone)] mb-2">
+          <div className={STATUS_TONE.replied}>
+            <p className="text-xs font-semibold text-(color:--tone) mb-2">
               Your reply — sent {new Date(email.reply.sentAt).toLocaleString()}
             </p>
-            <div className="rounded-[var(--radius)] border border-[color-mix(in_srgb,var(--tone)_28%,transparent)] bg-[color-mix(in_srgb,var(--tone)_8%,var(--background))] p-5 shadow-sm">
-              <p className="text-sm font-medium text-[var(--foreground)]">
+            <div className="rounded-xl border border-(--tone)/30 bg-(--tone)/10 p-5 shadow-sm">
+              <p className="text-sm font-medium text-foreground">
                 {email.reply.subject}
               </p>
-              <p className="text-sm mt-2 whitespace-pre-wrap text-[var(--foreground)]">
+              <p className="text-sm mt-2 whitespace-pre-wrap text-foreground">
                 {email.reply.body}
               </p>
             </div>

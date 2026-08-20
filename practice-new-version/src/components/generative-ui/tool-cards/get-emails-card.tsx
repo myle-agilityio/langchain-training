@@ -28,12 +28,12 @@ export const GetEmailsCard = ({
       {!data ? (
         <Pending label="Fetching emails…" />
       ) : data.count === 0 ? (
-        <p className="text-xs text-[var(--muted-foreground)]">
+        <p className="text-xs text-muted-foreground">
           No emails matched.
         </p>
       ) : (
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-[var(--foreground)]">
+          <p className="text-xs font-semibold text-foreground">
             {data.count} {data.count === 1 ? "email" : "emails"}
           </p>
           <div className="space-y-2">
@@ -41,10 +41,10 @@ export const GetEmailsCard = ({
               <div key={email.id} className="min-w-0">
                 <div className="flex min-w-0 items-center gap-1.5">
                   <span className="min-w-0 truncate text-xs">
-                    <span className="font-semibold text-[var(--foreground)]">
+                    <span className="font-semibold text-foreground">
                       {email.from.name}
                     </span>
-                    <span className="text-[var(--muted-foreground)]">
+                    <span className="text-muted-foreground">
                       {" "}
                       · {email.subject}
                     </span>
@@ -61,7 +61,7 @@ export const GetEmailsCard = ({
             ))}
           </div>
           {data.emails.length > MAX_ROWS && (
-            <p className="text-[11px] text-[var(--muted-foreground)]">
+            <p className="text-[11px] text-muted-foreground">
               +{data.emails.length - MAX_ROWS} more
             </p>
           )}

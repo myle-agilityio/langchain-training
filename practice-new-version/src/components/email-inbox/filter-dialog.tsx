@@ -2,30 +2,15 @@ import { useEffect, useState } from "react";
 import type { Course, EmailStatus, EmailTopic, Urgency, WorkType } from "@/types/email";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { COURSE_LABEL, TOPIC_LABEL, WORK_TYPE_LABEL } from "./inbox-list";
+import { Field, Input, Select } from "@/components/ui/field";
+import {
+  COURSE_LABEL,
+  STATUS_LABEL,
+  TOPIC_LABEL,
+  URGENCY_LABEL,
+  WORK_TYPE_LABEL,
+} from "@/constants";
 import { EMPTY_FILTERS, type EmailFilters } from "@/lib/email-filters";
-
-const URGENCY_LABEL: Record<Urgency, string> = {
-  high: "High",
-  medium: "Medium",
-  low: "Low",
-};
-
-const STATUS_LABEL: Record<EmailStatus, string> = {
-  unread: "Unread",
-  read: "Read",
-  replied: "Replied",
-  flagged_for_followup: "Follow up",
-};
-
-// Native <select> popups don't reliably inherit CSS custom properties like the closed control
-// does — "bg-transparent" left white-on-white in dark mode; color-scheme fixes the fallback.
-const selectClassName =
-  "flex h-9 w-full rounded-[var(--radius)] border border-[var(--input)] bg-[var(--background)] " +
-  "text-[var(--foreground)] px-3 text-sm shadow-sm transition-colors focus-visible:outline-none " +
-  "focus-visible:ring-2 focus-visible:ring-[var(--ring)] [color-scheme:light_dark]";
-const optionClassName = "bg-[var(--background)] text-[var(--foreground)]";
 
 interface FilterDialogProps {
   open: boolean;
@@ -33,17 +18,6 @@ interface FilterDialogProps {
   filters: EmailFilters;
   onApply: (filters: EmailFilters) => void;
 }
-
-const Field = ({ label, children }: { label: string; children: React.ReactNode }) => {
-  return (
-    <label className="block">
-      <span className="block text-xs font-medium text-[var(--muted-foreground)] mb-1">
-        {label}
-      </span>
-      {children}
-    </label>
-  );
-};
 
 export const FilterDialog = ({ open, onOpenChange, filters, onApply }: FilterDialogProps) => {
   // Draft state so Cancel/closing without Apply doesn't touch the active filters.
@@ -77,89 +51,84 @@ export const FilterDialog = ({ open, onOpenChange, filters, onApply }: FilterDia
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <Field label="Status">
-              <select
+              <Select
                 value={draft.status ?? ""}
                 onChange={(e) => set("status", (e.target.value || undefined) as EmailStatus)}
-                className={selectClassName}
               >
-                <option value="" className={optionClassName}>
+                <option value="">
                   Any
                 </option>
                 {(Object.keys(STATUS_LABEL) as EmailStatus[]).map((s) => (
-                  <option key={s} value={s} className={optionClassName}>
+                  <option key={s} value={s}>
                     {STATUS_LABEL[s]}
                   </option>
                 ))}
-              </select>
+              </Select>
             </Field>
             <Field label="Urgency">
-              <select
+              <Select
                 value={draft.urgency ?? ""}
                 onChange={(e) => set("urgency", (e.target.value || undefined) as Urgency)}
-                className={selectClassName}
               >
-                <option value="" className={optionClassName}>
+                <option value="">
                   Any
                 </option>
                 {(Object.keys(URGENCY_LABEL) as Urgency[]).map((u) => (
-                  <option key={u} value={u} className={optionClassName}>
+                  <option key={u} value={u}>
                     {URGENCY_LABEL[u]}
                   </option>
                 ))}
-              </select>
+              </Select>
             </Field>
             <Field label="Grade">
-              <select
+              <Select
                 value={draft.course ?? ""}
                 onChange={(e) => set("course", (e.target.value || undefined) as Course)}
-                className={selectClassName}
               >
-                <option value="" className={optionClassName}>
+                <option value="">
                   Any
                 </option>
-                <option value="math_11" className={optionClassName}>
+                <option value="math_11">
                   {COURSE_LABEL.math_11}
                 </option>
-                <option value="math_12" className={optionClassName}>
+                <option value="math_12">
                   {COURSE_LABEL.math_12}
                 </option>
-              </select>
+              </Select>
             </Field>
             <Field label="Type">
-              <select
+              <Select
                 value={draft.topic ?? ""}
                 onChange={(e) => set("topic", (e.target.value || undefined) as EmailTopic)}
-                className={selectClassName}
               >
-                <option value="" className={optionClassName}>
+                <option value="">
                   Any
                 </option>
                 {(Object.keys(TOPIC_LABEL) as EmailTopic[]).map((t) => (
-                  <option key={t} value={t} className={optionClassName}>
+                  <option key={t} value={t}>
                     {TOPIC_LABEL[t]}
                   </option>
                 ))}
-              </select>
+              </Select>
             </Field>
           </div>
 
           <Field label="Work type">
-            <select
+            <Select
               value={draft.workType ?? ""}
               onChange={(e) => set("workType", (e.target.value || undefined) as WorkType)}
-              className={selectClassName}
             >
-              <option value="" className={optionClassName}>
+              <option value="">
                 Any
               </option>
               {(Object.keys(WORK_TYPE_LABEL) as WorkType[])
                 .filter((w) => w !== "none")
                 .map((w) => (
-                  <option key={w} value={w} className={optionClassName}>
+                  <option key={w} value={w}>
                     {WORK_TYPE_LABEL[w]}
                   </option>
                 ))}
-            </select>
+            </Select>
           </Field>
 
           <div className="grid grid-cols-2 gap-3">

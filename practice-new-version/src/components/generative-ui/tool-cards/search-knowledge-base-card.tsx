@@ -13,24 +13,24 @@ export const SearchKnowledgeBaseCard = ({
   return (
     <Shell icon={BookOpen} title="Knowledge base" status={status}>
       {parameters.query && (
-        <p className="mb-2 truncate text-[11px] italic text-[var(--muted-foreground)]">
+        <p className="mb-2 truncate text-[11px] italic text-muted-foreground">
           “{parameters.query}”
         </p>
       )}
       {!data ? (
         <Pending label="Searching policy notes…" />
       ) : data.length === 0 ? (
-        <p className="text-xs text-[var(--muted-foreground)]">
+        <p className="text-xs text-muted-foreground">
           Nothing relevant found.
         </p>
       ) : (
         <div className="space-y-2">
           {data.map((hit, i) => (
             <div key={`${hit.title}-${i}`} className="min-w-0">
-              <p className="truncate text-xs font-semibold text-[var(--foreground)]">
+              <p className="truncate text-xs font-semibold text-foreground">
                 {hit.title}
               </p>
-              <p className="line-clamp-2 text-[11px] text-[var(--muted-foreground)]">
+              <p className="line-clamp-2 text-[11px] text-muted-foreground">
                 {hit.content}
               </p>
             </div>

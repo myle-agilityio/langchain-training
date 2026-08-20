@@ -10,7 +10,7 @@ import {
   URGENCY_TONE,
   URGENCY_VARIANT,
   WORK_TYPE_LABEL,
-} from "@/components/email-inbox/inbox-list";
+} from "@/constants";
 import type { Classification } from "@/types/email";
 import type { ToolStatus, EmailFilterArgs } from "@/types";
 import { useEmailLookup } from "@/utils";
@@ -27,15 +27,15 @@ export const Shell = ({
   children: React.ReactNode;
 }) => {
   return (
-    <div className="my-1.5 overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)]">
-      <div className="flex items-center gap-2 border-b border-[var(--border)] px-3 py-2">
-        <Icon className="h-3.5 w-3.5 shrink-0 text-[var(--muted-foreground)]" />
-        <span className="truncate text-xs font-semibold text-[var(--foreground)]">
+    <div className="my-1.5 overflow-hidden rounded-xl border border-border bg-card">
+      <div className="flex items-center gap-2 border-b border-border px-3 py-2">
+        <Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        <span className="truncate text-xs font-semibold text-foreground">
           {title}
         </span>
         <span className="ml-auto shrink-0">
           {status === "complete" ? (
-            <Check className="h-3 w-3 text-emerald-500" />
+            <Check className="h-3 w-3 text-tone-green" />
           ) : (
             <Spinner size="sm" className="h-3 w-3" />
           )}
@@ -47,12 +47,12 @@ export const Shell = ({
 };
 
 export const Pending = ({ label }: { label: string }) => {
-  return <p className="text-xs text-[var(--muted-foreground)]">{label}</p>;
+  return <p className="text-xs text-muted-foreground">{label}</p>;
 };
 
 export const Failure = ({ text }: { text: string }) => {
   return (
-    <span className="flex items-center gap-1 text-[11px] text-[var(--tone-red)]">
+    <span className="flex items-center gap-1 text-[11px] text-tone-red">
       <TriangleAlert className="h-3 w-3 shrink-0" />
       {text}
     </span>
@@ -97,17 +97,17 @@ export const EmailLine = ({ id, fallback }: { id: string; fallback?: string }) =
   const email = lookup.get(id);
   if (!email) {
     return (
-      <span className="text-xs text-[var(--muted-foreground)]">
+      <span className="text-xs text-muted-foreground">
         {fallback ?? id.slice(0, 8)}
       </span>
     );
   }
   return (
     <span className="min-w-0 truncate text-xs">
-      <span className="font-semibold text-[var(--foreground)]">
+      <span className="font-semibold text-foreground">
         {email.from.name}
       </span>
-      <span className="text-[var(--muted-foreground)]"> · {email.subject}</span>
+      <span className="text-muted-foreground"> · {email.subject}</span>
     </span>
   );
 };
