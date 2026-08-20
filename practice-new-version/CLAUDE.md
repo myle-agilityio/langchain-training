@@ -8,20 +8,24 @@ reference — don't copy patterns from `practice/`'s agent without deciding they
 ## Commands
 
 - `pnpm dev` — UI on :3000 + agent on :8123 together. `dev:ui` / `dev:agent` to isolate one.
-- `pnpm typecheck` (Vite app) and `pnpm --filter agent typecheck` — both must be clean
-  before a task is done. **The root check has 3 pre-existing errors**, all in
-  `src/app/declarative-generative-ui/renderers.tsx` (untouched boilerplate). That is the
+- `pnpm typecheck` — runs `turbo run typecheck` across both packages; must be clean
+  before a task is done. **The `web` check has 3 pre-existing errors**, all in
+  `apps/web/src/app/declarative-generative-ui/renderers.tsx` (untouched boilerplate). That is the
   baseline: don't add to it, and don't fix them as a side quest.
 - The agent runs under `langgraphjs dev`; the graph entry and the custom HTTP app (CopilotKit +
-  the `/api/emails`/`/api/threads` routes) are both registered in `agent/langgraph.json`. Both
+  the `/api/emails`/`/api/threads` routes) are both registered in `apps/agent/langgraph.json`. Both
   servers read the root `.env`.
 
 ## Where things live
 
-Agent (`agent/src/`), organized by role:
+Turborepo + pnpm workspace: `apps/web` (Vite SPA) and `apps/agent`. `turbo.json` drives
+`typecheck`/`build`; `pnpm dev` stays on `scripts/dev.mjs` (turbo's spawning hangs the agent
+on Windows — see the comment at the top of that file).
+
+Agent (`apps/agent/src/`), organized by role:
 
 - `graphs/` — graph definitions; `graphs/index.ts:graph` is the entry registered in
-  `agent/langgraph.json`, `graphs/composeEmailSubgraph.ts` the compose pipeline.
+  `apps/agent/langgraph.json`, `graphs/composeEmailSubgraph.ts` the compose pipeline.
 - `nodes/` — node implementations; `prompts/` — every prompt string; `tools/` — tool
   definitions; `state/` — StateSchema definitions; `types/` — zod schemas + interfaces.
 - `db/` — Postgres pool + queries, `PostgresSaver` checkpointer, `PostgresStore` memory store;
@@ -33,7 +37,7 @@ Agent (`agent/src/`), organized by role:
   `http.app`: `copilotkit.ts` (the CopilotKit endpoint), `emails.ts`/`threads.ts` (the inbox's
   REST routes, proxied to from Vite in dev via `vite.config.ts`'s `server.proxy`).
 
-Frontend (Vite SPA, single page — no router):
+Frontend (`apps/web/`, Vite SPA, single page — no router):
 
 - `index.html` + `src/main.tsx` — entry point; `src/app/App.tsx` — providers (CopilotKit,
   theme, OpenAI-key gate) wrapping the inbox + chat layout.

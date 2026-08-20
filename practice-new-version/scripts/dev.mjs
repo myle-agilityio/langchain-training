@@ -9,7 +9,7 @@ import { spawn, spawnSync } from "node:child_process";
 spawnSync(process.execPath, ["scripts/copilotkit-dev-infra.mjs"], { stdio: "inherit" });
 
 const tasks = {
-  ui: "vite",
+  ui: "pnpm --filter web dev",
   agent: "pnpm --filter agent dev",
 };
 

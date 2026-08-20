@@ -23,7 +23,7 @@ Start the narrowest thing that can prove the change, in the background:
 - Agent + UI (generative UI, interrupts, anything the user sees): `pnpm dev` → :3000 and :8123.
 
 Use `LOG_LEVEL=debug` (or `pnpm dev:debug`) when you need to see the agent's own tracing from
-`agent/src/debug.ts`.
+`apps/agent/src/debug.ts`.
 
 ## 3. Exercise the actual path
 
