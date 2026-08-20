@@ -34,7 +34,7 @@ const Inbox = () => {
   useEmailAgent();
 
   const body = (
-    <div className="flex h-dvh w-full overflow-hidden gap-3 p-3 bg-[var(--background)]">
+    <div className="flex h-dvh w-full overflow-hidden gap-3 p-3 bg-background">
       <div className="flex-1 min-w-0 h-full overflow-hidden">
         <EmailInbox />
       </div>

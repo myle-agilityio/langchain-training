@@ -5,11 +5,14 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Raw token values. Only these two blocks carry colour literals; every utility reads them
+ * through the `@theme inline` map below, so a theme swap here reaches the whole app.
+ * Also consumed directly by the A2UI renderers, which style with inline `var(--…)`.
+ */
 :root {
   --background: #f1f8fd;
   --foreground: #010507;
-
-  /* Semantic tokens — CopilotKit brand */
   --card: #ffffff;
   --card-foreground: #010507;
   --primary: #010507;
@@ -26,53 +29,20 @@
   --input: #dbdbe5;
   --ring: #bec2ff;
 
-  /* Chart tokens */
-  --chart-tooltip-bg: #ffffff;
-  --chart-tooltip-border: #dbdbe5;
-  --chart-axis: #57575b;
-
-  /*
-   * Semantic tones — one hue per meaning (category / urgency / status), consumed
-   * only through the `.tone-*` + `.badge-tone*` pair below. Light mode uses
-   * darkened hues so the tinted-background badges stay readable; dark mode
-   * (further down) swaps in lighter values, mostly the CopilotKit brand accents.
-   */
+  /* One hue per meaning (category / urgency / status). Light mode darkens them so the
+     tinted-fill badges stay readable; dark mode swaps in the lighter brand accents. */
   --tone-blue: #2563eb;
   --tone-red: #cf2f36;
   --tone-amber: #b45309;
   --tone-violet: #7c3aed;
   --tone-teal: #0d9488;
   --tone-green: #15803d;
-
-  --radius: 0.75rem;
-
-  /* Override CopilotKit font */
-  --cpk-default-font-family: var(--font-body);
-
-  /* Fonts */
-  --font-body: "Plus Jakarta Sans", "DM Sans", "Segoe UI", sans-serif;
-  --font-code:
-    "Spline Sans Mono", "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
-
-  /* Brand accent colors */
-  --cpk-mint-400: #85ecce;
-  --cpk-mint-800: #189370;
-  --cpk-lilac-400: #bec2ff;
-  --cpk-orange-400: #ffac4d;
-  --cpk-yellow-400: #fff388;
-  --cpk-ambient-gradient: linear-gradient(
-    90deg,
-    #bec2ff 0%,
-    #85ecce 45.673%,
-    #ffac4d 100%
-  );
 }
 
 :root.dark,
 .dark {
   --background: #031118;
   --foreground: #ffffff;
-
   --card: #191a1e;
   --card-foreground: #ffffff;
   --primary: #ffffff;
@@ -89,11 +59,6 @@
   --input: #303136;
   --ring: #bec2ff;
 
-  --chart-tooltip-bg: #191a1e;
-  --chart-tooltip-border: #303136;
-  --chart-axis: #adadb2;
-
-  /* Lighter tones for dark surfaces; violet/teal/amber reuse the brand accents. */
   --tone-blue: #8fb0ff;
   --tone-red: #fa5f67;
   --tone-amber: #ffac4d;
@@ -102,111 +67,82 @@
   --tone-green: #6ee7b7;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-body);
+@theme {
+  --font-sans: "Plus Jakarta Sans", "DM Sans", "Segoe UI", sans-serif;
+  --font-mono:
+    "Spline Sans Mono", "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
 }
 
-body,
-html {
-  height: 100%;
+/* `inline` is what makes dark mode work: utilities emit `var(--card)` rather than a
+   snapshot of its value, so redefining it under `.dark` restyles them. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-tone-blue: var(--tone-blue);
+  --color-tone-red: var(--tone-red);
+  --color-tone-amber: var(--tone-amber);
+  --color-tone-violet: var(--tone-violet);
+  --color-tone-teal: var(--tone-teal);
+  --color-tone-green: var(--tone-green);
 }
 
-/*
- * Showcase highlight for suggestion pills.
- * Applied via className in use-example-suggestions.tsx when showcase.json
- * is set to a non-default mode (e.g. "a2ui", "opengenui"). Uses CopilotKit
- * brand colors with a subtle tinted background.
- * Add new showcase variants here following the same pattern.
- */
-[data-copilotkit] button[data-slot="suggestion-pill"].a2ui-highlight {
-  border-color: var(--cpk-lilac-400);
-  background: color-mix(in srgb, var(--cpk-lilac-400) 15%, var(--background));
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    /* CopilotKit reads this for its own chrome. */
+    --cpk-default-font-family: var(--font-sans);
+  }
 }
 
-[data-copilotkit] button[data-slot="suggestion-pill"].opengenui-highlight {
-  border-color: var(--cpk-mint-400);
-  background: color-mix(in srgb, var(--cpk-mint-400) 15%, var(--background));
-}
-
-/*
- * Tone system. A `.tone-*` class only sets `--tone`; a separate class decides how
- * that hue is rendered. Splitting hue from treatment means a new colour is one
- * variable, and a new treatment (e.g. a tinted row) doesn't have to be written
- * once per colour. Everything derives from `--tone` via color-mix, so both
- * themes work off the single value swapped in `.dark`.
- */
-.tone-blue {
-  --tone: var(--tone-blue);
-}
-.tone-red {
-  --tone: var(--tone-red);
-}
-.tone-amber {
-  --tone: var(--tone-amber);
-}
-.tone-violet {
-  --tone: var(--tone-violet);
-}
-.tone-teal {
-  --tone: var(--tone-teal);
-}
-.tone-green {
-  --tone: var(--tone-green);
-}
-
-/* Soft treatment: tinted fill, for labels that shouldn't outshout the subject line. */
-.badge-tone {
-  border-color: color-mix(in srgb, var(--tone) 32%, transparent);
-  background: color-mix(in srgb, var(--tone) 12%, var(--background));
-  color: var(--tone);
-}
-
-/* Loud treatment: reserved for the one badge per row that should grab the eye. */
-.badge-tone-solid {
-  border-color: transparent;
-  background: var(--tone);
-  color: var(--background);
-}
-
-/* Left rail on a list row — same hue, used to tint the row rather than a pill. */
-.row-accent {
-  box-shadow: inset 3px 0 0 0 var(--tone);
-}
-
-/*
- * Slim, low-contrast scrollbar — Firefox via scrollbar-width/-color, WebKit/Blink
- * via ::-webkit-scrollbar. Apply to any scroll container that shouldn't draw
- * attention to itself (e.g. the inbox list).
- */
-.thin-scrollbar {
+/* Slim, low-contrast scrollbar for containers that shouldn't draw attention to themselves. */
+@utility thin-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background-color: var(--border);
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: var(--muted-foreground);
+  }
 }
 
-.thin-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.thin-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.thin-scrollbar::-webkit-scrollbar-thumb {
-  background-color: var(--border);
-  border-radius: 9999px;
-}
-
-.thin-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: var(--muted-foreground);
+/* Showcase highlight for suggestion pills — applied by use-example-suggestions.tsx when
+   showcase.json is set to "a2ui". */
+[data-copilotkit] button[data-slot="suggestion-pill"].a2ui-highlight {
+  @apply border-ring bg-ring/15;
 }
 
 /*
- * Threads-drawer scrollbar. The drawer is <copilotkit-threads-drawer>, a custom element with a
- * shadow root, so ordinary selectors can't reach its scroll container — ::part() is the one
- * selector that crosses that boundary. `!important` beats the drawer's own scrollbar rule
- * living inside the shadow tree.
+ * The Threads drawer is a custom element with a shadow root, so ::part() is the only selector
+ * that reaches its scroll container; `!important` beats its own rule inside the shadow tree.
  */
 copilotkit-threads-drawer::part(root),
 copilotkit-threads-drawer::part(list) {
@@ -215,11 +151,9 @@ copilotkit-threads-drawer::part(list) {
 }
 
 /*
- * Force the inspector FAB to bottom-left. `inspectorDefaultAnchor` (layout.tsx) does NOT work:
- * React passes that object prop to the <cpk-web-inspector> custom element as a DOM attribute,
- * which stringifies it to the literal text "[object Object]" instead of setting a real property
- * — confirmed by inspecting the rendered attribute. The default (top-right) would otherwise sit
- * directly under the chat sidebar's header buttons (threads dropdown, collapse toggle).
+ * Force the inspector FAB to bottom-left. `inspectorDefaultAnchor` (App.tsx) does NOT work:
+ * React passes that object prop to <cpk-web-inspector> as a DOM attribute, stringifying it to
+ * "[object Object]". The default (top-right) would sit under the chat sidebar's header buttons.
  */
 cpk-web-inspector {
   top: auto !important;

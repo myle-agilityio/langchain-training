@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { useOpenAiKey } from "@/stores/use-openai-key";
 
@@ -46,7 +46,7 @@ export const OpenAiKeyGate = ({ children }: { children: ReactNode }) => {
                 setError(null);
               }}
             />
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && <p className="text-sm text-destructive">{error}</p>}
             <Button type="submit" disabled={!draft.trim()}>
               Save and continue
             </Button>
@@ -54,7 +54,7 @@ export const OpenAiKeyGate = ({ children }: { children: ReactNode }) => {
               href="https://platform.openai.com/api-keys"
               target="_blank"
               rel="noreferrer"
-              className="text-xs text-[var(--muted-foreground)] hover:underline text-center"
+              className="text-xs text-muted-foreground hover:underline text-center"
             >
               Get a key from platform.openai.com
             </a>

@@ -1,5 +1,5 @@
 import { Filter, Mail, MailOpen, MoreVertical, RefreshCw } from "lucide-react";
-import type { Course, Email, EmailTopic, Urgency, WorkType } from "@/types/email";
+import type { Email } from "@/types/email";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,63 +9,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import {
+  COURSE_LABEL,
+  FALLBACK_TONE,
+  STATUS_TONE,
+  TOPIC_LABEL,
+  TOPIC_TONE,
+  URGENCY_TONE,
+  URGENCY_VARIANT,
+} from "@/constants";
 import { formatReceivedAt, formatReceivedAtFull } from "@/lib/format-date";
-
-export const TOPIC_LABEL: Record<EmailTopic, string> = {
-  question: "Question",
-  submission: "Submission",
-  review_request: "Review",
-  grade_dispute: "Grade dispute",
-  absence: "Absence",
-  scheduling: "Scheduling",
-  admin: "Admin",
-  complex: "Complex",
-};
-
-// Six tones for eight topics, so two pairs share one — the reuses are paired so the two never
-// plausibly apply to the same email, and the label disambiguates either way.
-export const TOPIC_TONE: Record<EmailTopic, string> = {
-  question: "tone-blue",
-  submission: "tone-green",
-  review_request: "tone-teal",
-  grade_dispute: "tone-red",
-  absence: "tone-amber",
-  scheduling: "tone-violet",
-  admin: "tone-blue",
-  complex: "tone-violet",
-};
-
-// Course and workType stay colourless (outline badges): they're filter facets, not triage
-// signals, and hues would put four competing colours in one row and drown the urgency cue.
-export const COURSE_LABEL: Record<Course, string> = {
-  math_11: "Grade 11",
-  math_12: "Grade 12",
-  none: "",
-};
-
-export const WORK_TYPE_LABEL: Record<WorkType, string> = {
-  practice: "Practice",
-  exercise: "Exercise",
-  homework: "Homework",
-  quiz: "Quiz",
-  test: "Test",
-  project: "Project",
-  none: "",
-};
-
-// Urgency shares hues with topics, so it's separated by treatment instead: only `high` gets
-// the solid fill, keeping at most one loud badge per row.
-export const URGENCY_TONE: Record<Urgency, string> = {
-  high: "tone-red",
-  medium: "tone-amber",
-  low: "tone-teal",
-};
-
-export const URGENCY_VARIANT: Record<Urgency, "tone" | "toneSolid"> = {
-  high: "toneSolid",
-  medium: "tone",
-  low: "tone",
-};
 
 interface InboxListProps {
   emails: Email[];
@@ -88,15 +41,15 @@ const InboxSkeleton = () => {
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
-          className="px-4 py-3 border-b border-[var(--border)] animate-pulse"
+          className="px-4 py-3 border-b border-border animate-pulse"
           style={{ opacity: 1 - i * 0.14 }}
         >
           <div className="flex items-center justify-between gap-2">
-            <div className="h-3 w-28 rounded bg-[var(--secondary)]" />
-            <div className="h-2.5 w-10 rounded bg-[var(--secondary)]" />
+            <div className="h-3 w-28 rounded bg-secondary" />
+            <div className="h-2.5 w-10 rounded bg-secondary" />
           </div>
-          <div className="h-3 w-52 rounded bg-[var(--secondary)] mt-2" />
-          <div className="h-2.5 w-full rounded bg-[var(--secondary)] mt-2" />
+          <div className="h-3 w-52 rounded bg-secondary mt-2" />
+          <div className="h-2.5 w-full rounded bg-secondary mt-2" />
         </div>
       ))}
     </div>
@@ -122,11 +75,11 @@ export const InboxList = ({
 
   return (
     <div>
-      <div className="sticky top-0 z-10 bg-[var(--card)] border-b border-[var(--border)] px-4 py-3">
+      <div className="sticky top-0 z-10 bg-card border-b border-border px-4 py-3">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-bold text-[var(--foreground)]">
+          <h2 className="text-sm font-bold text-foreground">
             Inbox{" "}
-            <span className="text-[var(--muted-foreground)] font-normal">
+            <span className="text-muted-foreground font-normal">
               {/* A count of 0 while loading reads as "empty inbox", a different claim
                   than "not known yet". */}
               {isLoading
@@ -142,7 +95,7 @@ export const InboxList = ({
               size="icon"
               className={cn(
                 "h-7 w-7 relative",
-                isFiltered ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]",
+                isFiltered ? "text-primary" : "text-muted-foreground",
               )}
               onClick={onOpenFilters}
               disabled={isLoading}
@@ -151,7 +104,7 @@ export const InboxList = ({
             >
               <Filter className="h-3.5 w-3.5" />
               {isFiltered && (
-                <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
+                <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-primary" />
               )}
             </Button>
             <DropdownMenu>
@@ -159,7 +112,7 @@ export const InboxList = ({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-[var(--muted-foreground)]"
+                  className="h-7 w-7 text-muted-foreground"
                   disabled={isLoading}
                   title="List actions"
                   aria-label="List actions"
@@ -183,7 +136,7 @@ export const InboxList = ({
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 -mr-1 text-[var(--muted-foreground)]"
+              className="h-7 w-7 -mr-1 text-muted-foreground"
               onClick={onRefresh}
               disabled={isLoading || isRefreshing}
               title="Refresh inbox"
@@ -200,7 +153,7 @@ export const InboxList = ({
       {isLoading ? (
         <InboxSkeleton />
       ) : emails.length === 0 ? (
-        <div className="p-6 text-sm text-[var(--muted-foreground)] text-center">
+        <div className="p-6 text-sm text-muted-foreground text-center">
           No emails
         </div>
       ) : (
@@ -211,7 +164,7 @@ export const InboxList = ({
           // lilac so selection is still visible on an untriaged inbox.
           const railTone = email.classification
             ? URGENCY_TONE[email.classification.urgency]
-            : "tone-violet";
+            : FALLBACK_TONE;
           return (
             <div
               key={email.id}
@@ -228,8 +181,8 @@ export const InboxList = ({
                 "group w-full text-left px-4 py-3.5 transition-colors cursor-pointer",
                 railTone,
                 isSelected
-                  ? "row-accent mx-2 my-1 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] shadow-sm"
-                  : "border-b border-[var(--border)] hover:bg-[var(--secondary)]/50",
+                  ? "mx-2 my-1 rounded-xl border border-border bg-card shadow-[inset_3px_0_0_0_var(--tone)]"
+                  : "border-b border-border hover:bg-secondary/50",
               )}
             >
               <div className="flex items-center justify-between gap-2">
@@ -237,15 +190,15 @@ export const InboxList = ({
                   className={cn(
                     "text-sm truncate",
                     isUnread
-                      ? "font-bold text-[var(--foreground)]"
-                      : "font-medium text-[var(--muted-foreground)]",
+                      ? "font-bold text-foreground"
+                      : "font-medium text-muted-foreground",
                   )}
                 >
                   {email.from.name}
                 </span>
                 <div className="flex items-center gap-1 shrink-0">
                   {isUnread && (
-                    <span className="h-2 w-2 rounded-full bg-[var(--tone)]" />
+                    <span className="h-2 w-2 rounded-full bg-(--tone)" />
                   )}
                   <time
                     dateTime={email.receivedAt}
@@ -254,8 +207,8 @@ export const InboxList = ({
                     className={cn(
                       "text-[11px] tabular-nums",
                       isUnread
-                        ? "font-semibold text-[var(--foreground)]"
-                        : "text-[var(--muted-foreground)]",
+                        ? "font-semibold text-foreground"
+                        : "text-muted-foreground",
                     )}
                   >
                     {formatReceivedAt(email.receivedAt)}
@@ -267,7 +220,7 @@ export const InboxList = ({
                         onClick={(e) => e.stopPropagation()}
                         title="Email actions"
                         aria-label="Email actions"
-                        className="h-5 w-5 -my-1 flex items-center justify-center rounded hover:bg-[var(--secondary)] text-[var(--muted-foreground)] cursor-pointer"
+                        className="h-5 w-5 -my-1 flex items-center justify-center rounded hover:bg-secondary text-muted-foreground cursor-pointer"
                       >
                         <MoreVertical className="h-3 w-3" />
                       </button>
@@ -298,13 +251,13 @@ export const InboxList = ({
                 className={cn(
                   "text-sm truncate mt-0.5",
                   isUnread
-                    ? "font-semibold text-[var(--foreground)]"
-                    : "text-[var(--muted-foreground)]",
+                    ? "font-semibold text-foreground"
+                    : "text-muted-foreground",
                 )}
               >
                 {email.subject}
               </div>
-              <p className="text-xs text-[var(--muted-foreground)] truncate mt-1">
+              <p className="text-xs text-muted-foreground truncate mt-1">
                 {email.body}
               </p>
               {(email.classification || email.status !== "unread") && (
@@ -337,12 +290,12 @@ export const InboxList = ({
                     </>
                   )}
                   {email.status === "replied" && (
-                    <Badge variant="tone" className="text-[11px] tone-green">
+                    <Badge variant="tone" className={cn("text-[11px]", STATUS_TONE.replied)}>
                       Replied
                     </Badge>
                   )}
                   {email.status === "flagged_for_followup" && (
-                    <Badge variant="tone" className="text-[11px] tone-amber">
+                    <Badge variant="tone" className={cn("text-[11px]", STATUS_TONE.flagged_for_followup)}>
                       Follow up
                     </Badge>
                   )}

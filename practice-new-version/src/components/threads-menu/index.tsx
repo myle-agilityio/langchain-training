@@ -3,6 +3,7 @@ import { Clock, SquarePen } from "lucide-react";
 import { useCopilotChatConfiguration } from "@copilotkit/react-core/v2";
 import { useSelfManagedThreads } from "@/stores/use-self-managed-threads";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { formatRelative } from "@/lib/format-date";
 import {
   DropdownMenu,
@@ -41,21 +42,21 @@ export const ThreadsMenu = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-72 p-0">
-        <div className="p-2 border-b border-[var(--border)]">
+        <div className="p-2 border-b border-border">
           <button
             type="button"
             onClick={() => {
               config.startNewThread();
               setOpen(false);
             }}
-            className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium hover:bg-[var(--secondary)] cursor-pointer"
+            className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium hover:bg-secondary cursor-pointer"
           >
             <SquarePen className="h-3.5 w-3.5" /> New chat
           </button>
         </div>
         <div className="max-h-80 overflow-y-auto thin-scrollbar p-1">
           {threads.length === 0 && (
-            <p className="px-2 py-4 text-sm text-[var(--muted-foreground)]">No conversations yet.</p>
+            <p className="px-2 py-4 text-sm text-muted-foreground">No conversations yet.</p>
           )}
           <ul className="flex flex-col gap-0.5">
             {threads.map((thread) => {
@@ -63,9 +64,10 @@ export const ThreadsMenu = () => {
               return (
                 <li key={thread.id} className="group">
                   <div
-                    className={`flex items-center gap-1 rounded-md px-2 py-2 cursor-pointer text-sm ${
-                      active ? "bg-[var(--secondary)]" : "hover:bg-[var(--secondary)]"
-                    }`}
+                    className={cn(
+                      "flex cursor-pointer items-center gap-1 rounded-md px-2 py-2 text-sm",
+                      active ? "bg-secondary" : "hover:bg-secondary",
+                    )}
                     onClick={() => {
                       config.setActiveThreadId(thread.id, { explicit: true });
                       setOpen(false);
@@ -83,12 +85,12 @@ export const ThreadsMenu = () => {
                             if (e.key === "Escape") setEditingId(null);
                           }}
                           onClick={(e) => e.stopPropagation()}
-                          className="w-full bg-transparent border-b border-[var(--border)] outline-none"
+                          className="w-full bg-transparent border-b border-border outline-none"
                         />
                       ) : (
                         <>
                           <div className="truncate">{thread.title ?? "New conversation"}</div>
-                          <div className="text-xs text-[var(--muted-foreground)]">
+                          <div className="text-xs text-muted-foreground">
                             {formatRelative(thread.updatedAt)}
                           </div>
                         </>
@@ -97,7 +99,7 @@ export const ThreadsMenu = () => {
                     <button
                       type="button"
                       title="Rename"
-                      className="opacity-0 group-hover:opacity-100 shrink-0 p-1 text-[var(--muted-foreground)] hover:text-[var(--foreground)] cursor-pointer"
+                      className="opacity-0 group-hover:opacity-100 shrink-0 p-1 text-muted-foreground hover:text-foreground cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
                         setEditingId(thread.id);
@@ -109,7 +111,7 @@ export const ThreadsMenu = () => {
                     <button
                       type="button"
                       title="Delete"
-                      className="opacity-0 group-hover:opacity-100 shrink-0 p-1 text-[var(--muted-foreground)] hover:text-[var(--destructive)] cursor-pointer"
+                      className="opacity-0 group-hover:opacity-100 shrink-0 p-1 text-muted-foreground hover:text-destructive cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
                         deleteThread(thread.id);
