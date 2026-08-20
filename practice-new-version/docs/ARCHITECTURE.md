@@ -17,7 +17,7 @@ graph TD
     end
 
     subgraph AgentServer["LangGraph agent — :8123 (langgraphjs dev)"]
-        Graph["graph (agent/src/graphs/index.ts)"]
+        Graph["graph (apps/agent/src/graphs/index.ts)"]
     end
 
     subgraph Postgres["Postgres — DATABASE_URL"]
@@ -40,7 +40,7 @@ graph TD
     Graph --> Store
 ```
 
-## Main agent graph (`agent/src/graphs/index.ts`)
+## Main agent graph (`apps/agent/src/graphs/index.ts`)
 
 A ReAct loop gated by a `moderator` node; `compose_email` is a subgraph node (detailed below).
 `moderator` hard-blocks unsafe/abusive chat input before it reaches `call_model` — distinct from
@@ -67,7 +67,7 @@ graph TD
     compose_email --> call_model
 ```
 
-## `compose_email` subgraph (`agent/src/graphs/composeEmailSubgraph.ts`)
+## `compose_email` subgraph (`apps/agent/src/graphs/composeEmailSubgraph.ts`)
 
 Fixed prompt-chaining pipeline run for every reply.
 
@@ -88,7 +88,7 @@ graph TD
 
 ## Tools available to `call_model`
 
-`modelTools` (`agent/src/tools/index.ts`); all but `reply_to_email` run through the `tools`
+`modelTools` (`apps/agent/src/tools/index.ts`); all but `reply_to_email` run through the `tools`
 node — `reply_to_email` is routing-only and never executes. Frontend tools (below) are bound
 in alongside these, so the model picks from one combined list.
 
@@ -116,7 +116,7 @@ graph TD
 ## Frontend tools
 
 UI components register tools with `useFrontendTool` (`@copilotkit/react-core/v2`). CopilotKit
-sends them up as `copilotkit.actions` on agent state; `callModel` (`agent/src/nodes/index.ts`)
+sends them up as `copilotkit.actions` on agent state; `callModel` (`apps/agent/src/nodes/index.ts`)
 converts each into OpenAI tool format and binds it alongside `modelTools` for that invocation
 only — they are not in `executableTools`, so `routeAfterModel` never sends their calls to the
 `tools` node. A call to one ends the graph turn; CopilotKit's frontend runtime matches it back

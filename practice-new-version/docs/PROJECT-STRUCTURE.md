@@ -3,40 +3,45 @@
 ## Project Structure
 
 ```
-├── src/                              # Next.js frontend
-│   ├── app/
-│   │   ├── page.tsx                  # Main page (inbox main area + collapsible chat sidebar)
-│   │   ├── api/copilotkit/           # CopilotKit runtime route
-│   │   ├── api/emails/               # Reads the inbox directly from Postgres
-│   │   └── declarative-generative-ui/ # A2UI catalog: definitions + renderers
-│   ├── components/
-│   │   ├── email-inbox/              # Inbox list, detail view, compose form
-│   │   ├── chat-sidebar/             # Collapsible right-hand chat sidebar
-│   │   ├── threads-menu/             # Clock-icon dropdown: conversation history
-│   │   └── generative-ui/            # Generative UI components
-│   └── hooks/
-│       └── use-shared-inbox.tsx      # Inbox data provider
-├── agent/                            # LangGraph TypeScript agent
-│   └── src/
-│       ├── agent.ts                  # Agent entry point
-│       ├── graphs/                   # Graph definitions (main graph, compose-email subgraph)
-│       ├── nodes/                    # Node implementations
-│       ├── prompts/                  # Every prompt string
-│       ├── tools/                    # Tool definitions (emails, knowledge base, A2UI)
-│       ├── state/                    # StateSchema definitions
-│       ├── types/                    # Zod schemas + interfaces
-│       ├── db/                       # Postgres pool, checkpointer, cross-thread store
-│       ├── rag/                      # pgvector knowledge base (seed + semantic search)
-│       ├── config/                   # Env validation + model instances
-│       ├── constants/                # Tool names, table names
-│       └── utils/
+├── apps/
+│   ├── web/                          # Vite frontend
+│   │   ├── src/
+│   │   │   ├── app/                  # Page shell + A2UI catalog (definitions + renderers)
+│   │   │   ├── components/
+│   │   │   │   ├── email-inbox/      # Inbox list, detail view, compose form
+│   │   │   │   ├── chat-sidebar/     # Collapsible right-hand chat sidebar
+│   │   │   │   ├── threads-menu/     # Clock-icon dropdown: conversation history
+│   │   │   │   └── generative-ui/    # Generative UI components
+│   │   │   └── hooks/
+│   │   │       └── use-shared-inbox.tsx  # Inbox data provider
+│   │   ├── public/                   # Static assets
+│   │   ├── index.html
+│   │   ├── vite.config.ts
+│   │   ├── tsconfig.json
+│   │   └── package.json
+│   └── agent/                        # LangGraph TypeScript agent
+│       ├── langgraph.json            # Graph entry + custom HTTP app + env file
+│       ├── Dockerfile
+│       └── src/
+│           ├── agent.ts              # Agent entry point
+│           ├── graphs/               # Graph definitions (main graph, compose-email subgraph)
+│           ├── nodes/                # Node implementations
+│           ├── prompts/              # Every prompt string
+│           ├── tools/                # Tool definitions (emails, knowledge base, A2UI)
+│           ├── state/                # StateSchema definitions
+│           ├── types/                # Zod schemas + interfaces
+│           ├── db/                   # Postgres pool, checkpointer, cross-thread store
+│           ├── rag/                  # pgvector knowledge base (seed + semantic search)
+│           ├── config/               # Env validation + model instances
+│           ├── constants/            # Tool names, table names
+│           └── utils/
 ├── docs/
 │   └── TEST-SCENARIOS.md             # Scenarios the assistant is expected to handle
 ├── scripts/                          # Dev-server helper scripts
-├── public/                           # Static assets
-├── next.config.ts
-├── tsconfig.json
-└── package.json
+├── turbo.json                        # Task graph: typecheck, build, dev
+├── pnpm-workspace.yaml               # packages: apps/*
+├── vercel.json
+└── package.json                      # Workspace root: turbo + cross-package scripts
 ```
 
 ## Technical Stack
@@ -54,7 +59,7 @@
 | Recharts | ^3.7.0 |
 | Zod | ^3.23.8 |
 
-**Agent (`agent/`)**
+**Agent (`apps/agent/`)**
 
 | Technology | Version |
 | --- | --- |
@@ -82,7 +87,7 @@
 | Tool | Version | Purpose |
 | --- | --- | --- |
 | Node.js | 20+ | JS runtime for both the Next.js app and the agent |
-| pnpm | 10.30.3 (pinned via `packageManager`) | Package manager — required (root + `agent/` are one pnpm workspace) |
+| pnpm | 10.30.3 (pinned via `packageManager`) | Package manager — required (`apps/web` + `apps/agent` are one pnpm workspace) |
 | `tsc` (`pnpm typecheck`) | TypeScript ^5 / ^5.6.3 | Type-checks the Next.js app and the agent separately |
 | `next lint` | Next.js 16.1.6 | Lints the Next.js app |
 | LangGraph Studio (`langgraphjs dev`) | LangGraph CLI 1.4.3 | Local agent server + graph debugger on port `8123` |

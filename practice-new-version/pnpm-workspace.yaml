@@ -1,5 +1,5 @@
 packages:
-  - agent
+  - apps/*
 
 onlyBuiltDependencies:
   - esbuild

@@ -37,7 +37,7 @@ My Le
 
 [![pnpm](https://img.shields.io/badge/pnpm-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/installation)
 
-Root and `agent/` are one [pnpm workspace](https://pnpm.io/workspaces) — pnpm is required, not
+`apps/web` and `apps/agent` are one [pnpm workspace](https://pnpm.io/workspaces) — pnpm is required, not
 just preferred (npm/yarn won't resolve the workspace lockfile).
 
 - A Postgres database with the `pgvector` extension available — local install, Neon, Supabase, etc. all work.
@@ -55,7 +55,7 @@ just preferred (npm/yarn won't resolve the workspace lockfile).
 pnpm install
 ```
 
-This installs both the root Vite app and `agent/` in one pass — they're a single pnpm workspace.
+This installs both `apps/web` (the Vite app) and `apps/agent` in one pass — one pnpm workspace.
 
 2. Copy the example environment file and edit `.env`:
 

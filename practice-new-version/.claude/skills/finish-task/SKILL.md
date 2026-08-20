@@ -20,8 +20,8 @@ feature, or a phase boundary. A small internal refactor needs none.
 
 - [ ] Follows an existing repo pattern, or the deviation is stated and justified
 - [ ] Feature exercised end-to-end via the `verify-feature` skill — not just typechecked
-- [ ] `pnpm typecheck` and `pnpm --filter agent typecheck` clean (root baseline: the
-      3 pre-existing renderers.tsx errors, no new ones)
+- [ ] `pnpm typecheck` clean across both packages (baseline: the 3 pre-existing
+      `apps/web` renderers.tsx errors, no new ones)
 - [ ] Non-obvious logic has a why-comment
 - [ ] TEST-SCENARIOS updated if a new manual flow is worth re-running later
 - [ ] `.env.example` in sync if env vars changed; no secrets staged
