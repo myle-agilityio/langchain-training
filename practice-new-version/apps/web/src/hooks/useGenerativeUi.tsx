@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { useTheme } from "@/stores/use-theme";
+import { useTheme } from "@/stores/useTheme";
 
 import { useFrontendTool, useDefaultRenderTool } from "@copilotkit/react-core/v2";
 
-import { ToolReasoning } from "@/components/tool-rendering";
-import { useToolRenderers } from "@/hooks/use-tool-renderers";
+import { ToolReasoning } from "@/components/ToolRendering";
+import { useToolRenderers } from "@/hooks/useToolRenderers";
 
 export const useGenerativeUIExamples = () => {
   const { theme, setTheme } = useTheme();

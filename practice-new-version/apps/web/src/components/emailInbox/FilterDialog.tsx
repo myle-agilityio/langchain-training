@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type { Course, EmailStatus, EmailTopic, Urgency, WorkType } from "@/types/email";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Field, Input, Select } from "@/components/ui/field";
+import { Button } from "@/components/ui/Button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
+import { Field, Input, Select } from "@/components/ui/Field";
 import {
   COURSE_LABEL,
   STATUS_LABEL,
@@ -10,7 +10,7 @@ import {
   URGENCY_LABEL,
   WORK_TYPE_LABEL,
 } from "@/constants";
-import { EMPTY_FILTERS, type EmailFilters } from "@/lib/email-filters";
+import { EMPTY_FILTERS, type EmailFilters } from "@/lib/emailFilters";
 
 interface FilterDialogProps {
   open: boolean;

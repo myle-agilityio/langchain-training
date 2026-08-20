@@ -1,5 +1,5 @@
 import { BookOpen } from "lucide-react";
-import { Pending, Shell } from "./common";
+import { Pending, Shell } from "./Common";
 import type { ToolCardProps } from "@/types";
 import { parseResult } from "@/utils";
 

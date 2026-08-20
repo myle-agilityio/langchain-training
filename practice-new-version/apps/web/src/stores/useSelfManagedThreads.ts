@@ -4,7 +4,7 @@ import {
   useAgent,
   useCopilotChatConfiguration,
 } from "@copilotkit/react-core/v2";
-import { readStoredOpenAiKey } from "@/stores/use-openai-key";
+import { readStoredOpenAiKey } from "@/stores/useOpenAiKey";
 import type { ChatThread } from "@/types/thread";
 
 interface SelfManagedThreadsState {

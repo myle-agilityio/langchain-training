@@ -6,7 +6,7 @@ import {
   Failure,
   Pending,
   Shell,
-} from "./common";
+} from "./Common";
 import type { ToolCardProps } from "@/types";
 import { parseResult } from "@/utils";
 

@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input, Textarea } from "@/components/ui/field";
+import { Card, CardContent } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { Input, Textarea } from "@/components/ui/Field";
 import { Mail, Check, X, TriangleAlert } from "lucide-react";
-import { useSharedInbox } from "@/stores/use-shared-inbox";
+import { useSharedInbox } from "@/stores/useSharedInbox";
 
 export interface EmailReplyCardProps {
   status: "inProgress" | "executing" | "complete";

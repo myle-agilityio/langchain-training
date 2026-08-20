@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type { Email } from "@/types/email";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ComposeForm } from "./compose-form";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { ComposeForm } from "./ComposeForm";
 import {
   COURSE_LABEL,
   STATUS_TONE,
@@ -12,7 +12,7 @@ import {
   URGENCY_VARIANT,
   WORK_TYPE_LABEL,
 } from "@/constants";
-import { formatReceivedAtFull } from "@/lib/format-date";
+import { formatReceivedAtFull } from "@/lib/formatDate";
 import { Mail, Sparkles } from "lucide-react";
 
 interface EmailDetailProps {

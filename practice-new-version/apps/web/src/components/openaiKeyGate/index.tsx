@@ -1,8 +1,8 @@
 import { useState, type ReactNode } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/field";
-import { Button } from "@/components/ui/button";
-import { useOpenAiKey } from "@/stores/use-openai-key";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Field";
+import { Button } from "@/components/ui/Button";
+import { useOpenAiKey } from "@/stores/useOpenAiKey";
 
 // Deliberately not a Dialog: there's nothing to dismiss to — no close button, no
 // click-outside/Escape affordance — until a key is actually saved.

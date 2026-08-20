@@ -1,5 +1,5 @@
 import { useInterrupt } from "@copilotkit/react-core/v2";
-import { EmailReplyCard } from "@/components/generative-ui/email-reply-card";
+import { EmailReplyCard } from "@/components/generativeUi/EmailReplyCard";
 
 // Matches the discriminator agent/src/constants/index.ts puts in interrupt()'s value.
 const COMPOSE_REPLY_ACTION = "compose_reply";

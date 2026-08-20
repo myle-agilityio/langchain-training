@@ -134,7 +134,7 @@
   }
 }
 
-/* Showcase highlight for suggestion pills — applied by use-example-suggestions.tsx when
+/* Showcase highlight for suggestion pills — applied by useExampleSuggestions.tsx when
    showcase.json is set to "a2ui". */
 [data-copilotkit] button[data-slot="suggestion-pill"].a2ui-highlight {
   @apply border-ring bg-ring/15;
