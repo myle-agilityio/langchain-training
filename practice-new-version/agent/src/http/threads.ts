@@ -11,10 +11,10 @@ import {
 
 // Best-effort: a title is a nice-to-have, so any failure (missing key, network, rate limit)
 // just falls back to a truncated first message rather than blocking thread creation.
-async function generateTitle(
+const generateTitle = async (
   firstMessage: string | undefined,
   apiKey: string | undefined,
-): Promise<string | null> {
+): Promise<string | null> => {
   const text = firstMessage?.trim();
   if (!text) return null;
   const fallback = text.length > 60 ? `${text.slice(0, 60)}…` : text;
@@ -49,7 +49,7 @@ async function generateTitle(
   } catch {
     return fallback;
   }
-}
+};
 
 export const threadsApp = new Hono();
 

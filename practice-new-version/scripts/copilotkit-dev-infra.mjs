@@ -54,7 +54,7 @@ const envFileContent = envFileExists ? readFileSync('.env', 'utf8') : '';
 // drift. Defines readDotenvValue / isPlaceholderValue / resolveVendorKeyValue /
 // findUnsatisfiedVendorKeys.
 
-function readDotenvValue(envFileContent, key) {
+const readDotenvValue = (envFileContent, key) => {
   const re = new RegExp('^\\s*(?:export\\s+)?' + key + '=(.*)$', 'gm');
   let match;
   let last = null;
@@ -76,25 +76,25 @@ function readDotenvValue(envFileContent, key) {
     return '';
   }
   return raw.replace(/\s+#.*$/, '').trim();
-}
+};
 
-function isPlaceholderValue(value) {
+const isPlaceholderValue = (value) => {
   return /^<.*>$/.test(value) || /^your[-_]/i.test(value) || /\.\.\.$/.test(value);
-}
+};
 
-function resolveVendorKeyValue(processEnv, envFileContent, key) {
+const resolveVendorKeyValue = (processEnv, envFileContent, key) => {
   const fromProcess = ((processEnv && processEnv[key]) || '').trim();
   return fromProcess !== '' ? fromProcess : readDotenvValue(envFileContent, key);
-}
+};
 
-function findUnsatisfiedVendorKeys(processEnv, envFileContent, requirements) {
+const findUnsatisfiedVendorKeys = (processEnv, envFileContent, requirements) => {
   return requirements
     .map((requirement) => ({
       requirement,
       value: resolveVendorKeyValue(processEnv, envFileContent, requirement.key),
     }))
     .filter(({ value }) => value === '' || isPlaceholderValue(value));
-}
+};
 
 
 const failedKeys = findUnsatisfiedVendorKeys(process.env, envFileContent, REQUIRED_ENV_KEYS)

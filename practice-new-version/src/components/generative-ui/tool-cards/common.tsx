@@ -15,7 +15,7 @@ import type { Classification } from "@/types/email";
 import type { ToolStatus, EmailFilterArgs } from "@/types";
 import { useEmailLookup } from "@/utils";
 
-export function Shell({
+export const Shell = ({
   icon: Icon,
   title,
   status,
@@ -25,7 +25,7 @@ export function Shell({
   title: string;
   status: ToolStatus;
   children: React.ReactNode;
-}) {
+}) => {
   return (
     <div className="my-1.5 overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)]">
       <div className="flex items-center gap-2 border-b border-[var(--border)] px-3 py-2">
@@ -44,26 +44,26 @@ export function Shell({
       <div className="px-3 py-2.5">{children}</div>
     </div>
   );
-}
+};
 
-export function Pending({ label }: { label: string }) {
+export const Pending = ({ label }: { label: string }) => {
   return <p className="text-xs text-[var(--muted-foreground)]">{label}</p>;
-}
+};
 
-export function Failure({ text }: { text: string }) {
+export const Failure = ({ text }: { text: string }) => {
   return (
     <span className="flex items-center gap-1 text-[11px] text-[var(--tone-red)]">
       <TriangleAlert className="h-3 w-3 shrink-0" />
       {text}
     </span>
   );
-}
+};
 
-export function ClassificationBadges({
+export const ClassificationBadges = ({
   classification,
 }: {
   classification: Classification;
-}) {
+}) => {
   return (
     <div className="flex flex-wrap gap-1.5">
       <Badge
@@ -90,9 +90,9 @@ export function ClassificationBadges({
       </Badge>
     </div>
   );
-}
+};
 
-export function EmailLine({ id, fallback }: { id: string; fallback?: string }) {
+export const EmailLine = ({ id, fallback }: { id: string; fallback?: string }) => {
   const lookup = useEmailLookup();
   const email = lookup.get(id);
   if (!email) {
@@ -110,9 +110,9 @@ export function EmailLine({ id, fallback }: { id: string; fallback?: string }) {
       <span className="text-[var(--muted-foreground)]"> · {email.subject}</span>
     </span>
   );
-}
+};
 
-export function FilterChips({ filter }: { filter: EmailFilterArgs }) {
+export const FilterChips = ({ filter }: { filter: EmailFilterArgs }) => {
   const chips = Object.entries(filter).filter(
     ([, v]) => v !== undefined && v !== "",
   );
@@ -130,4 +130,4 @@ export function FilterChips({ filter }: { filter: EmailFilterArgs }) {
       ))}
     </div>
   );
-}
+};

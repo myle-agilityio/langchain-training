@@ -8,15 +8,15 @@ interface ToolReasoningProps {
   status: string;
 }
 
-function formatValue(value: unknown): string {
+const formatValue = (value: unknown): string => {
   if (Array.isArray(value)) return `[${value.length} items]`;
   if (typeof value === "object" && value !== null)
     return `{${Object.keys(value).length} keys}`;
   if (typeof value === "string") return `"${value}"`;
   return String(value);
-}
+};
 
-export function ToolReasoning({ name, args, status }: ToolReasoningProps) {
+export const ToolReasoning = ({ name, args, status }: ToolReasoningProps) => {
   const entries = args ? Object.entries(args) : [];
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const isRunning = status === "executing" || status === "inProgress";
@@ -79,4 +79,4 @@ export function ToolReasoning({ name, args, status }: ToolReasoningProps) {
       )}
     </div>
   );
-}
+};

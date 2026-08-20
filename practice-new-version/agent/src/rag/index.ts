@@ -16,13 +16,13 @@ const SAMPLE_DOCS_DIR = join(import.meta.dirname, "sample-docs");
 
 // initialize() creates the vector extension + table on first use (idempotent — IF NOT EXISTS —
 // so calling this per request, with whichever embeddings client the caller needs, is fine).
-function getVectorStore(embeddings: OpenAIEmbeddings): Promise<PGVectorStore> {
+const getVectorStore = (embeddings: OpenAIEmbeddings): Promise<PGVectorStore> => {
   return PGVectorStore.initialize(embeddings, { pool: getPool(), tableName: KB_TABLE });
-}
+};
 
 // Embeds the seed articles once (a non-empty table means already seeded). Runs at agent
 // startup, before any request exists, so it uses the server-side key, not a visitor's BYOK key.
-export async function ensureIndexed(): Promise<void> {
+export const ensureIndexed = async (): Promise<void> => {
   const { rows } = await getPool().query<{ n: number }>(
     `SELECT count(*)::int AS n FROM ${KB_TABLE}`,
   );
@@ -43,21 +43,19 @@ export async function ensureIndexed(): Promise<void> {
   );
   const fileDocs = await loadDirectoryAsChunks(SAMPLE_DOCS_DIR);
   await store.addDocuments([...seedDocs, ...fileDocs]);
-}
+};
 
 // PGVectorStore's default scoreNormalization returns raw cosine distance (0=identical, 2=opposite);
 // convert to similarity (0-1, higher=better) so the threshold reads the way a relevance score should.
-function distanceToSimilarity(distance: number): number {
-  return 1 - distance / 2;
-}
+const distanceToSimilarity = (distance: number): number => 1 - distance / 2;
 
 // Semantic search over the embedded KB — replaces the old keyword matcher. Embeds the query
 // with the visitor's own key (BYOK, via getEmbeddingsForConfig), not the seed-time server key.
-export async function searchKnowledge(
+export const searchKnowledge = async (
   query: string,
   config: LangGraphRunnableConfig,
   k = 3,
-): Promise<{ title: string; content: string }[]> {
+): Promise<{ title: string; content: string }[]> => {
   const store = await getVectorStore(getEmbeddingsForConfig(config));
   const results = await store.similaritySearchWithScore(query, k);
   const threshold = getRagScoreThreshold();
@@ -67,4 +65,4 @@ export async function searchKnowledge(
       title: String(d.metadata.title ?? ""),
       content: d.pageContent,
     }));
-}
+};

@@ -5,10 +5,10 @@ import type { ComposeEmailStateShape, KBArticle } from "@/types/index";
 import { fetchEmailById } from "@/utils/index";
 
 // research — search_knowledge_base for the policy the draft must not invent.
-export async function research(
+export const research = async (
   state: ComposeEmailStateShape,
   config: LangGraphRunnableConfig,
-) {
+) => {
   const email = await fetchEmailById(state.emailId);
   if (!email) return { kbContext: "" };
 
@@ -19,4 +19,4 @@ export async function research(
     : "No relevant articles found. Do not state any policy you cannot ground here.";
 
   return { kbContext };
-}
+};

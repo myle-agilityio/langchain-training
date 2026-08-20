@@ -14,11 +14,11 @@ interface StatusResult {
   error?: string;
 }
 
-export function UpdateEmailStatusCard({
+export const UpdateEmailStatusCard = ({
   status,
   parameters,
   result,
-}: ToolCardProps<{ patches: { id: string; status: EmailStatus }[] }>) {
+}: ToolCardProps<{ patches: { id: string; status: EmailStatus }[] }>) => {
   const patches = parameters.patches ?? [];
   const data = parseResult<{ results: StatusResult[] }>(result);
 
@@ -55,4 +55,4 @@ export function UpdateEmailStatusCard({
       )}
     </Shell>
   );
-}
+};

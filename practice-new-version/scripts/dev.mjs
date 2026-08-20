@@ -28,12 +28,12 @@ const children = Object.entries(tasks).map(([name, command]) => {
   return child;
 });
 
-function shutdown(code) {
+const shutdown = (code) => {
   if (shuttingDown) return;
   shuttingDown = true;
   for (const child of children) child.kill();
   process.exitCode = code;
-}
+};
 
 process.on("SIGINT", () => shutdown(0));
 process.on("SIGTERM", () => shutdown(0));

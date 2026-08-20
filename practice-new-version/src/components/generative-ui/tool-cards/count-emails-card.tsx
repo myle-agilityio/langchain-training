@@ -12,7 +12,7 @@ import { parseResult } from "@/utils";
 
 type GroupBy = "status" | "topic" | "course" | "workType" | "urgency";
 
-function groupLabel(groupBy: GroupBy | undefined, value: string): string {
+const groupLabel = (groupBy: GroupBy | undefined, value: string): string => {
   if (value === "unclassified") return "Unclassified";
   switch (groupBy) {
     case "status":
@@ -26,13 +26,13 @@ function groupLabel(groupBy: GroupBy | undefined, value: string): string {
     default:
       return value;
   }
-}
+};
 
-export function CountEmailsCard({
+export const CountEmailsCard = ({
   status,
   parameters,
   result,
-}: ToolCardProps<{ filter?: EmailFilterArgs; groupBy?: GroupBy }>) {
+}: ToolCardProps<{ filter?: EmailFilterArgs; groupBy?: GroupBy }>) => {
   const data = parseResult<{ total: number; byGroup?: Record<string, number> }>(
     result,
   );
@@ -81,4 +81,4 @@ export function CountEmailsCard({
       )}
     </Shell>
   );
-}
+};

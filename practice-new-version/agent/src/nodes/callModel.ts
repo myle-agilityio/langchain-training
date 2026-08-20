@@ -12,7 +12,7 @@ import { executableTools, modelTools } from "@/tools/index";
 import type { AgentStateShape } from "@/types/index";
 
 // Formats UI context for the prompt
-function renderFrontendContext(state: AgentStateShape): string {
+const renderFrontendContext = (state: AgentStateShape): string => {
   const entries = state.copilotkit?.context ?? [];
   if (entries.length === 0) return "";
   const lines = entries.map((e) => {
@@ -21,10 +21,10 @@ function renderFrontendContext(state: AgentStateShape): string {
     return `- ${e.description ? `${e.description}: ` : ""}${value}`;
   });
   return `\n\nContext from the app UI:\n${lines.join("\n")}`;
-}
+};
 
 // Wraps frontend actions in OpenAI tool format
-function frontendTools(state: AgentStateShape) {
+const frontendTools = (state: AgentStateShape) => {
   return (state.copilotkit?.actions ?? []).map((a) =>
     "function" in a
       ? a
@@ -37,7 +37,7 @@ function frontendTools(state: AgentStateShape) {
           },
         },
   );
-}
+};
 
 // System prompt + message history, as a template rather than manual array-spreading — the
 // placeholder marks exactly where state.messages goes, instead of `[new SystemMessage(...), ...]`.
@@ -48,10 +48,10 @@ const callModelPrompt = ChatPromptTemplate.fromMessages([
 
 // Invokes model with system prompt, context, and available tools. Also the one place that
 // checks for a visitor-supplied OpenAI key (BYOK — see config/model.ts).
-export async function callModel(
+export const callModel = async (
   state: AgentStateShape,
   config: LangGraphRunnableConfig,
-) {
+) => {
   let model;
   try {
     model = getModelForConfig(config);
@@ -81,16 +81,16 @@ export async function callModel(
     config,
   );
   return { messages: [response] };
-}
+};
 
 const EXECUTABLE_NAMES = new Set<string>(executableTools.map((t) => t.name));
 
 // Routes tool calls to compose_email, tools, or END
-export function routeAfterModel(state: { messages: BaseMessage[] }) {
+export const routeAfterModel = (state: { messages: BaseMessage[] }) => {
   const last = state.messages[state.messages.length - 1];
   if (!AIMessage.isInstance(last)) return END;
   const calls = last.tool_calls ?? [];
   if (calls.some((c) => c.name === TOOL.REPLY_TO_EMAIL)) return "compose_email";
   if (calls.some((c) => EXECUTABLE_NAMES.has(c.name))) return "tools";
   return END;
-}
+};

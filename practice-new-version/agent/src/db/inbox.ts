@@ -5,7 +5,7 @@ import { seedEmails } from "@/data/seed-emails";
 // Queries for the HTTP inbox routes (http/emails.ts) — distinct from the graph-tool queries
 // above; these need shapes (bulk status update, reply patch, seeding) tools never do.
 
-export async function listEmailsSeeded(): Promise<Email[]> {
+export const listEmailsSeeded = async (): Promise<Email[]> => {
   const { rows } = await getPool().query<EmailRow>(
     `SELECT ${EMAIL_COLUMNS} FROM emails ORDER BY received_at DESC`,
   );
@@ -38,17 +38,17 @@ export async function listEmailsSeeded(): Promise<Email[]> {
     );
   }
   return rows.map(toEmail);
-}
+};
 
-export async function updateEmailsStatus(ids: string[], status: string): Promise<Email[]> {
+export const updateEmailsStatus = async (ids: string[], status: string): Promise<Email[]> => {
   const { rows } = await getPool().query<EmailRow>(
     `UPDATE emails SET status = $1 WHERE id = ANY($2::text[]) RETURNING ${EMAIL_COLUMNS}`,
     [status, ids],
   );
   return rows.map(toEmail);
-}
+};
 
-export async function patchEmail(id: string, patch: Partial<Email>): Promise<Email | null> {
+export const patchEmail = async (id: string, patch: Partial<Email>): Promise<Email | null> => {
   const { rows } = await getPool().query<EmailRow>(
     `UPDATE emails SET
        status    = COALESCE($2, status),
@@ -70,4 +70,4 @@ export async function patchEmail(id: string, patch: Partial<Email>): Promise<Ema
     ],
   );
   return rows[0] ? toEmail(rows[0]) : null;
-}
+};

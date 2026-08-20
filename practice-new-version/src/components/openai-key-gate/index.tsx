@@ -6,7 +6,7 @@ import { useOpenAiKey } from "@/stores/use-openai-key";
 
 // Deliberately not a Dialog: there's nothing to dismiss to — no close button, no
 // click-outside/Escape affordance — until a key is actually saved.
-export function OpenAiKeyGate({ children }: { children: ReactNode }) {
+export const OpenAiKeyGate = ({ children }: { children: ReactNode }) => {
   const { apiKey, setApiKey } = useOpenAiKey();
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -63,4 +63,4 @@ export function OpenAiKeyGate({ children }: { children: ReactNode }) {
       </Card>
     </div>
   );
-}
+};

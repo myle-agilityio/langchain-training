@@ -6,7 +6,7 @@ import type { ComposeEmailStateShape, RejectedDraft } from "@/types/index";
 import { findReplyCall } from "@/utils/index";
 
 // Pauses for the teacher's approval card, then answers the dangling reply_to_email tool call with their decision.
-export async function requestApproval(state: ComposeEmailStateShape) {
+export const requestApproval = async (state: ComposeEmailStateShape) => {
   const draft = state.draft!;
   const args = {
     id: state.emailId,
@@ -44,4 +44,4 @@ export async function requestApproval(state: ComposeEmailStateShape) {
         ]
       : [],
   };
-}
+};

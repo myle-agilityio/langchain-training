@@ -1,7 +1,7 @@
 import { AIMessage, HumanMessage, type BaseMessage } from "@langchain/core/messages";
 
 // Finds the most recent reply_to_email call — the one this entry into the subgraph answers.
-export function findReplyCall(messages: BaseMessage[]) {
+export const findReplyCall = (messages: BaseMessage[]) => {
   for (let i = messages.length - 1; i >= 0; i--) {
     const message = messages[i];
     if (!AIMessage.isInstance(message)) continue;
@@ -9,11 +9,11 @@ export function findReplyCall(messages: BaseMessage[]) {
     if (call) return call;
   }
   return undefined;
-}
+};
 
 // What the teacher actually said about this reply — original request, plus the "try again,
 // but..." note on a redraft. Without it, write_draft has no instructions and just repeats itself.
-export function collectRevisionNotes(messages: BaseMessage[], emailId: string): string {
+export const collectRevisionNotes = (messages: BaseMessage[], emailId: string): string => {
   const callIndices = messages.reduce<number[]>((acc, message, i) => {
     if (!AIMessage.isInstance(message)) return acc;
     const call = (message.tool_calls ?? []).find(
@@ -31,4 +31,4 @@ export function collectRevisionNotes(messages: BaseMessage[], emailId: string): 
     .filter((m): m is HumanMessage => HumanMessage.isInstance(m))
     .map((m) => (typeof m.content === "string" ? m.content : JSON.stringify(m.content)))
     .join("\n");
-}
+};

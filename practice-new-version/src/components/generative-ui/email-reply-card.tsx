@@ -15,14 +15,14 @@ export interface EmailReplyCardProps {
   compliance?: { compliant: boolean; violations: string[] };
 }
 
-export function EmailReplyCard({
+export const EmailReplyCard = ({
   status,
   respond,
   id,
   subject: draftSubject,
   body: draftBody,
   compliance,
-}: EmailReplyCardProps) {
+}: EmailReplyCardProps) => {
   const { patchEmail } = useSharedInbox();
   const [subject, setSubject] = useState(draftSubject);
   const [body, setBody] = useState(draftBody);
@@ -195,4 +195,4 @@ export function EmailReplyCard({
       </CardContent>
     </Card>
   );
-}
+};

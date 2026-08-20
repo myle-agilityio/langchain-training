@@ -17,11 +17,11 @@ interface ClassifyResult {
   error?: string;
 }
 
-export function ClassifyEmailsCard({
+export const ClassifyEmailsCard = ({
   status,
   parameters,
   result,
-}: ToolCardProps<{ ids: string[] }>) {
+}: ToolCardProps<{ ids: string[] }>) => {
   const ids = parameters.ids ?? [];
   const data = parseResult<{ results: ClassifyResult[] }>(result);
 
@@ -55,4 +55,4 @@ export function ClassifyEmailsCard({
       )}
     </Shell>
   );
-}
+};

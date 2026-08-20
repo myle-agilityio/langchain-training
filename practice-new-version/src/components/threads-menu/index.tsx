@@ -12,7 +12,7 @@ import {
 
 // Clock-icon trigger + dropdown replacement for the old full-height SelfManagedThreadsDrawer —
 // same data/actions, just a popover; outside-click-to-close comes free from Radix.
-export function ThreadsMenu() {
+export const ThreadsMenu = () => {
   const config = useCopilotChatConfiguration();
   const { threads, renameThread, deleteThread } = useSelfManagedThreads();
   const [open, setOpen] = useState(false);
@@ -127,4 +127,4 @@ export function ThreadsMenu() {
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+};

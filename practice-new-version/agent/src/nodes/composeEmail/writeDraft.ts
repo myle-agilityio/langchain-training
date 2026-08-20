@@ -13,10 +13,10 @@ import { collectRevisionNotes } from "@/utils/index";
 
 // write_draft — email + researched context in, subject/body out. The sender profile is read here,
 // not in research: it's a cheap key lookup every draft should see, even when the KB isn't needed.
-export async function writeDraft(
+export const writeDraft = async (
   state: ComposeEmailStateShape,
   config: LangGraphRunnableConfig,
-) {
+) => {
   const email = await getEmail(state.emailId);
   if (!email) return {};
 
@@ -52,4 +52,4 @@ export async function writeDraft(
       hidden(config),
     );
   return { draft, senderContext };
-}
+};

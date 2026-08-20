@@ -3,11 +3,11 @@ import { Pending, Shell } from "./common";
 import type { ToolCardProps } from "@/types";
 import { parseResult } from "@/utils";
 
-export function SearchKnowledgeBaseCard({
+export const SearchKnowledgeBaseCard = ({
   status,
   parameters,
   result,
-}: ToolCardProps<{ query: string }>) {
+}: ToolCardProps<{ query: string }>) => {
   const data = parseResult<{ title: string; content: string }[]>(result);
 
   return (
@@ -39,4 +39,4 @@ export function SearchKnowledgeBaseCard({
       )}
     </Shell>
   );
-}
+};

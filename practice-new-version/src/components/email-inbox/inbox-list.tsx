@@ -82,7 +82,7 @@ interface InboxListProps {
   onOpenFilters: () => void;
 }
 
-function InboxSkeleton() {
+const InboxSkeleton = () => {
   return (
     <div aria-hidden>
       {Array.from({ length: 6 }).map((_, i) => (
@@ -101,9 +101,9 @@ function InboxSkeleton() {
       ))}
     </div>
   );
-}
+};
 
-export function InboxList({
+export const InboxList = ({
   emails,
   totalCount,
   isLoading,
@@ -116,7 +116,7 @@ export function InboxList({
   onMarkAllUnread,
   isFiltered,
   onOpenFilters,
-}: InboxListProps) {
+}: InboxListProps) => {
   const hasUnread = emails.some((e) => e.status === "unread");
   const hasRead = emails.some((e) => e.status === "read");
 
@@ -354,4 +354,4 @@ export function InboxList({
       )}
     </div>
   );
-}
+};

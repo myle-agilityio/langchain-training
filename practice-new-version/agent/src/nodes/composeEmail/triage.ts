@@ -12,10 +12,10 @@ import { fetchEmailById, findReplyCall } from "@/utils/index";
 
 // triage — resolve the email, classify it (skipped if already on file), decide if drafting
 // needs KB research. A fixed node, not a tool, so the model can't skip classification.
-export async function triage(
+export const triage = async (
   state: ComposeEmailStateShape,
   config: LangGraphRunnableConfig,
-) {
+) => {
   const call = findReplyCall(state.messages);
   const id = (call?.args as { id?: string } | undefined)?.id ?? "";
   const email = id ? await fetchEmailById(id) : null;
@@ -44,9 +44,9 @@ export async function triage(
     .invoke(needsResearchPrompt(email), hidden(config));
 
   return { emailId: email.id, needsResearch };
-}
+};
 
-export function afterTriage(state: ComposeEmailStateShape) {
+export const afterTriage = (state: ComposeEmailStateShape) => {
   if (!state.emailId) return END;
   return state.needsResearch ? "research" : "write_draft";
-}
+};

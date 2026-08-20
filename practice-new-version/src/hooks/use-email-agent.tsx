@@ -16,7 +16,7 @@ interface ComposeReplyInterrupt {
 
 // The AG-UI/LangGraph bridge forwards interrupt() values as a JSON string on a generic
 // "on_interrupt" custom event — parse it and only claim the ones this card understands.
-function parseComposeReply(raw: string): ComposeReplyInterrupt | null {
+const parseComposeReply = (raw: string): ComposeReplyInterrupt | null => {
   try {
     const parsed = JSON.parse(raw);
     return parsed?.action === COMPOSE_REPLY_ACTION ? parsed : null;
@@ -26,7 +26,7 @@ function parseComposeReply(raw: string): ComposeReplyInterrupt | null {
     console.error("on_interrupt payload was not valid JSON:", raw, error);
     return null;
   }
-}
+};
 
 export const useEmailAgent = () => {
   useInterrupt<string>({
