@@ -2,11 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { useAgent, useAgentContext, useCopilotKit, useFrontendTool } from "@copilotkit/react-core/v2";
 import type { Email } from "@/types/email";
-import { useSharedInbox } from "@/stores/use-shared-inbox";
-import { EMPTY_FILTERS, filterEmails, hasActiveFilters, type EmailFilters } from "@/lib/email-filters";
-import { InboxList } from "./inbox-list";
-import { EmailDetail } from "./email-detail";
-import { FilterDialog } from "./filter-dialog";
+import { useSharedInbox } from "@/stores/useSharedInbox";
+import { EMPTY_FILTERS, filterEmails, hasActiveFilters, type EmailFilters } from "@/lib/emailFilters";
+import { InboxList } from "./InboxList";
+import { EmailDetail } from "./EmailDetail";
+import { FilterDialog } from "./FilterDialog";
 
 export const EmailInbox = () => {
   const { emails, isLoading, isRefreshing, refresh, patchEmail, patchEmails } = useSharedInbox();

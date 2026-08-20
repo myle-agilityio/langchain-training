@@ -10,8 +10,8 @@ graph TD
     User["Teacher (browser)"]
 
     subgraph Frontend["Next.js — :3000"]
-        UI["src/components/email-inbox/*"]
-        Hook["use-shared-inbox.tsx"]
+        UI["src/components/emailInbox/*"]
+        Hook["useSharedInbox.ts"]
         EmailsAPI["/api/emails"]
         CopilotRoute["/api/copilotkit/[[...slug]]"]
     end
@@ -126,11 +126,11 @@ email, toggling the theme), then resumes the thread with the result.
 ```mermaid
 graph TD
     subgraph Frontend["Next.js — :3000"]
-        FilterInbox["filterInbox\n(email-inbox/index.tsx)"]
-        ShowEmail["showEmail\n(email-inbox/index.tsx)"]
-        ToggleTheme["toggleTheme\n(use-generative-ui-examples.tsx)"]
-        EnableAppMode["enableAppMode\n(chat-sidebar/index.tsx)"]
-        EnableChatMode["enableChatMode\n(chat-sidebar/index.tsx)"]
+        FilterInbox["filterInbox\n(emailInbox/index.tsx)"]
+        ShowEmail["showEmail\n(emailInbox/index.tsx)"]
+        ToggleTheme["toggleTheme\n(useGenerativeUi.tsx)"]
+        EnableAppMode["enableAppMode\n(chatSidebar/index.tsx)"]
+        EnableChatMode["enableChatMode\n(chatSidebar/index.tsx)"]
     end
 
     FilterInbox -- "useFrontendTool" --> CopilotRoute["/api/copilotkit/[[...slug]]"]

@@ -5,7 +5,7 @@
 
 export const knowledgeBase: KBArticle[] = [
   // ── Curriculum ────────────────────────────────────────────────────────────
-  // All Policy entries now live in rag/sample-docs/ (PDF + DOCX) instead of here.
+  // All Policy entries now live in rag/sampleDocs/ (PDF + DOCX) instead of here.
   {
     id: "kb-g11-logarithms",
     title: "Grade 11 unit: logarithms and exponential functions",

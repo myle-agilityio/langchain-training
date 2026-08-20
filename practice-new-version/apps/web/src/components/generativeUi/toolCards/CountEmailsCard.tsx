@@ -1,6 +1,6 @@
 import { Tags } from "lucide-react";
 import type { Course, EmailStatus, EmailTopic, WorkType } from "@/types/email";
-import { FilterChips, Pending, Shell } from "./common";
+import { FilterChips, Pending, Shell } from "./Common";
 import {
   COURSE_LABEL,
   FALLBACK_TONE,

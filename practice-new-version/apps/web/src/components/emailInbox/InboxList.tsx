@@ -1,13 +1,13 @@
 import { Filter, Mail, MailOpen, MoreVertical, RefreshCw } from "lucide-react";
 import type { Email } from "@/types/email";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/DropdownMenu";
 import { cn } from "@/lib/utils";
 import {
   COURSE_LABEL,
@@ -18,7 +18,7 @@ import {
   URGENCY_TONE,
   URGENCY_VARIANT,
 } from "@/constants";
-import { formatReceivedAt, formatReceivedAtFull } from "@/lib/format-date";
+import { formatReceivedAt, formatReceivedAtFull } from "@/lib/formatDate";
 
 interface InboxListProps {
   emails: Email[];

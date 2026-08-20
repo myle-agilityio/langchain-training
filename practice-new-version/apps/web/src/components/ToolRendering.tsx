@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Wrench, Check, ChevronDown } from "lucide-react";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/components/ui/Spinner";
 
 interface ToolReasoningProps {
   name: string;

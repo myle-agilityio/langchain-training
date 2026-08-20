@@ -2,7 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { PanelRightClose, PanelRightOpen } from "lucide-react";
 import { useFrontendTool } from "@copilotkit/react-core/v2";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 
 interface ChatSidebarProps {
   threadsMenu?: ReactNode;

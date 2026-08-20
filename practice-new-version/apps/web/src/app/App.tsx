@@ -4,21 +4,21 @@ import {
   CopilotChat,
   CopilotChatConfigurationProvider,
 } from "@copilotkit/react-core/v2";
-import { useSyncTheme } from "@/stores/use-theme";
-import { readStoredOpenAiKey } from "@/stores/use-openai-key";
-import { useSyncSharedInboxWithAgent } from "@/stores/use-shared-inbox";
-import { useSyncSelfManagedThreadsWithAgent } from "@/stores/use-self-managed-threads";
-import { OpenAiKeyGate } from "@/components/openai-key-gate";
-import { ChatSidebar } from "@/components/chat-sidebar";
-import { EmailInbox } from "@/components/email-inbox";
-import { ThreadsMenu } from "@/components/threads-menu";
+import { useSyncTheme } from "@/stores/useTheme";
+import { readStoredOpenAiKey } from "@/stores/useOpenAiKey";
+import { useSyncSharedInboxWithAgent } from "@/stores/useSharedInbox";
+import { useSyncSelfManagedThreadsWithAgent } from "@/stores/useSelfManagedThreads";
+import { OpenAiKeyGate } from "@/components/openaiKeyGate";
+import { ChatSidebar } from "@/components/chatSidebar";
+import { EmailInbox } from "@/components/emailInbox";
+import { ThreadsMenu } from "@/components/threadsMenu";
 import {
   useGenerativeUIExamples,
   useExampleSuggestions,
   useEmailAgent,
 } from "@/hooks";
-// A2UI catalog: definitions + renderers in ./declarative-generative-ui/
-import { demonstrationCatalog } from "./declarative-generative-ui/renderers";
+// A2UI catalog: definitions + renderers in ./declarativeGenerativeUi/
+import { demonstrationCatalog } from "./declarativeGenerativeUi/renderers";
 
 // Needs useAgent()/useCopilotChatConfiguration(), which only resolve inside
 // CopilotChatConfigurationProvider — wraps both chat and inbox since both use it.

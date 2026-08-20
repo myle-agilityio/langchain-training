@@ -1,6 +1,6 @@
 ﻿import { getPool, EMAIL_COLUMNS, toEmail, type EmailRow } from "./index";
 import type { Email } from "@/types/index";
-import { seedEmails } from "@/data/seed-emails";
+import { seedEmails } from "@/data/seedEmails";
 
 // Queries for the HTTP inbox routes (http/emails.ts) — distinct from the graph-tool queries
 // above; these need shapes (bulk status update, reply patch, seeding) tools never do.

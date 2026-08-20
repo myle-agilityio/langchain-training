@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input, Textarea } from "@/components/ui/field";
+import { Button } from "@/components/ui/Button";
+import { Input, Textarea } from "@/components/ui/Field";
 
 interface ComposeFormProps {
   initialSubject: string;

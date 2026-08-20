@@ -10,7 +10,7 @@ reference — don't copy patterns from `practice/`'s agent without deciding they
 - `pnpm dev` — UI on :3000 + agent on :8123 together. `dev:ui` / `dev:agent` to isolate one.
 - `pnpm typecheck` — runs `turbo run typecheck` across both packages; must be clean
   before a task is done. **The `web` check has 3 pre-existing errors**, all in
-  `apps/web/src/app/declarative-generative-ui/renderers.tsx` (untouched boilerplate). That is the
+  `apps/web/src/app/declarativeGenerativeUi/renderers.tsx` (untouched boilerplate). That is the
   baseline: don't add to it, and don't fix them as a side quest.
 - The agent runs under `langgraphjs dev`; the graph entry and the custom HTTP app (CopilotKit +
   the `/api/emails`/`/api/threads` routes) are both registered in `apps/agent/langgraph.json`. Both
@@ -41,7 +41,7 @@ Frontend (`apps/web/`, Vite SPA, single page — no router):
 
 - `index.html` + `src/main.tsx` — entry point; `src/app/App.tsx` — providers (CopilotKit,
   theme, OpenAI-key gate) wrapping the inbox + chat layout.
-- `src/components/email-inbox/` — the inbox UI; `src/hooks/use-shared-inbox.tsx` is its data
+- `src/components/emailInbox/` — the inbox UI; `src/hooks/useSharedInbox.ts` is its data
   provider (reads `/api/emails`, proxied to the agent's HTTP app above).
 
 Everything persistent is in the one Postgres behind `DATABASE_URL`: the inbox (`emails`,
@@ -62,6 +62,12 @@ These are how we work on this project, not style preferences. Follow them on eve
    scripts. An orphaned server holds its port and collides with the user's next `pnpm dev`.
 5. **Never let secrets leak.** `.env` stays untracked; a new env var goes into `.env.example` in
    the same change.
+6. **Name source files and folders in camelCase** — `useSharedInbox.ts`, `emailFilters.ts`,
+   `components/emailInbox/` — except a file whose export is a React component, which is
+   PascalCase matching the component (`InboxList.tsx`, `DropdownMenu.tsx`). Barrel
+   `index.ts`/`index.tsx` files keep their name. **Assets and scripts stay kebab-case**:
+   `public/copilotkit-logo-mark.svg`, `scripts/copilotkit-dev-infra.mjs`, and the KB documents
+   in `rag/sampleDocs/` (`loaders.ts` derives their titles from the filename).
 
 ## Workflows
 

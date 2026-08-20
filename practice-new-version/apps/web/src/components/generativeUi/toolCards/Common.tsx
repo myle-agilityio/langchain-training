@@ -1,7 +1,7 @@
 import type { ComponentType } from "react";
 import { Check, TriangleAlert } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Spinner } from "@/components/ui/spinner";
+import { Badge } from "@/components/ui/Badge";
+import { Spinner } from "@/components/ui/Spinner";
 import { cn } from "@/lib/utils";
 import {
   COURSE_LABEL,

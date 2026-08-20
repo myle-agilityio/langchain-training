@@ -1,6 +1,6 @@
 import { Inbox } from "lucide-react";
 import type { Classification, EmailStatus } from "@/types/email";
-import { ClassificationBadges, FilterChips, Pending, Shell } from "./common";
+import { ClassificationBadges, FilterChips, Pending, Shell } from "./Common";
 import type { EmailFilterArgs, ToolCardProps } from "@/types";
 import { parseResult } from "@/utils";
 

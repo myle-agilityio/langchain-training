@@ -1,6 +1,6 @@
 import { UserRoundCog } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Failure, Pending, Shell } from "./common";
+import { Badge } from "@/components/ui/Badge";
+import { Failure, Pending, Shell } from "./Common";
 import type { ToolCardProps } from "@/types";
 import { parseResult } from "@/utils";
 

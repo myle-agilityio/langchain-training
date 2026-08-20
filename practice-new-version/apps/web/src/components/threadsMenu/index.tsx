@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { Clock, SquarePen } from "lucide-react";
 import { useCopilotChatConfiguration } from "@copilotkit/react-core/v2";
-import { useSelfManagedThreads } from "@/stores/use-self-managed-threads";
-import { Button } from "@/components/ui/button";
+import { useSelfManagedThreads } from "@/stores/useSelfManagedThreads";
+import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-import { formatRelative } from "@/lib/format-date";
+import { formatRelative } from "@/lib/formatDate";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/DropdownMenu";
 
 // Clock-icon trigger + dropdown replacement for the old full-height SelfManagedThreadsDrawer —
 // same data/actions, just a popover; outside-click-to-close comes free from Radix.
