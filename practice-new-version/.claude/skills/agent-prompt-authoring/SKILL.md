@@ -11,11 +11,11 @@ crowds out the instructions that matter and makes the two copies drift apart.
 
 ## Where each kind of text goes
 
-| Kind of instruction | Home | Why there |
-| --- | --- | --- |
-| How to use a tool, its constraints, what it can't do | that tool's `description` | The model sees it bound to the tool, exactly when it's choosing to call it |
-| Cross-cutting behaviour, tone, response style, ordering across tools | system prompt | No single tool owns it |
-| What to do after a specific decision or result | that decision's tool-result / `respond()` payload | Only relevant once that branch is taken |
+| Kind of instruction                                                  | Home                                              | Why there                                                                  |
+| -------------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------- |
+| How to use a tool, its constraints, what it can't do                 | that tool's `description`                         | The model sees it bound to the tool, exactly when it's choosing to call it |
+| Cross-cutting behaviour, tone, response style, ordering across tools | system prompt                                     | No single tool owns it                                                     |
+| What to do after a specific decision or result                       | that decision's tool-result / `respond()` payload | Only relevant once that branch is taken                                    |
 
 The tool schema/description is the canonical home for anything about that tool. When in doubt
 between the description and the system prompt, put it in the description.
@@ -32,7 +32,7 @@ the model cannot pick a value the type doesn't have, whereas asking nicely only 
 
 ## Field notes
 
-- Descriptions should say what the *return value* is good for, not just what the tool does —
+- Descriptions should say what the _return value_ is good for, not just what the tool does —
   e.g. `get_emails` tells the model to read `countsByStatus` rather than counting the array
   itself, which is where it otherwise goes wrong.
 - Tool results should name the recovery when something fails ("call get_emails for current ids"),

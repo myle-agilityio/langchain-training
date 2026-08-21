@@ -36,9 +36,7 @@ export const UpdateContactProfileCard = ({
           </p>
           {data.profile.tone && (
             <div className="flex items-center gap-1.5">
-              <span className="text-[11px] text-muted-foreground">
-                Tone
-              </span>
+              <span className="text-[11px] text-muted-foreground">Tone</span>
               <Badge variant="secondary" className="text-[10px] font-normal">
                 {data.profile.tone}
               </Badge>

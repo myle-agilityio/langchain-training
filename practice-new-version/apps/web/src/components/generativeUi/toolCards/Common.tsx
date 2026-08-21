@@ -92,7 +92,13 @@ export const ClassificationBadges = ({
   );
 };
 
-export const EmailLine = ({ id, fallback }: { id: string; fallback?: string }) => {
+export const EmailLine = ({
+  id,
+  fallback,
+}: {
+  id: string;
+  fallback?: string;
+}) => {
   const lookup = useEmailLookup();
   const email = lookup.get(id);
   if (!email) {
@@ -104,9 +110,7 @@ export const EmailLine = ({ id, fallback }: { id: string; fallback?: string }) =
   }
   return (
     <span className="min-w-0 truncate text-xs">
-      <span className="font-semibold text-foreground">
-        {email.from.name}
-      </span>
+      <span className="font-semibold text-foreground">{email.from.name}</span>
       <span className="text-muted-foreground"> · {email.subject}</span>
     </span>
   );

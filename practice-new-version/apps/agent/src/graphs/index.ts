@@ -1,4 +1,9 @@
-﻿import { StateGraph, START, END, type LangGraphRunnableConfig } from "@langchain/langgraph";
+﻿import {
+  StateGraph,
+  START,
+  END,
+  type LangGraphRunnableConfig,
+} from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 
 import { getCheckpointer } from "@/db/checkpointer";
@@ -17,7 +22,10 @@ import { composeEmailSubgraph } from "./composeEmailSubgraph";
 
 // A compiled subgraph passed directly as an addNode action doesn't type-check together with a
 // third options argument, so wrap it in a function that does the invoke() call instead.
-const runComposeEmail = async (state: typeof AgentState.State, config: LangGraphRunnableConfig) => {
+const runComposeEmail = async (
+  state: typeof AgentState.State,
+  config: LangGraphRunnableConfig,
+) => {
   return composeEmailSubgraph.invoke(state, config);
 };
 
@@ -30,8 +38,12 @@ export const buildGraph = async () => {
     })
     .addNode("moderator", moderator)
     .addNode("call_model", callModel)
-    .addNode("tools", new ToolNode(executableTools), { timeout: { runTimeout: 90_000 } })
-    .addNode("compose_email", runComposeEmail, { errorHandler: composeEmailErrorHandler })
+    .addNode("tools", new ToolNode(executableTools), {
+      timeout: { runTimeout: 90_000 },
+    })
+    .addNode("compose_email", runComposeEmail, {
+      errorHandler: composeEmailErrorHandler,
+    })
 
     .addEdge(START, "moderator")
 

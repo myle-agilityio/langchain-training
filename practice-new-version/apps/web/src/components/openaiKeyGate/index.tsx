@@ -1,5 +1,11 @@
 import { useState, type ReactNode } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/Card";
 import { Input } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { useOpenAiKey } from "@/stores/useOpenAiKey";
@@ -17,7 +23,9 @@ export const OpenAiKeyGate = ({ children }: { children: ReactNode }) => {
     e.preventDefault();
     const trimmed = draft.trim();
     if (!trimmed.startsWith("sk-")) {
-      setError('That doesn\'t look like an OpenAI key — it should start with "sk-".');
+      setError(
+        'That doesn\'t look like an OpenAI key — it should start with "sk-".',
+      );
       return;
     }
     setApiKey(trimmed);
@@ -29,9 +37,10 @@ export const OpenAiKeyGate = ({ children }: { children: ReactNode }) => {
         <CardHeader>
           <CardTitle>Enter your OpenAI API key</CardTitle>
           <CardDescription>
-            This app doesn&apos;t supply its own key — every chat, classification, and drafted
-            reply runs on your key, billed to your OpenAI account. It&apos;s stored only in this
-            browser (localStorage), never on our servers.
+            This app doesn&apos;t supply its own key — every chat,
+            classification, and drafted reply runs on your key, billed to your
+            OpenAI account. It&apos;s stored only in this browser
+            (localStorage), never on our servers.
           </CardDescription>
         </CardHeader>
         <CardContent>

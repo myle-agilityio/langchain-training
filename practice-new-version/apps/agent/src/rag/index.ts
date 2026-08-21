@@ -16,8 +16,13 @@ const SAMPLE_DOCS_DIR = join(import.meta.dirname, "sampleDocs");
 
 // initialize() creates the vector extension + table on first use (idempotent — IF NOT EXISTS —
 // so calling this per request, with whichever embeddings client the caller needs, is fine).
-const getVectorStore = (embeddings: OpenAIEmbeddings): Promise<PGVectorStore> => {
-  return PGVectorStore.initialize(embeddings, { pool: getPool(), tableName: KB_TABLE });
+const getVectorStore = (
+  embeddings: OpenAIEmbeddings,
+): Promise<PGVectorStore> => {
+  return PGVectorStore.initialize(embeddings, {
+    pool: getPool(),
+    tableName: KB_TABLE,
+  });
 };
 
 // Embeds the seed articles once (a non-empty table means already seeded). Runs at agent
@@ -30,7 +35,9 @@ export const ensureIndexed = async (): Promise<void> => {
 
   const embeddings = getServerEmbeddings();
   if (!embeddings) {
-    console.warn("[rag] OPENAI_API_KEY not set on the server — skipping knowledge base seeding.");
+    console.warn(
+      "[rag] OPENAI_API_KEY not set on the server — skipping knowledge base seeding.",
+    );
     return;
   }
   const store = await getVectorStore(embeddings);

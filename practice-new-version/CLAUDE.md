@@ -9,9 +9,9 @@ reference — don't copy patterns from `practice/`'s agent without deciding they
 
 - `pnpm dev` — UI on :3000 + agent on :8123 together. `dev:ui` / `dev:agent` to isolate one.
 - `pnpm typecheck` — runs `turbo run typecheck` across both packages; must be clean
-  before a task is done. **The `web` check has 3 pre-existing errors**, all in
-  `apps/web/src/app/declarativeGenerativeUi/renderers.tsx` (untouched boilerplate). That is the
-  baseline: don't add to it, and don't fix them as a side quest.
+  before a task is done.
+- `pnpm lint` / `pnpm format` — ESLint (flat config, `eslint.config.mjs`) and Prettier, scoped to
+  this project. A pre-push hook re-runs both, but only on the files in the commits being pushed.
 - The agent runs under `langgraphjs dev`; the graph entry and the custom HTTP app (CopilotKit +
   the `/api/emails`/`/api/threads` routes) are both registered in `apps/agent/langgraph.json`. Both
   servers read the root `.env`.
@@ -19,8 +19,7 @@ reference — don't copy patterns from `practice/`'s agent without deciding they
 ## Where things live
 
 Turborepo + pnpm workspace: `apps/web` (Vite SPA) and `apps/agent`. `turbo.json` drives
-`typecheck`/`build`; `pnpm dev` stays on `scripts/dev.mjs` (turbo's spawning hangs the agent
-on Windows — see the comment at the top of that file).
+`dev`/`typecheck`/`build` across both packages.
 
 Agent (`apps/agent/src/`), organized by role:
 
@@ -66,8 +65,8 @@ These are how we work on this project, not style preferences. Follow them on eve
    `components/emailInbox/` — except a file whose export is a React component, which is
    PascalCase matching the component (`InboxList.tsx`, `DropdownMenu.tsx`). Barrel
    `index.ts`/`index.tsx` files keep their name. **Assets and scripts stay kebab-case**:
-   `public/copilotkit-logo-mark.svg`, `scripts/copilotkit-dev-infra.mjs`, and the KB documents
-   in `rag/sampleDocs/` (`loaders.ts` derives their titles from the filename).
+   `public/copilotkit-logo-mark.svg` and the KB documents in `rag/sampleDocs/`
+   (`loaders.ts` derives their titles from the filename).
 
 ## Workflows
 

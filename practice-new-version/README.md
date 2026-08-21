@@ -3,15 +3,19 @@
 An inbox triage assistant for a high school math teacher, built with [LangGraph](https://www.langchain.com/langgraph) and [CopilotKit](https://copilotkit.ai). It classifies incoming email, grounds answers in a school-policy knowledge base, and drafts replies for the teacher to approve before anything sends.
 
 ## Team Size
+
 1 Developer
 
 ## Timeline
+
 16 Days
 
 ## Author
+
 My Le
 
 ## Plan
+
 [LangChain/LangGraph Practice Plan - AI Inbox Mangement Assistant Application](https://docs.google.com/document/d/1x160_wm8LfrehY8Z4oTn0ErbDq93LimBUgjF_c6KNeY/edit?usp=sharing)
 
 ## Key Features
@@ -97,10 +101,8 @@ This starts both the Next.js UI on port `3000` and the LangGraph agent on port `
 ## Available Scripts
 
 - `dev` - Starts both UI and agent servers in development mode
-- `dev:debug` - Starts both development servers with debug logging enabled
 - `dev:ui` - Starts only the Next.js UI server
 - `dev:agent` - Starts only the LangGraph agent server
-- `dev:infra` - Starts CopilotKit development infrastructure
 - `typecheck` - Type-checks the Next.js app (`pnpm --filter agent typecheck` for the agent)
 - `lint` - Lints the Next.js app
 - `build` - Builds the Next.js application for production

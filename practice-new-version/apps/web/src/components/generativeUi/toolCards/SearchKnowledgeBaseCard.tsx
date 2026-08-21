@@ -20,9 +20,7 @@ export const SearchKnowledgeBaseCard = ({
       {!data ? (
         <Pending label="Searching policy notes…" />
       ) : data.length === 0 ? (
-        <p className="text-xs text-muted-foreground">
-          Nothing relevant found.
-        </p>
+        <p className="text-xs text-muted-foreground">Nothing relevant found.</p>
       ) : (
         <div className="space-y-2">
           {data.map((hit, i) => (

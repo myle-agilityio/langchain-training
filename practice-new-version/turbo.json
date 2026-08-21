@@ -16,13 +16,9 @@
     "INTELLIGENCE_GATEWAY_WS_URL",
     "INTELLIGENCE_API_KEY"
   ],
-  "globalPassThroughEnv": ["LOG_LEVEL", "PORT"],
+  "globalPassThroughEnv": ["PORT"],
   "tasks": {
-    "//#dev:infra": {
-      "cache": false
-    },
     "dev": {
-      "dependsOn": ["//#dev:infra"],
       "cache": false,
       "persistent": true
     },

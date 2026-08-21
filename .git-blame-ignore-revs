@@ -1,0 +1,5 @@
+# Commits here are skipped by `git blame` (when configured — see below).
+# One-time formatting/lint-fix passes belong here, not real code changes.
+
+# chore: add prettier + eslint, format codebase once (practice-new-version)
+42ca7c74171829261df74e8f23644ada91c03d61

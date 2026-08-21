@@ -19,7 +19,8 @@ export const useExampleSuggestions = () => {
       },
       {
         title: "Draft a reply",
-        message: "Draft a reply to Ezra about the missed test, for my approval.",
+        message:
+          "Draft a reply to Ezra about the missed test, for my approval.",
       },
       {
         title: "Inbox dashboard (A2UI)",

@@ -4,7 +4,9 @@ import type pg from "pg";
 export const getDatabaseUrl = (): string => {
   const url = process.env.DATABASE_URL;
   if (!url) {
-    throw new Error("DATABASE_URL is not set — the inbox lives in Postgres. Set it in the root .env.");
+    throw new Error(
+      "DATABASE_URL is not set — the inbox lives in Postgres. Set it in the root .env.",
+    );
   }
   return url;
 };
@@ -24,6 +26,9 @@ export const getPgConnectionOptions = (): pg.PoolConfig => {
   parsed.searchParams.delete("channel_binding");
   return {
     connectionString: parsed.toString(),
-    ssl: sslmode && sslmode !== "disable" ? { rejectUnauthorized: false } : undefined,
+    ssl:
+      sslmode && sslmode !== "disable"
+        ? { rejectUnauthorized: false }
+        : undefined,
   };
 };

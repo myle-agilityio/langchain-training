@@ -34,13 +34,17 @@ export const listEmailsSeeded = async (): Promise<Email[]> => {
       ),
     );
     return [...seedEmails].sort(
-      (a, b) => new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime(),
+      (a, b) =>
+        new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime(),
     );
   }
   return rows.map(toEmail);
 };
 
-export const updateEmailsStatus = async (ids: string[], status: string): Promise<Email[]> => {
+export const updateEmailsStatus = async (
+  ids: string[],
+  status: string,
+): Promise<Email[]> => {
   const { rows } = await getPool().query<EmailRow>(
     `UPDATE emails SET status = $1 WHERE id = ANY($2::text[]) RETURNING ${EMAIL_COLUMNS}`,
     [status, ids],
@@ -48,7 +52,10 @@ export const updateEmailsStatus = async (ids: string[], status: string): Promise
   return rows.map(toEmail);
 };
 
-export const patchEmail = async (id: string, patch: Partial<Email>): Promise<Email | null> => {
+export const patchEmail = async (
+  id: string,
+  patch: Partial<Email>,
+): Promise<Email | null> => {
   const { rows } = await getPool().query<EmailRow>(
     `UPDATE emails SET
        status    = COALESCE($2, status),

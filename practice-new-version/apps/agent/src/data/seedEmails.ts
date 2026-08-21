@@ -1,210 +1,209 @@
 ﻿import type { Email } from "@/types/index";
 
-
 export const seedEmails: Email[] = [
   {
-    "id": "1d4ff3e7-81b9-4d39-ad26-1e93e622d363",
-    "from": {
-      "name": "Angelina Connelly",
-      "email": "angelina.connelly@hotmail.com"
+    id: "1d4ff3e7-81b9-4d39-ad26-1e93e622d363",
+    from: {
+      name: "Angelina Connelly",
+      email: "angelina.connelly@hotmail.com",
     },
-    "subject": "Question about #4 on the related rates quiz",
-    "body": "Hi Ms. Lam,\n\nI was looking over the quiz from Period 3 today and I think my work on question 4 might have been marked wrong even though I got the same final answer, just a different way.\n\nIt was the ladder problem where we had to find how fast the top was sliding down when the bottom was 6 m from the wall. I used implicit differentiation starting from x^2 + y^2 = 100 and plugged in the values after, instead of the way from your notes. My answer still came out to the same rate.\n\nCould you maybe take another look when you have a chance?\n\nThanks,\nAngelina",
-    "receivedAt": "2026-07-21T22:50:42.986Z",
-    "status": "unread"
+    subject: "Question about #4 on the related rates quiz",
+    body: "Hi Ms. Lam,\n\nI was looking over the quiz from Period 3 today and I think my work on question 4 might have been marked wrong even though I got the same final answer, just a different way.\n\nIt was the ladder problem where we had to find how fast the top was sliding down when the bottom was 6 m from the wall. I used implicit differentiation starting from x^2 + y^2 = 100 and plugged in the values after, instead of the way from your notes. My answer still came out to the same rate.\n\nCould you maybe take another look when you have a chance?\n\nThanks,\nAngelina",
+    receivedAt: "2026-07-21T22:50:42.986Z",
+    status: "unread",
   },
   {
-    "id": "d01cce28-9812-444f-8f1d-9e47149547e1",
-    "from": {
-      "name": "Felix Gislason",
-      "email": "felix_gislason@hotmail.com"
+    id: "d01cce28-9812-444f-8f1d-9e47149547e1",
+    from: {
+      name: "Felix Gislason",
+      email: "felix_gislason@hotmail.com",
     },
-    "subject": "late project from period 6",
-    "body": "Hi Ms. Lam,\n\nI just submitted my project on polynomial and rational functions in Google Classroom, but it’s a day late. I was planning to turn it in yesterday, but my internet was being weird at home and then I had to leave with my mom before I could get it uploaded. The graph comparison part and the section on vertical/horizontal asymptotes are all in there now.\n\nI know it was due Tuesday, so I get it if there’s a late deduction, but I wanted to ask if the one-day late penalty still applies in this case.\n\nFelix",
-    "receivedAt": "2026-07-21T16:59:25.898Z",
-    "status": "unread"
+    subject: "late project from period 6",
+    body: "Hi Ms. Lam,\n\nI just submitted my project on polynomial and rational functions in Google Classroom, but it’s a day late. I was planning to turn it in yesterday, but my internet was being weird at home and then I had to leave with my mom before I could get it uploaded. The graph comparison part and the section on vertical/horizontal asymptotes are all in there now.\n\nI know it was due Tuesday, so I get it if there’s a late deduction, but I wanted to ask if the one-day late penalty still applies in this case.\n\nFelix",
+    receivedAt: "2026-07-21T16:59:25.898Z",
+    status: "unread",
   },
   {
-    "id": "d1ad1f6a-1312-4eaa-aedc-0d69be06426f",
-    "from": {
-      "name": "Flo Beahan",
-      "email": "flo.beahan93@hotmail.com"
+    id: "d1ad1f6a-1312-4eaa-aedc-0d69be06426f",
+    from: {
+      name: "Flo Beahan",
+      email: "flo.beahan93@hotmail.com",
     },
-    "subject": "Jewell Beahan - missed test Monday / grading question",
-    "body": "Ms. Lam,\n\nI’m writing about Jewell Beahan in Period 1. Jewell was absent on Monday, Oct. 16 and missed the related rates test. I’d like to know when that will be made up, because this unit has already been stressful.\n\nAlso, I’m still confused about the optimization/implicit differentiation quiz from Oct. 6. On #4, Jewell set up the cylinder problem correctly but lost several marks, and on #7 the tangent line question seems like it was marked more harshly than necessary. I’m not trying to argue every point, but the grading did not feel consistent.\n\nCould we meet in person sometime this week after school?\n\nFlo Beahan",
-    "receivedAt": "2026-07-20T18:12:20.073Z",
-    "status": "unread"
+    subject: "Jewell Beahan - missed test Monday / grading question",
+    body: "Ms. Lam,\n\nI’m writing about Jewell Beahan in Period 1. Jewell was absent on Monday, Oct. 16 and missed the related rates test. I’d like to know when that will be made up, because this unit has already been stressful.\n\nAlso, I’m still confused about the optimization/implicit differentiation quiz from Oct. 6. On #4, Jewell set up the cylinder problem correctly but lost several marks, and on #7 the tangent line question seems like it was marked more harshly than necessary. I’m not trying to argue every point, but the grading did not feel consistent.\n\nCould we meet in person sometime this week after school?\n\nFlo Beahan",
+    receivedAt: "2026-07-20T18:12:20.073Z",
+    status: "unread",
   },
   {
-    "id": "aaead21e-1dcc-4905-a1fc-a5494b6dfb4b",
-    "from": {
-      "name": "Imani Dietrich",
-      "email": "imani_dietrich53@hotmail.com"
+    id: "aaead21e-1dcc-4905-a1fc-a5494b6dfb4b",
+    from: {
+      name: "Imani Dietrich",
+      email: "imani_dietrich53@hotmail.com",
     },
-    "subject": "corrected 5.4 assignment",
-    "body": "Hi Ms. Lam,\n\nI’m resubmitting the 5.4 definite integrals/area worksheet from last Thursday. I fixed the sign errors you marked on #3, #7, and #9 — on #7 I forgot the curve was below the x-axis on part of the interval, and on #9 I switched the bounds when I rewrote the integral.\n\nI attached the corrected pages and highlighted the changes so it’s easier to check. If you want me to also redo #10 because my setup looks messy, I can.\n\nThanks,\nImani",
-    "receivedAt": "2026-07-19T18:05:24.593Z",
-    "status": "unread"
+    subject: "corrected 5.4 assignment",
+    body: "Hi Ms. Lam,\n\nI’m resubmitting the 5.4 definite integrals/area worksheet from last Thursday. I fixed the sign errors you marked on #3, #7, and #9 — on #7 I forgot the curve was below the x-axis on part of the interval, and on #9 I switched the bounds when I rewrote the integral.\n\nI attached the corrected pages and highlighted the changes so it’s easier to check. If you want me to also redo #10 because my setup looks messy, I can.\n\nThanks,\nImani",
+    receivedAt: "2026-07-19T18:05:24.593Z",
+    status: "unread",
   },
   {
-    "id": "a30389ba-fb53-4308-984d-b922434a7f3a",
-    "from": {
-      "name": "Marcus Mohr",
-      "email": "marcus.mohr52@yahoo.com"
+    id: "a30389ba-fb53-4308-984d-b922434a7f3a",
+    from: {
+      name: "Marcus Mohr",
+      email: "marcus.mohr52@yahoo.com",
     },
-    "subject": "could you check my work on the extra practice?",
-    "body": "Hi Ms. Lam,\n\nI finished the extra practice set you posted for polynomial + rational functions, and I wanted to ask if you could look over my work before Friday’s quiz if you have time. I’m mostly not sure about #7 and #12 — on #7 I got a hole at x = -2 and on #12 I think my asymptotes are right but my graph feels off.\n\nI can bring the pages to Period 5 tomorrow or send photos tonight, whatever is easier.\n\nThanks,\nMarcus",
-    "receivedAt": "2026-07-19T13:09:08.596Z",
-    "status": "unread"
+    subject: "could you check my work on the extra practice?",
+    body: "Hi Ms. Lam,\n\nI finished the extra practice set you posted for polynomial + rational functions, and I wanted to ask if you could look over my work before Friday’s quiz if you have time. I’m mostly not sure about #7 and #12 — on #7 I got a hole at x = -2 and on #12 I think my asymptotes are right but my graph feels off.\n\nI can bring the pages to Period 5 tomorrow or send photos tonight, whatever is easier.\n\nThanks,\nMarcus",
+    receivedAt: "2026-07-19T13:09:08.596Z",
+    status: "unread",
   },
   {
-    "id": "1fb3a668-a0f9-4dc0-81a6-235c168cc1ab",
-    "from": {
-      "name": "Ezra Konopelski",
-      "email": "ezra_konopelski@yahoo.com"
+    id: "1fb3a668-a0f9-4dc0-81a6-235c168cc1ab",
+    from: {
+      name: "Ezra Konopelski",
+      email: "ezra_konopelski@yahoo.com",
     },
-    "subject": "Absent today / test this afternoon",
-    "body": "Hi Ms. Lam,\n\nI woke up feeling pretty awful this morning and my parents are keeping me home, so I’m going to miss Period 5 today, including the chain rule test this afternoon. I’m really sorry.\n\nCould you let me know how I should set up a makeup? I’ve done the review from last night, especially the compositions and the trig/exponential derivative questions, so I don’t want to miss it completely or fall behind.\n\nIf there’s a time before school, lunch, or after school later this week that works, I can be there.\n\nThanks,\nEzra",
-    "receivedAt": "2026-07-18T23:24:16.351Z",
-    "status": "unread"
+    subject: "Absent today / test this afternoon",
+    body: "Hi Ms. Lam,\n\nI woke up feeling pretty awful this morning and my parents are keeping me home, so I’m going to miss Period 5 today, including the chain rule test this afternoon. I’m really sorry.\n\nCould you let me know how I should set up a makeup? I’ve done the review from last night, especially the compositions and the trig/exponential derivative questions, so I don’t want to miss it completely or fall behind.\n\nIf there’s a time before school, lunch, or after school later this week that works, I can be there.\n\nThanks,\nEzra",
+    receivedAt: "2026-07-18T23:24:16.351Z",
+    status: "unread",
   },
   {
-    "id": "4ab207af-862a-4b48-96ce-b7cb75b13486",
-    "from": {
-      "name": "Javonte Mohr",
-      "email": "javonte.mohr@westbrookhigh.edu"
+    id: "4ab207af-862a-4b48-96ce-b7cb75b13486",
+    from: {
+      name: "Javonte Mohr",
+      email: "javonte.mohr@westbrookhigh.edu",
     },
-    "subject": "P3 plans / seating chart?",
-    "body": "Hi Ms. Lam — I’m in with your Period 3 this block. Could you send me the pacing guide for the Grade 11 group and the current seating chart when you get a minute? They said they were on rational functions and a few mentioned finishing #18–24 from yesterday, but I want to make sure I’m pointing them to the right work for today. If there are any usual notes about who shouldn’t be paired up or who needs to sit near the front, send that along too. Thanks.",
-    "receivedAt": "2026-07-18T23:18:40.687Z",
-    "status": "unread"
+    subject: "P3 plans / seating chart?",
+    body: "Hi Ms. Lam — I’m in with your Period 3 this block. Could you send me the pacing guide for the Grade 11 group and the current seating chart when you get a minute? They said they were on rational functions and a few mentioned finishing #18–24 from yesterday, but I want to make sure I’m pointing them to the right work for today. If there are any usual notes about who shouldn’t be paired up or who needs to sit near the front, send that along too. Thanks.",
+    receivedAt: "2026-07-18T23:18:40.687Z",
+    status: "unread",
   },
   {
-    "id": "bdab2560-a695-470e-91b8-7bcc23b06b93",
-    "from": {
-      "name": "Jerry Torp",
-      "email": "jerry.torp@yahoo.com"
+    id: "bdab2560-a695-470e-91b8-7bcc23b06b93",
+    from: {
+      name: "Jerry Torp",
+      email: "jerry.torp@yahoo.com",
     },
-    "subject": "Marcelino Torp absent next week (Period 2)",
-    "body": "Ms. Lam,\n\nI’m writing to let you know Marcelino Torp will be away all of next week for a family trip, from Monday, March 11 through Friday, March 15. Could you please tell me what he should keep up with so he doesn’t fall behind in Period 2?\n\nIf you already know the sections or assignments coming up, that would help. Even page numbers, problem sets, or topics like polynomial division, zeros of functions, or transformations would be useful so he can work ahead while we’re away.\n\nPlease let me know the best way for him to stay current.\n\nJerry Torp",
-    "receivedAt": "2026-07-18T11:32:02.507Z",
-    "status": "unread"
+    subject: "Marcelino Torp absent next week (Period 2)",
+    body: "Ms. Lam,\n\nI’m writing to let you know Marcelino Torp will be away all of next week for a family trip, from Monday, March 11 through Friday, March 15. Could you please tell me what he should keep up with so he doesn’t fall behind in Period 2?\n\nIf you already know the sections or assignments coming up, that would help. Even page numbers, problem sets, or topics like polynomial division, zeros of functions, or transformations would be useful so he can work ahead while we’re away.\n\nPlease let me know the best way for him to stay current.\n\nJerry Torp",
+    receivedAt: "2026-07-18T11:32:02.507Z",
+    status: "unread",
   },
   {
-    "id": "c8636bd0-b3a1-4662-b38d-83e8200bac82",
-    "from": {
-      "name": "Vidal Fisher",
-      "email": "vidal.fisher50@hotmail.com"
+    id: "c8636bd0-b3a1-4662-b38d-83e8200bac82",
+    from: {
+      name: "Vidal Fisher",
+      email: "vidal.fisher50@hotmail.com",
     },
-    "subject": "Request to review Katrina Fisher’s test from March 14",
-    "body": "Ms. Lam,\n\nI’m writing about Katrina Fisher’s Period 2 test from Friday, March 14. She came home concerned that several answers in the logarithms and exponential functions section may have been marked incorrect despite using valid steps. She specifically mentioned #7 on solving 3^(2x-1)=27, #11 on expanding log(4x^2/y), and #14 involving compound interest. If partial credit was not given where the method was correct, I would appreciate a re-check.\n\nKatrina is preparing her college applications, so a difference of even a few points matters right now. Please let me know if you can review it.\n\nVidal Fisher",
-    "receivedAt": "2026-07-18T07:53:14.625Z",
-    "status": "unread"
+    subject: "Request to review Katrina Fisher’s test from March 14",
+    body: "Ms. Lam,\n\nI’m writing about Katrina Fisher’s Period 2 test from Friday, March 14. She came home concerned that several answers in the logarithms and exponential functions section may have been marked incorrect despite using valid steps. She specifically mentioned #7 on solving 3^(2x-1)=27, #11 on expanding log(4x^2/y), and #14 involving compound interest. If partial credit was not given where the method was correct, I would appreciate a re-check.\n\nKatrina is preparing her college applications, so a difference of even a few points matters right now. Please let me know if you can review it.\n\nVidal Fisher",
+    receivedAt: "2026-07-18T07:53:14.625Z",
+    status: "unread",
   },
   {
-    "id": "1f7d5ad2-a5a0-4993-999e-6fbbe763e076",
-    "from": {
-      "name": "Destinee Johnston",
-      "email": "destinee_johnston18@gmail.com"
+    id: "1f7d5ad2-a5a0-4993-999e-6fbbe763e076",
+    from: {
+      name: "Destinee Johnston",
+      email: "destinee_johnston18@gmail.com",
     },
-    "subject": "question about #7 on the practice set",
-    "body": "hi ms. lam,\n\nI’m stuck on the worked example and #7 from the packet. I get the derivative part at first, but then when it switches to plugging in the values and solving for the rate I lose what is supposed to stay variable and what becomes a number. I tried it again from today’s notes and still got a different answer than the example.\n\nCould you maybe show one more step for that kind of question tomorrow, or tell me which notes page matches it best? I’m trying to study before the test on Thursday and I don’t want to practice it wrong.\n\nDestinee",
-    "receivedAt": "2026-07-17T21:46:26.729Z",
-    "status": "read",
-    "classification": {
-      "topic": "question",
-      "course": "math_12",
-      "workType": "practice",
-      "urgency": "medium"
-    }
+    subject: "question about #7 on the practice set",
+    body: "hi ms. lam,\n\nI’m stuck on the worked example and #7 from the packet. I get the derivative part at first, but then when it switches to plugging in the values and solving for the rate I lose what is supposed to stay variable and what becomes a number. I tried it again from today’s notes and still got a different answer than the example.\n\nCould you maybe show one more step for that kind of question tomorrow, or tell me which notes page matches it best? I’m trying to study before the test on Thursday and I don’t want to practice it wrong.\n\nDestinee",
+    receivedAt: "2026-07-17T21:46:26.729Z",
+    status: "read",
+    classification: {
+      topic: "question",
+      course: "math_12",
+      workType: "practice",
+      urgency: "medium",
+    },
   },
   {
-    "id": "94ddcadc-2c2f-4e35-bd63-0f89035dc648",
-    "from": {
-      "name": "Alaina Ziemann",
-      "email": "alaina_ziemann74@yahoo.com"
+    id: "94ddcadc-2c2f-4e35-bd63-0f89035dc648",
+    from: {
+      name: "Alaina Ziemann",
+      email: "alaina_ziemann74@yahoo.com",
     },
-    "subject": "could you look over my project draft?",
-    "body": "Hi Ms. Lam,\n\nI have a draft of my definite integrals project done and wanted to see if you could give me quick feedback before I turn in the final on Friday. I’m mostly not sure if my setup is right on the part where I find the area between y = x^2 - 4x + 3 and y = x + 1 from the intersection points. I got the intersections at x=0 and x=5, but then I started second guessing which function should be on top in the integral.\n\nAlso, is it okay if my explanation for why I split the shaded region into two parts is kind of short right now?\n\nThanks,\nAlaina",
-    "receivedAt": "2026-07-17T21:10:34.321Z",
-    "status": "read",
-    "classification": {
-      "topic": "review_request",
-      "course": "math_12",
-      "workType": "project",
-      "urgency": "medium"
-    }
+    subject: "could you look over my project draft?",
+    body: "Hi Ms. Lam,\n\nI have a draft of my definite integrals project done and wanted to see if you could give me quick feedback before I turn in the final on Friday. I’m mostly not sure if my setup is right on the part where I find the area between y = x^2 - 4x + 3 and y = x + 1 from the intersection points. I got the intersections at x=0 and x=5, but then I started second guessing which function should be on top in the integral.\n\nAlso, is it okay if my explanation for why I split the shaded region into two parts is kind of short right now?\n\nThanks,\nAlaina",
+    receivedAt: "2026-07-17T21:10:34.321Z",
+    status: "read",
+    classification: {
+      topic: "review_request",
+      course: "math_12",
+      workType: "project",
+      urgency: "medium",
+    },
   },
   {
-    "id": "88e5095d-5c6d-4513-a0e1-9ac9b89893c4",
-    "from": {
-      "name": "Dayana Zulauf",
-      "email": "dayana_zulauf25@hotmail.com"
+    id: "88e5095d-5c6d-4513-a0e1-9ac9b89893c4",
+    from: {
+      name: "Dayana Zulauf",
+      email: "dayana_zulauf25@hotmail.com",
     },
-    "subject": "friday + question on 5.4 hw",
-    "body": "hi Ms. Lam,\n\nI had a question about #17 on the 5.4 homework. I got it into standard form for the hyperbola, but when I try to find the vertices/asymptotes I keep mixing up which number goes under x and y after completing the square. If my equation ended up as ((y-1)^2)/9 - ((x+2)^2)/16 = 1, does that mean it opens up/down?\n\nAlso just wanted to let you know I’ll be absent Friday (May 10) for a family thing.\n\nIf I turn in tonight’s homework on Monday instead, can it still get partial credit or is it a zero after the due date?\n\nthanks,\nDayana",
-    "receivedAt": "2026-07-17T16:11:24.315Z",
-    "status": "unread"
+    subject: "friday + question on 5.4 hw",
+    body: "hi Ms. Lam,\n\nI had a question about #17 on the 5.4 homework. I got it into standard form for the hyperbola, but when I try to find the vertices/asymptotes I keep mixing up which number goes under x and y after completing the square. If my equation ended up as ((y-1)^2)/9 - ((x+2)^2)/16 = 1, does that mean it opens up/down?\n\nAlso just wanted to let you know I’ll be absent Friday (May 10) for a family thing.\n\nIf I turn in tonight’s homework on Monday instead, can it still get partial credit or is it a zero after the due date?\n\nthanks,\nDayana",
+    receivedAt: "2026-07-17T16:11:24.315Z",
+    status: "unread",
   },
   {
-    "id": "016b5953-735f-4297-b0c7-cae89a8a7325",
-    "from": {
-      "name": "Omari O'Keefe",
-      "email": "omari.okeefe@hotmail.com"
+    id: "016b5953-735f-4297-b0c7-cae89a8a7325",
+    from: {
+      name: "Omari O'Keefe",
+      email: "omari.okeefe@hotmail.com",
     },
-    "subject": "Request to meet about Alta before report cards",
-    "body": "Dear Ms. Lam,\n\nI’m writing to ask if we could set up a parent-teacher conference about Alta O’Keefe’s progress in Period 6 before report cards are finalized. She told me the recent quadratics and polynomial functions work, especially the completing-the-square review and questions like #17–21 on last Thursday’s assignment, did not go as well as she expected.\n\nI’d appreciate a clearer sense of where she stands right now and what she should focus on over the next couple of weeks. I’m available after school most days this week, or Friday morning if that is easier.\n\nThank you,\nOmari O’Keefe",
-    "receivedAt": "2026-07-17T11:47:27.590Z",
-    "status": "unread"
+    subject: "Request to meet about Alta before report cards",
+    body: "Dear Ms. Lam,\n\nI’m writing to ask if we could set up a parent-teacher conference about Alta O’Keefe’s progress in Period 6 before report cards are finalized. She told me the recent quadratics and polynomial functions work, especially the completing-the-square review and questions like #17–21 on last Thursday’s assignment, did not go as well as she expected.\n\nI’d appreciate a clearer sense of where she stands right now and what she should focus on over the next couple of weeks. I’m available after school most days this week, or Friday morning if that is easier.\n\nThank you,\nOmari O’Keefe",
+    receivedAt: "2026-07-17T11:47:27.590Z",
+    status: "unread",
   },
   {
-    "id": "207a6fa1-27b5-4b6f-8d51-7a8e4c48f327",
-    "from": {
-      "name": "Laurel Rolfson",
-      "email": "laurel.rolfson@westbrookhigh.edu"
+    id: "207a6fa1-27b5-4b6f-8d51-7a8e4c48f327",
+    from: {
+      name: "Laurel Rolfson",
+      email: "laurel.rolfson@westbrookhigh.edu",
     },
-    "subject": "Grade 12 midterm marks by Friday",
-    "body": "Hi Ms. Lam — quick reminder from Laurel: admin needs the Period 7 midterm scores in the gradebook by Friday so they can lock reports. I think most of yours should be from the limits/derivatives section plus the optimization free-response on the last page. If you had any kids finish in the Learning Commons or write on Tuesday instead of Monday, just enter whatever you’ve got and flag the rest for me.\n\nIf it helps, I’m in the workroom after lunch tomorrow and can help double-check any entries.",
-    "receivedAt": "2026-07-16T22:19:24.678Z",
-    "status": "read",
-    "classification": {
-      "topic": "admin",
-      "course": "math_12",
-      "workType": "none",
-      "urgency": "medium"
-    }
+    subject: "Grade 12 midterm marks by Friday",
+    body: "Hi Ms. Lam — quick reminder from Laurel: admin needs the Period 7 midterm scores in the gradebook by Friday so they can lock reports. I think most of yours should be from the limits/derivatives section plus the optimization free-response on the last page. If you had any kids finish in the Learning Commons or write on Tuesday instead of Monday, just enter whatever you’ve got and flag the rest for me.\n\nIf it helps, I’m in the workroom after lunch tomorrow and can help double-check any entries.",
+    receivedAt: "2026-07-16T22:19:24.678Z",
+    status: "read",
+    classification: {
+      topic: "admin",
+      course: "math_12",
+      workType: "none",
+      urgency: "medium",
+    },
   },
   {
-    "id": "fe9bc507-d944-401c-bf8f-1aa49c6f7811",
-    "from": {
-      "name": "Raegan Morar",
-      "email": "raegan_morar@yahoo.com"
+    id: "fe9bc507-d944-401c-bf8f-1aa49c6f7811",
+    from: {
+      name: "Raegan Morar",
+      email: "raegan_morar@yahoo.com",
     },
-    "subject": "q6 on tonight’s homework",
-    "body": "Hi Ms. Lam,\n\nI’m stuck on question 6 from the Period 4 homework. I can tell it wants an identity but I can’t figure out which one I’m supposed to use first, and I keep going in circles after rewriting it.\n\nIs this the kind where we start by changing everything into sine/cosine first, or is there a better first step I’m missing? I don’t need the whole answer, just a nudge so I know I’m not doing something totally wrong.\n\nThanks,\nRaegan",
-    "receivedAt": "2026-07-16T02:18:41.126Z",
-    "status": "unread"
+    subject: "q6 on tonight’s homework",
+    body: "Hi Ms. Lam,\n\nI’m stuck on question 6 from the Period 4 homework. I can tell it wants an identity but I can’t figure out which one I’m supposed to use first, and I keep going in circles after rewriting it.\n\nIs this the kind where we start by changing everything into sine/cosine first, or is there a better first step I’m missing? I don’t need the whole answer, just a nudge so I know I’m not doing something totally wrong.\n\nThanks,\nRaegan",
+    receivedAt: "2026-07-16T02:18:41.126Z",
+    status: "unread",
   },
   {
-    "id": "0ccaa22c-6dce-4ae2-8611-1311430f2cd0",
-    "from": {
-      "name": "Florian Klein",
-      "email": "florian_klein10@hotmail.com"
+    id: "0ccaa22c-6dce-4ae2-8611-1311430f2cd0",
+    from: {
+      name: "Florian Klein",
+      email: "florian_klein10@hotmail.com",
     },
-    "subject": "Question about calculator requirements for the final",
-    "body": "Hello Ms. Lam,\n\nBefore I buy a graphing calculator for Garry Klein, could you let me know which models are actually permitted on the Period 4 final? He mentioned the review packet for limits and related rates, and I would rather not spend money on something he cannot bring into the exam.\n\nIf there is a school-recommended list, or if certain TI or Casio models are not allowed, I would appreciate the clarification. I know some exams are stricter about calculators with CAS features, so I wanted to check with you first.\n\nThank you,\nFlorian Klein",
-    "receivedAt": "2026-07-15T19:55:14.267Z",
-    "status": "unread"
+    subject: "Question about calculator requirements for the final",
+    body: "Hello Ms. Lam,\n\nBefore I buy a graphing calculator for Garry Klein, could you let me know which models are actually permitted on the Period 4 final? He mentioned the review packet for limits and related rates, and I would rather not spend money on something he cannot bring into the exam.\n\nIf there is a school-recommended list, or if certain TI or Casio models are not allowed, I would appreciate the clarification. I know some exams are stricter about calculators with CAS features, so I wanted to check with you first.\n\nThank you,\nFlorian Klein",
+    receivedAt: "2026-07-15T19:55:14.267Z",
+    status: "unread",
   },
   {
-    "id": "c9ca90a0-5985-46ab-a083-a3c284a7a12a",
-    "from": {
-      "name": "Anita McGlynn",
-      "email": "anita_mcglynn39@hotmail.com"
+    id: "c9ca90a0-5985-46ab-a083-a3c284a7a12a",
+    from: {
+      name: "Anita McGlynn",
+      email: "anita_mcglynn39@hotmail.com",
     },
-    "subject": "can i move tomorrow’s makeup?",
-    "body": "Hi Ms. Lam,\n\nI just found out my physics lab got moved to tomorrow morning, and it overlaps with the makeup we booked. The lab is the one for oscillations that got rescheduled after the assembly, so I can’t miss it.\n\nWould it be possible to move my makeup to lunch, after school, or sometime Thursday? I’ve still been reviewing the derivatives/integration review sheet, especially the related rates and volume questions like #7 and #11, so I’ll be ready.\n\nSorry for the late email, I only got the lab update tonight.\n\nAnita",
-    "receivedAt": "2026-07-15T15:22:40.410Z",
-    "status": "unread"
-  }
+    subject: "can i move tomorrow’s makeup?",
+    body: "Hi Ms. Lam,\n\nI just found out my physics lab got moved to tomorrow morning, and it overlaps with the makeup we booked. The lab is the one for oscillations that got rescheduled after the assembly, so I can’t miss it.\n\nWould it be possible to move my makeup to lunch, after school, or sometime Thursday? I’ve still been reviewing the derivatives/integration review sheet, especially the related rates and volume questions like #7 and #11, so I’ll be ready.\n\nSorry for the late email, I only got the lab update tonight.\n\nAnita",
+    receivedAt: "2026-07-15T15:22:40.410Z",
+    status: "unread",
+  },
 ];

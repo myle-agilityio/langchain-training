@@ -10,8 +10,8 @@ description: Wrap up a task — update docs and walk the done checklist. Use whe
 Only "big" changes need a docs entry. Big = a new tool, a new graph node or edge, a shipped
 feature, or a phase boundary. A small internal refactor needs none.
 
-| Change | Doc |
-| --- | --- |
+| Change                                   | Doc                                                       |
+| ---------------------------------------- | --------------------------------------------------------- |
 | A new manual flow worth re-running later | [docs/TEST-SCENARIOS.md](../../../docs/TEST-SCENARIOS.md) |
 
 `README.md` stays a stable quickstart. Never append progress notes to it.

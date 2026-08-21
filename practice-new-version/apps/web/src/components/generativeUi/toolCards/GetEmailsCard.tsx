@@ -28,9 +28,7 @@ export const GetEmailsCard = ({
       {!data ? (
         <Pending label="Fetching emails…" />
       ) : data.count === 0 ? (
-        <p className="text-xs text-muted-foreground">
-          No emails matched.
-        </p>
+        <p className="text-xs text-muted-foreground">No emails matched.</p>
       ) : (
         <div className="space-y-2">
           <p className="text-xs font-semibold text-foreground">

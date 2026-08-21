@@ -16,22 +16,37 @@ const Card = React.forwardRef<
 ));
 Card.displayName = "Card";
 
-const CardHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+const CardHeader = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
   <div className={cn("flex flex-col gap-1.5 p-6", className)} {...props} />
 );
 
-const CardTitle = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+const CardTitle = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn("text-lg leading-none font-semibold tracking-tight", className)}
+    className={cn(
+      "text-lg leading-none font-semibold tracking-tight",
+      className,
+    )}
     {...props}
   />
 );
 
-const CardDescription = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+const CardDescription = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
   <div className={cn("text-sm text-muted-foreground", className)} {...props} />
 );
 
-const CardContent = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+const CardContent = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
   <div className={cn("p-6 pt-0", className)} {...props} />
 );
 

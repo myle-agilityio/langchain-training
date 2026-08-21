@@ -3,10 +3,6 @@
 
 import { z } from "zod";
 
-// Literal string or a data-model path binding like `{ path: "airline" }`,
-// resolved to the actual value at render time by GenericBinder.
-const DynString = z.union([z.string(), z.object({ path: z.string() })]);
-
 export const demonstrationCatalogDefinitions = {
   Title: {
     description: "A heading. Use for section titles and page headers.",

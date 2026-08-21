@@ -8,7 +8,11 @@ interface ComposeFormProps {
   onCancel: () => void;
 }
 
-export const ComposeForm = ({ initialSubject, onSend, onCancel }: ComposeFormProps) => {
+export const ComposeForm = ({
+  initialSubject,
+  onSend,
+  onCancel,
+}: ComposeFormProps) => {
   const [subject, setSubject] = useState(initialSubject);
   const [body, setBody] = useState("");
 
@@ -32,7 +36,11 @@ export const ComposeForm = ({ initialSubject, onSend, onCancel }: ComposeFormPro
         <Button variant="outline" size="sm" onClick={onCancel}>
           Cancel
         </Button>
-        <Button size="sm" disabled={!canSend} onClick={() => onSend(subject.trim(), body.trim())}>
+        <Button
+          size="sm"
+          disabled={!canSend}
+          onClick={() => onSend(subject.trim(), body.trim())}
+        >
           Send
         </Button>
       </div>
