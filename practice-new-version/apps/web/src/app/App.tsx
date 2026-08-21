@@ -4,10 +4,7 @@ import {
   CopilotChat,
   CopilotChatConfigurationProvider,
 } from "@copilotkit/react-core/v2";
-import { useSyncTheme } from "@/stores/useTheme";
 import { readStoredOpenAiKey } from "@/stores/useOpenAiKey";
-import { useSyncSharedInboxWithAgent } from "@/stores/useSharedInbox";
-import { useSyncSelfManagedThreadsWithAgent } from "@/stores/useSelfManagedThreads";
 import { OpenAiKeyGate } from "@/components/openaiKeyGate";
 import { ChatSidebar } from "@/components/chatSidebar";
 import { EmailInbox } from "@/components/emailInbox";
@@ -16,6 +13,9 @@ import {
   useGenerativeUIExamples,
   useExampleSuggestions,
   useEmailAgent,
+  useSyncInbox,
+  useSyncThreads,
+  useSyncTheme,
 } from "@/hooks";
 // A2UI catalog: definitions + renderers in ./declarativeGenerativeUi/
 import { demonstrationCatalog } from "./declarativeGenerativeUi/renderers";
@@ -23,8 +23,8 @@ import { demonstrationCatalog } from "./declarativeGenerativeUi/renderers";
 // Needs useAgent()/useCopilotChatConfiguration(), which only resolve inside
 // CopilotChatConfigurationProvider — wraps both chat and inbox since both use it.
 const AgentSync = ({ children }: { children: ReactNode }) => {
-  useSyncSharedInboxWithAgent();
-  useSyncSelfManagedThreadsWithAgent();
+  useSyncInbox();
+  useSyncThreads();
   return <>{children}</>;
 };
 
