@@ -19,8 +19,7 @@ reference — don't copy patterns from `practice/`'s agent without deciding they
 ## Where things live
 
 Turborepo + pnpm workspace: `apps/web` (Vite SPA) and `apps/agent`. `turbo.json` drives
-`typecheck`/`build`; `pnpm dev` stays on `scripts/dev.mjs` (turbo's spawning hangs the agent
-on Windows — see the comment at the top of that file).
+`dev`/`typecheck`/`build` across both packages.
 
 Agent (`apps/agent/src/`), organized by role:
 
@@ -66,8 +65,8 @@ These are how we work on this project, not style preferences. Follow them on eve
    `components/emailInbox/` — except a file whose export is a React component, which is
    PascalCase matching the component (`InboxList.tsx`, `DropdownMenu.tsx`). Barrel
    `index.ts`/`index.tsx` files keep their name. **Assets and scripts stay kebab-case**:
-   `public/copilotkit-logo-mark.svg`, `scripts/copilotkit-dev-infra.mjs`, and the KB documents
-   in `rag/sampleDocs/` (`loaders.ts` derives their titles from the filename).
+   `public/copilotkit-logo-mark.svg` and the KB documents in `rag/sampleDocs/`
+   (`loaders.ts` derives their titles from the filename).
 
 ## Workflows
 

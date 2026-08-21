@@ -101,10 +101,8 @@ This starts both the Next.js UI on port `3000` and the LangGraph agent on port `
 ## Available Scripts
 
 - `dev` - Starts both UI and agent servers in development mode
-- `dev:debug` - Starts both development servers with debug logging enabled
 - `dev:ui` - Starts only the Next.js UI server
 - `dev:agent` - Starts only the LangGraph agent server
-- `dev:infra` - Starts CopilotKit development infrastructure
 - `typecheck` - Type-checks the Next.js app (`pnpm --filter agent typecheck` for the agent)
 - `lint` - Lints the Next.js app
 - `build` - Builds the Next.js application for production

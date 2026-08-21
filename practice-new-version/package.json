@@ -5,13 +5,11 @@
   "packageManager": "pnpm@10.30.3",
   "scripts": {
     "dev": "turbo run dev",
-    "dev:debug": "node scripts/dev.mjs --debug",
     "dev:ui": "turbo run dev --filter=web",
     "dev:agent": "turbo run dev --filter=agent",
     "typecheck": "turbo run typecheck",
     "build": "turbo run build --filter=web",
     "build:agent": "turbo run build --filter=agent",
-    "dev:infra": "node scripts/copilotkit-dev-infra.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",

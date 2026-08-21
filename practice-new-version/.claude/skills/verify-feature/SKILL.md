@@ -22,9 +22,6 @@ Start the narrowest thing that can prove the change, in the background:
   Hit `http://localhost:8123/ok` to confirm it's up before assuming a failure is yours.
 - Agent + UI (generative UI, interrupts, anything the user sees): `pnpm dev` → :3000 and :8123.
 
-Use `LOG_LEVEL=debug` (or `pnpm dev:debug`) when you need to see the agent's own tracing from
-`apps/agent/src/debug.ts`.
-
 ## 3. Exercise the actual path
 
 Pick the flow that would break if the change were wrong, and run it. For example:
