@@ -22,7 +22,7 @@ interface EmailDetailProps {
   onAskAgent: (email: Email) => void;
   // True while the agent is running or paused awaiting approval. Deliberately just disables
   // the button without relabelling it — a "Drafting…" label would often be a lie.
-  agentBusy: boolean;
+  isAgentBusy: boolean;
 }
 
 export const EmailDetail = ({
@@ -30,7 +30,7 @@ export const EmailDetail = ({
   isLoading,
   onSendReply,
   onAskAgent,
-  agentBusy,
+  isAgentBusy,
 }: EmailDetailProps) => {
   const [composing, setComposing] = useState(false);
 
@@ -126,7 +126,7 @@ export const EmailDetail = ({
             <Button
               variant="outline"
               onClick={() => onAskAgent(email)}
-              disabled={agentBusy}
+              disabled={isAgentBusy}
             >
               <Sparkles className="h-4 w-4" />
               Ask AI to draft

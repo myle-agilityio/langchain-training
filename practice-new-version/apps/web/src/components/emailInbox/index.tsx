@@ -192,7 +192,7 @@ export const EmailInbox = () => {
     });
     return () => subscription.unsubscribe();
   }, [agent]);
-  const agentBusy = agent.isRunning || awaitingApproval;
+  const isAgentBusy = agent.isRunning || awaitingApproval;
 
   return (
     <div className="h-full flex gap-3">
@@ -226,7 +226,7 @@ export const EmailInbox = () => {
           isLoading={isLoading}
           onSendReply={sendManualReply}
           onAskAgent={askAgentToReply}
-          agentBusy={agentBusy}
+          isAgentBusy={isAgentBusy}
         />
       </div>
     </div>
