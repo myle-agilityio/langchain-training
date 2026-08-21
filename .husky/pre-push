@@ -20,7 +20,8 @@ while read -r local_ref local_oid remote_ref remote_oid; do
     base="$remote_oid"
   fi
 
-  files=$(git diff --name-only "$base" "$local_oid" | grep -E '^practice-new-version/apps/.*\.(ts|tsx|js|jsx)$')
+  # `|| true`: grep exits 1 when nothing matches, which would kill the hook (husky runs it with `sh -e`).
+  files=$(git diff --name-only "$base" "$local_oid" | grep -E '^practice-new-version/apps/.*\.(ts|tsx|js|jsx)$' || true)
 
   [ -z "$files" ] && continue
 
