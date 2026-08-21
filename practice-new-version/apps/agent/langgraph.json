@@ -1,5 +1,6 @@
 {
   "node_version": "20",
+  "node_loader": "tsx/esm",
   "dockerfile_lines": [],
   "dependencies": ["."],
   "graphs": {
