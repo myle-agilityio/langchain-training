@@ -30,7 +30,9 @@ export const renderEmail = (email: Email): string => {
 
 // get_emails' structured counterpart to renderEmail — the ToolMessage stays in history and is
 // replayed every turn, so it needs the same scrubbing. Keeps the sender's name, drops the address.
-export const redactEmailForModel = (email: Email): Omit<Email, "from"> & { from: { name: string } } => {
+export const redactEmailForModel = (
+  email: Email,
+): Omit<Email, "from"> & { from: { name: string } } => {
   const { from, ...rest } = email;
   return {
     ...rest,

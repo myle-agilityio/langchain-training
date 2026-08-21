@@ -1,7 +1,18 @@
 import { useEffect, useState } from "react";
-import type { Course, EmailStatus, EmailTopic, Urgency, WorkType } from "@/types/email";
+import type {
+  Course,
+  EmailStatus,
+  EmailTopic,
+  Urgency,
+  WorkType,
+} from "@/types/email";
 import { Button } from "@/components/ui/Button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/Dialog";
 import { Field, Input, Select } from "@/components/ui/Field";
 import {
   COURSE_LABEL,
@@ -19,7 +30,12 @@ interface FilterDialogProps {
   onApply: (filters: EmailFilters) => void;
 }
 
-export const FilterDialog = ({ open, onOpenChange, filters, onApply }: FilterDialogProps) => {
+export const FilterDialog = ({
+  open,
+  onOpenChange,
+  filters,
+  onApply,
+}: FilterDialogProps) => {
   // Draft state so Cancel/closing without Apply doesn't touch the active filters.
   const [draft, setDraft] = useState<EmailFilters>(filters);
 
@@ -53,11 +69,11 @@ export const FilterDialog = ({ open, onOpenChange, filters, onApply }: FilterDia
             <Field label="Status">
               <Select
                 value={draft.status ?? ""}
-                onChange={(e) => set("status", (e.target.value || undefined) as EmailStatus)}
+                onChange={(e) =>
+                  set("status", (e.target.value || undefined) as EmailStatus)
+                }
               >
-                <option value="">
-                  Any
-                </option>
+                <option value="">Any</option>
                 {(Object.keys(STATUS_LABEL) as EmailStatus[]).map((s) => (
                   <option key={s} value={s}>
                     {STATUS_LABEL[s]}
@@ -68,11 +84,11 @@ export const FilterDialog = ({ open, onOpenChange, filters, onApply }: FilterDia
             <Field label="Urgency">
               <Select
                 value={draft.urgency ?? ""}
-                onChange={(e) => set("urgency", (e.target.value || undefined) as Urgency)}
+                onChange={(e) =>
+                  set("urgency", (e.target.value || undefined) as Urgency)
+                }
               >
-                <option value="">
-                  Any
-                </option>
+                <option value="">Any</option>
                 {(Object.keys(URGENCY_LABEL) as Urgency[]).map((u) => (
                   <option key={u} value={u}>
                     {URGENCY_LABEL[u]}
@@ -83,27 +99,23 @@ export const FilterDialog = ({ open, onOpenChange, filters, onApply }: FilterDia
             <Field label="Grade">
               <Select
                 value={draft.course ?? ""}
-                onChange={(e) => set("course", (e.target.value || undefined) as Course)}
+                onChange={(e) =>
+                  set("course", (e.target.value || undefined) as Course)
+                }
               >
-                <option value="">
-                  Any
-                </option>
-                <option value="math_11">
-                  {COURSE_LABEL.math_11}
-                </option>
-                <option value="math_12">
-                  {COURSE_LABEL.math_12}
-                </option>
+                <option value="">Any</option>
+                <option value="math_11">{COURSE_LABEL.math_11}</option>
+                <option value="math_12">{COURSE_LABEL.math_12}</option>
               </Select>
             </Field>
             <Field label="Type">
               <Select
                 value={draft.topic ?? ""}
-                onChange={(e) => set("topic", (e.target.value || undefined) as EmailTopic)}
+                onChange={(e) =>
+                  set("topic", (e.target.value || undefined) as EmailTopic)
+                }
               >
-                <option value="">
-                  Any
-                </option>
+                <option value="">Any</option>
                 {(Object.keys(TOPIC_LABEL) as EmailTopic[]).map((t) => (
                   <option key={t} value={t}>
                     {TOPIC_LABEL[t]}
@@ -116,11 +128,11 @@ export const FilterDialog = ({ open, onOpenChange, filters, onApply }: FilterDia
           <Field label="Work type">
             <Select
               value={draft.workType ?? ""}
-              onChange={(e) => set("workType", (e.target.value || undefined) as WorkType)}
+              onChange={(e) =>
+                set("workType", (e.target.value || undefined) as WorkType)
+              }
             >
-              <option value="">
-                Any
-              </option>
+              <option value="">Any</option>
               {(Object.keys(WORK_TYPE_LABEL) as WorkType[])
                 .filter((w) => w !== "none")
                 .map((w) => (
@@ -179,7 +191,11 @@ export const FilterDialog = ({ open, onOpenChange, filters, onApply }: FilterDia
             Clear filters
           </Button>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
             <Button size="sm" onClick={apply}>

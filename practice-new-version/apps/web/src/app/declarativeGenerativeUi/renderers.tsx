@@ -1,7 +1,7 @@
 // A2UI Catalog — React Renderers: each renderer maps a component name from
 // definitions.ts to a React implementation, registered via <CopilotKit a2ui={...}>.
 
-import React, { useState } from "react";
+import React from "react";
 import {
   PieChart as RechartsPie,
   Pie,
@@ -18,76 +18,14 @@ import { createCatalog } from "@copilotkit/a2ui-renderer";
 import type { CatalogRenderers } from "@copilotkit/a2ui-renderer";
 import { demonstrationCatalogDefinitions } from "./definitions";
 import type { DemonstrationCatalogDefinitions } from "./definitions";
+import { c } from "./theme";
+import { ActionButton } from "./ActionButton";
 
-// ─── Theme-aware colors ─────────────────────────────────────────────
-
-const c = {
-  card: "var(--card)",
-  cardFg: "var(--card-foreground)",
-  border: "var(--border)",
-  muted: "var(--muted-foreground)",
-  divider: "color-mix(in srgb, var(--border) 50%, var(--card))",
-  shadow: "0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
-  btnBg: "color-mix(in srgb, var(--muted) 40%, var(--card))",
-  btnDoneBg: "color-mix(in srgb, #22c55e 10%, var(--card))",
-};
-
-const ActionButton = ({
-  label,
-  doneLabel,
-  action,
-  children: child,
-}: {
-  label: string;
-  doneLabel: string;
-  action: any;
-  children?: React.ReactNode;
-}) => {
-  const [done, setDone] = useState(false);
-  return (
-    <button
-      disabled={done}
-      style={{
-        width: "100%",
-        padding: "10px 16px",
-        borderRadius: "10px",
-        border: done ? "1px solid #bbf7d0" : `1px solid ${c.border}`,
-        background: done ? c.btnDoneBg : c.btnBg,
-        color: done ? "#059669" : c.cardFg,
-        fontSize: "0.85rem",
-        fontWeight: 500,
-        cursor: done ? "default" : "pointer",
-        transition: "all 0.2s ease",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "6px",
-      }}
-      onClick={() => {
-        if (!done) {
-          action?.();
-          setDone(true);
-        }
-      }}
-    >
-      {done && (
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#059669"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-      )}
-      {done ? doneLabel : (child ?? label)}
-    </button>
-  );
-};
+// "children" template entries are strings or { id, basePath } once GenericBinder resolves a
+// STRUCTURAL binding — richer than definitions.ts's pre-resolution Zod shape, and not yet
+// reflected in @copilotkit/a2ui-renderer's published RendererProps.children type either.
+type ChildEntry = string | { id: string; basePath?: string };
+type ChildrenWithBasePath = (id: string, basePath?: string) => React.ReactNode;
 
 // ─── Renderers (type-checked against schema definitions) ────────────
 
@@ -127,7 +65,9 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
         end: "flex-end",
         spaceBetween: "space-between",
       };
-      const items = Array.isArray(props.children) ? props.children : [];
+      const items = (
+        Array.isArray(props.children) ? props.children : []
+      ) as ChildEntry[];
       return (
         <div
           style={{
@@ -141,7 +81,7 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
             width: "100%",
           }}
         >
-          {items.map((item: any, i: number) => {
+          {items.map((item, i) => {
             if (typeof item === "string")
               return (
                 <div
@@ -157,7 +97,7 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
                   key={`${item.id}-${i}`}
                   style={{ flex: "1 1 0", minWidth: 0 }}
                 >
-                  {(children as any)(item.id, item.basePath)}
+                  {(children as ChildrenWithBasePath)(item.id, item.basePath)}
                 </div>
               );
             return null;
@@ -167,7 +107,9 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
     },
 
     Column: ({ props, children }) => {
-      const items = Array.isArray(props.children) ? props.children : [];
+      const items = (
+        Array.isArray(props.children) ? props.children : []
+      ) as ChildEntry[];
       return (
         <div
           style={{
@@ -177,7 +119,7 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
             width: "100%",
           }}
         >
-          {items.map((item: any, i: number) => {
+          {items.map((item, i) => {
             if (typeof item === "string")
               return (
                 <React.Fragment key={`${item}-${i}`}>
@@ -187,7 +129,7 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
             if (item && typeof item === "object" && "id" in item)
               return (
                 <React.Fragment key={`${item.id}-${i}`}>
-                  {(children as any)(item.id, item.basePath)}
+                  {(children as ChildrenWithBasePath)(item.id, item.basePath)}
                 </React.Fragment>
               );
             return null;
@@ -304,7 +246,7 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
                 outerRadius={80}
                 paddingAngle={2}
               >
-                {data.map((entry: any, i: number) => (
+                {data.map((entry, i) => (
                   <Cell
                     key={i}
                     fill={entry.color ?? COLORS[i % COLORS.length]}
@@ -379,7 +321,7 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
           >
             <thead>
               <tr>
-                {cols.map((col: any) => (
+                {cols.map((col) => (
                   <th
                     key={col.key}
                     style={{
@@ -399,9 +341,9 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
               </tr>
             </thead>
             <tbody>
-              {rows.map((row: any, i: number) => (
+              {rows.map((row, i) => (
                 <tr key={i} style={{ borderBottom: `1px solid ${c.divider}` }}>
-                  {cols.map((col: any) => (
+                  {cols.map((col) => (
                     <td
                       key={col.key}
                       style={{ padding: "8px 12px", color: c.cardFg }}

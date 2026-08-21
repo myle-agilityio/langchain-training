@@ -95,7 +95,8 @@ export const useSharedInbox = create<SharedInboxState>((set, get) => ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ids, patch }),
       });
-      if (!res.ok) throw new Error(`PATCH /api/emails (bulk) failed (${res.status})`);
+      if (!res.ok)
+        throw new Error(`PATCH /api/emails (bulk) failed (${res.status})`);
       const data = (await res.json()) as { emails: Email[] };
       const updated = new Map(data.emails.map((email) => [email.id, email]));
       set((state) => ({

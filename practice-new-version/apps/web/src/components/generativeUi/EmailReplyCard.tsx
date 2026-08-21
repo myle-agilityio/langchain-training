@@ -83,12 +83,8 @@ export const EmailReplyCard = ({
               <Check className="h-5 w-5 text-white" strokeWidth={3} />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-foreground">
-                Reply sent
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                {subject}
-              </p>
+              <h3 className="text-lg font-bold text-foreground">Reply sent</h3>
+              <p className="text-sm text-muted-foreground mt-1">{subject}</p>
             </div>
           </div>
         </CardContent>
@@ -139,16 +135,16 @@ export const EmailReplyCard = ({
         </div>
 
         {status === "inProgress" ? (
-          <div className="text-sm text-muted-foreground">
-            Drafting reply…
-          </div>
+          <div className="text-sm text-muted-foreground">Drafting reply…</div>
         ) : (
           <div className="space-y-3">
             {compliance && !compliance.compliant && (
               <div className="flex gap-2 rounded-xl border border-tone-amber/30 bg-tone-amber/10 px-3 py-2 text-xs text-tone-amber">
                 <TriangleAlert className="h-4 w-4 shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-medium">Compliance check flagged this draft</p>
+                  <p className="font-medium">
+                    Compliance check flagged this draft
+                  </p>
                   <ul className="list-disc pl-4 mt-1 space-y-0.5">
                     {compliance.violations.map((v) => (
                       <li key={v}>{v}</li>

@@ -46,9 +46,7 @@ export const ToolReasoning = ({ name, args, status }: ToolReasoningProps) => {
           <div className="ml-5 mt-1.5 rounded-md bg-secondary px-3 py-2 space-y-1">
             {entries.map(([key, value]) => (
               <div key={key} className="flex gap-2 min-w-0 font-mono text-xs">
-                <span className="text-muted-foreground shrink-0">
-                  {key}:
-                </span>
+                <span className="text-muted-foreground shrink-0">{key}:</span>
                 <span className="text-foreground truncate">
                   {formatValue(value)}
                 </span>

@@ -67,4 +67,5 @@ export const moderator = async (
 };
 
 // Routes to call_model or ends if the message was flagged
-export const afterModeration = (state: AgentStateShape) => state.blocked ? END : "call_model";
+export const afterModeration = (state: AgentStateShape) =>
+  state.blocked ? END : "call_model";

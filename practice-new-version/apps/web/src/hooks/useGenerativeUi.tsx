@@ -1,7 +1,10 @@
 import { z } from "zod";
 import { useTheme } from "@/stores/useTheme";
 
-import { useFrontendTool, useDefaultRenderTool } from "@copilotkit/react-core/v2";
+import {
+  useFrontendTool,
+  useDefaultRenderTool,
+} from "@copilotkit/react-core/v2";
 
 import { ToolReasoning } from "@/components/ToolRendering";
 import { useToolRenderers } from "@/hooks/useToolRenderers";

@@ -10,7 +10,10 @@ const relativeTimeFormat = new Intl.RelativeTimeFormat(undefined, {
   numeric: "always",
 });
 
-export const formatReceivedAt = (iso: string, now: Date = new Date()): string => {
+export const formatReceivedAt = (
+  iso: string,
+  now: Date = new Date(),
+): string => {
   const d = new Date(iso);
   if (!isValid(d)) return "";
 

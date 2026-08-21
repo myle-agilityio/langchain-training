@@ -11,7 +11,12 @@
       // without this the page paints unthemed (light) first, then flips. This
       // blocking inline script matches ThemeProvider's "system" default so
       // there's no flash and no class mismatch when the provider re-applies.
-      (function(){try{var d=window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.classList.add(d?'dark':'light');}catch(e){}})();
+      (function () {
+        try {
+          var d = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          document.documentElement.classList.add(d ? "dark" : "light");
+        } catch (e) {}
+      })();
     </script>
   </head>
   <body class="antialiased">

@@ -68,7 +68,9 @@ const FILTER_COLUMNS = {
 } as const;
 
 // Shared by listEmails and aggregateEmails so a filter means the same thing in both.
-const buildWhere = (filter: EmailFilter): { clause: string; params: unknown[] } => {
+const buildWhere = (
+  filter: EmailFilter,
+): { clause: string; params: unknown[] } => {
   const conditions: string[] = [];
   const params: unknown[] = [];
 
@@ -76,7 +78,13 @@ const buildWhere = (filter: EmailFilter): { clause: string; params: unknown[] } 
     params.push(filter.id);
     conditions.push(`id = $${params.length}`);
   }
-  for (const key of ["status", "topic", "course", "workType", "urgency"] as const) {
+  for (const key of [
+    "status",
+    "topic",
+    "course",
+    "workType",
+    "urgency",
+  ] as const) {
     const value = filter[key];
     if (value !== undefined) {
       params.push(value);
@@ -86,11 +94,15 @@ const buildWhere = (filter: EmailFilter): { clause: string; params: unknown[] } 
   if (filter.unclassified) conditions.push(`topic IS NULL`);
   if (filter.sender) {
     params.push(`%${filter.sender}%`);
-    conditions.push(`(from_name ILIKE $${params.length} OR from_email ILIKE $${params.length})`);
+    conditions.push(
+      `(from_name ILIKE $${params.length} OR from_email ILIKE $${params.length})`,
+    );
   }
   if (filter.search) {
     params.push(`%${filter.search}%`);
-    conditions.push(`(subject ILIKE $${params.length} OR body ILIKE $${params.length})`);
+    conditions.push(
+      `(subject ILIKE $${params.length} OR body ILIKE $${params.length})`,
+    );
   }
   if (filter.receivedAfter) {
     params.push(filter.receivedAfter);
@@ -101,10 +113,15 @@ const buildWhere = (filter: EmailFilter): { clause: string; params: unknown[] } 
     conditions.push(`received_at <= $${params.length}`);
   }
 
-  return { clause: conditions.length ? `WHERE ${conditions.join(" AND ")}` : "", params };
+  return {
+    clause: conditions.length ? `WHERE ${conditions.join(" AND ")}` : "",
+    params,
+  };
 };
 
-export const listEmails = async (filter: EmailFilter = {}): Promise<Email[]> => {
+export const listEmails = async (
+  filter: EmailFilter = {},
+): Promise<Email[]> => {
   const { clause, params } = buildWhere(filter);
   const { rows } = await getPool().query<EmailRow>(
     `SELECT ${COLUMNS} FROM emails ${clause} ORDER BY received_at DESC`,
@@ -138,7 +155,10 @@ export const aggregateEmails = async (
   }
 
   const column = FILTER_COLUMNS[groupBy];
-  const { rows } = await getPool().query<{ group_value: string | null; n: string }>(
+  const { rows } = await getPool().query<{
+    group_value: string | null;
+    n: string;
+  }>(
     `SELECT ${column} AS group_value, count(*) AS n FROM emails ${clause} GROUP BY ${column}`,
     params,
   );
@@ -173,4 +193,3 @@ export const updateEmail = async (
   );
   return rows[0] ? toEmail(rows[0]) : null;
 };
-

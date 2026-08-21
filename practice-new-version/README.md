@@ -3,15 +3,19 @@
 An inbox triage assistant for a high school math teacher, built with [LangGraph](https://www.langchain.com/langgraph) and [CopilotKit](https://copilotkit.ai). It classifies incoming email, grounds answers in a school-policy knowledge base, and drafts replies for the teacher to approve before anything sends.
 
 ## Team Size
+
 1 Developer
 
 ## Timeline
+
 16 Days
 
 ## Author
+
 My Le
 
 ## Plan
+
 [LangChain/LangGraph Practice Plan - AI Inbox Mangement Assistant Application](https://docs.google.com/document/d/1x160_wm8LfrehY8Z4oTn0ErbDq93LimBUgjF_c6KNeY/edit?usp=sharing)
 
 ## Key Features

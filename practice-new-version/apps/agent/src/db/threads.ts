@@ -46,7 +46,10 @@ export const listThreads = async (): Promise<ChatThread[]> => {
 
 // Upsert: creates the row the first time a thread is touched, and just bumps updated_at on
 // every later touch, without ever clobbering a title (LLM-generated or teacher-renamed).
-export const upsertThread = async (id: string, title: string | null): Promise<ChatThread> => {
+export const upsertThread = async (
+  id: string,
+  title: string | null,
+): Promise<ChatThread> => {
   const { rows } = await getPool().query<ChatThreadRow>(
     `INSERT INTO chat_threads (id, title)
      VALUES ($1, $2)
@@ -65,7 +68,10 @@ export const threadExists = async (id: string): Promise<boolean> => {
   return rows.length > 0;
 };
 
-export const renameThread = async (id: string, title: string): Promise<ChatThread | null> => {
+export const renameThread = async (
+  id: string,
+  title: string,
+): Promise<ChatThread | null> => {
   const { rows } = await getPool().query<ChatThreadRow>(
     `UPDATE chat_threads SET title = $2, updated_at = now() WHERE id = $1
      RETURNING ${CHAT_THREAD_COLUMNS}`,

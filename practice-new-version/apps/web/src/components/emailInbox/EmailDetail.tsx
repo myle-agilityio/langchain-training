@@ -58,9 +58,7 @@ export const EmailDetail = ({
           {email.subject}
         </h1>
         <div className="flex flex-wrap items-center gap-2 mt-3 text-sm text-muted-foreground">
-          <span className="font-medium text-foreground">
-            {email.from.name}
-          </span>
+          <span className="font-medium text-foreground">{email.from.name}</span>
           <span>&lt;{email.from.email}&gt;</span>
           <span>·</span>
           <time dateTime={email.receivedAt} suppressHydrationWarning>

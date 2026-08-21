@@ -37,7 +37,12 @@ export const ThreadsMenu = () => {
       }}
     >
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Conversation history" title="Conversation history">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Conversation history"
+          title="Conversation history"
+        >
           <Clock className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
@@ -56,11 +61,14 @@ export const ThreadsMenu = () => {
         </div>
         <div className="max-h-80 overflow-y-auto thin-scrollbar p-1">
           {threads.length === 0 && (
-            <p className="px-2 py-4 text-sm text-muted-foreground">No conversations yet.</p>
+            <p className="px-2 py-4 text-sm text-muted-foreground">
+              No conversations yet.
+            </p>
           )}
           <ul className="flex flex-col gap-0.5">
             {threads.map((thread) => {
-              const active = config.hasExplicitThreadId && config.threadId === thread.id;
+              const active =
+                config.hasExplicitThreadId && config.threadId === thread.id;
               return (
                 <li key={thread.id} className="group">
                   <div
@@ -89,7 +97,9 @@ export const ThreadsMenu = () => {
                         />
                       ) : (
                         <>
-                          <div className="truncate">{thread.title ?? "New conversation"}</div>
+                          <div className="truncate">
+                            {thread.title ?? "New conversation"}
+                          </div>
                           <div className="text-xs text-muted-foreground">
                             {formatRelative(thread.updatedAt)}
                           </div>

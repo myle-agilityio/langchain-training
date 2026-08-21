@@ -29,7 +29,7 @@ Use `LOG_LEVEL=debug` (or `pnpm dev:debug`) when you need to see the agent's own
 
 Pick the flow that would break if the change were wrong, and run it. For example:
 
-- New/changed tool → send a message that forces that tool call, and check the tool's *return*
+- New/changed tool → send a message that forces that tool call, and check the tool's _return_
   reaches state, not just that it ran.
 - Classification → classify a real seeded email and confirm the badge row renders fully
   (classification is all-or-nothing; a partial one renders half-filled).

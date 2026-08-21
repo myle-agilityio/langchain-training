@@ -29,7 +29,8 @@ export const ChatSidebar = ({ threadsMenu, children }: ChatSidebarProps) => {
   // The sidebar's right edge sits flush against the viewport edge, so width is just how far the
   // drag point is from that edge. Also keeps at least 320px for the inbox.
   const clampWidth = useCallback(
-    (px: number) => Math.min(MAX_WIDTH, window.innerWidth - 320, Math.max(MIN_WIDTH, px)),
+    (px: number) =>
+      Math.min(MAX_WIDTH, window.innerWidth - 320, Math.max(MIN_WIDTH, px)),
     [],
   );
   const resizeTo = useCallback(
@@ -42,12 +43,14 @@ export const ChatSidebar = ({ threadsMenu, children }: ChatSidebarProps) => {
   useEffect(() => {
     if (!isResizing) return;
     document.body.classList.add("select-none", "cursor-col-resize");
-    return () => document.body.classList.remove("select-none", "cursor-col-resize");
+    return () =>
+      document.body.classList.remove("select-none", "cursor-col-resize");
   }, [isResizing]);
 
   useFrontendTool({
     name: "enableChatMode",
-    description: "Open the chat sidebar so the teacher can see the conversation.",
+    description:
+      "Open the chat sidebar so the teacher can see the conversation.",
     handler: async () => setCollapsed(false),
   });
 
@@ -77,7 +80,9 @@ export const ChatSidebar = ({ threadsMenu, children }: ChatSidebarProps) => {
           isResizing ? "" : "transition-transform duration-200 ease-in-out",
           collapsed ? "translate-x-full" : "translate-x-0",
           "lg:relative lg:z-auto lg:translate-x-0 lg:rounded-xl lg:border lg:border-border lg:bg-card",
-          isResizing ? "" : "lg:transition-[width] lg:duration-200 lg:ease-in-out",
+          isResizing
+            ? ""
+            : "lg:transition-[width] lg:duration-200 lg:ease-in-out",
           "lg:overflow-hidden",
           collapsed ? "lg:w-0 lg:border-0" : "lg:w-(--chat-sidebar-width)",
         ].join(" ")}
@@ -108,7 +113,9 @@ export const ChatSidebar = ({ threadsMenu, children }: ChatSidebarProps) => {
             onKeyDown={(e) => {
               if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
               e.preventDefault();
-              setWidth((w) => clampWidth(w + (e.key === "ArrowLeft" ? 24 : -24)));
+              setWidth((w) =>
+                clampWidth(w + (e.key === "ArrowLeft" ? 24 : -24)),
+              );
             }}
             className="hidden lg:block absolute left-0 inset-y-0 z-10 w-1.5 -translate-x-1/2 cursor-col-resize touch-none group focus:outline-none"
           >
@@ -118,8 +125,14 @@ export const ChatSidebar = ({ threadsMenu, children }: ChatSidebarProps) => {
         <div className="flex h-full w-full flex-col lg:w-(--chat-sidebar-width)">
           <div className="shrink-0 flex items-center justify-between gap-2 px-4 pt-4 pb-2">
             <div className="flex items-center gap-1.5 min-w-0">
-              <span className="font-extrabold text-xl truncate">CopilotKit</span>
-              <img src="/copilotkit-logo-mark.svg" alt="" className="h-6 shrink-0" />
+              <span className="font-extrabold text-xl truncate">
+                CopilotKit
+              </span>
+              <img
+                src="/copilotkit-logo-mark.svg"
+                alt=""
+                className="h-6 shrink-0"
+              />
             </div>
             <div className="flex items-center gap-1 shrink-0">
               {threadsMenu}

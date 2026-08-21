@@ -10,7 +10,9 @@ emailsApp.get("/", async (c) => {
 });
 
 emailsApp.patch("/", async (c) => {
-  let body: { ids: string[]; patch: Partial<Email> } | { id: string; patch: Partial<Email> };
+  let body:
+    | { ids: string[]; patch: Partial<Email> }
+    | { id: string; patch: Partial<Email> };
   try {
     body = await c.req.json();
   } catch {
@@ -26,7 +28,10 @@ emailsApp.patch("/", async (c) => {
     const { ids, patch } = body;
     if (!Array.isArray(ids) || ids.length === 0 || !patch?.status) {
       return c.json(
-        { error: "Bulk patch requires a non-empty `ids` array and a `patch.status`" },
+        {
+          error:
+            "Bulk patch requires a non-empty `ids` array and a `patch.status`",
+        },
         400,
       );
     }

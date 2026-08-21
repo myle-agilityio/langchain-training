@@ -24,7 +24,10 @@ const generateTitle = async (
   try {
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
       body: JSON.stringify({
         model: MODEL,
         messages: [
@@ -44,7 +47,9 @@ const generateTitle = async (
     const data = (await res.json()) as {
       choices?: { message?: { content?: string } }[];
     };
-    const generated = data.choices?.[0]?.message?.content?.trim().replace(/^["']|["']$/g, "");
+    const generated = data.choices?.[0]?.message?.content
+      ?.trim()
+      .replace(/^["']|["']$/g, "");
     return generated || fallback;
   } catch {
     return fallback;
@@ -79,7 +84,9 @@ threadsApp.post("/", async (c) => {
   // is only a leftover fallback for as long as it's still set on this deployment.
   const apiKey = c.req.header("x-openai-api-key") ?? process.env.OPENAI_API_KEY;
   // Only spend an LLM call the first time this thread is created, not on every touch.
-  const title = exists ? null : await generateTitle(firstMessage, apiKey ?? undefined);
+  const title = exists
+    ? null
+    : await generateTitle(firstMessage, apiKey ?? undefined);
 
   const thread = await upsertThread(id, title);
   return c.json({ thread });

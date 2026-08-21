@@ -44,6 +44,8 @@ with Row/Column under the root.`,
   schema: renderA2uiSchema,
 });
 
+// Only used via `typeof` below to type ToolRuntime's state — never called at runtime.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const DynamicStateSchema = z.object({
   messages: z.array(z.any()).default(() => []),
   copilotkit: z
@@ -113,8 +115,8 @@ export const generate_a2ui = tool(
       "to see, show, or visualize the inbox (e.g. a breakdown by topic and urgency). This tool " +
       "does not fetch or aggregate inbox data itself: it only turns numbers already in this " +
       "conversation into UI. For a breakdown/count dashboard, call count_emails FIRST, as an " +
-      "earlier step — once per field being broken down (e.g. one call with groupBy: \"topic\", " +
-      "a separate call with groupBy: \"urgency\") — so the real per-category counts are already " +
+      'earlier step — once per field being broken down (e.g. one call with groupBy: "topic", ' +
+      'a separate call with groupBy: "urgency") — so the real per-category counts are already ' +
       "in the conversation before this runs. Do not use get_emails for this: reading raw email " +
       "text makes the dashboard invent its own categories and numbers instead of using the " +
       "real classification counts. This also can't see a sibling tool call's result from the " +

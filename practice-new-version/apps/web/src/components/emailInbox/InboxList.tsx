@@ -121,11 +121,17 @@ export const InboxList = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem disabled={!hasUnread} onSelect={onMarkAllRead}>
+                <DropdownMenuItem
+                  disabled={!hasUnread}
+                  onSelect={onMarkAllRead}
+                >
                   <MailOpen className="h-3.5 w-3.5" />
                   Mark all as read
                 </DropdownMenuItem>
-                <DropdownMenuItem disabled={!hasRead} onSelect={onMarkAllUnread}>
+                <DropdownMenuItem
+                  disabled={!hasRead}
+                  onSelect={onMarkAllUnread}
+                >
                   <Mail className="h-3.5 w-3.5" />
                   Mark all as unread
                 </DropdownMenuItem>
@@ -290,12 +296,21 @@ export const InboxList = ({
                     </>
                   )}
                   {email.status === "replied" && (
-                    <Badge variant="tone" className={cn("text-[11px]", STATUS_TONE.replied)}>
+                    <Badge
+                      variant="tone"
+                      className={cn("text-[11px]", STATUS_TONE.replied)}
+                    >
                       Replied
                     </Badge>
                   )}
                   {email.status === "flagged_for_followup" && (
-                    <Badge variant="tone" className={cn("text-[11px]", STATUS_TONE.flagged_for_followup)}>
+                    <Badge
+                      variant="tone"
+                      className={cn(
+                        "text-[11px]",
+                        STATUS_TONE.flagged_for_followup,
+                      )}
+                    >
                       Follow up
                     </Badge>
                   )}

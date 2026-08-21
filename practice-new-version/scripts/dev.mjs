@@ -6,7 +6,9 @@
 // layering. Plain child_process avoids that nesting.
 import { spawn, spawnSync } from "node:child_process";
 
-spawnSync(process.execPath, ["scripts/copilotkit-dev-infra.mjs"], { stdio: "inherit" });
+spawnSync(process.execPath, ["scripts/copilotkit-dev-infra.mjs"], {
+  stdio: "inherit",
+});
 
 const tasks = {
   ui: "pnpm --filter web dev",

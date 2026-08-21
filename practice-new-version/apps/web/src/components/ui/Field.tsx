@@ -7,7 +7,11 @@ const controlClass =
 
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
   ({ className, ...props }, ref) => (
-    <input ref={ref} className={cn(controlClass, "h-9", className)} {...props} />
+    <input
+      ref={ref}
+      className={cn(controlClass, "h-9", className)}
+      {...props}
+    />
   ),
 );
 Input.displayName = "Input";
