@@ -15,7 +15,9 @@ import {
 // same data/actions, just a popover; outside-click-to-close comes free from Radix.
 export const ThreadsMenu = () => {
   const config = useCopilotChatConfiguration();
-  const { threads, renameThread, deleteThread } = useSelfManagedThreads();
+  const threads = useSelfManagedThreads((s) => s.threads);
+  const renameThread = useSelfManagedThreads((s) => s.renameThread);
+  const deleteThread = useSelfManagedThreads((s) => s.deleteThread);
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftTitle, setDraftTitle] = useState("");

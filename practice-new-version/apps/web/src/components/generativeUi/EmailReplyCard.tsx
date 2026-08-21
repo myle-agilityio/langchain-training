@@ -24,7 +24,7 @@ export const EmailReplyCard = ({
   body: draftBody,
   compliance,
 }: EmailReplyCardProps) => {
-  const { patchEmail } = useSharedInbox();
+  const patchEmail = useSharedInbox((s) => s.patchEmail);
   const [subject, setSubject] = useState(draftSubject);
   const [body, setBody] = useState(draftBody);
   const [decision, setDecision] = useState<"approve" | "reject" | null>(null);

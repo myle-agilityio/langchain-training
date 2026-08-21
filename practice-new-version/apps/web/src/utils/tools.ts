@@ -13,6 +13,6 @@ export const parseResult = <T>(result: string | undefined): T | null => {
 
 // Tool results carry ids, not sender/subject — the inbox the panel already holds resolves them.
 export const useEmailLookup = () => {
-  const { emails } = useSharedInbox();
+  const emails = useSharedInbox((s) => s.emails);
   return useMemo(() => new Map(emails.map((e) => [e.id, e])), [emails]);
 };
