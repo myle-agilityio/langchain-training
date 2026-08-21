@@ -10,7 +10,7 @@ import { ToolReasoning } from "@/components/ToolRendering";
 import { useToolRenderers } from "@/hooks/useToolRenderers";
 
 export const useGenerativeUIExamples = () => {
-  const { theme, setTheme } = useTheme();
+  const setTheme = useTheme((s) => s.setTheme);
 
   // Named per-tool cards; they take precedence over the wildcard renderer below.
   useToolRenderers();
@@ -40,6 +40,6 @@ export const useGenerativeUIExamples = () => {
         setTheme(isDark ? "light" : "dark");
       },
     },
-    [theme, setTheme],
+    [setTheme],
   );
 };
