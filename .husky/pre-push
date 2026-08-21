@@ -1,0 +1,44 @@
+#!/usr/bin/env sh
+# Lints/format-checks only the practice-new-version files actually being pushed —
+# not the whole repo — so this doesn't choke on code from before prettier/eslint existed.
+
+zero="0000000000000000000000000000000000000000"
+any_failed=0
+
+while read -r local_ref local_oid remote_ref remote_oid; do
+  [ -z "$local_oid" ] && continue
+  [ "$local_oid" = "$zero" ] && continue # deleting a ref, nothing to check
+
+  if [ "$remote_oid" = "$zero" ]; then
+    # New branch/ref on the remote — no prior state to diff against there.
+    if git rev-parse --verify origin/main >/dev/null 2>&1; then
+      base=$(git merge-base "$local_oid" origin/main)
+    else
+      base=$(git hash-object -t tree /dev/null) # empty tree: diff the whole pushed history
+    fi
+  else
+    base="$remote_oid"
+  fi
+
+  files=$(git diff --name-only "$base" "$local_oid" | grep -E '^practice-new-version/apps/.*\.(ts|tsx|js|jsx)$')
+
+  [ -z "$files" ] && continue
+
+  echo "pre-push: checking $(echo "$files" | wc -l) file(s) in practice-new-version ($local_ref)"
+
+  if ! echo "$files" | xargs npx --prefix practice-new-version eslint; then
+    any_failed=1
+  fi
+  if ! echo "$files" | xargs npx --prefix practice-new-version prettier --check; then
+    any_failed=1
+  fi
+done
+
+if [ "$any_failed" = "1" ]; then
+  echo ""
+  echo "pre-push: lint/format check failed on files in this push."
+  echo "Run 'pnpm lint:fix' and 'pnpm format' inside practice-new-version, then commit and push again."
+  exit 1
+fi
+
+exit 0
