@@ -51,7 +51,8 @@ export const moderator = async (
   try {
     check = await chain.invoke({ messages: state.messages }, runConfig);
   } catch (error) {
-    if (isRejectedApiKeyError(error)) return { blocked: true, messages: rejectedApiKeyNotice() };
+    if (isRejectedApiKeyError(error))
+      return { blocked: true, messages: rejectedApiKeyNotice() };
     throw error;
   }
 

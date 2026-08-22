@@ -79,7 +79,8 @@ export const callModel = async (
     );
     return { messages: [response] };
   } catch (error) {
-    if (isRejectedApiKeyError(error)) return { messages: rejectedApiKeyNotice() };
+    if (isRejectedApiKeyError(error))
+      return { messages: rejectedApiKeyNotice() };
     throw error;
   }
 };
