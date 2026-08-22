@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { z } from "zod";
 import {
   useAgent,
@@ -8,6 +8,7 @@ import {
 } from "@copilotkit/react-core/v2";
 import type { Email } from "@/types/email";
 import { useSharedInbox } from "@/stores/useSharedInbox";
+import { useComposeApproval } from "@/stores/useComposeApproval";
 import {
   EMPTY_FILTERS,
   filterEmails,
@@ -179,20 +180,10 @@ export const EmailInbox = () => {
     copilotkit.runAgent({ agent });
   };
 
-  // Block a second draft while mid-run or paused on an interrupt. agent.pendingInterrupts never
-  // populates — the LangGraph bridge signals via a CUSTOM "on_interrupt" event instead.
-  const [awaitingApproval, setAwaitingApproval] = useState(false);
-  useEffect(() => {
-    const subscription = agent.subscribe({
-      onCustomEvent: ({ event }) => {
-        if (event.name === "on_interrupt") setAwaitingApproval(true);
-      },
-      onRunStartedEvent: () => setAwaitingApproval(false),
-      onRunFailed: () => setAwaitingApproval(false),
-    });
-    return () => subscription.unsubscribe();
-  }, [agent]);
-  const agentBusy = agent.isRunning || awaitingApproval;
+  // Block a second draft while mid-run or paused on an interrupt. Fed by useSyncComposeApproval
+  // and cleared by the approval card itself, so answering the card unblocks this immediately.
+  const awaitingApproval = useComposeApproval((s) => s.awaitingApproval);
+  const isAgentBusy = agent.isRunning || awaitingApproval;
 
   return (
     <div className="h-full flex gap-3">
@@ -226,7 +217,7 @@ export const EmailInbox = () => {
           isLoading={isLoading}
           onSendReply={sendManualReply}
           onAskAgent={askAgentToReply}
-          agentBusy={agentBusy}
+          isAgentBusy={isAgentBusy}
         />
       </div>
     </div>

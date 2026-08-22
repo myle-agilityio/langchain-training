@@ -1,4 +1,5 @@
 export * from "./ChatSidebar";
+export * from "./EmailChat";
 export * from "./EmailInbox";
 export * from "./OpenAiKeyGate";
 export * from "./ThreadsMenu";

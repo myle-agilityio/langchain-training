@@ -1,15 +1,13 @@
 import type { ReactNode } from "react";
 import { CopilotKit } from "@copilotkit/react-core/v2";
-import {
-  CopilotChat,
-  CopilotChatConfigurationProvider,
-} from "@copilotkit/react-core/v2";
+import { CopilotChatConfigurationProvider } from "@copilotkit/react-core/v2";
 import { readStoredOpenAiKey } from "@/stores";
 import {
   // A2UI catalog: definitions + renderers in @/components/declarativeGenerativeUi/
   demonstrationCatalog,
   OpenAiKeyGate,
   ChatSidebar,
+  EmailChat,
   EmailInbox,
   ThreadsMenu,
 } from "@/components";
@@ -17,6 +15,7 @@ import {
   useGenerativeUIExamples,
   useExampleSuggestions,
   useEmailAgent,
+  useSyncComposeApproval,
   useSyncInbox,
   useSyncThreads,
   useSyncTheme,
@@ -27,6 +26,7 @@ import {
 const AgentSync = ({ children }: { children: ReactNode }) => {
   useSyncInbox();
   useSyncThreads();
+  useSyncComposeApproval();
   return <>{children}</>;
 };
 
@@ -41,10 +41,7 @@ const Inbox = () => {
         <EmailInbox />
       </div>
       <ChatSidebar threadsMenu={<ThreadsMenu />}>
-        <CopilotChat
-          attachments={{ enabled: true }}
-          input={{ disclaimer: () => null, className: "pb-6" }}
-        />
+        <EmailChat />
       </ChatSidebar>
     </div>
   );
