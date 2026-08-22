@@ -1,8 +1,6 @@
 import type { ReactNode } from "react";
 import { CopilotKit } from "@copilotkit/react-core/v2";
-import {
-  CopilotChatConfigurationProvider,
-} from "@copilotkit/react-core/v2";
+import { CopilotChatConfigurationProvider } from "@copilotkit/react-core/v2";
 import { readStoredOpenAiKey } from "@/stores";
 import {
   // A2UI catalog: definitions + renderers in @/components/declarativeGenerativeUi/
