@@ -6,12 +6,16 @@
 ├── apps/
 │   ├── web/                          # Vite frontend
 │   │   ├── src/
-│   │   │   ├── app/                  # Page shell + A2UI catalog (definitions + renderers)
-│   │   │   ├── components/
-│   │   │   │   ├── emailInbox/       # Inbox list, detail view, compose form
-│   │   │   │   ├── chatSidebar/      # Collapsible right-hand chat sidebar
-│   │   │   │   ├── threadsMenu/      # Clock-icon dropdown: conversation history
-│   │   │   │   └── generativeUi/     # Generative UI components
+│   │   │   ├── app/                  # Page shell (providers + layout)
+│   │   │   ├── components/           # index.ts barrel; PascalCase folder per component
+│   │   │   │   ├── EmailInbox/       # Inbox list, detail view, compose form
+│   │   │   │   ├── ChatSidebar/      # Collapsible right-hand chat sidebar
+│   │   │   │   ├── ThreadsMenu/      # Clock-icon dropdown: conversation history
+│   │   │   │   ├── OpenAiKeyGate/    # API-key gate shown before the app renders
+│   │   │   │   ├── ToolRendering/    # Tool-call reasoning renderer
+│   │   │   │   ├── common/           # Shared primitives (Button, Card, Dialog, …)
+│   │   │   │   ├── generativeUi/     # Generative UI components (reply card, tool cards)
+│   │   │   │   └── declarativeGenerativeUi/  # A2UI catalog: definitions + renderers
 │   │   │   └── hooks/
 │   │   │       └── useSharedInbox.ts  # Inbox data provider
 │   │   ├── public/                   # Static assets

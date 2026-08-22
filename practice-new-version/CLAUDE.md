@@ -40,7 +40,10 @@ Frontend (`apps/web/`, Vite SPA, single page — no router):
 
 - `index.html` + `src/main.tsx` — entry point; `src/app/App.tsx` — providers (CopilotKit,
   theme, OpenAI-key gate) wrapping the inbox + chat layout.
-- `src/components/emailInbox/` — the inbox UI; `src/hooks/useSharedInbox.ts` is its data
+- `src/components/` — one folder per component, each with an `index.tsx`; a folder whose
+  `index` is a barrel groups them (`common/` primitives, `generativeUi/`,
+  `declarativeGenerativeUi/` — the A2UI catalog). `src/components/index.ts` re-exports all.
+- `src/components/EmailInbox/` — the inbox UI; `src/hooks/useSharedInbox.ts` is its data
   provider (reads `/api/emails`, proxied to the agent's HTTP app above).
 
 Everything persistent is in the one Postgres behind `DATABASE_URL`: the inbox (`emails`,
@@ -62,9 +65,10 @@ These are how we work on this project, not style preferences. Follow them on eve
 5. **Never let secrets leak.** `.env` stays untracked; a new env var goes into `.env.example` in
    the same change.
 6. **Name source files and folders in camelCase** — `useSharedInbox.ts`, `emailFilters.ts`,
-   `components/emailInbox/` — except a file whose export is a React component, which is
-   PascalCase matching the component (`InboxList.tsx`, `DropdownMenu.tsx`). Barrel
-   `index.ts`/`index.tsx` files keep their name. **Assets and scripts stay kebab-case**:
+   `components/generativeUi/` — except anything whose export is a React component, which is
+   PascalCase matching it: a component file (`renderers.tsx`'s siblings), and a component
+   folder holding that component's `index.tsx` (`components/InboxList/`,
+   `components/common/DropdownMenu/`). Barrel `index.ts`/`index.tsx` files keep their name. **Assets and scripts stay kebab-case**:
    `public/copilotkit-logo-mark.svg` and the KB documents in `rag/sampleDocs/`
    (`loaders.ts` derives their titles from the filename).
 
