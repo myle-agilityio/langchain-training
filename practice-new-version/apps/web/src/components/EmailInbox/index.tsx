@@ -7,7 +7,11 @@ import {
   useFrontendTool,
 } from "@copilotkit/react-core/v2";
 import type { Email } from "@/types/email";
-import { useSharedInbox } from "@/stores/useSharedInbox";
+import {
+  useSharedInbox,
+  usePatchEmail,
+  usePatchEmails,
+} from "@/hooks/useSharedInbox";
 import { useComposeApproval, useOpenAiKey } from "@/stores";
 import {
   EMPTY_FILTERS,
@@ -20,12 +24,9 @@ import { EmailDetail } from "./emailDetail";
 import { FilterDialog } from "./FilterDialog";
 
 export const EmailInbox = () => {
-  const emails = useSharedInbox((s) => s.emails);
-  const isLoading = useSharedInbox((s) => s.isLoading);
-  const isRefreshing = useSharedInbox((s) => s.isRefreshing);
-  const refresh = useSharedInbox((s) => s.refresh);
-  const patchEmail = useSharedInbox((s) => s.patchEmail);
-  const patchEmails = useSharedInbox((s) => s.patchEmails);
+  const { emails, isLoading, isRefreshing, refresh } = useSharedInbox();
+  const patchEmail = usePatchEmail();
+  const patchEmails = usePatchEmails();
   const { agent } = useAgent();
   // Run through the CopilotKit core, not agent.runAgent() directly — same interrupt-aware path
   // CopilotChat uses, so compose_reply's pause routes to useEmailAgent's useInterrupt card.

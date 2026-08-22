@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { Clock, SquarePen } from "lucide-react";
 import { useCopilotChatConfiguration } from "@copilotkit/react-core/v2";
-import { useSelfManagedThreads } from "@/stores";
+import {
+  useSelfManagedThreads,
+  useRenameThread,
+  useDeleteThread,
+} from "@/hooks";
 import {
   Button,
   DropdownMenu,
@@ -15,9 +19,9 @@ import { formatRelative } from "@/lib/formatDate";
 // same data/actions, just a popover; outside-click-to-close comes free from Radix.
 export const ThreadsMenu = () => {
   const config = useCopilotChatConfiguration();
-  const threads = useSelfManagedThreads((s) => s.threads);
-  const renameThread = useSelfManagedThreads((s) => s.renameThread);
-  const deleteThread = useSelfManagedThreads((s) => s.deleteThread);
+  const threads = useSelfManagedThreads();
+  const renameThread = useRenameThread();
+  const deleteThread = useDeleteThread();
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftTitle, setDraftTitle] = useState("");
