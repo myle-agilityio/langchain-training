@@ -29,10 +29,12 @@ while read -r local_ref local_oid remote_ref remote_oid; do
 
   echo "pre-push: checking $(echo "$files" | wc -l) file(s) in practice-new-version ($local_ref)"
 
-  if ! echo "$files" | xargs npx --prefix practice-new-version eslint; then
+  # -n 25: npx shells out through cmd.exe, which caps a command line at 8191 chars — one batch
+  # of every changed path blows past that and dies with "The command line is too long."
+  if ! echo "$files" | xargs -n 25 npx --prefix practice-new-version eslint; then
     any_failed=1
   fi
-  if ! echo "$files" | xargs npx --prefix practice-new-version prettier --check; then
+  if ! echo "$files" | xargs -n 25 npx --prefix practice-new-version prettier --check; then
     any_failed=1
   fi
 done
