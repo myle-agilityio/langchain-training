@@ -38,13 +38,19 @@ Agent (`apps/agent/src/`), organized by role:
 
 Frontend (`apps/web/`, Vite SPA, single page — no router):
 
-- `index.html` + `src/main.tsx` — entry point; `src/app/App.tsx` — providers (CopilotKit,
-  theme, OpenAI-key gate) wrapping the inbox + chat layout.
+- `index.html` + `src/main.tsx` — entry point; `src/app/App.tsx` — providers (TanStack Query,
+  CopilotKit, theme, OpenAI-key gate) wrapping the inbox + chat layout.
 - `src/components/` — one folder per component, each with an `index.tsx`; a folder whose
   `index` is a barrel groups them (`common/` primitives, `generativeUi/`,
   `declarativeGenerativeUi/` — the A2UI catalog). `src/components/index.ts` re-exports all.
 - `src/components/EmailInbox/` — the inbox UI; `src/hooks/useSharedInbox.ts` is its data
   provider (reads `/api/emails`, proxied to the agent's HTTP app above).
+- `src/api/` is the only place that talks HTTP: `client.ts`'s `apiFetch` (JSON in/out, uniform
+  `METHOD /path failed (status)` errors) plus one module per resource. Hooks never call `fetch`.
+- Server state is TanStack Query: `src/lib/queryClient.ts` (one client, one error log point) plus
+  the `useSharedInbox`/`useSelfManagedThreads` hooks — a `useX` query hook per resource and a
+  mutation hook per write, with the `useSync*` hooks invalidating on `onRunFinalized`.
+  `src/stores/` stays zustand, for client-only state (theme, OpenAI key, compose approval).
 
 Everything persistent is in the one Postgres behind `DATABASE_URL`: the inbox (`emails`,
 `contact_profiles`), the embedded KB (`kb_documents`), graph checkpoints (`checkpoints*`) and

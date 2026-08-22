@@ -8,7 +8,7 @@ import {
   Textarea,
 } from "@/components/common";
 import { Mail, Check, X, TriangleAlert } from "lucide-react";
-import { useSharedInbox } from "@/stores";
+import { usePatchEmail } from "@/hooks";
 
 export interface EmailReplyCardProps {
   status: "inProgress" | "executing" | "complete";
@@ -28,7 +28,7 @@ export const EmailReplyCard = ({
   body: draftBody,
   compliance,
 }: EmailReplyCardProps) => {
-  const patchEmail = useSharedInbox((s) => s.patchEmail);
+  const patchEmail = usePatchEmail();
   const [subject, setSubject] = useState(draftSubject);
   const [body, setBody] = useState(draftBody);
   const [decision, setDecision] = useState<"approve" | "reject" | null>(null);

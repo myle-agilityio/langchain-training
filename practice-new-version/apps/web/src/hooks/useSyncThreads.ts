@@ -3,8 +3,7 @@ import {
   useAgent,
   useCopilotChatConfiguration,
 } from "@copilotkit/react-core/v2";
-import { useOpenAiKey } from "@/stores/useOpenAiKey";
-import { useSelfManagedThreads } from "@/stores/useSelfManagedThreads";
+import { useSaveThread } from "@/hooks/useSelfManagedThreads";
 
 // Loose shape instead of importing AbstractAgent/Message from @ag-ui/client directly — that
 // package is only a transitive dependency here, not one of ours to import from.
@@ -29,17 +28,13 @@ const firstUserMessageText = (agent: AgentWithMessages): string | undefined => {
   return undefined;
 };
 
-// Keeps the threads store in sync with the agent's run lifecycle; call once from a
+// Keeps the threads query in sync with the agent's run lifecycle; call once from a
 // component inside CopilotChatConfigurationProvider.
 export const useSyncThreads = () => {
   // updates: [] — only need the agent handle to subscribe to run completion below.
   const { agent } = useAgent({ updates: [] });
   const config = useCopilotChatConfiguration();
-  const refresh = useSelfManagedThreads((state) => state.refresh);
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
+  const saveThread = useSaveThread();
 
   const configRef = useRef(config);
   configRef.current = config;
@@ -51,26 +46,9 @@ export const useSyncThreads = () => {
       onRunFinalized: () => {
         const threadId = configRef.current?.threadId;
         if (!threadId) return;
-        const openaiKey = useOpenAiKey.getState().apiKey;
-        fetch("/api/threads", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(openaiKey ? { "x-openai-api-key": openaiKey } : {}),
-          },
-          body: JSON.stringify({
-            id: threadId,
-            firstMessage: firstUserMessageText(agent),
-          }),
-        })
-          .then((res) => {
-            if (!res.ok)
-              throw new Error(`POST /api/threads failed (${res.status})`);
-          })
-          .catch((error) => console.error("Failed to save thread:", error))
-          .finally(() => refresh());
+        saveThread({ id: threadId, firstMessage: firstUserMessageText(agent) });
       },
     });
     return unsubscribe;
-  }, [agent, refresh]);
+  }, [agent, saveThread]);
 };

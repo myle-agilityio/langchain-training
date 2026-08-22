@@ -1,6 +1,8 @@
 import { useMemo, type ReactNode } from "react";
 import { CopilotKit } from "@copilotkit/react-core/v2";
 import { CopilotChatConfigurationProvider } from "@copilotkit/react-core/v2";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 import { useOpenAiKey } from "@/stores";
 import {
   // A2UI catalog: definitions + renderers in @/components/declarativeGenerativeUi/
@@ -66,19 +68,21 @@ const App = () => {
   );
 
   return (
-    <CopilotKit
-      runtimeUrl="/api/copilotkit"
-      // Forwarded to the graph as copilotkit_forwarded_headers — see agent/src/config/model.ts.
-      headers={headers}
-      // Inert — positioning is forced via CSS override in globals.css instead;
-      // left in place to state intent in case CopilotKit fixes the bug.
-      inspectorDefaultAnchor={{ horizontal: "left", vertical: "bottom" }}
-      a2ui={{ catalog: demonstrationCatalog }}
-      openGenerativeUI={{}}
-      useSingleEndpoint={false}
-    >
-      <Inbox />
-    </CopilotKit>
+    <QueryClientProvider client={queryClient}>
+      <CopilotKit
+        runtimeUrl="/api/copilotkit"
+        // Forwarded to the graph as copilotkit_forwarded_headers — see agent/src/config/model.ts.
+        headers={headers}
+        // Inert — positioning is forced via CSS override in globals.css instead;
+        // left in place to state intent in case CopilotKit fixes the bug.
+        inspectorDefaultAnchor={{ horizontal: "left", vertical: "bottom" }}
+        a2ui={{ catalog: demonstrationCatalog }}
+        openGenerativeUI={{}}
+        useSingleEndpoint={false}
+      >
+        <Inbox />
+      </CopilotKit>
+    </QueryClientProvider>
   );
 };
 

@@ -16,8 +16,16 @@
 │   │   │   │   ├── common/           # Shared primitives (Button, Card, Dialog, …)
 │   │   │   │   ├── generativeUi/     # Generative UI components (reply card, tool cards)
 │   │   │   │   └── declarativeGenerativeUi/  # A2UI catalog: definitions + renderers
-│   │   │   └── hooks/
-│   │   │       └── useSharedInbox.ts  # Inbox data provider
+│   │   │   ├── api/                  # Every HTTP call: apiFetch + one module per resource
+│   │   │   │   ├── client.ts         # apiFetch: JSON in/out, uniform request errors
+│   │   │   │   ├── emails.ts         # GET/PATCH /api/emails
+│   │   │   │   └── threads.ts        # GET/POST/PATCH/DELETE /api/threads
+│   │   │   ├── hooks/                # TanStack Query data hooks + agent-sync hooks
+│   │   │   │   ├── useSharedInbox.ts # Inbox query + patch mutations
+│   │   │   │   └── useSelfManagedThreads.ts  # Threads query + rename/delete/save
+│   │   │   ├── stores/               # zustand: client-only state (theme, key, approval)
+│   │   │   └── lib/
+│   │   │       └── queryClient.ts    # QueryClient + shared error logging
 │   │   ├── public/                   # Static assets
 │   │   ├── index.html
 │   │   ├── vite.config.ts

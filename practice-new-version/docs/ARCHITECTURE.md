@@ -11,7 +11,7 @@ graph TD
 
     subgraph Frontend["Next.js — :3000"]
         UI["src/components/EmailInbox/*"]
-        Hook["useSharedInbox.ts"]
+        Hook["useSharedInbox.ts (TanStack Query)"]
         EmailsAPI["/api/emails"]
         CopilotRoute["/api/copilotkit/[[...slug]]"]
     end
