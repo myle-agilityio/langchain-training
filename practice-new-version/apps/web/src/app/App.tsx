@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { CopilotKit } from "@copilotkit/react-core/v2";
 import {
-  CopilotChat,
   CopilotChatConfigurationProvider,
 } from "@copilotkit/react-core/v2";
 import { readStoredOpenAiKey } from "@/stores";
@@ -10,6 +9,7 @@ import {
   demonstrationCatalog,
   OpenAiKeyGate,
   ChatSidebar,
+  EmailChat,
   EmailInbox,
   ThreadsMenu,
 } from "@/components";
@@ -43,10 +43,7 @@ const Inbox = () => {
         <EmailInbox />
       </div>
       <ChatSidebar threadsMenu={<ThreadsMenu />}>
-        <CopilotChat
-          attachments={{ enabled: true }}
-          input={{ disclaimer: () => null, className: "pb-6" }}
-        />
+        <EmailChat />
       </ChatSidebar>
     </div>
   );
