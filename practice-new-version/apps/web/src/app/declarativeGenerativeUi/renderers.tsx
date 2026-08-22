@@ -18,7 +18,7 @@ import { createCatalog } from "@copilotkit/a2ui-renderer";
 import type { CatalogRenderers } from "@copilotkit/a2ui-renderer";
 import { demonstrationCatalogDefinitions } from "./definitions";
 import type { DemonstrationCatalogDefinitions } from "./definitions";
-import { c } from "./theme";
+import { colors } from "./theme";
 import { ActionButton } from "./ActionButton";
 
 // "children" template entries are strings or { id, basePath } once GenericBinder resolves a
@@ -46,7 +46,7 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
             margin: 0,
             fontWeight: 600,
             fontSize: sizes[props.level ?? "h2"],
-            color: c.cardFg,
+            color: colors.cardFg,
             letterSpacing: "-0.01em",
           }}
         >
@@ -141,25 +141,31 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
     DashboardCard: ({ props, children }) => (
       <div
         style={{
-          background: c.card,
+          background: colors.card,
           borderRadius: "12px",
-          border: `1px solid ${c.border}`,
+          border: `1px solid ${colors.border}`,
           padding: "20px",
-          boxShadow: c.shadow,
+          boxShadow: colors.shadow,
           display: "flex",
           flexDirection: "column",
           gap: "12px",
         }}
       >
         <div>
-          <div style={{ fontWeight: 600, fontSize: "0.9rem", color: c.cardFg }}>
+          <div
+            style={{
+              fontWeight: 600,
+              fontSize: "0.9rem",
+              color: colors.cardFg,
+            }}
+          >
             {props.title}
           </div>
           {props.subtitle && (
             <div
               style={{
                 fontSize: "0.75rem",
-                color: c.muted,
+                color: colors.muted,
                 marginTop: "2px",
               }}
             >
@@ -175,7 +181,7 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
       const trendColors: Record<string, string> = {
         up: "#059669",
         down: "#dc2626",
-        neutral: c.muted,
+        neutral: colors.muted,
       };
       const trendIcons: Record<string, string> = {
         up: "↑",
@@ -187,7 +193,7 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
           <span
             style={{
               fontSize: "0.75rem",
-              color: c.muted,
+              color: colors.muted,
               fontWeight: 500,
               textTransform: "uppercase",
               letterSpacing: "0.05em",
@@ -200,7 +206,7 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
               style={{
                 fontSize: "1.5rem",
                 fontWeight: 700,
-                color: c.cardFg,
+                color: colors.cardFg,
                 letterSpacing: "-0.02em",
               }}
             >
@@ -211,7 +217,7 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
                 style={{
                   fontSize: "0.8rem",
                   fontWeight: 500,
-                  color: trendColors[props.trend] ?? c.muted,
+                  color: trendColors[props.trend] ?? colors.muted,
                 }}
               >
                 {trendIcons[props.trend]} {props.trendValue}
@@ -266,9 +272,12 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
         <div style={{ width: "100%", height: 200 }}>
           <ResponsiveContainer>
             <RechartsBar data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke={c.divider} />
-              <XAxis dataKey="label" tick={{ fontSize: 11, fill: c.muted }} />
-              <YAxis tick={{ fontSize: 11, fill: c.muted }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={colors.divider} />
+              <XAxis
+                dataKey="label"
+                tick={{ fontSize: 11, fill: colors.muted }}
+              />
+              <YAxis tick={{ fontSize: 11, fill: colors.muted }} />
               <Tooltip />
               <Bar
                 dataKey="value"
@@ -287,7 +296,7 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
         warning: { bg: "#fef3c7", color: "#92400e" },
         error: { bg: "#fee2e2", color: "#991b1b" },
         info: { bg: "#dbeafe", color: "#1e40af" },
-        neutral: { bg: "var(--muted)", color: c.cardFg },
+        neutral: { bg: "var(--muted)", color: colors.cardFg },
       };
       const v = variants[props.variant ?? "neutral"] ?? variants.neutral;
       return (
@@ -327,8 +336,8 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
                     style={{
                       textAlign: "left",
                       padding: "8px 12px",
-                      borderBottom: `2px solid ${c.border}`,
-                      color: c.muted,
+                      borderBottom: `2px solid ${colors.border}`,
+                      color: colors.muted,
                       fontWeight: 600,
                       fontSize: "0.7rem",
                       textTransform: "uppercase",
@@ -342,11 +351,14 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
             </thead>
             <tbody>
               {rows.map((row, i) => (
-                <tr key={i} style={{ borderBottom: `1px solid ${c.divider}` }}>
+                <tr
+                  key={i}
+                  style={{ borderBottom: `1px solid ${colors.divider}` }}
+                >
                   {cols.map((col) => (
                     <td
                       key={col.key}
-                      style={{ padding: "8px 12px", color: c.cardFg }}
+                      style={{ padding: "8px 12px", color: colors.cardFg }}
                     >
                       {String(row[col.key] ?? "")}
                     </td>

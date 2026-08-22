@@ -1,4 +1,4 @@
-export const c = {
+export const colors = {
   card: "var(--card)",
   cardFg: "var(--card-foreground)",
   border: "var(--border)",

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type React from "react";
-import { c } from "./theme";
+import { colors } from "./theme";
 
 export const ActionButton = ({
   label,
@@ -23,9 +23,9 @@ export const ActionButton = ({
         width: "100%",
         padding: "10px 16px",
         borderRadius: "10px",
-        border: done ? "1px solid #bbf7d0" : `1px solid ${c.border}`,
-        background: done ? c.btnDoneBg : c.btnBg,
-        color: done ? "#059669" : c.cardFg,
+        border: done ? "1px solid #bbf7d0" : `1px solid ${colors.border}`,
+        background: done ? colors.btnDoneBg : colors.btnBg,
+        color: done ? "#059669" : colors.cardFg,
         fontSize: "0.85rem",
         fontWeight: 500,
         cursor: done ? "default" : "pointer",
