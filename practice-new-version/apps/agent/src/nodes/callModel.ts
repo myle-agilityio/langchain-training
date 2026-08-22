@@ -6,6 +6,11 @@ import {
 import { END, type LangGraphRunnableConfig } from "@langchain/langgraph";
 
 import { getModelForConfig, MissingApiKeyError } from "@/config/model";
+import {
+  isRejectedApiKeyError,
+  missingApiKeyNotice,
+  rejectedApiKeyNotice,
+} from "@/utils/index";
 import { TOOL } from "@/constants/index";
 import { currentDateLine, SYSTEM_PROMPT } from "@/prompts/index";
 import { executableTools, modelTools } from "@/tools/index";
@@ -57,30 +62,26 @@ export const callModel = async (
     model = getModelForConfig(config);
   } catch (error) {
     if (!(error instanceof MissingApiKeyError)) throw error;
-    return {
-      messages: [
-        new AIMessage({
-          id: crypto.randomUUID(),
-          content:
-            "I don't have an OpenAI API key to work with yet — enter yours in the box on " +
-            "screen, then try again.",
-        }),
-      ],
-    };
+    return { messages: missingApiKeyNotice() };
   }
 
   const bound = model.bindTools!([...modelTools, ...frontendTools(state)]);
   const chain = callModelPrompt.pipe(bound);
   // config threaded through so token callbacks stream assistant text into the chat UI.
-  const response = await chain.invoke(
-    {
-      dateLine: currentDateLine(),
-      frontendContext: renderFrontendContext(state),
-      messages: state.messages,
-    },
-    config,
-  );
-  return { messages: [response] };
+  try {
+    const response = await chain.invoke(
+      {
+        dateLine: currentDateLine(),
+        frontendContext: renderFrontendContext(state),
+        messages: state.messages,
+      },
+      config,
+    );
+    return { messages: [response] };
+  } catch (error) {
+    if (isRejectedApiKeyError(error)) return { messages: rejectedApiKeyNotice() };
+    throw error;
+  }
 };
 
 const EXECUTABLE_NAMES = new Set<string>(executableTools.map((t) => t.name));

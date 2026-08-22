@@ -1,11 +1,10 @@
 import type { ReactNode } from "react";
 import { CopilotKit } from "@copilotkit/react-core/v2";
 import { CopilotChatConfigurationProvider } from "@copilotkit/react-core/v2";
-import { readStoredOpenAiKey } from "@/stores";
+import { useOpenAiKey } from "@/stores";
 import {
   // A2UI catalog: definitions + renderers in @/components/declarativeGenerativeUi/
   demonstrationCatalog,
-  OpenAiKeyGate,
   ChatSidebar,
   EmailChat,
   EmailInbox,
@@ -64,7 +63,7 @@ const App = () => {
       // Read fresh per request (not React state) so saving a key takes effect
       // immediately — see agent/src/config/model.ts's getApiKeyFromConfig.
       headers={() => {
-        const key = readStoredOpenAiKey();
+        const key = useOpenAiKey.getState().apiKey;
         const headers: Record<string, string> = {};
         if (key) headers["x-openai-api-key"] = key;
         return headers;
@@ -76,9 +75,7 @@ const App = () => {
       openGenerativeUI={{}}
       useSingleEndpoint={false}
     >
-      <OpenAiKeyGate>
-        <Inbox />
-      </OpenAiKeyGate>
+      <Inbox />
     </CopilotKit>
   );
 };
