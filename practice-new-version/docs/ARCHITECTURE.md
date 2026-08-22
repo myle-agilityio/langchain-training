@@ -10,7 +10,7 @@ graph TD
     User["Teacher (browser)"]
 
     subgraph Frontend["Next.js — :3000"]
-        UI["src/components/emailInbox/*"]
+        UI["src/components/EmailInbox/*"]
         Hook["useSharedInbox.ts"]
         EmailsAPI["/api/emails"]
         CopilotRoute["/api/copilotkit/[[...slug]]"]

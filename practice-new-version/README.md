@@ -165,7 +165,7 @@ The project details are recorded in `.copilotkit/project.json`.
 - **Threads without it:** with the token unset, `NEXT_PUBLIC_COPILOTKIT_THREADS_ENABLED`
   (`next.config.ts`) resolves to `false` and the UI falls back to a self-managed thread list —
   `src/app/api/threads`, `src/hooks/useSelfManagedThreads.ts`,
-  `src/components/self-managed-threads` — backed by our own Postgres (a `chat_threads` table)
+  `src/components/ThreadsMenu` — backed by our own Postgres (a `chat_threads` table)
   instead of the Intelligence platform. Message history itself still comes from the graph's
   `PostgresSaver` checkpointer either way; this only replaces the list/rename/delete UI.
 - **Run it:** install dependencies, set your env vars, then `pnpm dev`
