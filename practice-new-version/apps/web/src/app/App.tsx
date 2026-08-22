@@ -11,7 +11,7 @@ import {
   OpenAiKeyGate,
   ChatSidebar,
   EmailInbox,
-  ThreadsMenu
+  ThreadsMenu,
 } from "@/components";
 import {
   useGenerativeUIExamples,
