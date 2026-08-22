@@ -8,7 +8,7 @@ import {
 } from "@copilotkit/react-core/v2";
 import type { Email } from "@/types/email";
 import { useSharedInbox } from "@/stores/useSharedInbox";
-import { useComposeApproval } from "@/stores/useComposeApproval";
+import { useComposeApproval, useOpenAiKey } from "@/stores";
 import {
   EMPTY_FILTERS,
   filterEmails,
@@ -183,7 +183,10 @@ export const EmailInbox = () => {
   // Block a second draft while mid-run or paused on an interrupt. Fed by useSyncComposeApproval
   // and cleared by the approval card itself, so answering the card unblocks this immediately.
   const awaitingApproval = useComposeApproval((s) => s.awaitingApproval);
-  const isAgentBusy = agent.isRunning || awaitingApproval;
+  // No key means the chat panel is showing the key form, so a reply drafted here would land
+  // somewhere the teacher can't see.
+  const hasApiKey = Boolean(useOpenAiKey((s) => s.apiKey));
+  const isAgentBusy = agent.isRunning || awaitingApproval || !hasApiKey;
 
   return (
     <div className="h-full flex gap-3">

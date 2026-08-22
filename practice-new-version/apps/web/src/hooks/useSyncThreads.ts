@@ -3,7 +3,7 @@ import {
   useAgent,
   useCopilotChatConfiguration,
 } from "@copilotkit/react-core/v2";
-import { readStoredOpenAiKey } from "@/stores/useOpenAiKey";
+import { useOpenAiKey } from "@/stores/useOpenAiKey";
 import { useSelfManagedThreads } from "@/stores/useSelfManagedThreads";
 
 // Loose shape instead of importing AbstractAgent/Message from @ag-ui/client directly — that
@@ -51,7 +51,7 @@ export const useSyncThreads = () => {
       onRunFinalized: () => {
         const threadId = configRef.current?.threadId;
         if (!threadId) return;
-        const openaiKey = readStoredOpenAiKey();
+        const openaiKey = useOpenAiKey.getState().apiKey;
         fetch("/api/threads", {
           method: "POST",
           headers: {

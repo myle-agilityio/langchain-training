@@ -1,11 +1,10 @@
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import { CopilotKit } from "@copilotkit/react-core/v2";
 import { CopilotChatConfigurationProvider } from "@copilotkit/react-core/v2";
-import { readStoredOpenAiKey } from "@/stores";
+import { useOpenAiKey } from "@/stores";
 import {
   // A2UI catalog: definitions + renderers in @/components/declarativeGenerativeUi/
   demonstrationCatalog,
-  OpenAiKeyGate,
   ChatSidebar,
   EmailChat,
   EmailInbox,
@@ -57,18 +56,20 @@ const Inbox = () => {
 
 const App = () => {
   useSyncTheme();
+  // Subscribed, not read on demand: CopilotKit re-evaluates `headers` only when its own provider
+  // re-renders, so without this a changed key kept using the old one until a reload.
+  const apiKey = useOpenAiKey((s) => s.apiKey);
+  const headers = useMemo(
+    (): Record<string, string> =>
+      apiKey ? { "x-openai-api-key": apiKey } : {},
+    [apiKey],
+  );
 
   return (
     <CopilotKit
       runtimeUrl="/api/copilotkit"
-      // Read fresh per request (not React state) so saving a key takes effect
-      // immediately — see agent/src/config/model.ts's getApiKeyFromConfig.
-      headers={() => {
-        const key = readStoredOpenAiKey();
-        const headers: Record<string, string> = {};
-        if (key) headers["x-openai-api-key"] = key;
-        return headers;
-      }}
+      // Forwarded to the graph as copilotkit_forwarded_headers — see agent/src/config/model.ts.
+      headers={headers}
       // Inert — positioning is forced via CSS override in globals.css instead;
       // left in place to state intent in case CopilotKit fixes the bug.
       inspectorDefaultAnchor={{ horizontal: "left", vertical: "bottom" }}
@@ -76,9 +77,7 @@ const App = () => {
       openGenerativeUI={{}}
       useSingleEndpoint={false}
     >
-      <OpenAiKeyGate>
-        <Inbox />
-      </OpenAiKeyGate>
+      <Inbox />
     </CopilotKit>
   );
 };

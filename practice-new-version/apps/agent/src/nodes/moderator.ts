@@ -7,6 +7,11 @@ import { END, type LangGraphRunnableConfig } from "@langchain/langgraph";
 import { copilotkitCustomizeConfig } from "@copilotkit/sdk-js/langgraph";
 
 import { getPlainModelForConfig, MissingApiKeyError } from "@/config/model";
+import {
+  isRejectedApiKeyError,
+  missingApiKeyNotice,
+  rejectedApiKeyNotice,
+} from "@/utils/index";
 import { moderationPrompt } from "@/prompts/index";
 import { ModerationCheckSchema, type AgentStateShape } from "@/types/index";
 
@@ -31,17 +36,7 @@ export const moderator = async (
     plainModel = getPlainModelForConfig(config);
   } catch (error) {
     if (!(error instanceof MissingApiKeyError)) throw error;
-    return {
-      blocked: true,
-      messages: [
-        new AIMessage({
-          id: crypto.randomUUID(),
-          content:
-            "I don't have an OpenAI API key to work with yet — enter yours in the box on " +
-            "screen, then try again.",
-        }),
-      ],
-    };
+    return { blocked: true, messages: missingApiKeyNotice() };
   }
 
   const chain = moderationPromptTemplate.pipe(
@@ -52,7 +47,14 @@ export const moderator = async (
     emitMessages: false,
     emitToolCalls: false,
   });
-  const check = await chain.invoke({ messages: state.messages }, runConfig);
+  let check;
+  try {
+    check = await chain.invoke({ messages: state.messages }, runConfig);
+  } catch (error) {
+    if (isRejectedApiKeyError(error))
+      return { blocked: true, messages: rejectedApiKeyNotice() };
+    throw error;
+  }
 
   if (!check.flagged) return { blocked: false };
   return {
