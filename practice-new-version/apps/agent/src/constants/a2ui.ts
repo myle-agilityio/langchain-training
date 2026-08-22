@@ -4,6 +4,6 @@ export const A2UI_OPERATIONS_KEY = "a2ui_operations";
 // Catalog id for createSurface's default — components not tied to a specific catalog.
 export const BASIC_CATALOG_ID = "copilotkit://basic-catalog";
 
-// Must match createCatalog's catalogId in src/app/declarativeGenerativeUi/renderers.tsx —
+// Must match createCatalog's catalogId in src/components/declarativeGenerativeUi/renderers.tsx —
 // the frontend only knows how to render surfaces tagged with this id.
 export const CUSTOM_CATALOG_ID = "copilotkit://app-dashboard-catalog";

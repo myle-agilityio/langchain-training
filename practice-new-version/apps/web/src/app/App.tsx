@@ -4,11 +4,15 @@ import {
   CopilotChat,
   CopilotChatConfigurationProvider,
 } from "@copilotkit/react-core/v2";
-import { readStoredOpenAiKey } from "@/stores/useOpenAiKey";
-import { OpenAiKeyGate } from "@/components/openaiKeyGate";
-import { ChatSidebar } from "@/components/chatSidebar";
-import { EmailInbox } from "@/components/emailInbox";
-import { ThreadsMenu } from "@/components/threadsMenu";
+import { readStoredOpenAiKey } from "@/stores";
+import {
+  // A2UI catalog: definitions + renderers in @/components/declarativeGenerativeUi/
+  demonstrationCatalog,
+  OpenAiKeyGate,
+  ChatSidebar,
+  EmailInbox,
+  ThreadsMenu
+} from "@/components";
 import {
   useGenerativeUIExamples,
   useExampleSuggestions,
@@ -17,8 +21,6 @@ import {
   useSyncThreads,
   useSyncTheme,
 } from "@/hooks";
-// A2UI catalog: definitions + renderers in ./declarativeGenerativeUi/
-import { demonstrationCatalog } from "./declarativeGenerativeUi/renderers";
 
 // Needs useAgent()/useCopilotChatConfiguration(), which only resolve inside
 // CopilotChatConfigurationProvider — wraps both chat and inbox since both use it.
