@@ -1,21 +1,17 @@
 import type { Email } from "@/types/email";
-import { apiFetch } from "./client";
+import { apiClient } from "./client";
 
 const EMAILS_PATH = "/api/emails";
 
 export const fetchEmails = async (): Promise<Email[]> =>
-  (await apiFetch<{ emails: Email[] }>(EMAILS_PATH)).emails;
+  (await apiClient.get<{ emails: Email[] }>(EMAILS_PATH)).data.emails;
 
 export const patchEmail = async (
   id: string,
   patch: Partial<Email>,
 ): Promise<Email> =>
-  (
-    await apiFetch<{ email: Email }>(EMAILS_PATH, {
-      method: "PATCH",
-      json: { id, patch },
-    })
-  ).email;
+  (await apiClient.patch<{ email: Email }>(EMAILS_PATH, { id, patch })).data
+    .email;
 
 // Bulk sibling of patchEmail — one PATCH for the whole "mark all as read/unread" action
 // instead of N racing requests, one per row.
@@ -23,9 +19,5 @@ export const patchEmails = async (
   ids: string[],
   patch: Partial<Email>,
 ): Promise<Email[]> =>
-  (
-    await apiFetch<{ emails: Email[] }>(EMAILS_PATH, {
-      method: "PATCH",
-      json: { ids, patch },
-    })
-  ).emails;
+  (await apiClient.patch<{ emails: Email[] }>(EMAILS_PATH, { ids, patch })).data
+    .emails;

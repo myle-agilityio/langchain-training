@@ -1,4 +1,5 @@
-﻿import { Hono } from "hono";
+﻿import axios from "axios";
+import { Hono } from "hono";
 import { MODEL } from "@/config/model";
 import {
   ensureThreadsSchema,
@@ -22,13 +23,11 @@ const generateTitle = async (
   if (!apiKey) return fallback;
 
   try {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
+    const { data } = await axios.post<{
+      choices?: { message?: { content?: string } }[];
+    }>(
+      "https://api.openai.com/v1/chat/completions",
+      {
         model: MODEL,
         messages: [
           {
@@ -41,12 +40,14 @@ const generateTitle = async (
         ],
         max_tokens: 20,
         temperature: 0.3,
-      }),
-    });
-    if (!res.ok) return fallback;
-    const data = (await res.json()) as {
-      choices?: { message?: { content?: string } }[];
-    };
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+      },
+    );
     const generated = data.choices?.[0]?.message?.content
       ?.trim()
       .replace(/^["']|["']$/g, "");
