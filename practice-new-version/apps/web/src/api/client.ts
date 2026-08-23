@@ -1,19 +1,18 @@
-// Every request to the agent's HTTP app goes through here: JSON in, JSON out, and one
+import axios from "axios";
+
+// Every request to the agent's HTTP app goes through this instance: JSON in, JSON out, and one
 // "METHOD /path failed (status)" error for the query client to log.
-export const apiFetch = async <T>(
-  path: string,
-  init: Omit<RequestInit, "body"> & { json?: unknown } = {},
-): Promise<T> => {
-  const { json, headers, method = "GET", ...rest } = init;
-  const res = await fetch(path, {
-    ...rest,
-    method,
-    headers:
-      json === undefined
-        ? headers
-        : { "Content-Type": "application/json", ...headers },
-    body: json === undefined ? undefined : JSON.stringify(json),
-  });
-  if (!res.ok) throw new Error(`${method} ${path} failed (${res.status})`);
-  return (await res.json()) as T;
-};
+export const apiClient = axios.create({
+  headers: { "Content-Type": "application/json" },
+});
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error: unknown) => {
+    if (!axios.isAxiosError(error)) throw error;
+    const method = error.config?.method?.toUpperCase() ?? "GET";
+    const path = error.config?.url ?? "";
+    const status = error.response?.status ?? error.code ?? "network error";
+    throw new Error(`${method} ${path} failed (${status})`);
+  },
+);
