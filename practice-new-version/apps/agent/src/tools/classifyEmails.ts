@@ -16,7 +16,7 @@ export const classifyEmail = async (
   config: LangGraphRunnableConfig,
 ) => {
   const email = await getEmail(id);
-  if (!email) return { id, ok: false as const, error: "no such email" };
+  if (!email) return { id, ok: false, error: "no such email" };
   try {
     // Internal per-email classifier call — hide its forced tool call from the chat UI.
     const classification = await getPlainModelForConfig(config)
@@ -29,12 +29,12 @@ export const classifyEmail = async (
         }),
       );
     await updateEmail(id, { classification });
-    return { id, ok: true as const, classification };
+    return { id, ok: true, classification };
   } catch (error) {
     // Never throw — one bad email (rate limit, parse failure) shouldn't sink the whole batch.
     return {
       id,
-      ok: false as const,
+      ok: false,
       error: error instanceof Error ? error.message : String(error),
     };
   }

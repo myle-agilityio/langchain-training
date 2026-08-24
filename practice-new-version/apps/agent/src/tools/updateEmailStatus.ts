@@ -22,18 +22,18 @@ export const update_email_status = tool(
       input.patches.map(async (patch) => {
         const current = await getEmail(patch.id);
         if (!current)
-          return { id: patch.id, ok: false as const, error: "no such email" };
+          return { id: patch.id, ok: false , error: "no such email" };
         if (current.status === "replied" && patch.status === "unread") {
           return {
             id: patch.id,
-            ok: false as const,
+            ok: false,
             error: "already replied — a replied email cannot be marked unread",
           };
         }
         const email = await updateEmail(patch.id, { status: patch.status });
         return email
-          ? { id: patch.id, ok: true as const, status: email.status }
-          : { id: patch.id, ok: false as const, error: "no such email" };
+          ? { id: patch.id, ok: true, status: email.status }
+          : { id: patch.id, ok: false, error: "no such email" };
       }),
     );
     const failed = results.filter((r) => !r.ok);
