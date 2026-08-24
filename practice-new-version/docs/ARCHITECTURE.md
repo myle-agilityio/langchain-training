@@ -9,7 +9,7 @@ Diagrams of the AI Email Assistant: overall system, the main agent graph, and th
 graph TD
     User["Teacher (browser)"]
 
-    subgraph Frontend["Next.js — :3000"]
+    subgraph Frontend["Vite — :3000"]
         UI["src/components/EmailInbox/*"]
         Hook["useSharedInbox.ts (TanStack Query)"]
         EmailsAPI["/api/emails"]
@@ -125,7 +125,7 @@ email, toggling the theme), then resumes the thread with the result.
 
 ```mermaid
 graph TD
-    subgraph Frontend["Next.js — :3000"]
+    subgraph Frontend["Vite — :3000"]
         FilterInbox["filterInbox\n(emailInbox/index.tsx)"]
         ShowEmail["showEmail\n(emailInbox/index.tsx)"]
         ToggleTheme["toggleTheme\n(useGenerativeUi.tsx)"]

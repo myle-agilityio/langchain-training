@@ -96,17 +96,22 @@ Everything persistent — the inbox, contact profiles, embedded knowledge base, 
 pnpm dev
 ```
 
-This starts both the Next.js UI on port `3000` and the LangGraph agent on port `8123`.
+This starts both the Vite UI on port `3000` and the LangGraph agent on port `8123`.
 
 ## Available Scripts
 
+Run from the repo root — all of these go through Turborepo:
+
 - `dev` - Starts both UI and agent servers in development mode
-- `dev:ui` - Starts only the Next.js UI server
-- `dev:agent` - Starts only the LangGraph agent server
-- `typecheck` - Type-checks the Next.js app (`pnpm --filter agent typecheck` for the agent)
-- `lint` - Lints the Next.js app
-- `build` - Builds the Next.js application for production
-- `start` - Starts the production server
+- `dev:ui` - Starts only the Vite UI server (`:3000`)
+- `dev:agent` - Starts only the LangGraph agent server (`:8123`)
+- `typecheck` - Type-checks both packages; must be clean before a task is done
+- `lint` / `lint:fix` - ESLint across the workspace (flat config, `eslint.config.mjs`)
+- `format` / `format:check` - Prettier across the workspace
+- `build` - Builds the UI for production (`apps/web/dist`)
+- `build:agent` - Builds the agent image target (`langgraphjs build`)
+
+A pre-push hook re-runs lint and format, but only on the files in the commits being pushed.
 
 If agent dependencies fail to install automatically, run:
 
@@ -114,10 +119,48 @@ If agent dependencies fail to install automatically, run:
 pnpm install
 ```
 
+## Project Structure
+
+A [Turborepo](https://turborepo.com) + pnpm workspace with two packages. Each has its own
+README covering its layout and stack:
+
+```
+├── apps/
+│   ├── web/            # Vite SPA — inbox UI + CopilotKit chat  → apps/web/README.md
+│   └── agent/          # LangGraph.js agent + Hono HTTP app     → apps/agent/README.md
+├── docs/               # FEATURES, ARCHITECTURE, TEST-SCENARIOS
+├── fixtures/           # Sample data for manual runs
+├── turbo.json          # Task graph: dev, typecheck, build (+ the shared env allowlist)
+├── pnpm-workspace.yaml # packages: apps/*
+├── eslint.config.mjs   # Flat config, workspace-wide
+├── vercel.json         # Static UI deploy; /api/* rewritten to $AGENT_URL
+├── .env                # Single env file — both servers read it
+└── package.json        # Root scripts, all delegating to turbo
+```
+
+Both servers read the **root** `.env`: Vite loads it for the UI, and the agent gets it via
+`apps/agent/langgraph.json`'s `"env": "../../.env"`. Everything persistent — the inbox,
+contact profiles, embedded knowledge base, graph checkpoints, and the cross-thread store —
+lives in the one Postgres behind `DATABASE_URL`.
+
+### Shared tooling
+
+| Tool               | Version                               | Purpose                                                    |
+| ------------------ | ------------------------------------- | ---------------------------------------------------------- |
+| Node.js            | 20+                                   | Runtime for both packages                                  |
+| pnpm               | 10.30.3 (pinned via `packageManager`) | Package manager — required, the two apps are one workspace |
+| Turborepo          | 2.10.11                               | Runs `dev`/`typecheck`/`build` across both packages        |
+| TypeScript         | ^5                                    | `pnpm typecheck` — `tsc --noEmit` per package              |
+| ESLint             | ^10.8.1                               | Flat config, workspace-wide                                |
+| Prettier           | ^3.9.6                                | Formatting, workspace-wide                                 |
+| husky + commitlint | —                                     | Commit-message check and the pre-push lint/format hook     |
+| LangGraph Studio   | LangGraph CLI 1.4.3                   | Local agent server + graph debugger on `:8123`             |
+
 ## Documentation
 
 - [CLAUDE.md](./CLAUDE.md) - collaboration rules and where things live
-- [Project Structure & Tech Stack](./docs/PROJECT-STRUCTURE.md) - directory layout, technical stack, and development tools with versions
+- [`apps/web` README](./apps/web/README.md) - the Vite UI: structure, state layers, and stack
+- [`apps/agent` README](./apps/agent/README.md) - the LangGraph agent: graph, HTTP app, tables, and stack
 - [Features](./docs/FEATURES.md) - what the assistant does, from the teacher's point of view
 - [Architecture](./docs/ARCHITECTURE.md) - system, main graph, and `compose_email` subgraph diagrams
 - [Test Scenarios](./docs/TEST-SCENARIOS.md) - scenarios the assistant is expected to handle
@@ -162,10 +205,11 @@ The project details are recorded in `.copilotkit/project.json`.
   upstream bug in `IntelligenceAgent.connectAgent`'s realtime WebSocket transport (`verifyEvents`
   rejects the first event), which drops runs in production with `RUNNER_CONNECTION_DROPPED`.
   Leave it commented out until CopilotKit fixes this.
-- **Threads without it:** with the token unset, `NEXT_PUBLIC_COPILOTKIT_THREADS_ENABLED`
-  (`next.config.ts`) resolves to `false` and the UI falls back to a self-managed thread list —
-  `src/app/api/threads`, `src/hooks/useSelfManagedThreads.ts`,
-  `src/components/ThreadsMenu` — backed by our own Postgres (a `chat_threads` table)
+- **Threads without it:** with the token unset, `VITE_COPILOTKIT_THREADS_ENABLED`
+  (derived in `apps/web/vite.config.ts`) resolves to `false` and the UI falls back to a
+  self-managed thread list — the agent's `/api/threads` routes,
+  `apps/web/src/hooks/useSelfManagedThreads.ts`, and
+  `apps/web/src/components/ThreadsMenu` — backed by our own Postgres (a `chat_threads` table)
   instead of the Intelligence platform. Message history itself still comes from the graph's
   `PostgresSaver` checkpointer either way; this only replaces the list/rename/delete UI.
 - **Run it:** install dependencies, set your env vars, then `pnpm dev`
