@@ -22,7 +22,7 @@ export const update_email_status = tool(
       input.patches.map(async (patch) => {
         const current = await getEmail(patch.id);
         if (!current)
-          return { id: patch.id, ok: false , error: "no such email" };
+          return { id: patch.id, ok: false, error: "no such email" };
         if (current.status === "replied" && patch.status === "unread") {
           return {
             id: patch.id,
