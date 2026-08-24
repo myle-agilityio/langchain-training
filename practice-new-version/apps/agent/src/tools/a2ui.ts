@@ -1,8 +1,11 @@
 ﻿import { z } from "zod";
 import { tool, type ToolRuntime } from "@langchain/core/tools";
 import { SystemMessage } from "@langchain/core/messages";
-import { ChatOpenAI } from "@langchain/openai";
-import { CUSTOM_CATALOG_ID } from "@/constants/index";
+import type { LangGraphRunnableConfig } from "@langchain/langgraph";
+import { getA2uiModelForConfig } from "@/config/model";
+import { CUSTOM_CATALOG_ID, TOOL } from "@/constants/index";
+import { AppError, ERROR_CODE } from "@/errors/index";
+import { defineTool } from "./defineTool";
 import {
   createSurface,
   render,
@@ -58,11 +61,29 @@ const DynamicStateSchema = z.object({
     .optional(),
 });
 
-export const generate_a2ui = tool(
-  async (
-    _input: Record<string, never>,
-    runtime: ToolRuntime<typeof DynamicStateSchema>,
+export const generate_a2ui = defineTool({
+  name: TOOL.GENERATE_A2UI,
+  description:
+    "Render a visual dashboard in the chat — metric tiles and pie/bar charts — for a request " +
+    "to see, show, or visualize the inbox (e.g. a breakdown by topic and urgency). This tool " +
+    "does not fetch or aggregate inbox data itself: it only turns numbers already in this " +
+    "conversation into UI. For a breakdown/count dashboard, call count_emails FIRST, as an " +
+    'earlier step — once per field being broken down (e.g. one call with groupBy: "topic", ' +
+    'a separate call with groupBy: "urgency") — so the real per-category counts are already ' +
+    "in the conversation before this runs. Do not use get_emails for this: reading raw email " +
+    "text makes the dashboard invent its own categories and numbers instead of using the " +
+    "real classification counts. This also can't see a sibling tool call's result from the " +
+    "same turn, so the count(s) must land in an earlier step, not alongside this call.",
+  schema: z.object({}),
+  // The A2UI renderer reads the operations payload at the top level of the tool result.
+  passthrough: true,
+  run: async (
+    _input,
+    config: LangGraphRunnableConfig & {
+      state?: z.infer<typeof DynamicStateSchema>;
+    },
   ) => {
+    const runtime = config as unknown as ToolRuntime<typeof DynamicStateSchema>;
     const messages = (runtime.state.messages ?? []).slice(0, -1);
     const contextEntries = runtime.state.copilotkit?.context ?? [];
     const contextText = contextEntries
@@ -70,10 +91,13 @@ export const generate_a2ui = tool(
       .filter(Boolean)
       .join("\n\n");
 
-    const model = new ChatOpenAI({ model: "gpt-4.1" });
-    const modelWithTool = model.bindTools!([renderA2ui], {
-      tool_choice: "render_a2ui",
-    });
+    // Same BYOK key as every other model call — this used to fall back to process.env only.
+    const modelWithTool = getA2uiModelForConfig(config).bindTools!(
+      [renderA2ui],
+      {
+        tool_choice: "render_a2ui",
+      },
+    );
 
     const response = await modelWithTool.invoke([
       new SystemMessage({ content: contextText }),
@@ -84,7 +108,9 @@ export const generate_a2ui = tool(
       response as { tool_calls?: Array<{ args: Record<string, unknown> }> }
     ).tool_calls;
     if (!toolCalls || toolCalls.length === 0) {
-      return JSON.stringify({ error: "LLM did not call render_a2ui" });
+      throw new AppError(ERROR_CODE.MODEL_OUTPUT_INVALID, {
+        detail: "secondary model did not call render_a2ui",
+      });
     }
 
     const args = toolCalls[0].args as {
@@ -108,19 +134,4 @@ export const generate_a2ui = tool(
     }
     return render(ops);
   },
-  {
-    name: "generate_a2ui",
-    description:
-      "Render a visual dashboard in the chat — metric tiles and pie/bar charts — for a request " +
-      "to see, show, or visualize the inbox (e.g. a breakdown by topic and urgency). This tool " +
-      "does not fetch or aggregate inbox data itself: it only turns numbers already in this " +
-      "conversation into UI. For a breakdown/count dashboard, call count_emails FIRST, as an " +
-      'earlier step — once per field being broken down (e.g. one call with groupBy: "topic", ' +
-      'a separate call with groupBy: "urgency") — so the real per-category counts are already ' +
-      "in the conversation before this runs. Do not use get_emails for this: reading raw email " +
-      "text makes the dashboard invent its own categories and numbers instead of using the " +
-      "real classification counts. This also can't see a sibling tool call's result from the " +
-      "same turn, so the count(s) must land in an earlier step, not alongside this call.",
-    schema: z.object({}),
-  },
-);
+});

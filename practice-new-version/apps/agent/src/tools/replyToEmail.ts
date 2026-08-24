@@ -3,7 +3,8 @@ import { z } from "zod";
 
 import { TOOL } from "@/constants/index";
 
-// Never executed as a tool — the router turns this call into a compose-email subgraph entry.
+// Never executed as a tool — the router turns this call into a compose-email subgraph entry, so
+// it stays on the raw tool() helper rather than defineTool's envelope.
 export const reply_to_email = tool(async () => "", {
   name: TOOL.REPLY_TO_EMAIL,
   description:
