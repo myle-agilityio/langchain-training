@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type {
   Course,
   EmailStatus,
@@ -41,9 +41,12 @@ export const FilterDialog = ({
   // Draft state so Cancel/closing without Apply doesn't touch the active filters.
   const [draft, setDraft] = useState<EmailFilters>(filters);
 
-  useEffect(() => {
+  // Reset the draft on each open, adjusted during render rather than in an effect.
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
     if (open) setDraft(filters);
-  }, [open, filters]);
+  }
 
   const set = <K extends keyof EmailFilters>(key: K, value: EmailFilters[K]) =>
     setDraft((d) => ({ ...d, [key]: value || undefined }));
