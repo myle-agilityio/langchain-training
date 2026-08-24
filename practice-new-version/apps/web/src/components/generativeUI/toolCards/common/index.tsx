@@ -1,7 +1,7 @@
 import type { ComponentType } from "react";
 import { Check, TriangleAlert } from "lucide-react";
 import { Badge, Spinner } from "@/components/common";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 import {
   COURSE_LABEL,
   TOPIC_LABEL,
@@ -11,7 +11,7 @@ import {
   WORK_TYPE_LABEL,
 } from "@/constants";
 import type { Classification, ToolStatus, EmailFilterArgs } from "@/types";
-import { useEmailLookup } from "@/utils";
+import { useEmailLookup } from "@/hooks";
 
 export const Shell = ({
   icon: Icon,

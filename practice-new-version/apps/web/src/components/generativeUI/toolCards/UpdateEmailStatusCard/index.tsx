@@ -1,11 +1,10 @@
 import { MailCheck } from "lucide-react";
 import { Badge } from "@/components/common";
-import { cn } from "@/lib/utils";
 import type { EmailStatus } from "@/types/email";
 import { EmailLine, Failure, Pending, Shell } from "../common";
 import { STATUS_LABEL, STATUS_TONE } from "@/constants";
 import type { ToolCardProps } from "@/types";
-import { parseResult } from "@/utils";
+import { cn, parseResult } from "@/utils";
 
 interface StatusResult {
   id: string;

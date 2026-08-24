@@ -8,7 +8,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components";
-import { cn } from "@/lib/utils";
 import {
   COURSE_LABEL,
   FALLBACK_TONE,
@@ -18,7 +17,7 @@ import {
   URGENCY_TONE,
   URGENCY_VARIANT,
 } from "@/constants";
-import { formatReceivedAt, formatReceivedAtFull } from "@/lib/formatDate";
+import { cn, formatReceivedAt, formatReceivedAtFull } from "@/utils";
 
 interface InboxListProps {
   emails: Email[];

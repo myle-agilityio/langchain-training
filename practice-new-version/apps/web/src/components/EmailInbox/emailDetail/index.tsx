@@ -11,7 +11,7 @@ import {
   URGENCY_VARIANT,
   WORK_TYPE_LABEL,
 } from "@/constants";
-import { formatReceivedAtFull } from "@/lib/formatDate";
+import { formatReceivedAtFull } from "@/utils";
 import { Mail, Sparkles } from "lucide-react";
 
 interface EmailDetailProps {

@@ -128,7 +128,7 @@ graph TD
     subgraph Frontend["Vite — :3000"]
         FilterInbox["filterInbox\n(emailInbox/index.tsx)"]
         ShowEmail["showEmail\n(emailInbox/index.tsx)"]
-        ToggleTheme["toggleTheme\n(useGenerativeUi.tsx)"]
+        ToggleTheme["toggleTheme\n(useGenerativeUI.tsx)"]
         EnableAppMode["enableAppMode\n(chatSidebar/index.tsx)"]
         EnableChatMode["enableChatMode\n(chatSidebar/index.tsx)"]
     end

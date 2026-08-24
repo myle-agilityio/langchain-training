@@ -41,8 +41,8 @@ Frontend (`apps/web/`, Vite SPA, single page — no router):
 - `index.html` + `src/main.tsx` — entry point; `src/app/App.tsx` — providers (TanStack Query,
   CopilotKit, theme, OpenAI-key gate) wrapping the inbox + chat layout.
 - `src/components/` — one folder per component, each with an `index.tsx`; a folder whose
-  `index` is a barrel groups them (`common/` primitives, `generativeUi/`,
-  `declarativeGenerativeUi/` — the A2UI catalog). `src/components/index.ts` re-exports all.
+  `index` is a barrel groups them (`common/` primitives, `generativeUI/`,
+  `declarativeGenerativeUI/` — the A2UI catalog). `src/components/index.ts` re-exports all.
 - `src/components/EmailInbox/` — the inbox UI; `src/hooks/useSharedInbox.ts` is its data
   provider (reads `/api/emails`, proxied to the agent's HTTP app above).
 - `src/api/` is the only place that talks HTTP: `client.ts`'s `apiFetch` (JSON in/out, uniform
@@ -51,6 +51,9 @@ Frontend (`apps/web/`, Vite SPA, single page — no router):
   the `useSharedInbox`/`useSelfManagedThreads` hooks — a `useX` query hook per resource and a
   mutation hook per write, with the `useSync*` hooks invalidating on `onRunFinalized`.
   `src/stores/` stays zustand, for client-only state (theme, OpenAI key, compose approval).
+- `src/lib/` is configured third-party instances only (`queryClient.ts`); `src/utils/` is pure
+  helpers and `src/constants/` is values — both one file per concept behind an `index.ts`
+  barrel, and neither holds React hooks (those go in `src/hooks/`).
 
 Everything persistent is in the one Postgres behind `DATABASE_URL`: the inbox (`emails`,
 `contact_profiles`), the embedded KB (`kb_documents`), graph checkpoints (`checkpoints*`) and
@@ -71,7 +74,7 @@ These are how we work on this project, not style preferences. Follow them on eve
 5. **Never let secrets leak.** `.env` stays untracked; a new env var goes into `.env.example` in
    the same change.
 6. **Name source files and folders in camelCase** — `useSharedInbox.ts`, `emailFilters.ts`,
-   `components/generativeUi/` — except anything whose export is a React component, which is
+   `components/generativeUI/` — except anything whose export is a React component, which is
    PascalCase matching it: a component file (`renderers.tsx`'s siblings), and a component
    folder holding that component's `index.tsx` (`components/InboxList/`,
    `components/common/DropdownMenu/`). Barrel `index.ts`/`index.tsx` files keep their name. **Assets and scripts stay kebab-case**:

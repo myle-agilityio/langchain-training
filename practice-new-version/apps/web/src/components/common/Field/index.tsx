@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 
 // One look for every form control in the app — text, date, textarea and select alike.
 const controlClass =

@@ -8,13 +8,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/common";
-import { useOpenAiKey } from "@/stores";
+import { useOpenAIKey } from "@/stores";
 import { KeyForm } from "../KeyForm";
 
 // The only way back out of a saved-but-invalid key — the gate only checks the "sk-" prefix, so a
 // wrong-but-well-formed key would otherwise lock the app behind 401s with no way to replace it.
 export const ChangeKeyButton = () => {
-  const clearApiKey = useOpenAiKey((s) => s.clearApiKey);
+  const clearApiKey = useOpenAIKey((s) => s.clearApiKey);
   const [open, setOpen] = useState(false);
 
   return (

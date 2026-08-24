@@ -9,8 +9,7 @@ import {
   WORK_TYPE_LABEL,
 } from "@/constants";
 import type { EmailFilterArgs, ToolCardProps } from "@/types";
-import { cn } from "@/lib/utils";
-import { parseResult } from "@/utils";
+import { cn, parseResult } from "@/utils";
 
 type GroupBy = "status" | "topic" | "course" | "workType" | "urgency";
 
