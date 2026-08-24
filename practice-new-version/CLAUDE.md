@@ -51,6 +51,9 @@ Frontend (`apps/web/`, Vite SPA, single page — no router):
   the `useSharedInbox`/`useSelfManagedThreads` hooks — a `useX` query hook per resource and a
   mutation hook per write, with the `useSync*` hooks invalidating on `onRunFinalized`.
   `src/stores/` stays zustand, for client-only state (theme, OpenAI key, compose approval).
+- `src/lib/` is configured third-party instances only (`queryClient.ts`); `src/utils/` is pure
+  helpers and `src/constants/` is values — both one file per concept behind an `index.ts`
+  barrel, and neither holds React hooks (those go in `src/hooks/`).
 
 Everything persistent is in the one Postgres behind `DATABASE_URL`: the inbox (`emails`,
 `contact_profiles`), the embedded KB (`kb_documents`), graph checkpoints (`checkpoints*`) and

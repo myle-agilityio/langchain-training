@@ -23,7 +23,7 @@ import {
   URGENCY_LABEL,
   WORK_TYPE_LABEL,
 } from "@/constants";
-import { EMPTY_FILTERS, type EmailFilters } from "@/lib/emailFilters";
+import { EMPTY_FILTERS, type EmailFilters } from "@/utils";
 
 interface FilterDialogProps {
   open: boolean;

@@ -19,7 +19,7 @@ import {
   filterEmails,
   hasActiveFilters,
   type EmailFilters,
-} from "@/lib/emailFilters";
+} from "@/utils";
 import { InboxList } from "./InboxList";
 import { EmailDetail } from "./emailDetail";
 import { FilterDialog } from "./FilterDialog";

@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 
 const sizeClass = {
   sm: "size-4 border-2",

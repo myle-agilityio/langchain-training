@@ -69,17 +69,18 @@ src/
 │   ├── useEmailAgent.tsx        # Wires the selected email into the agent's context
 │   ├── useGenerativeUi.tsx      # Frontend tools + interrupt rendering
 │   ├── useToolRenderers.tsx     # Maps tool calls to their cards
+│   ├── useEmailLookup.ts        # id -> Email map for the tool cards
 │   ├── useExampleSuggestions.tsx
 │   └── useSync*.ts              # Invalidate queries / mirror state on run lifecycle
 ├── stores/              # zustand — client-only state (theme, OpenAI key, compose approval)
-├── lib/
-│   ├── queryClient.ts   # One QueryClient, one error log point, agent-pushed freshness
+├── lib/queryClient.ts   # Configured library instances — one QueryClient, one error log point
+├── utils/               # Pure helpers, re-exported from index.ts
+│   ├── cn.ts            # clsx + tailwind-merge
 │   ├── emailFilters.ts  # Filter predicates for the inbox list
 │   ├── formatDate.ts
-│   └── utils.ts         # cn() — clsx + tailwind-merge
-├── constants/index.ts   # Labels and `--tone` hue utilities for topic/course/urgency/status
-├── types/               # email, thread, tools
-└── utils/tools.ts
+│   └── parseResult.ts   # Safe JSON.parse of a tool result
+├── constants/           # One file per facet (tone, topic, urgency, status, course, workType)
+└── types/               # email, thread, tools
 public/                  # Static assets (kebab-case, by rule)
 ```
 

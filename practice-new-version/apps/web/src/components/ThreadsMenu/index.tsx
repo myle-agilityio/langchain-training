@@ -12,8 +12,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
 } from "@/components/common";
-import { cn } from "@/lib/utils";
-import { formatRelative } from "@/lib/formatDate";
+import { cn, formatRelative } from "@/utils";
 
 // Clock-icon trigger + dropdown replacement for the old full-height SelfManagedThreadsDrawer —
 // same data/actions, just a popover; outside-click-to-close comes free from Radix.
