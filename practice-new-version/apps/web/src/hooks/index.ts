@@ -1,5 +1,6 @@
 export * from "./useComposingEmail";
 export * from "./useEmailAgent";
+export * from "./useEmailLookup";
 export * from "./useExampleSuggestions";
 export * from "./useGenerativeUi";
 export * from "./useSelfManagedThreads";
