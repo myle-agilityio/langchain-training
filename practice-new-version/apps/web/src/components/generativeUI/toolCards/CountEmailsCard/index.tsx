@@ -1,6 +1,6 @@
 import { Tags } from "lucide-react";
 import type { Course, EmailStatus, EmailTopic, WorkType } from "@/types/email";
-import { FilterChips, Pending, Shell } from "../common";
+import { FilterChips, Pending, Shell, ToolFailure } from "../common";
 import {
   COURSE_LABEL,
   FALLBACK_TONE,
@@ -9,7 +9,7 @@ import {
   WORK_TYPE_LABEL,
 } from "@/constants";
 import type { EmailFilterArgs, ToolCardProps } from "@/types";
-import { cn, parseResult } from "@/utils";
+import { cn, parseToolResult } from "@/utils";
 
 type GroupBy = "status" | "topic" | "course" | "workType" | "urgency";
 
@@ -34,9 +34,11 @@ export const CountEmailsCard = ({
   parameters,
   result,
 }: ToolCardProps<{ filter?: EmailFilterArgs; groupBy?: GroupBy }>) => {
-  const data = parseResult<{ total: number; byGroup?: Record<string, number> }>(
-    result,
-  );
+  const envelope = parseToolResult<{
+    total: number;
+    byGroup?: Record<string, number>;
+  }>(result);
+  const data = envelope?.ok ? envelope.data : undefined;
   // Sorted by size, single hue: the bar carries magnitude, the label carries identity.
   const groups = Object.entries(data?.byGroup ?? {}).sort(
     (a, b) => b[1] - a[1],
@@ -46,16 +48,18 @@ export const CountEmailsCard = ({
   return (
     <Shell icon={Tags} title="Count emails" status={status}>
       <FilterChips filter={parameters.filter ?? {}} />
-      {!data ? (
+      {!envelope ? (
         <Pending label="Counting…" />
+      ) : !envelope.ok ? (
+        <ToolFailure error={envelope.error} />
       ) : (
         <div className="space-y-2.5">
           <div className="flex items-baseline gap-1.5">
             <span className="text-2xl font-bold tabular-nums text-foreground">
-              {data.total}
+              {envelope.data.total}
             </span>
             <span className="text-[11px] text-muted-foreground">
-              {data.total === 1 ? "email" : "emails"}
+              {envelope.data.total === 1 ? "email" : "emails"}
             </span>
           </div>
           {groups.length > 0 && (

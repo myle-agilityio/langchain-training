@@ -1,13 +1,11 @@
 import { UserRoundCog } from "lucide-react";
 import { Badge } from "@/components/common";
-import { Failure, Pending, Shell } from "../common";
+import { Pending, Shell, ToolFailure } from "../common";
 import type { ToolCardProps } from "@/types";
-import { parseResult } from "@/utils";
+import { parseToolResult } from "@/utils";
 
 interface ProfileResult {
-  ok: boolean;
-  profile?: { name: string; tone: string | null; facts: string[] };
-  error?: string;
+  profile: { name: string; tone: string | null; facts: string[] };
 }
 
 export const UpdateContactProfileCard = ({
@@ -15,11 +13,11 @@ export const UpdateContactProfileCard = ({
   parameters,
   result,
 }: ToolCardProps<{ sender: string; tone?: string; facts?: string[] }>) => {
-  const data = parseResult<ProfileResult>(result);
+  const envelope = parseToolResult<ProfileResult>(result);
 
   return (
     <Shell icon={UserRoundCog} title="Remember about contact" status={status}>
-      {!data ? (
+      {!envelope ? (
         <Pending
           label={
             parameters.sender
@@ -27,24 +25,24 @@ export const UpdateContactProfileCard = ({
               : "Saving…"
           }
         />
-      ) : !data.ok || !data.profile ? (
-        <Failure text={data.error ?? "Could not save"} />
+      ) : !envelope.ok ? (
+        <ToolFailure error={envelope.error} />
       ) : (
         <div className="space-y-2">
           <p className="text-xs font-semibold text-foreground">
-            {data.profile.name}
+            {envelope.data.profile.name}
           </p>
-          {data.profile.tone && (
+          {envelope.data.profile.tone && (
             <div className="flex items-center gap-1.5">
               <span className="text-[11px] text-muted-foreground">Tone</span>
               <Badge variant="secondary" className="text-[10px] font-normal">
-                {data.profile.tone}
+                {envelope.data.profile.tone}
               </Badge>
             </div>
           )}
-          {data.profile.facts.length > 0 && (
+          {envelope.data.profile.facts.length > 0 && (
             <ul className="space-y-1">
-              {data.profile.facts.map((fact) => (
+              {envelope.data.profile.facts.map((fact) => (
                 <li
                   key={fact}
                   className="flex gap-1.5 text-[11px] text-muted-foreground"

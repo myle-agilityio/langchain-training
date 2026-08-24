@@ -3,19 +3,16 @@ import type { Classification } from "@/types/email";
 import {
   ClassificationBadges,
   EmailLine,
-  Failure,
   Pending,
   Shell,
+  ToolFailure,
 } from "../common";
-import type { ToolCardProps } from "@/types";
-import { parseResult } from "@/utils";
+import type { ToolCardProps, ToolError } from "@/types";
+import { parseToolResult } from "@/utils";
 
-interface ClassifyResult {
-  id: string;
-  ok: boolean;
-  classification?: Classification;
-  error?: string;
-}
+type ClassifyResult =
+  | { id: string; ok: true; classification: Classification }
+  | { id: string; ok: false; error: ToolError };
 
 export const ClassifyEmailsCard = ({
   status,
@@ -23,11 +20,11 @@ export const ClassifyEmailsCard = ({
   result,
 }: ToolCardProps<{ ids: string[] }>) => {
   const ids = parameters.ids ?? [];
-  const data = parseResult<{ results: ClassifyResult[] }>(result);
+  const envelope = parseToolResult<{ results: ClassifyResult[] }>(result);
 
   return (
     <Shell icon={Tags} title="Classify emails" status={status}>
-      {!data ? (
+      {!envelope ? (
         <Pending
           label={
             ids.length
@@ -35,18 +32,20 @@ export const ClassifyEmailsCard = ({
               : "Classifying…"
           }
         />
+      ) : !envelope.ok ? (
+        <ToolFailure error={envelope.error} />
       ) : (
         <div className="space-y-2.5">
-          {data.results.map((r) => (
+          {envelope.data.results.map((r) => (
             <div key={r.id} className="min-w-0">
               <div className="flex min-w-0">
                 <EmailLine id={r.id} />
               </div>
               <div className="mt-1">
-                {r.ok && r.classification ? (
+                {r.ok ? (
                   <ClassificationBadges classification={r.classification} />
                 ) : (
-                  <Failure text={r.error ?? "failed"} />
+                  <ToolFailure error={r.error} />
                 )}
               </div>
             </div>
