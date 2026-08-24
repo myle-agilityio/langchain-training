@@ -11,7 +11,7 @@ const badgeVariants = cva(
         default: "border-transparent bg-primary text-primary-foreground",
         secondary: "border-transparent bg-secondary text-secondary-foreground",
         outline: "border-border text-foreground",
-        // Both read `--tone`, set by a sibling tone class; see constants/index.ts.
+        // Both read `--tone`, set by a sibling tone class; see constants/tone.ts.
         tone: "border-(--tone)/30 bg-(--tone)/10 text-(color:--tone)",
         toneSolid: "border-transparent bg-(--tone) text-background",
       },
