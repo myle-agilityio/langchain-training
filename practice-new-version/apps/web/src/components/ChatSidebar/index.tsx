@@ -16,15 +16,12 @@ const MAX_WIDTH = 640;
 // Collapsible, resizable chat sidebar on the right; EmailInbox is now the main/left content,
 // so this just needs its own drag handle on its left edge, not a 50/50 split.
 export const ChatSidebar = ({ threadsMenu, children }: ChatSidebarProps) => {
-  const [collapsed, setCollapsed] = useState(false);
+  // Mobile starts collapsed so the inbox is what teachers land on — matches the old default "app" mode.
+  const [collapsed, setCollapsed] = useState(
+    () => window.matchMedia("(max-width: 1023px)").matches,
+  );
   const [width, setWidth] = useState(DEFAULT_WIDTH);
   const [isResizing, setIsResizing] = useState(false);
-
-  // Mobile starts collapsed so the inbox is what teachers land on — matches the old default
-  // "app" mode. Effect-based (like useSyncTheme) to avoid a hydration mismatch.
-  useEffect(() => {
-    if (window.matchMedia("(max-width: 1023px)").matches) setCollapsed(true);
-  }, []);
 
   // The sidebar's right edge sits flush against the viewport edge, so width is just how far the
   // drag point is from that edge. Also keeps at least 320px for the inbox.
