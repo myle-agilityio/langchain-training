@@ -1,51 +1,30 @@
-﻿import { Hono } from "hono";
-import type { Email } from "@/types/index";
-import { listEmailsSeeded, updateEmailsStatus, patchEmail } from "@/db/inbox";
+import { Hono } from "hono";
 
-export const emailsApp = new Hono();
+import { listEmailsSeeded, updateEmailsStatus, patchEmail } from "@/db/inbox";
+import { AppError, ERROR_CODE } from "@/errors/index";
+import { validate } from "./middleware/validate";
+import { PatchEmailBodySchema, type PatchEmailBody } from "./schemas";
+import type { AppEnv } from "./types";
+
+export const emailsApp = new Hono<AppEnv>();
 
 emailsApp.get("/", async (c) => {
-  const emails = await listEmailsSeeded();
-  return c.json({ emails });
+  return c.json({ emails: await listEmailsSeeded() });
 });
 
-emailsApp.patch("/", async (c) => {
-  let body:
-    | { ids: string[]; patch: Partial<Email> }
-    | { id: string; patch: Partial<Email> };
-  try {
-    body = await c.req.json();
-  } catch {
-    return c.json({ error: "Request body must be valid JSON" }, 400);
-  }
-  if (typeof body !== "object" || body === null) {
-    return c.json({ error: "Request body must be a JSON object" }, 400);
-  }
+emailsApp.patch("/", validate("json", PatchEmailBodySchema), async (c) => {
+  const body = c.get("valid") as PatchEmailBody;
 
-  // Bulk path — mark all as read/unread from the inbox toolbar. Status-only on purpose: a
-  // classification/reply patch always targets one specific email, never a batch.
   if ("ids" in body) {
-    const { ids, patch } = body;
-    if (!Array.isArray(ids) || ids.length === 0 || !patch?.status) {
-      return c.json(
-        {
-          error:
-            "Bulk patch requires a non-empty `ids` array and a `patch.status`",
-        },
-        400,
-      );
-    }
-    const emails = await updateEmailsStatus(ids, patch.status as string);
+    const emails = await updateEmailsStatus(body.ids, body.patch.status);
     return c.json({ emails });
   }
 
-  const { id, patch } = body;
-  if (!id || !patch) {
-    return c.json({ error: "Patch requires an `id` and a `patch`" }, 400);
-  }
-  const email = await patchEmail(id, patch);
+  const email = await patchEmail(body.id, body.patch);
   if (!email) {
-    return c.json({ error: `No email with id ${id}` }, 404);
+    throw new AppError(ERROR_CODE.EMAIL_NOT_FOUND, {
+      detail: `no email with id ${body.id}`,
+    });
   }
   return c.json({ email });
 });
