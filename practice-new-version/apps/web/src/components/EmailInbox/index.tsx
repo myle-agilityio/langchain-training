@@ -12,6 +12,7 @@ import {
   usePatchEmail,
   usePatchEmails,
 } from "@/hooks/useSharedInbox";
+import { useComposingEmail } from "@/hooks/useComposingEmail";
 import { useComposeApproval, useOpenAiKey } from "@/stores";
 import {
   EMPTY_FILTERS,
@@ -189,6 +190,11 @@ export const EmailInbox = () => {
   const hasApiKey = Boolean(useOpenAiKey((s) => s.apiKey));
   const isAgentBusy = agent.isRunning || awaitingApproval || !hasApiKey;
 
+  // Shared agent state: which email the compose pipeline is drafting for, if any.
+  const composingEmailId = useComposingEmail();
+  const isDrafting =
+    composingEmailId !== null && composingEmailId === selected?.id;
+
   return (
     <div className="h-full flex gap-3">
       <div className="w-[360px] shrink-0 rounded-xl border border-border bg-card overflow-hidden flex flex-col">
@@ -222,6 +228,7 @@ export const EmailInbox = () => {
           onSendReply={sendManualReply}
           onAskAgent={askAgentToReply}
           isAgentBusy={isAgentBusy}
+          isDrafting={isDrafting}
         />
       </div>
     </div>

@@ -1,3 +1,4 @@
+export * from "./useComposingEmail";
 export * from "./useEmailAgent";
 export * from "./useExampleSuggestions";
 export * from "./useGenerativeUi";

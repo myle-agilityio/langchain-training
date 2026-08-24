@@ -13,6 +13,7 @@ export const composeEmailErrorHandler = (
   const call = findReplyCall(state.messages);
   return new Command({
     update: {
+      emailId: "",
       messages: call
         ? [
             new ToolMessage({
