@@ -37,7 +37,9 @@ export const useSyncThreads = () => {
   const saveThread = useSaveThread();
 
   const configRef = useRef(config);
-  configRef.current = config;
+  useEffect(() => {
+    configRef.current = config;
+  }, [config]);
 
   // Upsert the active thread when a run finishes: creates its row on first use (so an unused
   // "+ New chat" never litters the list) and bumps updated_at so the list stays sorted by activity.
