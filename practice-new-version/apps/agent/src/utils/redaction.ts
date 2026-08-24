@@ -50,3 +50,19 @@ export const redactEmailForModel = (
       : {}),
   };
 };
+
+// Credentials that could ride along in a log line: OpenAI keys, bearer tokens, DB URLs.
+const SECRET_RE = /\b(?:sk|rk)-[A-Za-z0-9_-]{8,}/g;
+const BEARER_RE = /\b[Bb]earer\s+[A-Za-z0-9._-]+/g;
+const CONNECTION_RE = /\b(?:postgres(?:ql)?|redis|mongodb):\/\/[^\s"']+/g;
+
+// Applied to every string a log entry carries — logs leave the process, so they get the same
+// scrubbing as model input, plus credentials. Credentials go first: a connection string's
+// user:password@host would otherwise be eaten by the email rule and only half-redacted.
+export const redactSecrets = (text: string): string =>
+  redactSensitiveInfo(
+    text
+      .replace(CONNECTION_RE, "[redacted connection string]")
+      .replace(SECRET_RE, "[redacted key]")
+      .replace(BEARER_RE, "Bearer [redacted]"),
+  );
