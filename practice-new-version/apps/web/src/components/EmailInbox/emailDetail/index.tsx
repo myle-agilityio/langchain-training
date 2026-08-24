@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Email } from "@/types";
 import { Badge, Button, Spinner } from "@/components";
 import { ComposeForm } from "./components/ComposeForm";
@@ -37,9 +37,12 @@ export const EmailDetail = ({
 }: EmailDetailProps) => {
   const [composing, setComposing] = useState(false);
 
-  useEffect(() => {
+  // Close the compose form when another email is selected, adjusted during render not in an effect.
+  const [shownEmailId, setShownEmailId] = useState(email?.id);
+  if (email?.id !== shownEmailId) {
+    setShownEmailId(email?.id);
     setComposing(false);
-  }, [email?.id]);
+  }
 
   if (!email) {
     return (

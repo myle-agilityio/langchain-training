@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -35,10 +35,15 @@ export const EmailReplyCard = ({
 
   // Tool args arrive empty on the first ("inProgress") render, only populating at "executing" —
   // useState's initializer runs once, so without this the fields would stay blank.
-  useEffect(() => {
+  const [syncedDraft, setSyncedDraft] = useState({ draftSubject, draftBody });
+  if (
+    syncedDraft.draftSubject !== draftSubject ||
+    syncedDraft.draftBody !== draftBody
+  ) {
+    setSyncedDraft({ draftSubject, draftBody });
     setSubject(draftSubject);
     setBody(draftBody);
-  }, [draftSubject, draftBody]);
+  }
 
   // The interrupt's resume doesn't replay the backend tool, so this card applies the state
   // change via patchEmail. respond()'s instruction stops the model narrating what's on screen.
