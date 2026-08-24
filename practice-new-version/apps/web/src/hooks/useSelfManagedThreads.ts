@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchThreads, renameThread, deleteThread, saveThread } from "@/api";
+import { optimisticContext, rollback } from "@/lib/optimistic";
 import type { ChatThread } from "@/types";
 import { useOpenAIKey } from "@/stores";
 
@@ -21,22 +22,19 @@ export const useSelfManagedThreads = (): ChatThread[] => {
 export const useRenameThread = () => {
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
+    mutationKey: ["threads", "rename"],
     mutationFn: ({ id, title }: { id: string; title: string }) =>
       renameThread(id, title),
-    onMutate: async ({ id, title }) => {
-      await queryClient.cancelQueries({ queryKey: threadsQueryKey });
-      const previous = queryClient.getQueryData<ChatThread[]>(threadsQueryKey);
-      queryClient.setQueryData<ChatThread[]>(threadsQueryKey, (old) =>
+    onMutate: ({ id, title }) =>
+      optimisticContext<ChatThread[]>(queryClient, threadsQueryKey, (old) =>
         (old ?? []).map((thread) =>
           thread.id === id ? { ...thread, title } : thread,
         ),
-      );
-      return { previous };
-    },
+      ),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: threadsQueryKey }),
     onError: (_error, _variables, context) =>
-      queryClient.setQueryData(threadsQueryKey, context?.previous),
+      rollback<ChatThread[]>(queryClient, threadsQueryKey, context),
   });
 
   return useCallback(
@@ -48,17 +46,14 @@ export const useRenameThread = () => {
 export const useDeleteThread = () => {
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
+    mutationKey: ["threads", "delete"],
     mutationFn: deleteThread,
-    onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: threadsQueryKey });
-      const previous = queryClient.getQueryData<ChatThread[]>(threadsQueryKey);
-      queryClient.setQueryData<ChatThread[]>(threadsQueryKey, (old) =>
+    onMutate: (id) =>
+      optimisticContext<ChatThread[]>(queryClient, threadsQueryKey, (old) =>
         (old ?? []).filter((thread) => thread.id !== id),
-      );
-      return { previous };
-    },
+      ),
     onError: (_error, _variables, context) =>
-      queryClient.setQueryData(threadsQueryKey, context?.previous),
+      rollback<ChatThread[]>(queryClient, threadsQueryKey, context),
   });
 
   return mutate;
@@ -68,6 +63,9 @@ export const useDeleteThread = () => {
 export const useSaveThread = () => {
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
+    mutationKey: ["threads", "save"],
+    // Background upsert after a run — a failed title write shouldn't interrupt the teacher.
+    meta: { silent: true },
     // Read at call time, not render time: the teacher can change the key mid-session.
     mutationFn: (body: { id: string; firstMessage?: string }) =>
       saveThread(body, useOpenAIKey.getState().apiKey),

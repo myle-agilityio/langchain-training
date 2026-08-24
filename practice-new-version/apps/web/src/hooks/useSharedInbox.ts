@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchEmails, patchEmail, patchEmails } from "@/api";
+import { optimisticContext, rollback } from "@/lib/optimistic";
 import type { Email } from "@/types/email";
 
 export const inboxQueryKey = ["emails"] as const;
@@ -46,22 +47,21 @@ const replaceEmails = (updated: Email[]) => (old?: Email[]) => {
 export const usePatchEmail = () => {
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
+    mutationKey: ["emails", "patch"],
     mutationFn: ({ id, patch }: { id: string; patch: Partial<Email> }) =>
       patchEmail(id, patch),
-    onMutate: async ({ id, patch }) => {
-      await queryClient.cancelQueries({ queryKey: inboxQueryKey });
-      const previous = queryClient.getQueryData<Email[]>(inboxQueryKey);
-      queryClient.setQueryData<Email[]>(
+    onMutate: ({ id, patch }) =>
+      optimisticContext<Email[]>(
+        queryClient,
         inboxQueryKey,
         applyPatch(new Set([id]), patch),
-      );
-      return { previous };
-    },
+      ),
     // The server echoes the saved row, so write that instead of spending a refetch on it.
     onSuccess: (email) =>
       queryClient.setQueryData<Email[]>(inboxQueryKey, replaceEmails([email])),
+    // Logging and the toast happen once in queryClient.ts — this only undoes the optimism.
     onError: (_error, _variables, context) =>
-      queryClient.setQueryData(inboxQueryKey, context?.previous),
+      rollback<Email[]>(queryClient, inboxQueryKey, context),
   });
 
   return useCallback(
@@ -73,21 +73,20 @@ export const usePatchEmail = () => {
 export const usePatchEmails = () => {
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
+    mutationKey: ["emails", "patchMany"],
     mutationFn: ({ ids, patch }: { ids: string[]; patch: Partial<Email> }) =>
       patchEmails(ids, patch),
-    onMutate: async ({ ids, patch }) => {
-      await queryClient.cancelQueries({ queryKey: inboxQueryKey });
-      const previous = queryClient.getQueryData<Email[]>(inboxQueryKey);
-      queryClient.setQueryData<Email[]>(
+    onMutate: ({ ids, patch }) =>
+      optimisticContext<Email[]>(
+        queryClient,
         inboxQueryKey,
         applyPatch(new Set(ids), patch),
-      );
-      return { previous };
-    },
+      ),
     onSuccess: (emails) =>
       queryClient.setQueryData<Email[]>(inboxQueryKey, replaceEmails(emails)),
+    // Logging and the toast happen once in queryClient.ts — this only undoes the optimism.
     onError: (_error, _variables, context) =>
-      queryClient.setQueryData(inboxQueryKey, context?.previous),
+      rollback<Email[]>(queryClient, inboxQueryKey, context),
   });
 
   return useCallback(
