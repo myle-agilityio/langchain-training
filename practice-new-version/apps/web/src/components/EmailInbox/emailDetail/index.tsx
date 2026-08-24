@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Email } from "@/types";
-import { Badge, Button } from "@/components";
+import { Badge, Button, Spinner } from "@/components";
 import { ComposeForm } from "./components/ComposeForm";
 import {
   COURSE_LABEL,
@@ -19,9 +19,12 @@ interface EmailDetailProps {
   isLoading: boolean;
   onSendReply: (id: string, subject: string, body: string) => void;
   onAskAgent: (email: Email) => void;
-  // True while the agent is running or paused awaiting approval. Deliberately just disables
-  // the button without relabelling it — a "Drafting…" label would often be a lie.
+  // True while the agent is running or paused awaiting approval — disables the draft button
+  // whatever it's busy with.
   isAgentBusy: boolean;
+  // True only while the compose pipeline is drafting a reply to THIS email, so the button can
+  // say so instead of just going dead.
+  isDrafting: boolean;
 }
 
 export const EmailDetail = ({
@@ -30,6 +33,7 @@ export const EmailDetail = ({
   onSendReply,
   onAskAgent,
   isAgentBusy,
+  isDrafting,
 }: EmailDetailProps) => {
   const [composing, setComposing] = useState(false);
 
@@ -127,8 +131,17 @@ export const EmailDetail = ({
               onClick={() => onAskAgent(email)}
               disabled={isAgentBusy}
             >
-              <Sparkles className="h-4 w-4" />
-              Ask AI to draft
+              {isDrafting ? (
+                <>
+                  <Spinner size="sm" />
+                  Drafting…
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  Ask AI to draft
+                </>
+              )}
             </Button>
             <Button onClick={() => setComposing(true)}>Compose reply</Button>
           </div>

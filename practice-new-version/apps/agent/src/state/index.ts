@@ -18,6 +18,9 @@ export const AgentState = new StateSchema({
   lastRejectedDraft: zodState(
     RejectedDraftSchema.nullable().default(() => null),
   ),
+  // Shared with the subgraph by name: the email being drafted for, "" when idle. Declared here
+  // so the AG-UI bridge keeps it in the state snapshot the inbox UI reads.
+  emailId: zodState(z.string().default(() => "")),
 });
 
 // Compose-email state: `messages` is shared with the parent; the rest are private per entry.
