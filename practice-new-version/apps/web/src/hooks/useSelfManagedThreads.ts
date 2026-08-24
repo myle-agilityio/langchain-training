@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchThreads, renameThread, deleteThread, saveThread } from "@/api";
 import type { ChatThread } from "@/types";
-import { useOpenAiKey } from "@/stores";
+import { useOpenAIKey } from "@/stores";
 
 export const threadsQueryKey = ["threads"] as const;
 
@@ -70,7 +70,7 @@ export const useSaveThread = () => {
   const { mutate } = useMutation({
     // Read at call time, not render time: the teacher can change the key mid-session.
     mutationFn: (body: { id: string; firstMessage?: string }) =>
-      saveThread(body, useOpenAiKey.getState().apiKey),
+      saveThread(body, useOpenAIKey.getState().apiKey),
     onSettled: () =>
       queryClient.invalidateQueries({ queryKey: threadsQueryKey }),
   });

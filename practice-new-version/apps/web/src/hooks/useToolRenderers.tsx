@@ -8,7 +8,7 @@ import {
   SearchKnowledgeBaseCard,
   UpdateContactProfileCard,
   UpdateEmailStatusCard,
-} from "@/components/generativeUi/toolCards";
+} from "@/components/generativeUI/toolCards";
 
 // Mirrors the agent's EmailFilterSchema — only shapes props.parameters for the renderer.
 const filterSchema = z.object({

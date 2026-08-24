@@ -2,7 +2,7 @@ export * from "./useComposingEmail";
 export * from "./useEmailAgent";
 export * from "./useEmailLookup";
 export * from "./useExampleSuggestions";
-export * from "./useGenerativeUi";
+export * from "./useGenerativeUI";
 export * from "./useSelfManagedThreads";
 export * from "./useSharedInbox";
 export * from "./useSyncComposeApproval";

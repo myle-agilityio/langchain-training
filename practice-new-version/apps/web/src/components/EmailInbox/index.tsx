@@ -13,7 +13,7 @@ import {
   usePatchEmails,
 } from "@/hooks/useSharedInbox";
 import { useComposingEmail } from "@/hooks/useComposingEmail";
-import { useComposeApproval, useOpenAiKey } from "@/stores";
+import { useComposeApproval, useOpenAIKey } from "@/stores";
 import {
   EMPTY_FILTERS,
   filterEmails,
@@ -187,7 +187,7 @@ export const EmailInbox = () => {
   const awaitingApproval = useComposeApproval((s) => s.awaitingApproval);
   // No key means the chat panel is showing the key form, so a reply drafted here would land
   // somewhere the teacher can't see.
-  const hasApiKey = Boolean(useOpenAiKey((s) => s.apiKey));
+  const hasApiKey = Boolean(useOpenAIKey((s) => s.apiKey));
   const isAgentBusy = agent.isRunning || awaitingApproval || !hasApiKey;
 
   // Shared agent state: which email the compose pipeline is drafting for, if any.

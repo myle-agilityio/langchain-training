@@ -1,10 +1,10 @@
 import { CopilotChat } from "@copilotkit/react-core/v2";
-import { useComposeApproval, useOpenAiKey } from "@/stores";
-import { KeyRequiredCard } from "@/components/openAiKey";
+import { useComposeApproval, useOpenAIKey } from "@/stores";
+import { KeyRequiredCard } from "@/components/openAIKey";
 
 // Locks the composer while paused on a compose_reply interrupt: answer the card, not the chat.
 export const EmailChat = () => {
-  const apiKey = useOpenAiKey((s) => s.apiKey);
+  const apiKey = useOpenAIKey((s) => s.apiKey);
   const awaitingApproval = useComposeApproval((s) => s.awaitingApproval);
   const locked = awaitingApproval ? { disabled: true as const } : undefined;
 

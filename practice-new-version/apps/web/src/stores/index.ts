@@ -1,3 +1,3 @@
 export * from "./useComposeApproval";
-export * from "./useOpenAiKey";
+export * from "./useOpenAIKey";
 export * from "./useTheme";

@@ -54,11 +54,11 @@ src/
 │   ├── EmailChat/       # The CopilotKit chat surface
 │   ├── ChatSidebar/     # Collapsible right-hand sidebar hosting the chat
 │   ├── ThreadsMenu/     # Conversation history dropdown
-│   ├── openAiKey/       # BYOK — key form, chat gate card, change-key button
+│   ├── openAIKey/       # BYOK — key form, chat gate card, change-key button
 │   ├── ToolRendering/   # Tool-call reasoning renderer
 │   ├── common/          # Primitives: Badge, Button, Card, Dialog, DropdownMenu, Field, Spinner
-│   ├── generativeUi/    # EmailReplyCard (approve/reject) + one card per tool
-│   └── declarativeGenerativeUi/  # A2UI catalog: definitions.ts, renderers.tsx, theme.ts
+│   ├── generativeUI/    # EmailReplyCard (approve/reject) + one card per tool
+│   └── declarativeGenerativeUI/  # A2UI catalog: definitions.ts, renderers.tsx, theme.ts
 ├── api/                 # The only place that talks HTTP
 │   ├── client.ts        # axios instance — JSON in/out, uniform "METHOD /path failed (status)"
 │   ├── emails.ts        # GET/PATCH /api/emails
@@ -67,7 +67,7 @@ src/
 │   ├── useSharedInbox.ts        # Inbox query + patch mutations
 │   ├── useSelfManagedThreads.ts # Threads query + rename/delete/save
 │   ├── useEmailAgent.tsx        # Wires the selected email into the agent's context
-│   ├── useGenerativeUi.tsx      # Frontend tools + interrupt rendering
+│   ├── useGenerativeUI.tsx      # Frontend tools + interrupt rendering
 │   ├── useToolRenderers.tsx     # Maps tool calls to their cards
 │   ├── useEmailLookup.ts        # id -> Email map for the tool cards
 │   ├── useExampleSuggestions.tsx
@@ -98,7 +98,7 @@ which is also where request errors get their uniform shape for `queryClient` to 
 
 ## BYOK
 
-There is no shared server key for chat. `useOpenAiKey` holds the visitor's key in
+There is no shared server key for chat. `useOpenAIKey` holds the visitor's key in
 `localStorage`; `App.tsx` subscribes to it and passes it as a `headers` memo to `<CopilotKit>`,
 which forwards it to the graph as `copilotkit_forwarded_headers`. The subscription matters —
 CopilotKit only re-reads `headers` when its provider re-renders, so reading the store on demand

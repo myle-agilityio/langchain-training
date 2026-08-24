@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button, Input } from "@/components/common";
-import { useOpenAiKey } from "@/stores";
+import { useOpenAIKey } from "@/stores";
 
 interface KeyFormProps {
   submitLabel: string;
@@ -9,7 +9,7 @@ interface KeyFormProps {
 
 // Shared by the first-run gate and the change-key dialog so the "sk-" check lives in one place.
 export const KeyForm = ({ submitLabel, onSaved }: KeyFormProps) => {
-  const setApiKey = useOpenAiKey((s) => s.setApiKey);
+  const setApiKey = useOpenAIKey((s) => s.setApiKey);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
 
