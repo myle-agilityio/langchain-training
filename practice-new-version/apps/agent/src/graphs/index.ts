@@ -8,11 +8,13 @@ import { ToolNode } from "@langchain/langgraph/prebuilt";
 
 import { getCheckpointer } from "@/db/checkpointer";
 import { getMemoryStore } from "@/db/memoryStore";
+import { ensureSchema } from "@/db/schema";
+import { logError, logInfo } from "@/logging/index";
 import {
   afterModeration,
   callModel,
-  composeEmailErrorHandler,
   moderator,
+  nodeErrorHandler,
   routeAfterModel,
 } from "@/nodes/index";
 import { ensureIndexed } from "@/rag/index";
@@ -29,6 +31,16 @@ const runComposeEmail = async (
   return composeEmailSubgraph.invoke(state, config);
 };
 
+// Same wrapping reason as runComposeEmail — a bare ToolNode plus an options argument doesn't
+// type-check as a node action.
+const toolNode = new ToolNode(executableTools);
+const runTools = async (
+  state: typeof AgentState.State,
+  config: LangGraphRunnableConfig,
+) => {
+  return toolNode.invoke(state, config);
+};
+
 // Build the email assistant graph: a ReAct loop with the compose-email subgraph as a node.
 export const buildGraph = async () => {
   const workflow = new StateGraph(AgentState)
@@ -36,13 +48,18 @@ export const buildGraph = async () => {
       retryPolicy: { maxAttempts: 3 },
       timeout: { runTimeout: 60_000 },
     })
-    .addNode("moderator", moderator)
-    .addNode("call_model", callModel)
-    .addNode("tools", new ToolNode(executableTools), {
+    .addNode("moderator", moderator, {
+      errorHandler: nodeErrorHandler("moderator"),
+    })
+    .addNode("call_model", callModel, {
+      errorHandler: nodeErrorHandler("call_model"),
+    })
+    .addNode("tools", runTools, {
       timeout: { runTimeout: 90_000 },
+      errorHandler: nodeErrorHandler("tools"),
     })
     .addNode("compose_email", runComposeEmail, {
-      errorHandler: composeEmailErrorHandler,
+      errorHandler: nodeErrorHandler("compose_email"),
     })
 
     .addEdge(START, "moderator")
@@ -64,12 +81,17 @@ export const buildGraph = async () => {
     // Only traversed when triage found no email; a successful draft pauses at the interrupt.
     .addEdge("compose_email", "call_model");
 
-  // Postgres checkpointer + store, and the pgvector KB seeded before first search.
+  // Tables first, then the checkpointer/store and the pgvector KB seeded before first search.
+  await ensureSchema();
   const [checkpointer, store] = await Promise.all([
     getCheckpointer(),
     getMemoryStore(),
-    ensureIndexed(),
+    // Seeding is best-effort: a failure here leaves the KB empty, it doesn't stop the graph.
+    ensureIndexed().catch((error) =>
+      logError(error, { node: "ensureIndexed" }),
+    ),
   ]);
+  logInfo("graph.ready");
 
   return workflow.compile({ checkpointer, store });
 };

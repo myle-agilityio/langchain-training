@@ -5,16 +5,12 @@ import {
 } from "@langchain/core/prompts";
 import { END, type LangGraphRunnableConfig } from "@langchain/langgraph";
 
-import { getModelForConfig, MissingApiKeyError } from "@/config/model";
-import {
-  isRejectedApiKeyError,
-  missingApiKeyNotice,
-  rejectedApiKeyNotice,
-} from "@/utils/index";
+import { getModelForConfig } from "@/config/model";
 import { TOOL } from "@/constants/index";
 import { currentDateLine, SYSTEM_PROMPT } from "@/prompts/index";
 import { executableTools, modelTools } from "@/tools/index";
 import type { AgentStateShape } from "@/types/index";
+import { withNode } from "./withNode";
 
 // Formats UI context for the prompt
 const renderFrontendContext = (state: AgentStateShape): string => {
@@ -51,25 +47,17 @@ const callModelPrompt = ChatPromptTemplate.fromMessages([
   new MessagesPlaceholder("messages"),
 ]);
 
-// Invokes model with system prompt, context, and available tools. Also the one place that
-// checks for a visitor-supplied OpenAI key (BYOK — see config/model.ts).
-export const callModel = async (
-  state: AgentStateShape,
-  config: LangGraphRunnableConfig,
-) => {
-  let model;
-  try {
-    model = getModelForConfig(config);
-  } catch (error) {
-    if (!(error instanceof MissingApiKeyError)) throw error;
-    return { messages: missingApiKeyNotice() };
-  }
-
-  const bound = model.bindTools!([...modelTools, ...frontendTools(state)]);
-  const chain = callModelPrompt.pipe(bound);
-  // config threaded through so token callbacks stream assistant text into the chat UI.
-  try {
-    const response = await chain.invoke(
+// Invokes model with system prompt, context, and available tools. Errors (missing/rejected key,
+// rate limits) are handled once by withNode, not here.
+export const callModel = withNode(
+  "call_model",
+  async (state: AgentStateShape, config: LangGraphRunnableConfig) => {
+    const bound = getModelForConfig(config).bindTools!([
+      ...modelTools,
+      ...frontendTools(state),
+    ]);
+    // config threaded through so token callbacks stream assistant text into the chat UI.
+    const response = await callModelPrompt.pipe(bound).invoke(
       {
         dateLine: currentDateLine(),
         frontendContext: renderFrontendContext(state),
@@ -78,12 +66,8 @@ export const callModel = async (
       config,
     );
     return { messages: [response] };
-  } catch (error) {
-    if (isRejectedApiKeyError(error))
-      return { messages: rejectedApiKeyNotice() };
-    throw error;
-  }
-};
+  },
+);
 
 const EXECUTABLE_NAMES = new Set<string>(executableTools.map((t) => t.name));
 

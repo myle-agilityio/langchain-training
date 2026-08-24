@@ -1,6 +1,7 @@
 import {
   AIMessage,
   HumanMessage,
+  ToolMessage,
   type BaseMessage,
 } from "@langchain/core/messages";
 
@@ -15,6 +16,17 @@ export const findReplyCall = (messages: BaseMessage[]) => {
     if (call) return call;
   }
   return undefined;
+};
+
+// Same call, but only when nothing has answered it yet — an error handler that answers an
+// already-answered call would push a duplicate ToolMessage and break the next turn's history.
+export const findUnansweredReplyCall = (messages: BaseMessage[]) => {
+  const call = findReplyCall(messages);
+  if (!call) return undefined;
+  const answered = messages.some(
+    (m) => ToolMessage.isInstance(m) && m.tool_call_id === call.id,
+  );
+  return answered ? undefined : call;
 };
 
 // What the teacher actually said about this reply — original request, plus the "try again,
