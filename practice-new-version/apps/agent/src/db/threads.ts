@@ -19,24 +19,6 @@ const toChatThread = (row: ChatThreadRow): ChatThread => {
   };
 };
 
-let threadsSchemaReady: Promise<void> | undefined;
-
-// Self-managed thread list, standing in for CopilotKit's Intelligence-only useThreads. Created
-// lazily since, unlike `emails`, this table isn't pre-provisioned in the database.
-export const ensureThreadsSchema = (): Promise<void> => {
-  threadsSchemaReady ??= getPool()
-    .query(
-      `CREATE TABLE IF NOT EXISTS chat_threads (
-         id TEXT PRIMARY KEY,
-         title TEXT,
-         created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-         updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-       )`,
-    )
-    .then(() => undefined);
-  return threadsSchemaReady;
-};
-
 export const listThreads = async (): Promise<ChatThread[]> => {
   const { rows } = await getPool().query<ChatThreadRow>(
     `SELECT ${CHAT_THREAD_COLUMNS} FROM chat_threads ORDER BY updated_at DESC`,
