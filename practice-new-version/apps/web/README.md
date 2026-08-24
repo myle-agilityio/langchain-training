@@ -54,7 +54,7 @@ src/
 │   ├── EmailChat/       # The CopilotKit chat surface
 │   ├── ChatSidebar/     # Collapsible right-hand sidebar hosting the chat
 │   ├── ThreadsMenu/     # Conversation history dropdown
-│   ├── openAiKey/       # BYOK gate, key form, change-key button
+│   ├── openAiKey/       # BYOK — key form, chat gate card, change-key button
 │   ├── ToolRendering/   # Tool-call reasoning renderer
 │   ├── common/          # Primitives: Badge, Button, Card, Dialog, DropdownMenu, Field, Spinner
 │   ├── generativeUi/    # EmailReplyCard (approve/reject) + one card per tool
