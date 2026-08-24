@@ -15,10 +15,37 @@ pnpm dev:agent          # from the repo root — langgraphjs dev on :8123
 pnpm --filter agent typecheck
 ```
 
+## Environment
+
 Env comes from the **root** `.env` (wired up by `langgraph.json`'s `"env": "../../.env"`), not
-from a file in this package. `DATABASE_URL` is required; `OPENAI_API_KEY` is only a bootstrap
-fallback — chat, classification, drafting, and RAG all run on the key the browser forwards
-per-request as `x-openai-api-key`.
+from a file in this package.
+
+| Variable                      | Required                             | Read by                                 | Purpose                                                                                     |
+| ----------------------------- | ------------------------------------ | --------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                | **Yes**                              | `config/env.ts`                         | The one Postgres holding inbox, KB, checkpoints, and store. Throws on startup if unset.     |
+| `OPENAI_API_KEY`              | No                                   | `config/model.ts`, `http/threads.ts`    | Bootstrap fallback only — the one-time KB seed and thread title generation. See BYOK below. |
+| `RAG_SCORE_THRESHOLD`         | No — default `0.65`                  | `config/env.ts`                         | Minimum cosine similarity (0–1) a KB match must clear to be used as grounding.              |
+| `PORT`                        | No — default `8123`                  | `http/copilotkit.ts`, `pnpm start`      | Port the agent listens on.                                                                  |
+| `AGENT_URL`                   | No                                   | `http/copilotkit.ts`                    | Deployment URL the CopilotKit runtime points its `LangGraphAgent` at.                       |
+| `LANGGRAPH_DEPLOYMENT_URL`    | No                                   | `http/copilotkit.ts`                    | Second fallback for the above, before `http://127.0.0.1:$PORT`.                             |
+| `LANGSMITH_API_KEY`           | No                                   | `http/copilotkit.ts`, `langgraphjs dev` | Tracing; passed to the agent and picked up by the CLI.                                      |
+| `LANGSMITH_TRACING`           | No                                   | `langgraphjs dev`                       | Turns tracing on for every graph run.                                                       |
+| `LANGSMITH_PROJECT`           | No                                   | `langgraphjs dev`                       | LangSmith project name.                                                                     |
+| `COPILOTKIT_LICENSE_TOKEN`    | No                                   | `http/copilotkit.ts`                    | Enables CopilotKit Intelligence. Unset → an `InMemoryAgentRunner` instead.                  |
+| `INTELLIGENCE_API_KEY`        | No                                   | `http/copilotkit.ts`                    | Only read when the license token is set.                                                    |
+| `INTELLIGENCE_API_URL`        | No — default `http://localhost:4201` | `http/copilotkit.ts`                    | Only read when the license token is set.                                                    |
+| `INTELLIGENCE_GATEWAY_WS_URL` | No — default `ws://localhost:4401`   | `http/copilotkit.ts`                    | Only read when the license token is set.                                                    |
+
+The `INTELLIGENCE_*` trio and the license token are commented out in `.env.example` — see the
+root README's "CopilotKit Intelligence" section for why.
+
+**BYOK:** chat, classification, drafting, and RAG all run on the key the browser forwards
+per-request as the `x-openai-api-key` header, resolved in `config/model.ts`'s
+`getApiKeyFromConfig`. `OPENAI_API_KEY` is only the fallback for the two paths with no visitor
+request to read a header from: seeding the KB at startup, and `/api/threads` title generation.
+Once the KB is seeded it can be left unset.
+
+## The HTTP surface
 
 `langgraph.json` registers three things:
 

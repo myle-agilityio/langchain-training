@@ -15,14 +15,30 @@ pnpm --filter web typecheck
 pnpm build              # vite build → apps/web/dist
 ```
 
-`vite.config.ts` proxies `/api` → `http://localhost:8123`, so the dev server needs the agent
-running for the inbox and chat to work. It also derives
-`import.meta.env.VITE_COPILOTKIT_THREADS_ENABLED` from the server-side
-`COPILOTKIT_LICENSE_TOKEN` at build/dev time — set the token, never the flag.
-
-`@` is aliased to `src/`.
+`vite.config.ts` proxies `/api` → `http://localhost:8123` (hard-coded), so the dev server needs
+the agent running for the inbox and chat to work. `@` is aliased to `src/`.
 
 Deployment is static: `vercel.json` serves `dist` and rewrites `/api/*` to `$AGENT_URL`.
+
+## Environment
+
+This package has no `.env` of its own and reads no variable at runtime — the agent owns
+configuration. Both entries below are consumed outside the app code, from the root `.env`.
+
+| Variable                          | Required | Read by                             | Purpose                                                                                         |
+| --------------------------------- | -------- | ----------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `COPILOTKIT_LICENSE_TOKEN`        | No       | `vite.config.ts`, at build/dev time | Server-side token. Its presence derives the Threads flag below — set the token, never the flag. |
+| `AGENT_URL`                       | No       | `vercel.json`, at deploy time       | Rewrite target for `/api/*` in production. Ignored in dev, where the Vite proxy handles it.     |
+| `VITE_COPILOTKIT_THREADS_ENABLED` | Derived  | —                                   | Injected by `vite.config.ts` as `"true"`/`"false"`. **Currently read by nothing** — see below.  |
+
+The visitor's OpenAI key is not an env var: it's entered in the browser, kept in `localStorage`,
+and sent per-request as the `x-openai-api-key` header (see [BYOK](#byok) below).
+
+> **Note on the Threads flag.** `vite.config.ts` still defines
+> `import.meta.env.VITE_COPILOTKIT_THREADS_ENABLED`, but no file in `src/` reads it — the UI
+> always uses the self-managed thread list (`useSelfManagedThreads` + `ThreadsMenu`). Setting
+> `COPILOTKIT_LICENSE_TOKEN` currently changes agent behaviour only. Either wire the flag up or
+> drop the `define`; leaving it implies a switch that isn't there.
 
 ## Structure
 
