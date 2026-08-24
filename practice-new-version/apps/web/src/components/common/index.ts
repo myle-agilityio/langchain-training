@@ -5,3 +5,4 @@ export * from "./Dialog";
 export * from "./DropdownMenu";
 export * from "./Field";
 export * from "./Spinner";
+export * from "./Toast";
