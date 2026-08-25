@@ -1,5 +1,5 @@
-﻿import { getPool } from "./index";
-import type { ChatThread } from "@/types/thread";
+import { getPool } from "./pool";
+import type { ChatThread } from "@/types";
 
 interface ChatThreadRow {
   id: string;
