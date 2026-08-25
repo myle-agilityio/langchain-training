@@ -1,5 +1,10 @@
 import { Inbox } from "lucide-react";
-import type { Classification, EmailStatus } from "@/types/email";
+import type {
+  Classification,
+  EmailStatus,
+  EmailFilterArgs,
+  ToolCardProps,
+} from "@/types";
 import {
   ClassificationBadges,
   FilterChips,
@@ -7,7 +12,6 @@ import {
   Shell,
   ToolFailure,
 } from "../common";
-import type { EmailFilterArgs, ToolCardProps } from "@/types";
 import { parseToolResult } from "@/utils";
 
 interface RedactedEmail {

@@ -6,13 +6,13 @@ import {
   useCopilotKit,
   useFrontendTool,
 } from "@copilotkit/react-core/v2";
-import type { Email } from "@/types/email";
+import type { Email } from "@/types";
 import {
   useSharedInbox,
   usePatchEmail,
   usePatchEmails,
-} from "@/hooks/useSharedInbox";
-import { useComposingEmail } from "@/hooks/useComposingEmail";
+  useComposingEmail,
+} from "@/hooks";
 import { useComposeApproval, useOpenAIKey } from "@/stores";
 import {
   EMPTY_FILTERS,

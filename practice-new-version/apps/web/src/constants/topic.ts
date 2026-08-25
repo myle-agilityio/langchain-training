@@ -1,4 +1,4 @@
-import type { EmailTopic } from "@/types/email";
+import type { EmailTopic } from "@/types";
 
 import { TONE } from "./tone";
 

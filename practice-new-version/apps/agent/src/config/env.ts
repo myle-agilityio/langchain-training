@@ -1,7 +1,7 @@
 import type pg from "pg";
 import { z } from "zod";
 
-import { AppError, ERROR_CODE } from "@/errors/index";
+import { AppError, ERROR_CODE } from "@/errors";
 
 // Read at call time, not import time, so the dev server's env loading always wins.
 const EnvSchema = z.object({

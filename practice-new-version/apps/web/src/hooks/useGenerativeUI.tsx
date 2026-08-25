@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { useTheme } from "@/stores/useTheme";
+import { useTheme } from "@/stores";
 
 import {
   useFrontendTool,

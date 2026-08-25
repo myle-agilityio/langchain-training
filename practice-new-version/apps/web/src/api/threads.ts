@@ -1,4 +1,4 @@
-import type { ChatThread } from "@/types/thread";
+import type { ChatThread } from "@/types";
 import { apiClient } from "./client";
 
 const THREADS_PATH = "/api/threads";

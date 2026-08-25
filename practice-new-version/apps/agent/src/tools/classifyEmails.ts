@@ -3,14 +3,14 @@ import { copilotkitCustomizeConfig } from "@copilotkit/sdk-js/langgraph";
 import { z } from "zod";
 
 import { getPlainModelForConfig } from "@/config/model";
-import { CLASSIFY_CONCURRENCY, TOOL } from "@/constants/index";
-import { getEmail, updateEmail } from "@/db/index";
-import { AppError, ERROR_CODE, ERRORS } from "@/errors/index";
-import { logError } from "@/logging/index";
-import { classifyPrompt } from "@/prompts/index";
-import { ClassificationSchema, type Classification } from "@/types/index";
+import { CLASSIFY_CONCURRENCY, TOOL } from "@/constants";
+import { getEmail, updateEmail } from "@/db";
+import { AppError, ERROR_CODE, ERRORS } from "@/errors";
+import { logError } from "@/logging";
+import { classifyPrompt } from "@/prompts";
+import { ClassificationSchema, type Classification } from "@/types";
 import type { ToolError } from "@/types/toolResult";
-import { threadIdOf } from "@/utils/index";
+import { threadIdOf } from "@/utils";
 import { defineTool, toolError } from "./defineTool";
 
 type ClassifyResult =

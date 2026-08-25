@@ -1,7 +1,7 @@
 import { createMiddleware } from "hono/factory";
 import type { z } from "zod";
 
-import { AppError, ERROR_CODE, toAppError } from "@/errors/index";
+import { AppError, ERROR_CODE, toAppError } from "@/errors";
 import type { AppEnv } from "../types";
 
 type Source = "json" | "query";

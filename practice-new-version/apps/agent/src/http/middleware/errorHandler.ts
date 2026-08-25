@@ -1,7 +1,7 @@
 import type { Context, ErrorHandler, NotFoundHandler } from "hono";
 
-import { AppError, ERROR_CODE } from "@/errors/index";
-import { logError } from "@/logging/index";
+import { AppError, ERROR_CODE } from "@/errors";
+import { logError } from "@/logging";
 import type { AppEnv } from "../types";
 
 const body = (c: Context<AppEnv>, error: AppError) => ({

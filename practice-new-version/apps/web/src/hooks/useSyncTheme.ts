@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useTheme } from "@/stores/useTheme";
+import { useTheme } from "@/stores";
 
 // Applies the active theme to <html>; call once near the app root.
 export const useSyncTheme = () => {

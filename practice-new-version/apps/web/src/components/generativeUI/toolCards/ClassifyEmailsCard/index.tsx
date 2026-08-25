@@ -1,5 +1,5 @@
 import { Tags } from "lucide-react";
-import type { Classification } from "@/types/email";
+import type { Classification, ToolCardProps, ToolError } from "@/types";
 import {
   ClassificationBadges,
   EmailLine,
@@ -7,7 +7,6 @@ import {
   Shell,
   ToolFailure,
 } from "../common";
-import type { ToolCardProps, ToolError } from "@/types";
 import { parseToolResult } from "@/utils";
 
 type ClassifyResult =

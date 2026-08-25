@@ -1,6 +1,6 @@
 import { createMiddleware } from "hono/factory";
 
-import { logInfo } from "@/logging/index";
+import { logInfo } from "@/logging";
 import type { AppEnv } from "../types";
 
 // One correlation id per request, echoed to the client on failures and carried by every log

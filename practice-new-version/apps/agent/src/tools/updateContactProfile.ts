@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-import { CONTACT_PROFILE_NAMESPACE, TOOL } from "@/constants/index";
-import { listEmails } from "@/db/index";
-import { AppError, ERROR_CODE } from "@/errors/index";
-import type { ContactProfileValue } from "@/types/index";
+import { CONTACT_PROFILE_NAMESPACE, TOOL } from "@/constants";
+import { listEmails } from "@/db";
+import { AppError, ERROR_CODE } from "@/errors";
+import type { ContactProfileValue } from "@/types";
 import { defineTool } from "./defineTool";
 
 // Resolves sender against real inbox data (like classify_emails resolves ids) instead of trusting

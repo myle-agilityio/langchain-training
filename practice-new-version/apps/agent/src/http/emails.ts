@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 
-import { listEmailsSeeded, updateEmailsStatus, patchEmail } from "@/db/inbox";
-import { AppError, ERROR_CODE } from "@/errors/index";
+import { listEmailsSeeded, updateEmailsStatus, patchEmail } from "@/db";
+import { AppError, ERROR_CODE } from "@/errors";
 import { validate } from "./middleware/validate";
 import { PatchEmailBodySchema, type PatchEmailBody } from "./schemas";
 import type { AppEnv } from "./types";

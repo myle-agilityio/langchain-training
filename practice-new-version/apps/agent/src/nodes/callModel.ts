@@ -6,10 +6,10 @@ import {
 import { END, type LangGraphRunnableConfig } from "@langchain/langgraph";
 
 import { getModelForConfig } from "@/config/model";
-import { TOOL } from "@/constants/index";
-import { currentDateLine, SYSTEM_PROMPT } from "@/prompts/index";
-import { executableTools, modelTools } from "@/tools/index";
-import type { AgentStateShape } from "@/types/index";
+import { TOOL } from "@/constants";
+import { currentDateLine, SYSTEM_PROMPT } from "@/prompts";
+import { executableTools, modelTools } from "@/tools";
+import type { AgentStateShape } from "@/types";
 import { withNode } from "./withNode";
 
 // Formats UI context for the prompt

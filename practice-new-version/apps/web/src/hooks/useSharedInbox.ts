@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchEmails, patchEmail, patchEmails } from "@/api";
 import { optimisticContext, rollback } from "@/lib/optimistic";
-import type { Email } from "@/types/email";
+import type { Email } from "@/types";
 
 export const inboxQueryKey = ["emails"] as const;
 

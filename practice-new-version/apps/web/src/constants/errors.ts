@@ -1,4 +1,4 @@
-import { ERROR_CODE, type ErrorCode } from "@/types/errors";
+import { ERROR_CODE, type ErrorCode } from "@/types";
 
 export const GENERIC_ERROR_MESSAGE = "Something went wrong. Try again.";
 

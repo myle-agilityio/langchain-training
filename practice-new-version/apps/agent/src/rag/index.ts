@@ -1,4 +1,4 @@
-﻿import { join } from "node:path";
+import { join } from "node:path";
 
 import { PGVectorStore } from "@langchain/community/vectorstores/pgvector";
 import { Document } from "@langchain/core/documents";
@@ -6,10 +6,10 @@ import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 import type { OpenAIEmbeddings } from "@langchain/openai";
 
 import { getRagScoreThreshold } from "../config/env";
-import { logWarn } from "@/logging/index";
+import { logWarn } from "@/logging";
 import { getEmbeddingsForConfig, getServerEmbeddings } from "@/config/model";
-import { KB_TABLE } from "@/constants/index";
-import { getPool } from "@/db/index";
+import { KB_TABLE } from "@/constants";
+import { getPool } from "@/db";
 import { knowledgeBase } from "./knowledgeBase";
 import { loadDirectoryAsChunks } from "./loaders";
 

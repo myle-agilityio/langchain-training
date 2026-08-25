@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ClassificationSchema, StatusSchema } from "@/types/index";
+import { ClassificationSchema, StatusSchema } from "@/types";
 
 const ReplySchema = z.object({
   subject: z.string(),

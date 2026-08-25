@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-import { TOOL } from "@/constants/index";
-import { getEmail, updateEmail } from "@/db/index";
-import { AppError, ERROR_CODE, ERRORS } from "@/errors/index";
-import type { Email } from "@/types/index";
+import { TOOL } from "@/constants";
+import { getEmail, updateEmail } from "@/db";
+import { AppError, ERROR_CODE, ERRORS } from "@/errors";
+import type { Email } from "@/types";
 import type { ToolError } from "@/types/toolResult";
 import { defineTool, toolError } from "./defineTool";
 

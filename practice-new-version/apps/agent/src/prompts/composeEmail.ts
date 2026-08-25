@@ -1,5 +1,5 @@
-import type { Email } from "@/types/index";
-import { renderEmail } from "@/utils/index";
+import type { Email } from "@/types";
+import { renderEmail } from "@/utils";
 
 // Used by the compose subgraph's triage node, after classification is already on file (fresh or
 // pre-existing) — decides only the KB-research routing, not classification again.

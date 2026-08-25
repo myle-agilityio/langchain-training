@@ -8,10 +8,10 @@ import {
   threadExists,
   renameThread,
   deleteThread,
-} from "@/db/threads";
-import { AppError, ERROR_CODE } from "@/errors/index";
-import { logWarn } from "@/logging/index";
-import { titlePrompt } from "@/prompts/index";
+} from "@/db";
+import { AppError, ERROR_CODE } from "@/errors";
+import { logWarn } from "@/logging";
+import { titlePrompt } from "@/prompts";
 import { validate } from "./middleware/validate";
 import {
   RenameThreadBodySchema,

@@ -2,7 +2,7 @@ import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
 import { copilotkitCustomizeConfig } from "@copilotkit/sdk-js/langgraph";
 
-import { AppError, ERROR_CODE } from "@/errors/index";
+import { AppError, ERROR_CODE } from "@/errors";
 
 export const MODEL = "gpt-4o-mini";
 export const A2UI_MODEL = "gpt-4.1";

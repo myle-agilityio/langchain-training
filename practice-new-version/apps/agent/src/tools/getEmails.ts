@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-import { FILTER_DESCRIPTION, TOOL } from "@/constants/index";
-import { listEmails } from "@/db/index";
-import { EmailFilterSchema } from "@/types/index";
-import { redactEmailForModel } from "@/utils/index";
+import { FILTER_DESCRIPTION, TOOL } from "@/constants";
+import { listEmails } from "@/db";
+import { EmailFilterSchema } from "@/types";
+import { redactEmailForModel } from "@/utils";
 import { defineTool } from "./defineTool";
 
 export const get_emails = defineTool({

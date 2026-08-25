@@ -5,7 +5,7 @@ import type {
   EmailTopic,
   Urgency,
   WorkType,
-} from "@/types/email";
+} from "@/types";
 import {
   Button,
   Dialog,

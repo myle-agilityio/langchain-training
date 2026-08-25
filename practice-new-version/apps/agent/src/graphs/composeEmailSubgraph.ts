@@ -7,8 +7,8 @@ import {
   writeDraft,
   checkCompliance,
   requestApproval,
-} from "@/nodes/index";
-import { ComposeEmailState } from "@/state/index";
+} from "@/nodes";
+import { ComposeEmailState } from "@/state";
 
 // Prompt-chaining pipeline: triage → (research?) → write_draft → check_compliance →
 // request_approval → interrupt. Skips research when unneeded; ends early if not found.

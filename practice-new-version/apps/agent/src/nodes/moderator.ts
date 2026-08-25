@@ -7,8 +7,8 @@ import { END, type LangGraphRunnableConfig } from "@langchain/langgraph";
 import { copilotkitCustomizeConfig } from "@copilotkit/sdk-js/langgraph";
 
 import { getPlainModelForConfig } from "@/config/model";
-import { moderationPrompt } from "@/prompts/index";
-import { ModerationCheckSchema, type AgentStateShape } from "@/types/index";
+import { moderationPrompt } from "@/prompts";
+import { ModerationCheckSchema, type AgentStateShape } from "@/types";
 import { withNode } from "./withNode";
 
 // System prompt + full history, so a jailbreak attempt built up gradually across turns is still

@@ -1,4 +1,4 @@
-import type { WorkType } from "@/types/email";
+import type { WorkType } from "@/types";
 
 // Colourless (outline badge): a filter facet, not a triage signal.
 export const WORK_TYPE_LABEL: Record<WorkType, string> = {

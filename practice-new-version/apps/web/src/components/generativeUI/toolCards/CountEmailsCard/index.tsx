@@ -1,5 +1,12 @@
 import { Tags } from "lucide-react";
-import type { Course, EmailStatus, EmailTopic, WorkType } from "@/types/email";
+import type {
+  Course,
+  EmailStatus,
+  EmailTopic,
+  WorkType,
+  EmailFilterArgs,
+  ToolCardProps,
+} from "@/types";
 import { FilterChips, Pending, Shell, ToolFailure } from "../common";
 import {
   COURSE_LABEL,
@@ -8,7 +15,6 @@ import {
   TOPIC_LABEL,
   WORK_TYPE_LABEL,
 } from "@/constants";
-import type { EmailFilterArgs, ToolCardProps } from "@/types";
 import { cn, parseToolResult } from "@/utils";
 
 type GroupBy = "status" | "topic" | "course" | "workType" | "urgency";

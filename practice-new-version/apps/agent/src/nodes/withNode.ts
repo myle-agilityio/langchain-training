@@ -1,7 +1,7 @@
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
-import { logError, logInfo } from "@/logging/index";
-import { errorNotice, threadIdOf } from "@/utils/index";
+import { logError, logInfo } from "@/logging";
+import { errorNotice, threadIdOf } from "@/utils";
 
 // The one try/catch every node runs behind. Retryable failures are rethrown so the graph's
 // retryPolicy still applies; a terminal expected failure ends the turn with chat text the

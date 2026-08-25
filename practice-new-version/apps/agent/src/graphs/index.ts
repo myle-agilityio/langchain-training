@@ -1,4 +1,4 @@
-﻿import {
+import {
   StateGraph,
   START,
   END,
@@ -6,20 +6,18 @@
 } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 
-import { getCheckpointer } from "@/db/checkpointer";
-import { getMemoryStore } from "@/db/memoryStore";
-import { ensureSchema } from "@/db/schema";
-import { logError, logInfo } from "@/logging/index";
+import { getCheckpointer, getMemoryStore, ensureSchema } from "@/db";
+import { logError, logInfo } from "@/logging";
 import {
   afterModeration,
   callModel,
   moderator,
   nodeErrorHandler,
   routeAfterModel,
-} from "@/nodes/index";
-import { ensureIndexed } from "@/rag/index";
-import { AgentState } from "@/state/index";
-import { executableTools } from "@/tools/index";
+} from "@/nodes";
+import { ensureIndexed } from "@/rag";
+import { AgentState } from "@/state";
+import { executableTools } from "@/tools";
 import { composeEmailSubgraph } from "./composeEmailSubgraph";
 
 // A compiled subgraph passed directly as an addNode action doesn't type-check together with a

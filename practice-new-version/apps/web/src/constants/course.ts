@@ -1,4 +1,4 @@
-import type { Course } from "@/types/email";
+import type { Course } from "@/types";
 
 // Colourless (outline badge): a filter facet, not a triage signal.
 export const COURSE_LABEL: Record<Course, string> = {

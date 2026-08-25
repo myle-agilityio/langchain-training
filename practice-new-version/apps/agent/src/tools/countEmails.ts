@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-import { FILTER_DESCRIPTION, TOOL } from "@/constants/index";
-import { aggregateEmails } from "@/db/index";
-import { EmailFilterSchema, EmailGroupBySchema } from "@/types/index";
+import { FILTER_DESCRIPTION, TOOL } from "@/constants";
+import { aggregateEmails } from "@/db";
+import { EmailFilterSchema, EmailGroupBySchema } from "@/types";
 import { defineTool } from "./defineTool";
 
 export const count_emails = defineTool({

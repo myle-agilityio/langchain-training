@@ -2,10 +2,10 @@ import { tool } from "@langchain/core/tools";
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 import type { z } from "zod";
 
-import type { AppError } from "@/errors/index";
-import { logError } from "@/logging/index";
+import type { AppError } from "@/errors";
+import { logError } from "@/logging";
 import type { ToolEnvelope, ToolError } from "@/types/toolResult";
-import { threadIdOf } from "@/utils/index";
+import { threadIdOf } from "@/utils";
 
 export const toolError = (error: AppError): ToolError => ({
   code: error.code,

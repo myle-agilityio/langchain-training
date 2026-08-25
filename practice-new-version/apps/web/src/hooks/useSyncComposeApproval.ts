@@ -3,7 +3,7 @@ import {
   useAgent,
   useCopilotChatConfiguration,
 } from "@copilotkit/react-core/v2";
-import { useComposeApproval } from "@/stores/useComposeApproval";
+import { useComposeApproval } from "@/stores";
 
 // Mirrors the graph's compose_reply pause into the store. agent.pendingInterrupts never
 // populates — the LangGraph bridge signals via a CUSTOM "on_interrupt" event instead.

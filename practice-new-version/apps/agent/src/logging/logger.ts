@@ -1,4 +1,4 @@
-import { AppError, toAppError } from "@/errors/index";
+import { AppError, toAppError } from "@/errors";
 import { redactSecrets } from "@/utils/redaction";
 
 export type LogLevel = "debug" | "info" | "warn" | "error";
