@@ -20,8 +20,9 @@ while read -r local_ref local_oid remote_ref remote_oid; do
     base="$remote_oid"
   fi
 
+  # --diff-filter=d drops files deleted in this range: eslint/prettier abort on paths that no longer exist.
   # Pathspec, not grep: git diff exits 0 on no match, grep exits 1 — and husky runs this with `sh -e`.
-  files=$(git diff --name-only "$base" "$local_oid" -- \
+  files=$(git diff --name-only --diff-filter=d "$base" "$local_oid" -- \
     'practice-new-version/apps/*.ts' 'practice-new-version/apps/*.tsx' \
     'practice-new-version/apps/*.js' 'practice-new-version/apps/*.jsx')
 
