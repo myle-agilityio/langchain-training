@@ -1,4 +1,4 @@
-export type * from "./thread";
-export type * from "./email";
-export * from "./errors";
-export type * from "./tools";
+export * from "@/types/errors";
+export * from "@/types/tools";
+export * from "@/types/email";
+export * from "@/types/thread";
