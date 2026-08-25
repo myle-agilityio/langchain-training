@@ -1,17 +1,14 @@
 import { MailCheck } from "lucide-react";
 import { Badge } from "@/components/common";
 import type { EmailStatus } from "@/types/email";
-import { EmailLine, Failure, Pending, Shell } from "../common";
+import { EmailLine, Pending, Shell, ToolFailure } from "../common";
 import { STATUS_LABEL, STATUS_TONE } from "@/constants";
-import type { ToolCardProps } from "@/types";
-import { cn, parseResult } from "@/utils";
+import type { ToolCardProps, ToolError } from "@/types";
+import { cn, parseToolResult } from "@/utils";
 
-interface StatusResult {
-  id: string;
-  ok: boolean;
-  status?: EmailStatus;
-  error?: string;
-}
+type StatusResult =
+  | { id: string; ok: true; status: EmailStatus }
+  | { id: string; ok: false; error: ToolError };
 
 export const UpdateEmailStatusCard = ({
   status,
@@ -19,11 +16,11 @@ export const UpdateEmailStatusCard = ({
   result,
 }: ToolCardProps<{ patches: { id: string; status: EmailStatus }[] }>) => {
   const patches = parameters.patches ?? [];
-  const data = parseResult<{ results: StatusResult[] }>(result);
+  const envelope = parseToolResult<{ results: StatusResult[] }>(result);
 
   return (
     <Shell icon={MailCheck} title="Update status" status={status}>
-      {!data ? (
+      {!envelope ? (
         <Pending
           label={
             patches.length
@@ -31,13 +28,15 @@ export const UpdateEmailStatusCard = ({
               : "Updating…"
           }
         />
+      ) : !envelope.ok ? (
+        <ToolFailure error={envelope.error} />
       ) : (
         <div className="space-y-2">
-          {data.results.map((r) => (
+          {envelope.data.results.map((r) => (
             <div key={r.id} className="flex min-w-0 items-center gap-2">
               <EmailLine id={r.id} />
               <span className="ml-auto shrink-0">
-                {r.ok && r.status ? (
+                {r.ok ? (
                   <Badge
                     variant="tone"
                     className={cn("text-[10px]", STATUS_TONE[r.status])}
@@ -45,7 +44,7 @@ export const UpdateEmailStatusCard = ({
                     {STATUS_LABEL[r.status]}
                   </Badge>
                 ) : (
-                  <Failure text={r.error ?? "failed"} />
+                  <ToolFailure error={r.error} />
                 )}
               </span>
             </div>

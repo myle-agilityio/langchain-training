@@ -6,6 +6,7 @@ import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 import type { OpenAIEmbeddings } from "@langchain/openai";
 
 import { getRagScoreThreshold } from "../config/env";
+import { logWarn } from "@/logging/index";
 import { getEmbeddingsForConfig, getServerEmbeddings } from "@/config/model";
 import { KB_TABLE } from "@/constants/index";
 import { getPool } from "@/db/index";
@@ -28,19 +29,21 @@ const getVectorStore = (
 // Embeds the seed articles once (a non-empty table means already seeded). Runs at agent
 // startup, before any request exists, so it uses the server-side key, not a visitor's BYOK key.
 export const ensureIndexed = async (): Promise<void> => {
+  const embeddings = getServerEmbeddings();
+  if (!embeddings) {
+    logWarn("rag.seed_skipped", {
+      detail: "OPENAI_API_KEY not set on the server",
+    });
+    return;
+  }
+
+  // initialize() first — the count below reads a table this call is what creates.
+  const store = await getVectorStore(embeddings);
   const { rows } = await getPool().query<{ n: number }>(
     `SELECT count(*)::int AS n FROM ${KB_TABLE}`,
   );
   if (rows[0].n > 0) return;
 
-  const embeddings = getServerEmbeddings();
-  if (!embeddings) {
-    console.warn(
-      "[rag] OPENAI_API_KEY not set on the server — skipping knowledge base seeding.",
-    );
-    return;
-  }
-  const store = await getVectorStore(embeddings);
   const seedDocs = knowledgeBase.map(
     (a) =>
       new Document({

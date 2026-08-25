@@ -4,13 +4,19 @@ import { Badge, Spinner } from "@/components/common";
 import { cn } from "@/utils";
 import {
   COURSE_LABEL,
+  messageForCode,
   TOPIC_LABEL,
   TOPIC_TONE,
   URGENCY_TONE,
   URGENCY_VARIANT,
   WORK_TYPE_LABEL,
 } from "@/constants";
-import type { Classification, ToolStatus, EmailFilterArgs } from "@/types";
+import type {
+  Classification,
+  ToolError,
+  ToolStatus,
+  EmailFilterArgs,
+} from "@/types";
 import { useEmailLookup } from "@/hooks";
 
 export const Shell = ({
@@ -55,6 +61,12 @@ export const Failure = ({ text }: { text: string }) => {
       {text}
     </span>
   );
+};
+
+// The one failure branch every card renders — wording comes from the code, so a message the
+// agent generated is never shown verbatim.
+export const ToolFailure = ({ error }: { error: ToolError }) => {
+  return <Failure text={messageForCode(error.code)} />;
 };
 
 export const ClassificationBadges = ({

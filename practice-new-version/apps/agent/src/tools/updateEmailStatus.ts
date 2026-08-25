@@ -1,8 +1,11 @@
-import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 
 import { TOOL } from "@/constants/index";
 import { getEmail, updateEmail } from "@/db/index";
+import { AppError, ERROR_CODE, ERRORS } from "@/errors/index";
+import type { Email } from "@/types/index";
+import type { ToolError } from "@/types/toolResult";
+import { defineTool, toolError } from "./defineTool";
 
 // Omitting "replied" makes "mark it replied" unreachable — only a sent reply sets that.
 const ManageableStatusSchema = z.enum([
@@ -16,43 +19,45 @@ const StatusPatchSchema = z.object({
   status: ManageableStatusSchema,
 });
 
-export const update_email_status = tool(
-  async (input: { patches: z.infer<typeof StatusPatchSchema>[] }) => {
-    const results = await Promise.all(
-      input.patches.map(async (patch) => {
-        const current = await getEmail(patch.id);
-        if (!current)
-          return { id: patch.id, ok: false, error: "no such email" };
-        if (current.status === "replied" && patch.status === "unread") {
-          return {
-            id: patch.id,
-            ok: false,
-            error: "already replied — a replied email cannot be marked unread",
-          };
-        }
-        const email = await updateEmail(patch.id, { status: patch.status });
-        return email
-          ? { id: patch.id, ok: true, status: email.status }
-          : { id: patch.id, ok: false, error: "no such email" };
-      }),
-    );
+type StatusResult =
+  | { id: string; ok: true; status: Email["status"] }
+  | { id: string; ok: false; error: ToolError };
+
+const applyPatch = async (
+  patch: z.infer<typeof StatusPatchSchema>,
+): Promise<StatusResult> => {
+  try {
+    const current = await getEmail(patch.id);
+    if (!current) throw new AppError(ERROR_CODE.EMAIL_NOT_FOUND);
+    if (current.status === "replied" && patch.status === "unread") {
+      throw new AppError(ERROR_CODE.STATUS_TRANSITION_INVALID);
+    }
+    const email = await updateEmail(patch.id, { status: patch.status });
+    if (!email) throw new AppError(ERROR_CODE.EMAIL_NOT_FOUND);
+    return { id: patch.id, ok: true, status: email.status };
+  } catch (error) {
+    // Per-item failure, so the rest of the batch still lands. Anything unexpected rethrows and
+    // the defineTool wrapper turns the whole call into one logged envelope.
+    if (!(error instanceof AppError) || !error.expected) throw error;
+    return { id: patch.id, ok: false, error: toolError(error) };
+  }
+};
+
+export const update_email_status = defineTool({
+  run: async ({ patches }) => {
+    const results = await Promise.all(patches.map(applyPatch));
     const failed = results.filter((r) => !r.ok);
-    return JSON.stringify({
+    return {
       results,
       ...(failed.length
-        ? {
-            recovery:
-              "Call get_emails for current ids, then retry the failed patches.",
-          }
+        ? { recovery: ERRORS[ERROR_CODE.EMAIL_NOT_FOUND].recovery }
         : {}),
-    });
+    };
   },
-  {
-    name: TOOL.UPDATE_EMAIL_STATUS,
-    description:
-      "Set status (unread/read/flagged_for_followup) on one or more emails. Batch every email " +
-      "into a single call rather than one call each. Cannot mark an email replied: only sending " +
-      "a reply does that. A replied email cannot be marked unread.",
-    schema: z.object({ patches: z.array(StatusPatchSchema) }),
-  },
-);
+  name: TOOL.UPDATE_EMAIL_STATUS,
+  description:
+    "Set status (unread/read/flagged_for_followup) on one or more emails. Batch every email " +
+    "into a single call rather than one call each. Cannot mark an email replied: only sending " +
+    "a reply does that. A replied email cannot be marked unread.",
+  schema: z.object({ patches: z.array(StatusPatchSchema) }),
+});

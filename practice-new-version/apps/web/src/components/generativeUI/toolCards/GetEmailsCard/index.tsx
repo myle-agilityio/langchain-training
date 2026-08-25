@@ -1,8 +1,14 @@
 import { Inbox } from "lucide-react";
 import type { Classification, EmailStatus } from "@/types/email";
-import { ClassificationBadges, FilterChips, Pending, Shell } from "../common";
+import {
+  ClassificationBadges,
+  FilterChips,
+  Pending,
+  Shell,
+  ToolFailure,
+} from "../common";
 import type { EmailFilterArgs, ToolCardProps } from "@/types";
-import { parseResult } from "@/utils";
+import { parseToolResult } from "@/utils";
 
 interface RedactedEmail {
   id: string;
@@ -20,22 +26,27 @@ export const GetEmailsCard = ({
   result,
 }: ToolCardProps<{ filter?: EmailFilterArgs }>) => {
   const filter = parameters.filter ?? {};
-  const data = parseResult<{ emails: RedactedEmail[]; count: number }>(result);
+  const envelope = parseToolResult<{ emails: RedactedEmail[]; count: number }>(
+    result,
+  );
 
   return (
     <Shell icon={Inbox} title="Read inbox" status={status}>
       <FilterChips filter={filter} />
-      {!data ? (
+      {!envelope ? (
         <Pending label="Fetching emails…" />
-      ) : data.count === 0 ? (
+      ) : !envelope.ok ? (
+        <ToolFailure error={envelope.error} />
+      ) : envelope.data.count === 0 ? (
         <p className="text-xs text-muted-foreground">No emails matched.</p>
       ) : (
         <div className="space-y-2">
           <p className="text-xs font-semibold text-foreground">
-            {data.count} {data.count === 1 ? "email" : "emails"}
+            {envelope.data.count}{" "}
+            {envelope.data.count === 1 ? "email" : "emails"}
           </p>
           <div className="space-y-2">
-            {data.emails.slice(0, MAX_ROWS).map((email) => (
+            {envelope.data.emails.slice(0, MAX_ROWS).map((email) => (
               <div key={email.id} className="min-w-0">
                 <div className="flex min-w-0 items-center gap-1.5">
                   <span className="min-w-0 truncate text-xs">
@@ -58,9 +69,9 @@ export const GetEmailsCard = ({
               </div>
             ))}
           </div>
-          {data.emails.length > MAX_ROWS && (
+          {envelope.data.emails.length > MAX_ROWS && (
             <p className="text-[11px] text-muted-foreground">
-              +{data.emails.length - MAX_ROWS} more
+              +{envelope.data.emails.length - MAX_ROWS} more
             </p>
           )}
         </div>

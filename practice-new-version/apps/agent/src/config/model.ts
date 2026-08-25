@@ -2,15 +2,11 @@ import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
 import { copilotkitCustomizeConfig } from "@copilotkit/sdk-js/langgraph";
 
-export const MODEL = "gpt-4o-mini";
-export const EMBEDDING_MODEL = "text-embedding-3-small";
+import { AppError, ERROR_CODE } from "@/errors/index";
 
-export class MissingApiKeyError extends Error {
-  constructor() {
-    super("Missing OpenAI API key");
-    this.name = "MissingApiKeyError";
-  }
-}
+export const MODEL = "gpt-4o-mini";
+export const A2UI_MODEL = "gpt-4.1";
+export const EMBEDDING_MODEL = "text-embedding-3-small";
 
 // BYOK: CopilotKit forwards the visitor's key via config.configurable.copilotkit_forwarded_headers.
 // Falls back to process.env.OPENAI_API_KEY when unset (e.g. running from LangSmith Studio).
@@ -25,7 +21,7 @@ export const getApiKeyFromConfig = (
       )?.[1]
     : undefined;
   const resolved = key ?? process.env.OPENAI_API_KEY;
-  if (!resolved) throw new MissingApiKeyError();
+  if (!resolved) throw new AppError(ERROR_CODE.API_KEY_MISSING);
   return resolved;
 };
 
@@ -37,6 +33,16 @@ export const getModelForConfig = (
     model: MODEL,
     apiKey: getApiKeyFromConfig(config),
     modelKwargs: { parallel_tool_calls: false },
+  });
+};
+
+// The A2UI tool's secondary model — same BYOK key, its own model id.
+export const getA2uiModelForConfig = (
+  config: LangGraphRunnableConfig,
+): ChatOpenAI => {
+  return new ChatOpenAI({
+    model: A2UI_MODEL,
+    apiKey: getApiKeyFromConfig(config),
   });
 };
 

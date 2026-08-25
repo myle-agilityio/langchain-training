@@ -1,20 +1,34 @@
-﻿import axios from "axios";
+import axios from "axios";
 import { Hono } from "hono";
+
 import { MODEL } from "@/config/model";
 import {
-  ensureThreadsSchema,
   listThreads,
   upsertThread,
   threadExists,
   renameThread,
   deleteThread,
 } from "@/db/threads";
+import { AppError, ERROR_CODE } from "@/errors/index";
+import { logWarn } from "@/logging/index";
+import { titlePrompt } from "@/prompts/index";
+import { validate } from "./middleware/validate";
+import {
+  RenameThreadBodySchema,
+  SaveThreadBodySchema,
+  ThreadIdQuerySchema,
+  type RenameThreadBody,
+  type SaveThreadBody,
+  type ThreadIdQuery,
+} from "./schemas";
+import type { AppEnv } from "./types";
 
-// Best-effort: a title is a nice-to-have, so any failure (missing key, network, rate limit)
-// just falls back to a truncated first message rather than blocking thread creation.
+// Best-effort: a title is a nice-to-have, so any failure falls back to a truncated first
+// message rather than blocking thread creation — but it gets logged, not swallowed silently.
 const generateTitle = async (
   firstMessage: string | undefined,
   apiKey: string | undefined,
+  requestId: string,
 ): Promise<string | null> => {
   const text = firstMessage?.trim();
   if (!text) return null;
@@ -30,12 +44,7 @@ const generateTitle = async (
       {
         model: MODEL,
         messages: [
-          {
-            role: "system",
-            content:
-              "Write a short chat title (3-6 words) summarizing the user's message. " +
-              "No quotes, no trailing punctuation, no prefix like 'Title:'.",
-          },
+          { role: "system", content: titlePrompt() },
           { role: "user", content: text },
         ],
         max_tokens: 20,
@@ -52,33 +61,25 @@ const generateTitle = async (
       ?.trim()
       .replace(/^["']|["']$/g, "");
     return generated || fallback;
-  } catch {
+  } catch (error) {
+    logWarn("threads.title_fallback", {
+      requestId,
+      detail: error instanceof Error ? error.message : String(error),
+    });
     return fallback;
   }
 };
 
-export const threadsApp = new Hono();
+export const threadsApp = new Hono<AppEnv>();
 
 threadsApp.get("/", async (c) => {
-  await ensureThreadsSchema();
-  const threads = await listThreads();
-  return c.json({ threads });
+  return c.json({ threads: await listThreads() });
 });
 
 // Upsert: creates the row (title from firstMessage) on a thread's first touch, else just bumps
 // updated_at — never clobbers an existing title (LLM-generated or teacher-renamed).
-threadsApp.post("/", async (c) => {
-  await ensureThreadsSchema();
-  let body: { id: string; firstMessage?: string };
-  try {
-    body = await c.req.json();
-  } catch {
-    return c.json({ error: "Request body must be valid JSON" }, 400);
-  }
-  const { id, firstMessage } = body;
-  if (!id) {
-    return c.json({ error: "id is required" }, 400);
-  }
+threadsApp.post("/", validate("json", SaveThreadBodySchema), async (c) => {
+  const { id, firstMessage } = c.get("valid") as SaveThreadBody;
 
   const exists = await threadExists(id);
   // Visitor's own key (BYOK — see agent/src/config/model.ts) first; process.env.OPENAI_API_KEY
@@ -87,37 +88,24 @@ threadsApp.post("/", async (c) => {
   // Only spend an LLM call the first time this thread is created, not on every touch.
   const title = exists
     ? null
-    : await generateTitle(firstMessage, apiKey ?? undefined);
+    : await generateTitle(firstMessage, apiKey, c.get("requestId"));
 
-  const thread = await upsertThread(id, title);
-  return c.json({ thread });
+  return c.json({ thread: await upsertThread(id, title) });
 });
 
-threadsApp.patch("/", async (c) => {
-  await ensureThreadsSchema();
-  let body: { id: string; title: string };
-  try {
-    body = await c.req.json();
-  } catch {
-    return c.json({ error: "Request body must be valid JSON" }, 400);
-  }
-  const { id, title } = body;
-  if (!id || !title) {
-    return c.json({ error: "id and title are required" }, 400);
-  }
+threadsApp.patch("/", validate("json", RenameThreadBodySchema), async (c) => {
+  const { id, title } = c.get("valid") as RenameThreadBody;
   const thread = await renameThread(id, title);
   if (!thread) {
-    return c.json({ error: `No thread with id ${id}` }, 404);
+    throw new AppError(ERROR_CODE.THREAD_NOT_FOUND, {
+      detail: `no thread with id ${id}`,
+    });
   }
   return c.json({ thread });
 });
 
-threadsApp.delete("/", async (c) => {
-  await ensureThreadsSchema();
-  const id = c.req.query("id");
-  if (!id) {
-    return c.json({ error: "id is required" }, 400);
-  }
+threadsApp.delete("/", validate("query", ThreadIdQuerySchema), async (c) => {
+  const { id } = c.get("valid") as ThreadIdQuery;
   await deleteThread(id);
   return c.json({ ok: true });
 });

@@ -8,6 +8,7 @@ import {
   // A2UI catalog: definitions + renderers in @/components/declarativeGenerativeUI/
   demonstrationCatalog,
   ChatSidebar,
+  Toaster,
   EmailChat,
   EmailInbox,
   ThreadsMenu,
@@ -81,6 +82,8 @@ const App = () => {
         useSingleEndpoint={false}
       >
         <Inbox />
+        {/* One mount for every toast the query client raises. */}
+        <Toaster />
       </CopilotKit>
     </QueryClientProvider>
   );
