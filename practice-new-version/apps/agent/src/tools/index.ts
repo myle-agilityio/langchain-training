@@ -1,4 +1,4 @@
-﻿import { generate_a2ui } from "./a2ui";
+import { generate_a2ui } from "./a2ui";
 import { classify_emails, classifyEmail } from "./classifyEmails";
 import { count_emails } from "./countEmails";
 import { get_emails } from "./getEmails";
@@ -6,6 +6,8 @@ import { reply_to_email } from "./replyToEmail";
 import { search_knowledge_base } from "./searchKnowledgeBase";
 import { update_contact_profile } from "./updateContactProfile";
 import { update_email_status } from "./updateEmailStatus";
+
+export * from "./defineTool";
 
 export { classifyEmail };
 export { generate_a2ui };

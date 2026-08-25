@@ -4,7 +4,7 @@ import type { z } from "zod";
 
 import type { AppError } from "@/errors";
 import { logError } from "@/logging";
-import type { ToolEnvelope, ToolError } from "@/types/toolResult";
+import type { ToolEnvelope, ToolError } from "@/types";
 import { threadIdOf } from "@/utils";
 
 export const toolError = (error: AppError): ToolError => ({

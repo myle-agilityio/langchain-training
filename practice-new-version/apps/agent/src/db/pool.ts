@@ -1,6 +1,6 @@
 import pg from "pg";
 
-import { getPgConnectionOptions } from "@/config/env";
+import { getPgConnectionOptions } from "@/config";
 import { logError } from "@/logging";
 
 // Stashed on globalThis so dev-server reloads don't leak a pool per reload.

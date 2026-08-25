@@ -1,4 +1,5 @@
 import { AppError, toAppError } from "@/errors";
+// Direct file import, not the @/utils barrel: that barrel reaches @/db, which imports this logger.
 import { redactSecrets } from "@/utils/redaction";
 
 export type LogLevel = "debug" | "info" | "warn" | "error";

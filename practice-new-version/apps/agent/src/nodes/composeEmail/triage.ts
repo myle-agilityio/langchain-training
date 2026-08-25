@@ -1,7 +1,7 @@
 import { ToolMessage } from "@langchain/core/messages";
 import { END, type LangGraphRunnableConfig } from "@langchain/langgraph";
 
-import { getPlainModelForConfig, hidden } from "@/config/model";
+import { getPlainModelForConfig, hidden } from "@/config";
 import { needsResearchPrompt } from "@/prompts";
 import { classifyEmail } from "@/tools";
 import { NeedsResearchSchema, type ComposeEmailStateShape } from "@/types";

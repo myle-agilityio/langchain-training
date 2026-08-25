@@ -1,8 +1,10 @@
 import { useMemo, type ReactNode } from "react";
-import { CopilotKit } from "@copilotkit/react-core/v2";
-import { CopilotChatConfigurationProvider } from "@copilotkit/react-core/v2";
+import {
+  CopilotKit,
+  CopilotChatConfigurationProvider,
+} from "@copilotkit/react-core/v2";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient } from "@/lib";
 import { useOpenAIKey } from "@/stores";
 import {
   // A2UI catalog: definitions + renderers in @/components/declarativeGenerativeUI/

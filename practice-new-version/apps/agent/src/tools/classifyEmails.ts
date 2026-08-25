@@ -2,14 +2,17 @@ import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 import { copilotkitCustomizeConfig } from "@copilotkit/sdk-js/langgraph";
 import { z } from "zod";
 
-import { getPlainModelForConfig } from "@/config/model";
+import { getPlainModelForConfig } from "@/config";
 import { CLASSIFY_CONCURRENCY, TOOL } from "@/constants";
 import { getEmail, updateEmail } from "@/db";
 import { AppError, ERROR_CODE, ERRORS } from "@/errors";
 import { logError } from "@/logging";
 import { classifyPrompt } from "@/prompts";
-import { ClassificationSchema, type Classification } from "@/types";
-import type { ToolError } from "@/types/toolResult";
+import {
+  ClassificationSchema,
+  type Classification,
+  type ToolError,
+} from "@/types";
 import { threadIdOf } from "@/utils";
 import { defineTool, toolError } from "./defineTool";
 

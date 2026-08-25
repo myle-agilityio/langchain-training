@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { ApiError } from "@/lib/errors";
+import { ApiError } from "@/lib";
 import { ERROR_CODE } from "@/types";
 
 // Every request to the agent's HTTP app goes through this instance: JSON in, JSON out, and one

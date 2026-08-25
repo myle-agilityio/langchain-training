@@ -3,8 +3,7 @@ import { z } from "zod";
 import { TOOL } from "@/constants";
 import { getEmail, updateEmail } from "@/db";
 import { AppError, ERROR_CODE, ERRORS } from "@/errors";
-import type { Email } from "@/types";
-import type { ToolError } from "@/types/toolResult";
+import type { Email, ToolError } from "@/types";
 import { defineTool, toolError } from "./defineTool";
 
 // Omitting "replied" makes "mark it replied" unreachable — only a sent reply sets that.

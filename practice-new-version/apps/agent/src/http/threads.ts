@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Hono } from "hono";
 
-import { MODEL } from "@/config/model";
+import { MODEL } from "@/config";
 import {
   listThreads,
   upsertThread,
@@ -12,7 +12,7 @@ import {
 import { AppError, ERROR_CODE } from "@/errors";
 import { logWarn } from "@/logging";
 import { titlePrompt } from "@/prompts";
-import { validate } from "./middleware/validate";
+import { validate } from "./middleware";
 import {
   RenameThreadBodySchema,
   SaveThreadBodySchema,

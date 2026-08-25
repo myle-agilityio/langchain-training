@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchThreads, renameThread, deleteThread, saveThread } from "@/api";
-import { optimisticContext, rollback } from "@/lib/optimistic";
+import { optimisticContext, rollback } from "@/lib";
 import type { ChatThread } from "@/types";
 import { useOpenAIKey } from "@/stores";
 

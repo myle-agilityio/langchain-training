@@ -1,6 +1,6 @@
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
-import { getPlainModelForConfig, hidden } from "@/config/model";
+import { getPlainModelForConfig, hidden } from "@/config";
 import { checkCompliancePrompt } from "@/prompts";
 import { ComplianceCheckSchema, type ComposeEmailStateShape } from "@/types";
 

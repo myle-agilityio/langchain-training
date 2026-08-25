@@ -2,7 +2,7 @@ import { z } from "zod";
 import { tool, type ToolRuntime } from "@langchain/core/tools";
 import { SystemMessage } from "@langchain/core/messages";
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
-import { getA2uiModelForConfig } from "@/config/model";
+import { getA2uiModelForConfig } from "@/config";
 import { CUSTOM_CATALOG_ID, TOOL } from "@/constants";
 import { AppError, ERROR_CODE } from "@/errors";
 import { defineTool } from "./defineTool";
@@ -11,7 +11,7 @@ import {
   render,
   updateComponents,
   updateDataModel,
-} from "@/utils/a2ui";
+} from "@/utils";
 
 const renderA2uiSchema = z.object({
   surfaceId: z.string(),

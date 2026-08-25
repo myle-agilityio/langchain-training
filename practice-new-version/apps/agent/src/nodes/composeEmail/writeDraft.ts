@@ -1,6 +1,6 @@
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
-import { getPlainModelForConfig, hidden } from "@/config/model";
+import { getPlainModelForConfig, hidden } from "@/config";
 import { CONTACT_PROFILE_NAMESPACE } from "@/constants";
 import { getEmail } from "@/db";
 import { draftPrompt } from "@/prompts";

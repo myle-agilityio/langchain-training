@@ -5,9 +5,9 @@ import { Document } from "@langchain/core/documents";
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 import type { OpenAIEmbeddings } from "@langchain/openai";
 
-import { getRagScoreThreshold } from "../config/env";
+import { getRagScoreThreshold } from "../config";
 import { logWarn } from "@/logging";
-import { getEmbeddingsForConfig, getServerEmbeddings } from "@/config/model";
+import { getEmbeddingsForConfig, getServerEmbeddings } from "@/config";
 import { KB_TABLE } from "@/constants";
 import { getPool } from "@/db";
 import { knowledgeBase } from "./knowledgeBase";
