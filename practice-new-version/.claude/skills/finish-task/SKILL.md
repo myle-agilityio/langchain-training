@@ -24,5 +24,6 @@ feature, or a phase boundary. A small internal refactor needs none.
       `apps/web` renderers.tsx errors, no new ones)
 - [ ] Non-obvious logic has a why-comment
 - [ ] TEST-SCENARIOS updated if a new manual flow is worth re-running later
-- [ ] `.env.example` in sync if env vars changed; no secrets staged
+- [ ] The owning app's `.env.example` (`apps/agent/` or `apps/web/`) in sync if env vars
+      changed; no secrets staged
 - [ ] Background servers stopped, temp scripts deleted

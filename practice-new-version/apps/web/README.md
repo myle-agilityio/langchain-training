@@ -22,14 +22,16 @@ Deployment is static: `vercel.json` serves `dist` and rewrites `/api/*` to `$AGE
 
 ## Environment
 
-This package has no `.env` of its own and reads no variable at runtime — the agent owns
-configuration. Both entries below are consumed outside the app code, from the root `.env`.
+This package has its own `.env` (copy `.env.example` next to it) but reads **nothing at
+runtime** — the agent owns configuration and keeps its own `apps/agent/.env`. Both entries below
+are consumed outside `src/`, by tooling. `vite.config.ts` picks the file up via `loadEnv`, so no
+`VITE_` prefix is needed.
 
-| Variable                          | Required | Read by                             | Purpose                                                                                         |
-| --------------------------------- | -------- | ----------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `COPILOTKIT_LICENSE_TOKEN`        | No       | `vite.config.ts`, at build/dev time | Server-side token. Its presence derives the Threads flag below — set the token, never the flag. |
-| `AGENT_URL`                       | No       | `vercel.json`, at deploy time       | Rewrite target for `/api/*` in production. Ignored in dev, where the Vite proxy handles it.     |
-| `VITE_COPILOTKIT_THREADS_ENABLED` | Derived  | —                                   | Injected by `vite.config.ts` as `"true"`/`"false"`. **Currently read by nothing** — see below.  |
+| Variable                          | Required | Read by                             | Purpose                                                                                                                        |
+| --------------------------------- | -------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `COPILOTKIT_LICENSE_TOKEN`        | No       | `vite.config.ts`, at build/dev time | Server-side token, also set in `apps/agent/.env`. Its presence derives the Threads flag below — set the token, never the flag. |
+| `AGENT_URL`                       | No       | `vercel.json`, at deploy time       | Rewrite target for `/api/*` in production; set on the deploy platform. Ignored in dev, where the Vite proxy handles it.        |
+| `VITE_COPILOTKIT_THREADS_ENABLED` | Derived  | —                                   | Injected by `vite.config.ts` as `"true"`/`"false"`. **Currently read by nothing** — see below.                                 |
 
 The visitor's OpenAI key is not an env var: it's entered in the browser, kept in `localStorage`,
 and sent per-request as the `x-openai-api-key` header (see [BYOK](#byok) below).

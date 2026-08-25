@@ -17,8 +17,10 @@ pnpm --filter agent typecheck
 
 ## Environment
 
-Env comes from the **root** `.env` (wired up by `langgraph.json`'s `"env": "../../.env"`), not
-from a file in this package.
+Env lives in **this package's own `.env`** (`apps/agent/.env`, wired up by `langgraph.json`'s
+`"env": ".env"`); copy `.env.example` next to it to start. The web app has a separate
+`apps/web/.env` — there is no root env file, so `COPILOTKIT_LICENSE_TOKEN` and `AGENT_URL` are
+set in each file that needs them.
 
 | Variable                      | Required                             | Read by                                 | Purpose                                                                                     |
 | ----------------------------- | ------------------------------------ | --------------------------------------- | ------------------------------------------------------------------------------------------- |
@@ -31,13 +33,16 @@ from a file in this package.
 | `LANGSMITH_API_KEY`           | No                                   | `http/copilotkit.ts`, `langgraphjs dev` | Tracing; passed to the agent and picked up by the CLI.                                      |
 | `LANGSMITH_TRACING`           | No                                   | `langgraphjs dev`                       | Turns tracing on for every graph run.                                                       |
 | `LANGSMITH_PROJECT`           | No                                   | `langgraphjs dev`                       | LangSmith project name.                                                                     |
+| `LANGSMITH_ENDPOINT`          | No                                   | `langgraphjs dev`                       | Override the LangSmith API host.                                                            |
 | `COPILOTKIT_LICENSE_TOKEN`    | No                                   | `http/copilotkit.ts`                    | Enables CopilotKit Intelligence. Unset → an `InMemoryAgentRunner` instead.                  |
 | `INTELLIGENCE_API_KEY`        | No                                   | `http/copilotkit.ts`                    | Only read when the license token is set.                                                    |
 | `INTELLIGENCE_API_URL`        | No — default `http://localhost:4201` | `http/copilotkit.ts`                    | Only read when the license token is set.                                                    |
 | `INTELLIGENCE_GATEWAY_WS_URL` | No — default `ws://localhost:4401`   | `http/copilotkit.ts`                    | Only read when the license token is set.                                                    |
 
 The `INTELLIGENCE_*` trio and the license token are commented out in `.env.example` — see the
-root README's "CopilotKit Intelligence" section for why.
+root README's "CopilotKit Intelligence" section for why. Enabling Threads means setting
+`COPILOTKIT_LICENSE_TOKEN` here **and** in `apps/web/.env`, which is where `vite.config.ts`
+derives the UI's flag from.
 
 **BYOK:** chat, classification, drafting, and RAG all run on the key the browser forwards
 per-request as the `x-openai-api-key` header, resolved in `config/model.ts`'s

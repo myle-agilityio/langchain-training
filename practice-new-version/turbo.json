@@ -1,21 +1,6 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
-  "globalDependencies": [".env"],
-  "globalEnv": [
-    "OPENAI_API_KEY",
-    "DATABASE_URL",
-    "AGENT_URL",
-    "RAG_SCORE_THRESHOLD",
-    "LANGSMITH_API_KEY",
-    "LANGSMITH_TRACING",
-    "LANGSMITH_PROJECT",
-    "LANGSMITH_ENDPOINT",
-    "COPILOTKIT_LICENSE_TOKEN",
-    "INTELLIGENCE_API_URL",
-    "INTELLIGENCE_GATEWAY_WS_URL",
-    "INTELLIGENCE_API_KEY"
-  ],
   "globalPassThroughEnv": ["PORT"],
   "tasks": {
     "dev": {
@@ -27,6 +12,7 @@
     },
     "web#build": {
       "env": ["COPILOTKIT_LICENSE_TOKEN"],
+      "inputs": ["$TURBO_DEFAULT$", ".env"],
       "outputs": ["dist/**"]
     },
     "agent#build": {

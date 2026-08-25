@@ -10,5 +10,5 @@
   "http": {
     "app": "./src/http/index.ts:app"
   },
-  "env": "../../.env"
+  "env": ".env"
 }

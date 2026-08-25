@@ -13,8 +13,11 @@ reference — don't copy patterns from `practice/`'s agent without deciding they
 - `pnpm lint` / `pnpm format` — ESLint (flat config, `eslint.config.mjs`) and Prettier, scoped to
   this project. A pre-push hook re-runs both, but only on the files in the commits being pushed.
 - The agent runs under `langgraphjs dev`; the graph entry and the custom HTTP app (CopilotKit +
-  the `/api/emails`/`/api/threads` routes) are both registered in `apps/agent/langgraph.json`. Both
-  servers read the root `.env`.
+  the `/api/emails`/`/api/threads` routes) are both registered in `apps/agent/langgraph.json`.
+  **Each app owns its env — there is no root `.env`:** the agent reads `apps/agent/.env`
+  (`langgraph.json`'s `"env": ".env"`), the UI reads `apps/web/.env` (`vite.config.ts`'s
+  `loadEnv`). `COPILOTKIT_LICENSE_TOKEN` and `AGENT_URL` are needed on both sides, so they live
+  in both files.
 
 ## Where things live
 
@@ -71,8 +74,8 @@ These are how we work on this project, not style preferences. Follow them on eve
    Say in your response what you verified and what you didn't. See the `verify-feature` skill.
 4. **Tear down anything you started.** Agent (:8123), Vite dev server (:3000), monitors, probe
    scripts. An orphaned server holds its port and collides with the user's next `pnpm dev`.
-5. **Never let secrets leak.** `.env` stays untracked; a new env var goes into `.env.example` in
-   the same change.
+5. **Never let secrets leak.** `.env` stays untracked; a new env var goes into the owning app's
+   `.env.example` (`apps/agent/` or `apps/web/`) in the same change.
 6. **Name source files and folders in camelCase** — `useSharedInbox.ts`, `emailFilters.ts`,
    `components/generativeUI/` — except anything whose export is a React component, which is
    PascalCase matching it: a component file (`renderers.tsx`'s siblings), and a component
