@@ -16,6 +16,7 @@ import {
 } from "recharts";
 import { createCatalog } from "@copilotkit/a2ui-renderer";
 import type { CatalogRenderers } from "@copilotkit/a2ui-renderer";
+import { CUSTOM_CATALOG_ID } from "@/constants";
 import { demonstrationCatalogDefinitions } from "./definitions";
 import type { DemonstrationCatalogDefinitions } from "./definitions";
 import { colors } from "./theme";
@@ -402,6 +403,6 @@ export const demonstrationCatalog = createCatalog(
   demonstrationCatalogDefinitions,
   demonstrationCatalogRenderers,
   {
-    catalogId: "copilotkit://app-dashboard-catalog",
+    catalogId: CUSTOM_CATALOG_ID,
   },
 );

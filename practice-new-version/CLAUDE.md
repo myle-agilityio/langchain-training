@@ -21,8 +21,15 @@ reference — don't copy patterns from `practice/`'s agent without deciding they
 
 ## Where things live
 
-Turborepo + pnpm workspace: `apps/web` (Vite SPA) and `apps/agent`. `turbo.json` drives
-`dev`/`typecheck`/`build` across both packages.
+Turborepo + pnpm workspace: `apps/web` (Vite SPA), `apps/agent`, and `packages/shared`.
+`turbo.json` drives `dev`/`typecheck`/`build` across the packages.
+
+`packages/shared` (`@repo/shared`) holds the contracts both sides must agree on — the tool
+names (`TOOL`), `COMPOSE_REPLY_ACTION`, `CUSTOM_CATALOG_ID`, and the `ChatThread` type. It ships
+TS source (no build step; `exports` points at `src/index.ts`), so tsx and Vite compile it in
+place. Each app re-exports what it needs through its own `constants/index.ts` / `types/index.ts`
+barrel — use sites keep importing from `@/constants` and `@/types`, never from `@repo/shared`
+directly. Anything one side alone cares about (prompts, labels, error wording) stays in that app.
 
 Agent (`apps/agent/src/`), organized by role:
 

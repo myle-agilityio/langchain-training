@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { COMPOSE_REPLY_ACTION, TOOL } from "@/constants";
 import { useTheme } from "@/stores";
 
 import {
@@ -17,11 +18,11 @@ export const useGenerativeUIExamples = () => {
 
   // Renders every backend tool call as a collapsible card in the chat, so the teacher can see
   // which inbox tools ran and with what arguments.
-  const ignoredTools = [
+  const ignoredTools: string[] = [
     "render_a2ui", // Rendered by A2UI streaming, not as a tool card
-    "generate_a2ui", // Legacy: rendered by A2UI, not as a tool card
+    TOOL.GENERATE_A2UI, // Legacy: rendered by A2UI, not as a tool card
     "log_a2ui_event", // Internal A2UI event tracker
-    "compose_reply", // Rendered as the approval card by useEmailAgent
+    COMPOSE_REPLY_ACTION, // Rendered as the approval card by useEmailAgent
   ];
 
   useDefaultRenderTool({
