@@ -9,6 +9,7 @@ import { defineTool } from "./defineTool";
 export const get_emails = defineTool({
   run: async ({ filter }) => {
     const emails = await listEmails(filter);
+
     return { emails: emails.map(redactEmailForModel), count: emails.length };
   },
   name: TOOL.GET_EMAILS,

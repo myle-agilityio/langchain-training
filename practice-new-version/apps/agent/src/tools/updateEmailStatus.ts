@@ -28,17 +28,29 @@ const applyPatch = async (
 ): Promise<StatusResult> => {
   try {
     const current = await getEmail(patch.id);
-    if (!current) throw new AppError(ERROR_CODE.EMAIL_NOT_FOUND);
+
+    if (!current) {
+      throw new AppError(ERROR_CODE.EMAIL_NOT_FOUND);
+    }
+
     if (current.status === "replied" && patch.status === "unread") {
       throw new AppError(ERROR_CODE.STATUS_TRANSITION_INVALID);
     }
+
     const email = await updateEmail(patch.id, { status: patch.status });
-    if (!email) throw new AppError(ERROR_CODE.EMAIL_NOT_FOUND);
+
+    if (!email) {
+      throw new AppError(ERROR_CODE.EMAIL_NOT_FOUND);
+    }
+
     return { id: patch.id, ok: true, status: email.status };
   } catch (error) {
     // Per-item failure, so the rest of the batch still lands. Anything unexpected rethrows and
     // the defineTool wrapper turns the whole call into one logged envelope.
-    if (!(error instanceof AppError) || !error.expected) throw error;
+    if (!(error instanceof AppError) || !error.expected) {
+      throw error;
+    }
+
     return { id: patch.id, ok: false, error: toolError(error) };
   }
 };
@@ -47,6 +59,7 @@ export const update_email_status = defineTool({
   run: async ({ patches }) => {
     const results = await Promise.all(patches.map(applyPatch));
     const failed = results.filter((r) => !r.ok);
+
     return {
       results,
       ...(failed.length

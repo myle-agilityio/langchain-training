@@ -37,12 +37,14 @@ const globalForPg = globalThis as unknown as { agentPool?: pg.Pool };
 export const getPool = (): pg.Pool => {
   if (!globalForPg.agentPool) {
     const pool = new pg.Pool(getPgConnectionOptions());
+
     // An idle client dropped by the server emits here — without a listener node exits the process.
     pool.on("error", (error) =>
       logError(error, { detail: "idle pool client" }),
     );
     globalForPg.agentPool = pool;
   }
+
   return globalForPg.agentPool;
 };
 
@@ -86,6 +88,7 @@ const buildWhere = (
     params.push(filter.id);
     conditions.push(`id = $${params.length}`);
   }
+
   for (const key of [
     "status",
     "topic",
@@ -94,28 +97,36 @@ const buildWhere = (
     "urgency",
   ] as const) {
     const value = filter[key];
+
     if (value !== undefined) {
       params.push(value);
       conditions.push(`${FILTER_COLUMNS[key]} = $${params.length}`);
     }
   }
-  if (filter.unclassified) conditions.push(`topic IS NULL`);
+
+  if (filter.unclassified) {
+    conditions.push(`topic IS NULL`);
+  }
+
   if (filter.sender) {
     params.push(`%${filter.sender}%`);
     conditions.push(
       `(from_name ILIKE $${params.length} OR from_email ILIKE $${params.length})`,
     );
   }
+
   if (filter.search) {
     params.push(`%${filter.search}%`);
     conditions.push(
       `(subject ILIKE $${params.length} OR body ILIKE $${params.length})`,
     );
   }
+
   if (filter.receivedAfter) {
     params.push(filter.receivedAfter);
     conditions.push(`received_at >= $${params.length}`);
   }
+
   if (filter.receivedBefore) {
     params.push(filter.receivedBefore);
     conditions.push(`received_at <= $${params.length}`);
@@ -135,6 +146,7 @@ export const listEmails = async (
     `SELECT ${COLUMNS} FROM emails ${clause} ORDER BY received_at DESC`,
     params,
   );
+
   return rows.map(toEmail);
 };
 
@@ -143,6 +155,7 @@ export const getEmail = async (id: string): Promise<Email | null> => {
     `SELECT ${COLUMNS} FROM emails WHERE id = $1`,
     [id],
   );
+
   return rows[0] ? toEmail(rows[0]) : null;
 };
 
@@ -159,6 +172,7 @@ export const aggregateEmails = async (
       `SELECT count(*) AS n FROM emails ${clause}`,
       params,
     );
+
     return { total: Number(rows[0].n) };
   }
 
@@ -173,6 +187,7 @@ export const aggregateEmails = async (
   const byGroup = Object.fromEntries(
     rows.map((r) => [r.group_value ?? "unclassified", Number(r.n)]),
   );
+
   return { total: rows.reduce((sum, r) => sum + Number(r.n), 0), byGroup };
 };
 
@@ -199,5 +214,6 @@ export const updateEmail = async (
       patch.classification?.urgency ?? null,
     ],
   );
+
   return rows[0] ? toEmail(rows[0]) : null;
 };

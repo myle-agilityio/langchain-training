@@ -98,5 +98,6 @@ export const currentDateLine = (now = new Date()): string => {
     weekday: "long",
     timeZone: "UTC",
   });
+
   return `\n\nToday is ${now.toISOString().slice(0, 10)} (${weekday}), in UTC.`;
 };

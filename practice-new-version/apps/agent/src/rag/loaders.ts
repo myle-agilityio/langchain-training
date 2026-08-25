@@ -19,20 +19,26 @@ const loadFile = async (filePath: string): Promise<Document[]> => {
     case ".pdf": {
       const { PDFLoader } =
         await import("@langchain/community/document_loaders/fs/pdf");
+
       return new PDFLoader(filePath).load();
     }
+
     case ".csv": {
       const { CSVLoader } =
         await import("@langchain/community/document_loaders/fs/csv");
+
       return new CSVLoader(filePath).load();
     }
+
     case ".docx":
     case ".doc": {
       const { DocxLoader } =
         await import("@langchain/community/document_loaders/fs/docx");
       const type = extname(filePath).toLowerCase() === ".doc" ? "doc" : "docx";
+
       return new DocxLoader(filePath, { type }).load();
     }
+
     default:
       throw new Error(`Unsupported KB file type: ${filePath}`);
   }
@@ -45,12 +51,19 @@ export const loadDirectoryAsChunks = async (
 ): Promise<Document[]> => {
   const files = await readdir(dir);
   const docs: Document[] = [];
+
   for (const file of files) {
     const loaded = await loadFile(join(dir, file));
+
     console.log("loaded", loaded);
     const title = titleFromFilename(file);
-    for (const d of loaded) d.metadata = { ...d.metadata, title, source: file };
+
+    for (const d of loaded) {
+      d.metadata = { ...d.metadata, title, source: file };
+    }
+
     docs.push(...loaded);
   }
+
   return splitter.splitDocuments(docs);
 };

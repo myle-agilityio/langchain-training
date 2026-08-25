@@ -10,5 +10,6 @@ export const getMemoryStore = async (): Promise<PostgresStore> => {
     store = new PostgresStore({ connectionOptions: getPgConnectionOptions() });
     await store.setup();
   }
+
   return store;
 };

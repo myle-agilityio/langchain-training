@@ -29,6 +29,7 @@ const AgentSync = ({ children }: { children: ReactNode }) => {
   useSyncInbox();
   useSyncThreads();
   useSyncComposeApproval();
+
   return <>{children}</>;
 };
 

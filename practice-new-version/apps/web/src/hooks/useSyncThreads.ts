@@ -15,7 +15,11 @@ interface AgentWithMessages {
 // attachments) — pull the first text part out of either shape.
 const firstUserMessageText = (agent: AgentWithMessages): string | undefined => {
   const { content } = agent.messages.find((m) => m.role === "user") ?? {};
-  if (typeof content === "string") return content;
+
+  if (typeof content === "string") {
+    return content;
+  }
+
   if (Array.isArray(content)) {
     const textPart = content.find(
       (part) =>
@@ -23,8 +27,10 @@ const firstUserMessageText = (agent: AgentWithMessages): string | undefined => {
         part !== null &&
         (part as { type?: unknown }).type === "text",
     ) as { text?: string } | undefined;
+
     return textPart?.text;
   }
+
   return undefined;
 };
 
@@ -37,6 +43,7 @@ export const useSyncThreads = () => {
   const saveThread = useSaveThread();
 
   const configRef = useRef(config);
+
   useEffect(() => {
     configRef.current = config;
   }, [config]);
@@ -47,10 +54,15 @@ export const useSyncThreads = () => {
     const { unsubscribe } = agent.subscribe({
       onRunFinalized: () => {
         const threadId = configRef.current?.threadId;
-        if (!threadId) return;
+
+        if (!threadId) {
+          return;
+        }
+
         saveThread({ id: threadId, firstMessage: firstUserMessageText(agent) });
       },
     });
+
     return unsubscribe;
   }, [agent, saveThread]);
 };

@@ -4,6 +4,7 @@ import { getPool } from "./index";
 // their own libraries). Idempotent, so a fresh database and an existing one take the same path.
 export const ensureSchema = async (): Promise<void> => {
   const pool = getPool();
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS emails (
       id          text PRIMARY KEY,

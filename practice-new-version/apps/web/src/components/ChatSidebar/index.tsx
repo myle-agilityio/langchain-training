@@ -38,8 +38,12 @@ export const ChatSidebar = ({ threadsMenu, children }: ChatSidebarProps) => {
   // While dragging, prevent text selection under the pointer for the whole page, not just the
   // handle — the pointer sweeps across the chat panel too.
   useEffect(() => {
-    if (!isResizing) return;
+    if (!isResizing) {
+      return;
+    }
+
     document.body.classList.add("select-none", "cursor-col-resize");
+
     return () =>
       document.body.classList.remove("select-none", "cursor-col-resize");
   }, [isResizing]);
@@ -100,7 +104,9 @@ export const ChatSidebar = ({ threadsMenu, children }: ChatSidebarProps) => {
               setIsResizing(true);
             }}
             onPointerMove={(e) => {
-              if (e.buttons !== 0) resizeTo(e.clientX);
+              if (e.buttons !== 0) {
+                resizeTo(e.clientX);
+              }
             }}
             onPointerUp={(e) => {
               e.currentTarget.releasePointerCapture(e.pointerId);
@@ -108,7 +114,10 @@ export const ChatSidebar = ({ threadsMenu, children }: ChatSidebarProps) => {
             }}
             onDoubleClick={() => setWidth(DEFAULT_WIDTH)}
             onKeyDown={(e) => {
-              if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+              if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") {
+                return;
+              }
+
               e.preventDefault();
               setWidth((w) =>
                 clampWidth(w + (e.key === "ArrowLeft" ? 24 : -24)),

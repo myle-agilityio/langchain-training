@@ -24,7 +24,10 @@ export const moderator = withNode(
   "moderator",
   async (state: AgentStateShape, config: LangGraphRunnableConfig) => {
     const last = state.messages[state.messages.length - 1];
-    if (!HumanMessage.isInstance(last)) return { blocked: false };
+
+    if (!HumanMessage.isInstance(last)) {
+      return { blocked: false };
+    }
 
     const chain = moderationPromptTemplate.pipe(
       getPlainModelForConfig(config).withStructuredOutput(
@@ -40,7 +43,10 @@ export const moderator = withNode(
       }),
     );
 
-    if (!check.flagged) return { blocked: false };
+    if (!check.flagged) {
+      return { blocked: false };
+    }
+
     return {
       blocked: true,
       messages: [

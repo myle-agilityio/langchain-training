@@ -14,7 +14,10 @@ import { cn, parseToolResult } from "@/utils";
 type GroupBy = "status" | "topic" | "course" | "workType" | "urgency";
 
 const groupLabel = (groupBy: GroupBy | undefined, value: string): string => {
-  if (value === "unclassified") return "Unclassified";
+  if (value === "unclassified") {
+    return "Unclassified";
+  }
+
   switch (groupBy) {
     case "status":
       return STATUS_LABEL[value as EmailStatus] ?? value;

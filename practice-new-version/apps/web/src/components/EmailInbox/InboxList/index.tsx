@@ -170,6 +170,7 @@ export const InboxList = ({
           const railTone = email.classification
             ? URGENCY_TONE[email.classification.urgency]
             : FALLBACK_TONE;
+
           return (
             <div
               key={email.id}

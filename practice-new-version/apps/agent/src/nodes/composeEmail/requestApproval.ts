@@ -33,6 +33,7 @@ export const requestApproval = async (state: ComposeEmailStateShape) => {
       : null;
 
   const call = findReplyCall(state.messages);
+
   return {
     lastRejectedDraft,
     // Cleared so the inbox stops showing this email as being drafted.

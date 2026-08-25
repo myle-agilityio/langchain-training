@@ -36,13 +36,18 @@ export const defineTool = <S extends z.ZodTypeAny, T>({
     async (input: z.infer<S>, config: LangGraphRunnableConfig) => {
       try {
         const data = await run(input, config);
-        if (passthrough) return data as string;
+
+        if (passthrough) {
+          return data as string;
+        }
+
         return JSON.stringify({ ok: true, data } satisfies ToolEnvelope<T>);
       } catch (error) {
         const appError = logError(error, {
           tool: name,
           threadId: threadIdOf(config),
         });
+
         return JSON.stringify({
           ok: false,
           error: toolError(appError),

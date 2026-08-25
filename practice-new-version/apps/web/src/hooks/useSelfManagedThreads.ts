@@ -16,6 +16,7 @@ export const useSelfManagedThreads = (): ChatThread[] => {
     queryKey: threadsQueryKey,
     queryFn: fetchThreads,
   });
+
   return data ?? EMPTY;
 };
 

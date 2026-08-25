@@ -21,7 +21,11 @@ export const getApiKeyFromConfig = (
       )?.[1]
     : undefined;
   const resolved = key ?? process.env.OPENAI_API_KEY;
-  if (!resolved) throw new AppError(ERROR_CODE.API_KEY_MISSING);
+
+  if (!resolved) {
+    throw new AppError(ERROR_CODE.API_KEY_MISSING);
+  }
+
   return resolved;
 };
 
@@ -75,6 +79,7 @@ export const hidden = (config: LangGraphRunnableConfig) =>
 // before any visitor request exists to pull a key from. May be unset once already seeded.
 export const getServerEmbeddings = (): OpenAIEmbeddings | undefined => {
   const apiKey = process.env.OPENAI_API_KEY;
+
   return apiKey
     ? new OpenAIEmbeddings({ model: EMBEDDING_MODEL, apiKey })
     : undefined;

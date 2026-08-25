@@ -7,10 +7,12 @@ import type { AppEnv } from "../types";
 // line the request produces.
 export const requestContext = createMiddleware<AppEnv>(async (c, next) => {
   const requestId = crypto.randomUUID();
+
   c.set("requestId", requestId);
   c.header("x-request-id", requestId);
 
   const startedAt = Date.now();
+
   try {
     await next();
   } finally {

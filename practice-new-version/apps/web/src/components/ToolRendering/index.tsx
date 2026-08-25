@@ -9,10 +9,18 @@ interface ToolReasoningProps {
 }
 
 const formatValue = (value: unknown): string => {
-  if (Array.isArray(value)) return `[${value.length} items]`;
-  if (typeof value === "object" && value !== null)
+  if (Array.isArray(value)) {
+    return `[${value.length} items]`;
+  }
+
+  if (typeof value === "object" && value !== null) {
     return `{${Object.keys(value).length} keys}`;
-  if (typeof value === "string") return `"${value}"`;
+  }
+
+  if (typeof value === "string") {
+    return `"${value}"`;
+  }
+
   return String(value);
 };
 
@@ -23,7 +31,10 @@ export const ToolReasoning = ({ name, args, status }: ToolReasoningProps) => {
 
   // Auto-open while executing, auto-close when complete
   useEffect(() => {
-    if (!detailsRef.current) return;
+    if (!detailsRef.current) {
+      return;
+    }
+
     detailsRef.current.open = isRunning;
   }, [isRunning]);
 

@@ -17,11 +17,14 @@ export const useSyncComposeApproval = () => {
   useEffect(() => {
     const subscription = agent.subscribe({
       onCustomEvent: ({ event }) => {
-        if (event.name === "on_interrupt") openInterrupt();
+        if (event.name === "on_interrupt") {
+          openInterrupt();
+        }
       },
       onRunStartedEvent: () => clearInterrupt(),
       onRunFailed: () => clearInterrupt(),
     });
+
     return () => subscription.unsubscribe();
   }, [agent, openInterrupt, clearInterrupt]);
 

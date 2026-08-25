@@ -88,6 +88,12 @@ These are how we work on this project, not style preferences. Follow them on eve
    instead of listing every name. Spell out names only when the barrel deliberately takes a
    subset, e.g. each app picking its share of `@repo/shared`.
 
+8. **Blank lines separate sections; every branch gets braces.** A body reads as declarations →
+   work → return, split by blank lines: one after each block (`if {}`, `for {}`), one before a
+   `return`/`throw`, one after a run of declarations. No single-line `if (x) doThing();`.
+   `@stylistic/padding-line-between-statements` + `curly` in `eslint.config.mjs` enforce this —
+   `pnpm lint:fix` applies it.
+
 ## Workflows
 
 Invoke these skills instead of improvising the workflow:

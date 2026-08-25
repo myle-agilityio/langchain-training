@@ -20,10 +20,12 @@ export const errorHandler: ErrorHandler<AppEnv> = (error, c) => {
     method: c.req.method,
     path: c.req.path,
   });
+
   return c.json(body(c, appError), appError.status as 400);
 };
 
 export const notFoundHandler: NotFoundHandler<AppEnv> = (c) => {
   const appError = new AppError(ERROR_CODE.NOT_FOUND);
+
   return c.json(body(c, appError), 404);
 };

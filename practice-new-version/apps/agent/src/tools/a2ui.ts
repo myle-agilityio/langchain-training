@@ -107,6 +107,7 @@ export const generate_a2ui = defineTool({
     const toolCalls = (
       response as { tool_calls?: Array<{ args: Record<string, unknown> }> }
     ).tool_calls;
+
     if (!toolCalls || toolCalls.length === 0) {
       throw new AppError(ERROR_CODE.MODEL_OUTPUT_INVALID, {
         detail: "secondary model did not call render_a2ui",
@@ -129,9 +130,11 @@ export const generate_a2ui = defineTool({
       createSurface(surfaceId, CUSTOM_CATALOG_ID),
       updateComponents(surfaceId, components),
     ];
+
     if (Object.keys(data).length > 0) {
       ops.push(updateDataModel(surfaceId, data));
     }
+
     return render(ops);
   },
 });

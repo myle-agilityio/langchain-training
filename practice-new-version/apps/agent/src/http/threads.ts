@@ -31,10 +31,16 @@ const generateTitle = async (
   requestId: string,
 ): Promise<string | null> => {
   const text = firstMessage?.trim();
-  if (!text) return null;
+
+  if (!text) {
+    return null;
+  }
+
   const fallback = text.length > 60 ? `${text.slice(0, 60)}…` : text;
 
-  if (!apiKey) return fallback;
+  if (!apiKey) {
+    return fallback;
+  }
 
   try {
     const { data } = await axios.post<{
@@ -60,12 +66,14 @@ const generateTitle = async (
     const generated = data.choices?.[0]?.message?.content
       ?.trim()
       .replace(/^["']|["']$/g, "");
+
     return generated || fallback;
   } catch (error) {
     logWarn("threads.title_fallback", {
       requestId,
       detail: error instanceof Error ? error.message : String(error),
     });
+
     return fallback;
   }
 };
@@ -96,16 +104,20 @@ threadsApp.post("/", validate("json", SaveThreadBodySchema), async (c) => {
 threadsApp.patch("/", validate("json", RenameThreadBodySchema), async (c) => {
   const { id, title } = c.get("valid") as RenameThreadBody;
   const thread = await renameThread(id, title);
+
   if (!thread) {
     throw new AppError(ERROR_CODE.THREAD_NOT_FOUND, {
       detail: `no thread with id ${id}`,
     });
   }
+
   return c.json({ thread });
 });
 
 threadsApp.delete("/", validate("query", ThreadIdQuerySchema), async (c) => {
   const { id } = c.get("valid") as ThreadIdQuery;
+
   await deleteThread(id);
+
   return c.json({ ok: true });
 });

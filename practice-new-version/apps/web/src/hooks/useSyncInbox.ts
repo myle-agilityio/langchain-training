@@ -18,6 +18,7 @@ export const useSyncInbox = () => {
         queryClient.invalidateQueries({ queryKey: inboxQueryKey });
       },
     });
+
     return unsubscribe;
   }, [agent, queryClient]);
 };

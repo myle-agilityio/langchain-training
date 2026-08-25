@@ -18,7 +18,10 @@ export const writeDraft = async (
   config: LangGraphRunnableConfig,
 ) => {
   const email = await getEmail(state.emailId);
-  if (!email) return {};
+
+  if (!email) {
+    return {};
+  }
 
   const profile = (
     await config.store?.get(CONTACT_PROFILE_NAMESPACE, email.from.email)
@@ -51,5 +54,6 @@ export const writeDraft = async (
       }),
       hidden(config),
     );
+
   return { draft, senderContext };
 };

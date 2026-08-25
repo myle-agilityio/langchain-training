@@ -10,5 +10,6 @@ export const getCheckpointer = async (): Promise<PostgresSaver> => {
     saver = new PostgresSaver(getPool());
     await saver.setup();
   }
+
   return saver;
 };

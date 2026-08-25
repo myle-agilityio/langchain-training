@@ -21,6 +21,7 @@ export const useSharedInbox = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const refresh = useCallback(async () => {
     setIsRefreshing(true);
+
     try {
       await refetch();
     } finally {
@@ -39,6 +40,7 @@ const applyPatch =
 
 const replaceEmails = (updated: Email[]) => (old?: Email[]) => {
   const byId = new Map(updated.map((email) => [email.id, email]));
+
   return (old ?? []).map((email) => byId.get(email.id) ?? email);
 };
 
@@ -91,7 +93,9 @@ export const usePatchEmails = () => {
 
   return useCallback(
     (ids: string[], patch: Partial<Email>) => {
-      if (ids.length > 0) mutate({ ids, patch });
+      if (ids.length > 0) {
+        mutate({ ids, patch });
+      }
     },
     [mutate],
   );

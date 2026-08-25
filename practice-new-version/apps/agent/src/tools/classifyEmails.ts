@@ -25,7 +25,11 @@ export const classifyEmail = async (
 ): Promise<ClassifyResult> => {
   try {
     const email = await getEmail(id);
-    if (!email) throw new AppError(ERROR_CODE.EMAIL_NOT_FOUND);
+
+    if (!email) {
+      throw new AppError(ERROR_CODE.EMAIL_NOT_FOUND);
+    }
+
     // Internal per-email classifier call — hide its forced tool call from the chat UI.
     const classification = await getPlainModelForConfig(config)
       .withStructuredOutput(ClassificationSchema)
@@ -36,7 +40,9 @@ export const classifyEmail = async (
           emitToolCalls: false,
         }),
       );
+
     await updateEmail(id, { classification });
+
     return { id, ok: true, classification };
   } catch (error) {
     // Never throw — one bad email (rate limit, parse failure) shouldn't sink the whole batch.
@@ -45,6 +51,7 @@ export const classifyEmail = async (
       threadId: threadIdOf(config),
       detail: `email ${id}`,
     });
+
     return { id, ok: false, error: toolError(appError) };
   }
 };
@@ -54,12 +61,15 @@ const classifyEmailsBatched = async (
   config: LangGraphRunnableConfig,
 ) => {
   const results: ClassifyResult[] = [];
+
   for (let i = 0; i < ids.length; i += CLASSIFY_CONCURRENCY) {
     const chunk = ids.slice(i, i + CLASSIFY_CONCURRENCY);
+
     results.push(
       ...(await Promise.all(chunk.map((id) => classifyEmail(id, config)))),
     );
   }
+
   return results;
 };
 
@@ -69,6 +79,7 @@ export const classify_emails = defineTool({
   run: async ({ ids }, config) => {
     const results = await classifyEmailsBatched(ids, config);
     const failed = results.filter((r) => !r.ok);
+
     return {
       results,
       note: "The inbox UI already shows these classification tags — don't list topic/course/workType/urgency per email in your reply, just confirm briefly.",

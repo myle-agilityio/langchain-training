@@ -36,6 +36,7 @@ export const triage = async (
 
   if (!email.classification) {
     const result = await classifyEmail(id, config);
+
     email.classification = result.ok ? result.classification : undefined;
   }
 
@@ -47,6 +48,9 @@ export const triage = async (
 };
 
 export const afterTriage = (state: ComposeEmailStateShape) => {
-  if (!state.emailId) return END;
+  if (!state.emailId) {
+    return END;
+  }
+
   return state.needsResearch ? "research" : "write_draft";
 };

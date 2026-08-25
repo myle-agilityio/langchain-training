@@ -17,14 +17,17 @@ emailsApp.patch("/", validate("json", PatchEmailBodySchema), async (c) => {
 
   if ("ids" in body) {
     const emails = await updateEmailsStatus(body.ids, body.patch.status);
+
     return c.json({ emails });
   }
 
   const email = await patchEmail(body.id, body.patch);
+
   if (!email) {
     throw new AppError(ERROR_CODE.EMAIL_NOT_FOUND, {
       detail: `no email with id ${body.id}`,
     });
   }
+
   return c.json({ email });
 });

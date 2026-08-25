@@ -8,7 +8,9 @@ export const EmailChat = () => {
   const awaitingApproval = useComposeApproval((s) => s.awaitingApproval);
   const locked = awaitingApproval ? { disabled: true as const } : undefined;
 
-  if (!apiKey) return <KeyRequiredCard />;
+  if (!apiKey) {
+    return <KeyRequiredCard />;
+  }
 
   return (
     <CopilotChat

@@ -10,7 +10,10 @@ export const research = async (
   config: LangGraphRunnableConfig,
 ) => {
   const email = await fetchEmailById(state.emailId);
-  if (!email) return { kbContext: "" };
+
+  if (!email) {
+    return { kbContext: "" };
+  }
 
   const query = `${email.subject} ${email.body} ${Object.values(email.classification ?? {}).join(" ")}`;
   const articles = (await searchKnowledge(query, config)) as KBArticle[];

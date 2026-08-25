@@ -23,6 +23,7 @@ export const listThreads = async (): Promise<ChatThread[]> => {
   const { rows } = await getPool().query<ChatThreadRow>(
     `SELECT ${CHAT_THREAD_COLUMNS} FROM chat_threads ORDER BY updated_at DESC`,
   );
+
   return rows.map(toChatThread);
 };
 
@@ -39,6 +40,7 @@ export const upsertThread = async (
      RETURNING ${CHAT_THREAD_COLUMNS}`,
     [id, title],
   );
+
   return toChatThread(rows[0]);
 };
 
@@ -47,6 +49,7 @@ export const threadExists = async (id: string): Promise<boolean> => {
     `SELECT id FROM chat_threads WHERE id = $1`,
     [id],
   );
+
   return rows.length > 0;
 };
 
@@ -59,6 +62,7 @@ export const renameThread = async (
      RETURNING ${CHAT_THREAD_COLUMNS}`,
     [id, title],
   );
+
   return rows[0] ? toChatThread(rows[0]) : null;
 };
 

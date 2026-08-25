@@ -91,6 +91,7 @@ export const buildGraph = async () => {
       logError(error, { node: "ensureIndexed" }),
     ),
   ]);
+
   logInfo("graph.ready");
 
   return workflow.compile({ checkpointer, store });

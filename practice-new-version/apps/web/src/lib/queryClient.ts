@@ -8,13 +8,17 @@ import { toast } from "@/stores";
 // teacher. Pass meta.silent on a query that fails in the background and shouldn't interrupt.
 const handle = (error: unknown, source: string, silent?: boolean) => {
   const apiError = toApiError(error);
+
   logError(source, {
     code: apiError.code,
     status: apiError.status,
     requestId: apiError.requestId,
     detail: apiError.message,
   });
-  if (!silent) toast.error(apiError.userMessage);
+
+  if (!silent) {
+    toast.error(apiError.userMessage);
+  }
 };
 
 export const queryClient = new QueryClient({

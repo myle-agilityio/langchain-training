@@ -15,6 +15,7 @@ export const nodeErrorHandler =
     });
     // A dangling reply_to_email call has to be answered or the next turn rejects the history.
     const call = findUnansweredReplyCall(state.messages);
+
     return new Command({
       update: {
         emailId: "",

@@ -34,6 +34,7 @@ export const redactEmailForModel = (
   email: Email,
 ): Omit<Email, "from"> & { from: { name: string } } => {
   const { from, ...rest } = email;
+
   return {
     ...rest,
     from: { name: from.name },

@@ -16,12 +16,15 @@ export const KeyForm = ({ submitLabel, onSaved }: KeyFormProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = draft.trim();
+
     if (!trimmed.startsWith("sk-")) {
       setError(
         'That doesn\'t look like an OpenAI key — it should start with "sk-".',
       );
+
       return;
     }
+
     setDraft("");
     setApiKey(trimmed);
     onSaved?.();

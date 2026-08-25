@@ -32,6 +32,7 @@ const DialogContent = React.forwardRef<
     </DialogPrimitive.Content>
   </DialogPrimitive.Portal>
 ));
+
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({
@@ -51,6 +52,7 @@ const DialogTitle = React.forwardRef<
     {...props}
   />
 ));
+
 DialogTitle.displayName = DialogPrimitive.Title.displayName;
 
 export { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle };

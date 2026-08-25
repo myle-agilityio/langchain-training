@@ -16,5 +16,6 @@ export const checkCompliance = async (
   const compliance = await getPlainModelForConfig(config)
     .withStructuredOutput(ComplianceCheckSchema)
     .invoke(checkCompliancePrompt(draft), hidden(config));
+
   return { compliance };
 };

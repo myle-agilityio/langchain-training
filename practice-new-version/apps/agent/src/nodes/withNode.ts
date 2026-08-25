@@ -16,13 +16,16 @@ export const withNode = <S, R>(
   return async (state: S, config: LangGraphRunnableConfig) => {
     const startedAt = Date.now();
     const threadId = threadIdOf(config);
+
     try {
       const result = await run(state, config);
+
       logInfo("node.ok", {
         node: name,
         threadId,
         durationMs: Date.now() - startedAt,
       });
+
       return result;
     } catch (error) {
       const appError = logError(error, {
@@ -30,7 +33,11 @@ export const withNode = <S, R>(
         threadId,
         durationMs: Date.now() - startedAt,
       });
-      if (appError.retryable) throw appError;
+
+      if (appError.retryable) {
+        throw appError;
+      }
+
       return { ...terminalUpdate, messages: errorNotice(appError) };
     }
   };

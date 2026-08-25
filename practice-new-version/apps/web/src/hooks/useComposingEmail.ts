@@ -12,7 +12,11 @@ export const useComposingEmail = (): string | null => {
   const awaitingApproval = useComposeApproval((s) => s.awaitingApproval);
 
   const state = agent.state as { emailId?: string } | undefined;
+
   // The field survives in the checkpoint after an aborted run — only trust it while one is live.
-  if (!agent.isRunning && !awaitingApproval) return null;
+  if (!agent.isRunning && !awaitingApproval) {
+    return null;
+  }
+
   return state?.emailId || null;
 };
