@@ -1,4 +1,4 @@
 export type { ChatThread } from "@repo/shared";
 export * from "@/types/tools";
 export * from "@/types/email";
-export * from "@/types/thread";
+export * from "@/types/errors";
