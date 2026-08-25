@@ -7,7 +7,7 @@ import { AppError, ERROR_CODE } from "@/errors/index";
 const EnvSchema = z.object({
   DATABASE_URL: z
     .string()
-    .min(1, "the inbox lives in Postgres — set it in the root .env"),
+    .min(1, "the inbox lives in Postgres — set it in apps/agent/.env"),
   OPENAI_API_KEY: z.string().optional(),
   // Cosine similarity (0-1) a KB match must clear to be used as grounding.
   // 0.65 default: on-topic matches land ~0.7-0.8, off-topic ~0.55-0.6 for this KB.

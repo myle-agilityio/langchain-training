@@ -48,7 +48,7 @@ just preferred (npm/yarn won't resolve the workspace lockfile).
   - Setting up your own is optional — please contact the author (My Le) to get a shared `DATABASE_URL`.
 - An OpenAI API key — BYOK: each visitor pastes their own into the browser prompt on first
   load (stored only in that browser's `localStorage`), so you don't need to set one up front to
-  run the app. `.env`'s `OPENAI_API_KEY` is now optional, used only to seed the shared
+  run the app. `apps/agent/.env`'s `OPENAI_API_KEY` is now optional, used only to seed the shared
   knowledge base on a brand-new database and as a fallback for `/api/threads`' title generation.
 
 ## Getting Started
@@ -61,30 +61,40 @@ pnpm install
 
 This installs both `apps/web` (the Vite app) and `apps/agent` in one pass — one pnpm workspace.
 
-2. Copy the example environment file and edit `.env`:
+2. Copy the example environment files — **each app owns its own `.env`**, there is no root one:
 
 ```bash
-cp .env.example .env
+cp apps/agent/.env.example apps/agent/.env
+cp apps/web/.env.example apps/web/.env
 ```
 
-Then update the required values:
+Then update the required values in `apps/agent/.env`:
 
 ```bash
 AGENT_URL=http://localhost:8123
 DATABASE_URL=your-postgres-connection-string
 ```
 
+`apps/web/.env` is optional — everything in it is commented out by default, and nothing in it is
+read at runtime (see [`apps/web/README.md`](apps/web/README.md#environment)).
+
 You'll be prompted for an OpenAI key in the browser the first time you open the app — that's
 what actually powers chat/classify/draft/RAG, not anything in `.env`.
 
-Optional environment values in `.env.example` include:
+Optional values in `apps/agent/.env.example`:
 
 - `OPENAI_API_KEY` — bootstrap-only now (see "Prerequisites" above)
-- `LANGSMITH_API_KEY` / `LANGSMITH_TRACING` / `LANGSMITH_PROJECT`
+- `RAG_SCORE_THRESHOLD` — defaults to `0.65`
+- `LANGSMITH_API_KEY` / `LANGSMITH_TRACING` / `LANGSMITH_PROJECT` / `LANGSMITH_ENDPOINT`
 - `COPILOTKIT_LICENSE_TOKEN`
 - `INTELLIGENCE_API_URL`
 - `INTELLIGENCE_GATEWAY_WS_URL`
 - `INTELLIGENCE_API_KEY`
+
+`apps/web/.env.example` holds only the two values the UI's tooling reads outside `src/`:
+`COPILOTKIT_LICENSE_TOKEN` (build/dev time, via `vite.config.ts`) and `AGENT_URL` (deploy time,
+via `vercel.json`). Both are also set on the agent side — enabling Threads means setting the
+license token in **both** files.
 
 The Intelligence ones are commented out by default — see "CopilotKit Intelligence" below for why.
 
@@ -127,21 +137,24 @@ README covering its layout and stack:
 ```
 ├── apps/
 │   ├── web/            # Vite SPA — inbox UI + CopilotKit chat  → apps/web/README.md
+│   │   └── .env        # Web-only env, read by vite.config.ts at build/dev time
 │   └── agent/          # LangGraph.js agent + Hono HTTP app     → apps/agent/README.md
+│       └── .env        # Agent-only env, read via langgraph.json's "env": ".env"
 ├── docs/               # FEATURES, ARCHITECTURE, TEST-SCENARIOS
 ├── fixtures/           # Sample data for manual runs
-├── turbo.json          # Task graph: dev, typecheck, build (+ the shared env allowlist)
+├── turbo.json          # Task graph: dev, typecheck, build
 ├── pnpm-workspace.yaml # packages: apps/*
 ├── eslint.config.mjs   # Flat config, workspace-wide
 ├── vercel.json         # Static UI deploy; /api/* rewritten to $AGENT_URL
-├── .env                # Single env file — both servers read it
 └── package.json        # Root scripts, all delegating to turbo
 ```
 
-Both servers read the **root** `.env`: Vite loads it for the UI, and the agent gets it via
-`apps/agent/langgraph.json`'s `"env": "../../.env"`. Everything persistent — the inbox,
-contact profiles, embedded knowledge base, graph checkpoints, and the cross-thread store —
-lives in the one Postgres behind `DATABASE_URL`.
+**Each package owns its env — there is no root `.env`.** The agent reads `apps/agent/.env`
+(wired by `apps/agent/langgraph.json`'s `"env": ".env"`); Vite reads `apps/web/.env` through
+`loadEnv` in `vite.config.ts`. The two values that matter on both sides —
+`COPILOTKIT_LICENSE_TOKEN` and `AGENT_URL` — have to be set in each file that needs them.
+Everything persistent — the inbox, contact profiles, embedded knowledge base, graph
+checkpoints, and the cross-thread store — lives in the one Postgres behind `DATABASE_URL`.
 
 ### Shared tooling
 
@@ -182,8 +195,8 @@ This project is licensed under the MIT License — see the LICENSE file for deta
 If the agent reports tool connection problems, make sure:
 
 1. The LangGraph agent is running on port `8123`
-2. You've entered a valid OpenAI key in the browser prompt (BYOK — `.env`'s `OPENAI_API_KEY`
-   no longer powers chat, only KB seeding)
+2. You've entered a valid OpenAI key in the browser prompt (BYOK — `apps/agent/.env`'s
+   `OPENAI_API_KEY` no longer powers chat, only KB seeding)
 3. `DATABASE_URL` is set to a Postgres database with `pgvector`
 4. Both servers started successfully
 
@@ -200,8 +213,9 @@ pnpm install
 This app is connected to the CopilotKit Intelligence project **practice-new-version**.
 The project details are recorded in `.copilotkit/project.json`.
 
-- **License:** a token can be stored in `COPILOTKIT_LICENSE_TOKEN` in `.env`
-- **Currently disabled:** the token is commented out in `.env`. Enabling it hits an unresolved
+- **License:** a token can be stored in `COPILOTKIT_LICENSE_TOKEN` — in `apps/agent/.env` for
+  the server, and in `apps/web/.env` for the UI's derived Threads flag
+- **Currently disabled:** the token is commented out in both files. Enabling it hits an unresolved
   upstream bug in `IntelligenceAgent.connectAgent`'s realtime WebSocket transport (`verifyEvents`
   rejects the first event), which drops runs in production with `RUNNER_CONNECTION_DROPPED`.
   Leave it commented out until CopilotKit fixes this.
