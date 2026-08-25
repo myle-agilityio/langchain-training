@@ -5,7 +5,7 @@ import type {
   EmailTopic,
   Urgency,
   WorkType,
-} from "@/types/email";
+} from "@/types";
 
 export interface EmailFilters {
   status?: EmailStatus;

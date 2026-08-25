@@ -16,6 +16,7 @@ export const ActionButton = ({
   children?: React.ReactNode;
 }) => {
   const [done, setDone] = useState(false);
+
   return (
     <button
       disabled={done}
@@ -37,7 +38,10 @@ export const ActionButton = ({
       }}
       onClick={() => {
         if (!done) {
-          if (typeof action === "function") action();
+          if (typeof action === "function") {
+            action();
+          }
+
           setDone(true);
         }
       }}

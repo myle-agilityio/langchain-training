@@ -1,8 +1,8 @@
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
-import { searchKnowledge } from "@/rag/index";
-import type { ComposeEmailStateShape, KBArticle } from "@/types/index";
-import { fetchEmailById } from "@/utils/index";
+import { searchKnowledge } from "@/rag";
+import type { ComposeEmailStateShape, KBArticle } from "@/types";
+import { fetchEmailById } from "@/utils";
 
 // research — search_knowledge_base for the policy the draft must not invent.
 export const research = async (
@@ -10,7 +10,10 @@ export const research = async (
   config: LangGraphRunnableConfig,
 ) => {
   const email = await fetchEmailById(state.emailId);
-  if (!email) return { kbContext: "" };
+
+  if (!email) {
+    return { kbContext: "" };
+  }
 
   const query = `${email.subject} ${email.body} ${Object.values(email.classification ?? {}).join(" ")}`;
   const articles = (await searchKnowledge(query, config)) as KBArticle[];

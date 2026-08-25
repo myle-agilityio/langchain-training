@@ -2,8 +2,7 @@ import { Hono } from "hono";
 
 import { copilotkitApp } from "./copilotkit";
 import { emailsApp } from "./emails";
-import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
-import { requestContext } from "./middleware/requestContext";
+import { errorHandler, notFoundHandler, requestContext } from "./middleware";
 import { threadsApp } from "./threads";
 import type { AppEnv } from "./types";
 

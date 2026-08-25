@@ -19,9 +19,14 @@ const write = (level: LogLevel, message: string, context: LogContext = {}) => {
       ),
     ),
   );
-  if (level === "error") console.error(line);
-  else if (level === "warn") console.warn(line);
-  else console.info(line);
+
+  if (level === "error") {
+    console.error(line);
+  } else if (level === "warn") {
+    console.warn(line);
+  } else {
+    console.info(line);
+  }
 };
 
 export const logInfo = (message: string, context?: LogContext) =>

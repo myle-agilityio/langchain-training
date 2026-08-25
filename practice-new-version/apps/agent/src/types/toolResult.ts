@@ -1,4 +1,4 @@
-import { type ErrorCode } from "@/errors/index";
+import { type ErrorCode } from "@/errors";
 
 export interface ToolError {
   code: ErrorCode;

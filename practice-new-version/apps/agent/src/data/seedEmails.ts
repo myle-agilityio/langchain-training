@@ -1,4 +1,4 @@
-﻿import type { Email } from "@/types/index";
+﻿import type { Email } from "@/types";
 
 export const seedEmails: Email[] = [
   {

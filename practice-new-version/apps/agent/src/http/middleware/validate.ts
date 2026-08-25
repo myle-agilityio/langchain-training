@@ -1,7 +1,7 @@
 import { createMiddleware } from "hono/factory";
 import type { z } from "zod";
 
-import { AppError, ERROR_CODE, toAppError } from "@/errors/index";
+import { AppError, ERROR_CODE, toAppError } from "@/errors";
 import type { AppEnv } from "../types";
 
 type Source = "json" | "query";
@@ -11,6 +11,7 @@ type Source = "json" | "query";
 export const validate = <S extends z.ZodTypeAny>(source: Source, schema: S) =>
   createMiddleware<AppEnv>(async (c, next) => {
     let raw: unknown;
+
     if (source === "json") {
       try {
         raw = await c.req.json();
@@ -24,7 +25,11 @@ export const validate = <S extends z.ZodTypeAny>(source: Source, schema: S) =>
     }
 
     const parsed = schema.safeParse(raw);
-    if (!parsed.success) throw toAppError(parsed.error);
+
+    if (!parsed.success) {
+      throw toAppError(parsed.error);
+    }
+
     c.set("valid", parsed.data);
     await next();
   });

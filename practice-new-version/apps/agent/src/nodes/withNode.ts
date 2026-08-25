@@ -1,7 +1,7 @@
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
-import { logError, logInfo } from "@/logging/index";
-import { errorNotice, threadIdOf } from "@/utils/index";
+import { logError, logInfo } from "@/logging";
+import { errorNotice, threadIdOf } from "@/utils";
 
 // The one try/catch every node runs behind. Retryable failures are rethrown so the graph's
 // retryPolicy still applies; a terminal expected failure ends the turn with chat text the
@@ -16,13 +16,16 @@ export const withNode = <S, R>(
   return async (state: S, config: LangGraphRunnableConfig) => {
     const startedAt = Date.now();
     const threadId = threadIdOf(config);
+
     try {
       const result = await run(state, config);
+
       logInfo("node.ok", {
         node: name,
         threadId,
         durationMs: Date.now() - startedAt,
       });
+
       return result;
     } catch (error) {
       const appError = logError(error, {
@@ -30,7 +33,11 @@ export const withNode = <S, R>(
         threadId,
         durationMs: Date.now() - startedAt,
       });
-      if (appError.retryable) throw appError;
+
+      if (appError.retryable) {
+        throw appError;
+      }
+
       return { ...terminalUpdate, messages: errorNotice(appError) };
     }
   };

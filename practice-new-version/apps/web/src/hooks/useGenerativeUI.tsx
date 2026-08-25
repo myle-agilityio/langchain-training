@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { useTheme } from "@/stores/useTheme";
+import { useTheme } from "@/stores";
 
 import {
   useFrontendTool,
@@ -23,9 +23,13 @@ export const useGenerativeUIExamples = () => {
     "log_a2ui_event", // Internal A2UI event tracker
     "compose_reply", // Rendered as the approval card by useEmailAgent
   ];
+
   useDefaultRenderTool({
     render: ({ name, status, parameters }) => {
-      if (ignoredTools.includes(name)) return <></>;
+      if (ignoredTools.includes(name)) {
+        return <></>;
+      }
+
       return <ToolReasoning name={name} status={status} args={parameters} />;
     },
   });
@@ -37,6 +41,7 @@ export const useGenerativeUIExamples = () => {
       parameters: z.object({}),
       handler: async () => {
         const isDark = document.documentElement.classList.contains("dark");
+
         setTheme(isDark ? "light" : "dark");
       },
     },

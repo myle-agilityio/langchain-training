@@ -6,13 +6,13 @@ import {
   useCopilotKit,
   useFrontendTool,
 } from "@copilotkit/react-core/v2";
-import type { Email } from "@/types/email";
+import type { Email } from "@/types";
 import {
   useSharedInbox,
   usePatchEmail,
   usePatchEmails,
-} from "@/hooks/useSharedInbox";
-import { useComposingEmail } from "@/hooks/useComposingEmail";
+  useComposingEmail,
+} from "@/hooks";
 import { useComposeApproval, useOpenAIKey } from "@/stores";
 import {
   EMPTY_FILTERS,
@@ -84,8 +84,10 @@ export const EmailInbox = () => {
         const next = Object.fromEntries(
           Object.entries(args).filter(([, v]) => v !== undefined && v !== ""),
         ) as EmailFilters;
+
         setFilters(next);
         const visible = filterEmails(emails, next);
+
         return hasActiveFilters(next)
           ? `Filters applied — ${visible.length} of ${emails.length} emails visible.`
           : "Filters cleared — all emails visible.";
@@ -110,6 +112,7 @@ export const EmailInbox = () => {
 
   const selectEmail = (email: Email) => {
     setSelectedId(email.id);
+
     if (email.status === "unread") {
       patchEmail(email.id, { status: "read" });
     }
@@ -128,9 +131,13 @@ export const EmailInbox = () => {
       parameters: z.object({ id: z.string() }),
       handler: async ({ id }) => {
         const email = emails.find((e) => e.id === id);
-        if (!email)
+
+        if (!email) {
           return `No email with id ${id} — call get_emails for current ids and retry.`;
+        }
+
         selectEmail(email);
+
         return `Opened "${email.subject}" from ${email.from.name} in the reading pane.`;
       },
     },
@@ -140,7 +147,10 @@ export const EmailInbox = () => {
   // Per-row toggle: flip between unread/read. A replied email can't go back to unread (the
   // reply already happened); flagged_for_followup still can.
   const toggleRead = (email: Email) => {
-    if (email.status === "replied") return;
+    if (email.status === "replied") {
+      return;
+    }
+
     patchEmail(email.id, {
       status: email.status === "unread" ? "read" : "unread",
     });
@@ -152,6 +162,7 @@ export const EmailInbox = () => {
     const ids = visibleEmails
       .filter((e) => e.status === "unread")
       .map((e) => e.id);
+
     patchEmails(ids, { status: "read" });
   };
 
@@ -159,6 +170,7 @@ export const EmailInbox = () => {
     const ids = visibleEmails
       .filter((e) => e.status === "read")
       .map((e) => e.id);
+
     patchEmails(ids, { status: "unread" });
   };
 

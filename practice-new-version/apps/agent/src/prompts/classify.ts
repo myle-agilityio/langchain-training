@@ -1,5 +1,5 @@
-import type { Email } from "@/types/index";
-import { renderEmail } from "@/utils/index";
+import type { Email } from "@/types";
+import { renderEmail } from "@/utils";
 
 // Used by classifyPrompt (classify_emails' own structured-output call).
 const CLASSIFICATION_GUIDE = `

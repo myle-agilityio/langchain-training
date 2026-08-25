@@ -6,5 +6,6 @@ export const threadIdOf = (
   config?: LangGraphRunnableConfig,
 ): string | undefined => {
   const value = config?.configurable?.thread_id;
+
   return typeof value === "string" ? value : undefined;
 };

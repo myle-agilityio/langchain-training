@@ -1,15 +1,15 @@
-﻿import { join } from "node:path";
+import { join } from "node:path";
 
 import { PGVectorStore } from "@langchain/community/vectorstores/pgvector";
 import { Document } from "@langchain/core/documents";
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 import type { OpenAIEmbeddings } from "@langchain/openai";
 
-import { getRagScoreThreshold } from "../config/env";
-import { logWarn } from "@/logging/index";
-import { getEmbeddingsForConfig, getServerEmbeddings } from "@/config/model";
-import { KB_TABLE } from "@/constants/index";
-import { getPool } from "@/db/index";
+import { getRagScoreThreshold } from "../config";
+import { logWarn } from "@/logging";
+import { getEmbeddingsForConfig, getServerEmbeddings } from "@/config";
+import { KB_TABLE } from "@/constants";
+import { getPool } from "@/db";
 import { knowledgeBase } from "./knowledgeBase";
 import { loadDirectoryAsChunks } from "./loaders";
 
@@ -30,10 +30,12 @@ const getVectorStore = (
 // startup, before any request exists, so it uses the server-side key, not a visitor's BYOK key.
 export const ensureIndexed = async (): Promise<void> => {
   const embeddings = getServerEmbeddings();
+
   if (!embeddings) {
     logWarn("rag.seed_skipped", {
       detail: "OPENAI_API_KEY not set on the server",
     });
+
     return;
   }
 
@@ -42,7 +44,10 @@ export const ensureIndexed = async (): Promise<void> => {
   const { rows } = await getPool().query<{ n: number }>(
     `SELECT count(*)::int AS n FROM ${KB_TABLE}`,
   );
-  if (rows[0].n > 0) return;
+
+  if (rows[0].n > 0) {
+    return;
+  }
 
   const seedDocs = knowledgeBase.map(
     (a) =>
@@ -52,6 +57,7 @@ export const ensureIndexed = async (): Promise<void> => {
       }),
   );
   const fileDocs = await loadDirectoryAsChunks(SAMPLE_DOCS_DIR);
+
   await store.addDocuments([...seedDocs, ...fileDocs]);
 };
 
@@ -69,6 +75,7 @@ export const searchKnowledge = async (
   const store = await getVectorStore(getEmbeddingsForConfig(config));
   const results = await store.similaritySearchWithScore(query, k);
   const threshold = getRagScoreThreshold();
+
   return results
     .filter(([, distance]) => distanceToSimilarity(distance) >= threshold)
     .map(([d]) => ({

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useTheme } from "@/stores/useTheme";
+import { useTheme } from "@/stores";
 
 // Applies the active theme to <html>; call once near the app root.
 export const useSyncTheme = () => {
@@ -7,6 +7,7 @@ export const useSyncTheme = () => {
 
   useEffect(() => {
     const root = document.documentElement;
+
     root.classList.remove("light", "dark");
 
     if (theme === "system") {
@@ -15,8 +16,10 @@ export const useSyncTheme = () => {
         root.classList.remove("light", "dark");
         root.classList.add(mq.matches ? "dark" : "light");
       };
+
       apply();
       mq.addEventListener("change", apply);
+
       return () => mq.removeEventListener("change", apply);
     }
 

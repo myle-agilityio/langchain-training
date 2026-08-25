@@ -83,6 +83,16 @@ These are how we work on this project, not style preferences. Follow them on eve
    `components/common/DropdownMenu/`). Barrel `index.ts`/`index.tsx` files keep their name. **Assets and scripts stay kebab-case**:
    `public/copilotkit-logo-mark.svg` and the KB documents in `rag/sampleDocs/`
    (`loaders.ts` derives their titles from the filename).
+7. **Barrels re-export whole modules with `export *`.** When the barrel takes everything a file
+   exports, write `export * from "./x"` — `export type * from "./x"` if that file is types only —
+   instead of listing every name. Spell out names only when the barrel deliberately takes a
+   subset, e.g. each app picking its share of `@repo/shared`.
+
+8. **Blank lines separate sections; every branch gets braces.** A body reads as declarations →
+   work → return, split by blank lines: one after each block (`if {}`, `for {}`), one before a
+   `return`/`throw`, one after a run of declarations. No single-line `if (x) doThing();`.
+   `@stylistic/padding-line-between-statements` + `curly` in `eslint.config.mjs` enforce this —
+   `pnpm lint:fix` applies it.
 
 ## Workflows
 

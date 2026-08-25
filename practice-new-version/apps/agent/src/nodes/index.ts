@@ -6,7 +6,7 @@ export {
   research,
   triage,
   writeDraft,
-} from "./composeEmail/index";
+} from "./composeEmail";
 export { nodeErrorHandler } from "./errorHandler";
 export { afterModeration, moderator } from "./moderator";
 export { withNode } from "./withNode";

@@ -2,10 +2,10 @@ import { tool } from "@langchain/core/tools";
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 import type { z } from "zod";
 
-import type { AppError } from "@/errors/index";
-import { logError } from "@/logging/index";
-import type { ToolEnvelope, ToolError } from "@/types/toolResult";
-import { threadIdOf } from "@/utils/index";
+import type { AppError } from "@/errors";
+import { logError } from "@/logging";
+import type { ToolEnvelope, ToolError } from "@/types";
+import { threadIdOf } from "@/utils";
 
 export const toolError = (error: AppError): ToolError => ({
   code: error.code,
@@ -36,13 +36,18 @@ export const defineTool = <S extends z.ZodTypeAny, T>({
     async (input: z.infer<S>, config: LangGraphRunnableConfig) => {
       try {
         const data = await run(input, config);
-        if (passthrough) return data as string;
+
+        if (passthrough) {
+          return data as string;
+        }
+
         return JSON.stringify({ ok: true, data } satisfies ToolEnvelope<T>);
       } catch (error) {
         const appError = logError(error, {
           tool: name,
           threadId: threadIdOf(config),
         });
+
         return JSON.stringify({
           ok: false,
           error: toolError(appError),

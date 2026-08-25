@@ -39,6 +39,7 @@ export const EmailDetail = ({
 
   // Close the compose form when another email is selected, adjusted during render not in an effect.
   const [shownEmailId, setShownEmailId] = useState(email?.id);
+
   if (email?.id !== shownEmailId) {
     setShownEmailId(email?.id);
     setComposing(false);

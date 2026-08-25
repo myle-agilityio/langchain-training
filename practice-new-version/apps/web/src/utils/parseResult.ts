@@ -5,9 +5,13 @@ import type { ToolEnvelope } from "@/types";
 export const parseToolResult = <T>(
   result: string | undefined,
 ): ToolEnvelope<T> | null => {
-  if (!result) return null;
+  if (!result) {
+    return null;
+  }
+
   try {
     const parsed = JSON.parse(result) as ToolEnvelope<T>;
+
     return typeof parsed?.ok === "boolean" ? parsed : null;
   } catch {
     return null;

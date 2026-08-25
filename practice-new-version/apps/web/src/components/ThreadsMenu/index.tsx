@@ -25,12 +25,18 @@ export const ThreadsMenu = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftTitle, setDraftTitle] = useState("");
 
-  if (!config) return null;
+  if (!config) {
+    return null;
+  }
 
   const commitRename = (id: string) => {
     const title = draftTitle.trim();
+
     setEditingId(null);
-    if (title) renameThread(id, title);
+
+    if (title) {
+      renameThread(id, title);
+    }
   };
 
   return (
@@ -38,7 +44,10 @@ export const ThreadsMenu = () => {
       open={open}
       onOpenChange={(next) => {
         setOpen(next);
-        if (!next) setEditingId(null);
+
+        if (!next) {
+          setEditingId(null);
+        }
       }}
     >
       <DropdownMenuTrigger asChild>
@@ -74,6 +83,7 @@ export const ThreadsMenu = () => {
             {threads.map((thread) => {
               const active =
                 config.hasExplicitThreadId && config.threadId === thread.id;
+
               return (
                 <li key={thread.id} className="group">
                   <div
@@ -94,8 +104,13 @@ export const ThreadsMenu = () => {
                           onChange={(e) => setDraftTitle(e.target.value)}
                           onBlur={() => commitRename(thread.id)}
                           onKeyDown={(e) => {
-                            if (e.key === "Enter") commitRename(thread.id);
-                            if (e.key === "Escape") setEditingId(null);
+                            if (e.key === "Enter") {
+                              commitRename(thread.id);
+                            }
+
+                            if (e.key === "Escape") {
+                              setEditingId(null);
+                            }
                           }}
                           onClick={(e) => e.stopPropagation()}
                           className="w-full bg-transparent border-b border-border outline-none"
@@ -130,7 +145,10 @@ export const ThreadsMenu = () => {
                       onClick={(e) => {
                         e.stopPropagation();
                         deleteThread(thread.id);
-                        if (active) config.startNewThread();
+
+                        if (active) {
+                          config.startNewThread();
+                        }
                       }}
                     >
                       ✕

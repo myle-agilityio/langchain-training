@@ -1,15 +1,15 @@
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
-import { getPlainModelForConfig, hidden } from "@/config/model";
-import { CONTACT_PROFILE_NAMESPACE } from "@/constants/index";
-import { getEmail } from "@/db/index";
-import { draftPrompt } from "@/prompts/index";
+import { getPlainModelForConfig, hidden } from "@/config";
+import { CONTACT_PROFILE_NAMESPACE } from "@/constants";
+import { getEmail } from "@/db";
+import { draftPrompt } from "@/prompts";
 import {
   DraftSchema,
   type ComposeEmailStateShape,
   type ContactProfileValue,
-} from "@/types/index";
-import { collectRevisionNotes } from "@/utils/index";
+} from "@/types";
+import { collectRevisionNotes } from "@/utils";
 
 // write_draft — email + researched context in, subject/body out. The sender profile is read here,
 // not in research: it's a cheap key lookup every draft should see, even when the KB isn't needed.
@@ -18,7 +18,10 @@ export const writeDraft = async (
   config: LangGraphRunnableConfig,
 ) => {
   const email = await getEmail(state.emailId);
-  if (!email) return {};
+
+  if (!email) {
+    return {};
+  }
 
   const profile = (
     await config.store?.get(CONTACT_PROFILE_NAMESPACE, email.from.email)
@@ -51,5 +54,6 @@ export const writeDraft = async (
       }),
       hidden(config),
     );
+
   return { draft, senderContext };
 };

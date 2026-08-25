@@ -1,4 +1,4 @@
-import type { EmailStatus } from "@/types/email";
+import type { EmailStatus } from "@/types";
 
 import { TONE } from "./tone";
 

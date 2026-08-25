@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { TOOL } from "@/constants/index";
-import { searchKnowledge } from "@/rag/index";
+import { TOOL } from "@/constants";
+import { searchKnowledge } from "@/rag";
 import { defineTool } from "./defineTool";
 
 export const search_knowledge_base = defineTool({

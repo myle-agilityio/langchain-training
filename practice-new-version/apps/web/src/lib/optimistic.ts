@@ -9,7 +9,9 @@ export const optimisticContext = async <T>(
 ) => {
   await queryClient.cancelQueries({ queryKey });
   const previous = queryClient.getQueryData<T>(queryKey);
+
   queryClient.setQueryData<T>(queryKey, updater);
+
   return { previous };
 };
 

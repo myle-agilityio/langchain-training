@@ -1,7 +1,7 @@
 import axios from "axios";
 
-import { ApiError } from "@/lib/errors";
-import { ERROR_CODE } from "@/types/errors";
+import { ApiError } from "@/lib";
+import { ERROR_CODE } from "@/types";
 
 // Every request to the agent's HTTP app goes through this instance: JSON in, JSON out, and one
 // ApiError for the query client to log and toast.
@@ -16,7 +16,10 @@ interface ErrorBody {
 apiClient.interceptors.response.use(
   (response) => response,
   (error: unknown) => {
-    if (!axios.isAxiosError(error)) throw error;
+    if (!axios.isAxiosError(error)) {
+      throw error;
+    }
+
     const method = error.config?.method?.toUpperCase() ?? "GET";
     const path = error.config?.url ?? "";
     const status = error.response?.status;
@@ -24,6 +27,7 @@ apiClient.interceptors.response.use(
     // No response at all means we never reached the agent — a different thing to tell the user.
     const code =
       body?.error?.code ?? (status ? ERROR_CODE.INTERNAL : ERROR_CODE.NETWORK);
+
     throw new ApiError(
       code,
       `${method} ${path} failed (${status ?? error.code ?? "network error"})`,

@@ -1,9 +1,8 @@
 import { MailCheck } from "lucide-react";
 import { Badge } from "@/components/common";
-import type { EmailStatus } from "@/types/email";
+import type { EmailStatus, ToolCardProps, ToolError } from "@/types";
 import { EmailLine, Pending, Shell, ToolFailure } from "../common";
 import { STATUS_LABEL, STATUS_TONE } from "@/constants";
-import type { ToolCardProps, ToolError } from "@/types";
 import { cn, parseToolResult } from "@/utils";
 
 type StatusResult =

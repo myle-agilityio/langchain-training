@@ -1,7 +1,7 @@
 import type { Context, ErrorHandler, NotFoundHandler } from "hono";
 
-import { AppError, ERROR_CODE } from "@/errors/index";
-import { logError } from "@/logging/index";
+import { AppError, ERROR_CODE } from "@/errors";
+import { logError } from "@/logging";
 import type { AppEnv } from "../types";
 
 const body = (c: Context<AppEnv>, error: AppError) => ({
@@ -20,10 +20,12 @@ export const errorHandler: ErrorHandler<AppEnv> = (error, c) => {
     method: c.req.method,
     path: c.req.path,
   });
+
   return c.json(body(c, appError), appError.status as 400);
 };
 
 export const notFoundHandler: NotFoundHandler<AppEnv> = (c) => {
   const appError = new AppError(ERROR_CODE.NOT_FOUND);
+
   return c.json(body(c, appError), 404);
 };

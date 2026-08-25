@@ -40,6 +40,7 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
         h2: "1.25rem",
         h3: "1rem",
       };
+
       return (
         <Tag
           style={{
@@ -68,6 +69,7 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
       const items = (
         Array.isArray(props.children) ? props.children : []
       ) as ChildEntry[];
+
       return (
         <div
           style={{
@@ -82,7 +84,7 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
           }}
         >
           {items.map((item, i) => {
-            if (typeof item === "string")
+            if (typeof item === "string") {
               return (
                 <div
                   key={`${item}-${i}`}
@@ -91,7 +93,9 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
                   {children(item)}
                 </div>
               );
-            if (item && typeof item === "object" && "id" in item)
+            }
+
+            if (item && typeof item === "object" && "id" in item) {
               return (
                 <div
                   key={`${item.id}-${i}`}
@@ -100,6 +104,8 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
                   {(children as ChildrenWithBasePath)(item.id, item.basePath)}
                 </div>
               );
+            }
+
             return null;
           })}
         </div>
@@ -110,6 +116,7 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
       const items = (
         Array.isArray(props.children) ? props.children : []
       ) as ChildEntry[];
+
       return (
         <div
           style={{
@@ -120,18 +127,22 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
           }}
         >
           {items.map((item, i) => {
-            if (typeof item === "string")
+            if (typeof item === "string") {
               return (
                 <React.Fragment key={`${item}-${i}`}>
                   {children(item)}
                 </React.Fragment>
               );
-            if (item && typeof item === "object" && "id" in item)
+            }
+
+            if (item && typeof item === "object" && "id" in item) {
               return (
                 <React.Fragment key={`${item.id}-${i}`}>
                   {(children as ChildrenWithBasePath)(item.id, item.basePath)}
                 </React.Fragment>
               );
+            }
+
             return null;
           })}
         </div>
@@ -188,6 +199,7 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
         down: "↓",
         neutral: "→",
       };
+
       return (
         <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
           <span
@@ -238,6 +250,7 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
         "#6366f1",
       ];
       const data = props.data ?? [];
+
       return (
         <div style={{ width: "100%", height: 200 }}>
           <ResponsiveContainer>
@@ -268,6 +281,7 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
 
     BarChart: ({ props }) => {
       const data = props.data ?? [];
+
       return (
         <div style={{ width: "100%", height: 200 }}>
           <ResponsiveContainer>
@@ -299,6 +313,7 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
         neutral: { bg: "var(--muted)", color: colors.cardFg },
       };
       const v = variants[props.variant ?? "neutral"] ?? variants.neutral;
+
       return (
         <span
           style={{
@@ -319,6 +334,7 @@ const demonstrationCatalogRenderers: CatalogRenderers<DemonstrationCatalogDefini
     DataTable: ({ props }) => {
       const cols = props.columns ?? [];
       const rows = props.rows ?? [];
+
       return (
         <div style={{ overflowX: "auto", width: "100%" }}>
           <table

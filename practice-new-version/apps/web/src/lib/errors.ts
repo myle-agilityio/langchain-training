@@ -1,5 +1,5 @@
 import { messageForCode } from "@/constants";
-import { ERROR_CODE } from "@/types/errors";
+import { ERROR_CODE } from "@/types";
 
 // What the rest of the app sees for any failed request: a code to branch on, wording that is
 // safe to render, and the technical bits kept for the log only.

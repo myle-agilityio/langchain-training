@@ -1,7 +1,7 @@
 import type pg from "pg";
 import { z } from "zod";
 
-import { AppError, ERROR_CODE } from "@/errors/index";
+import { AppError, ERROR_CODE } from "@/errors";
 
 // Read at call time, not import time, so the dev server's env loading always wins.
 const EnvSchema = z.object({
@@ -20,18 +20,25 @@ let cached: Env | undefined;
 
 // Validated once, then reused. A bad env is a CONFIG_INVALID with the offending names in detail.
 export const getEnv = (): Env => {
-  if (cached) return cached;
+  if (cached) {
+    return cached;
+  }
+
   const parsed = EnvSchema.safeParse(process.env);
+
   if (!parsed.success) {
     const fields = parsed.error.issues.map(
       (i) => `${i.path.join(".")} (${i.message})`,
     );
+
     throw new AppError(ERROR_CODE.CONFIG_INVALID, {
       detail: `invalid environment: ${fields.join("; ")}`,
       cause: parsed.error,
     });
   }
+
   cached = parsed.data;
+
   return cached;
 };
 
@@ -43,8 +50,10 @@ export const getRagScoreThreshold = (): number => getEnv().RAG_SCORE_THRESHOLD;
 export const getPgConnectionOptions = (): pg.PoolConfig => {
   const parsed = new URL(getDatabaseUrl());
   const sslmode = parsed.searchParams.get("sslmode");
+
   parsed.searchParams.delete("sslmode");
   parsed.searchParams.delete("channel_binding");
+
   return {
     connectionString: parsed.toString(),
     ssl:

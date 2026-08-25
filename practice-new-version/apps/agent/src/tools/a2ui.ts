@@ -1,17 +1,17 @@
-﻿import { z } from "zod";
+import { z } from "zod";
 import { tool, type ToolRuntime } from "@langchain/core/tools";
 import { SystemMessage } from "@langchain/core/messages";
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
-import { getA2uiModelForConfig } from "@/config/model";
-import { CUSTOM_CATALOG_ID, TOOL } from "@/constants/index";
-import { AppError, ERROR_CODE } from "@/errors/index";
+import { getA2uiModelForConfig } from "@/config";
+import { CUSTOM_CATALOG_ID, TOOL } from "@/constants";
+import { AppError, ERROR_CODE } from "@/errors";
 import { defineTool } from "./defineTool";
 import {
   createSurface,
   render,
   updateComponents,
   updateDataModel,
-} from "@/utils/a2ui";
+} from "@/utils";
 
 const renderA2uiSchema = z.object({
   surfaceId: z.string(),
@@ -107,6 +107,7 @@ export const generate_a2ui = defineTool({
     const toolCalls = (
       response as { tool_calls?: Array<{ args: Record<string, unknown> }> }
     ).tool_calls;
+
     if (!toolCalls || toolCalls.length === 0) {
       throw new AppError(ERROR_CODE.MODEL_OUTPUT_INVALID, {
         detail: "secondary model did not call render_a2ui",
@@ -129,9 +130,11 @@ export const generate_a2ui = defineTool({
       createSurface(surfaceId, CUSTOM_CATALOG_ID),
       updateComponents(surfaceId, components),
     ];
+
     if (Object.keys(data).length > 0) {
       ops.push(updateDataModel(surfaceId, data));
     }
+
     return render(ops);
   },
 });

@@ -1,4 +1,5 @@
-import { AppError, toAppError } from "@/errors/index";
+import { AppError, toAppError } from "@/errors";
+// Direct file import, not the @/utils barrel: that barrel reaches @/db, which imports this logger.
 import { redactSecrets } from "@/utils/redaction";
 
 export type LogLevel = "debug" | "info" | "warn" | "error";
@@ -46,9 +47,14 @@ const write = (level: LogLevel, message: string, context: LogContext = {}) => {
     ...context,
   });
   const line = JSON.stringify(entry);
-  if (level === "error") console.error(line);
-  else if (level === "warn") console.warn(line);
-  else console.log(line);
+
+  if (level === "error") {
+    console.error(line);
+  } else if (level === "warn") {
+    console.warn(line);
+  } else {
+    console.log(line);
+  }
 };
 
 export const logInfo = (message: string, context?: LogContext) =>
@@ -63,6 +69,7 @@ export const logError = (
   context: LogContext = {},
 ): AppError => {
   const appError = toAppError(error);
+
   write("error", appError.code, {
     ...context,
     ...appError.context,
@@ -71,5 +78,6 @@ export const logError = (
     detail: appError.detail,
     stack: appError.stack,
   });
+
   return appError;
 };

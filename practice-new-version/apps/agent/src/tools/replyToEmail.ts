@@ -1,7 +1,7 @@
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 
-import { TOOL } from "@/constants/index";
+import { TOOL } from "@/constants";
 
 // Never executed as a tool — the router turns this call into a compose-email subgraph entry, so
 // it stays on the raw tool() helper rather than defineTool's envelope.

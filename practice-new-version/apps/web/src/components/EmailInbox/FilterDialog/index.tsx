@@ -5,7 +5,7 @@ import type {
   EmailTopic,
   Urgency,
   WorkType,
-} from "@/types/email";
+} from "@/types";
 import {
   Button,
   Dialog,
@@ -43,9 +43,13 @@ export const FilterDialog = ({
 
   // Reset the draft on each open, adjusted during render rather than in an effect.
   const [wasOpen, setWasOpen] = useState(open);
+
   if (open !== wasOpen) {
     setWasOpen(open);
-    if (open) setDraft(filters);
+
+    if (open) {
+      setDraft(filters);
+    }
   }
 
   const set = <K extends keyof EmailFilters>(key: K, value: EmailFilters[K]) =>

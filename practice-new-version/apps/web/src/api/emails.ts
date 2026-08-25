@@ -1,4 +1,4 @@
-import type { Email } from "@/types/email";
+import type { Email } from "@/types";
 import { apiClient } from "./client";
 
 const EMAILS_PATH = "/api/emails";

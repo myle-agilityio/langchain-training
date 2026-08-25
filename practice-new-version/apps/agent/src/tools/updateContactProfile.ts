@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-import { CONTACT_PROFILE_NAMESPACE, TOOL } from "@/constants/index";
-import { listEmails } from "@/db/index";
-import { AppError, ERROR_CODE } from "@/errors/index";
-import type { ContactProfileValue } from "@/types/index";
+import { CONTACT_PROFILE_NAMESPACE, TOOL } from "@/constants";
+import { listEmails } from "@/db";
+import { AppError, ERROR_CODE } from "@/errors";
+import type { ContactProfileValue } from "@/types";
 import { defineTool } from "./defineTool";
 
 // Resolves sender against real inbox data (like classify_emails resolves ids) instead of trusting
@@ -12,25 +12,30 @@ export const update_contact_profile = defineTool({
   run: async (input, config) => {
     const matches = await listEmails({ sender: input.sender });
     const addresses = [...new Set(matches.map((e) => e.from.email))];
+
     if (addresses.length === 0) {
       throw new AppError(ERROR_CODE.SENDER_NOT_FOUND, {
         detail: `no inbox sender matches "${input.sender}"`,
       });
     }
+
     if (addresses.length > 1) {
       throw new AppError(ERROR_CODE.SENDER_AMBIGUOUS, {
         detail: `${addresses.length} senders match "${input.sender}"`,
       });
     }
+
     const email = addresses[0];
     const name = matches.find((e) => e.from.email === email)!.from.name;
 
     const store = config.store;
+
     if (!store) {
       throw new AppError(ERROR_CODE.INTERNAL, {
         detail: "BaseStore missing — graph must be compiled with a store",
       });
     }
+
     // Store.put replaces the whole value, so merge facts read-modify-write style.
     const existing = (await store.get(CONTACT_PROFILE_NAMESPACE, email))
       ?.value as ContactProfileValue | undefined;
@@ -39,7 +44,9 @@ export const update_contact_profile = defineTool({
       tone: input.tone ?? existing?.tone ?? null,
       facts: [...new Set([...(existing?.facts ?? []), ...(input.facts ?? [])])],
     };
+
     await store.put(CONTACT_PROFILE_NAMESPACE, email, profile);
+
     return { profile: { email, ...profile } };
   },
   name: TOOL.UPDATE_CONTACT_PROFILE,

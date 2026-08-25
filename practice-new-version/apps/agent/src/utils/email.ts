@@ -1,5 +1,5 @@
-import { getEmail } from "@/db/index";
-import type { Email } from "@/types/index";
+import { getEmail } from "@/db";
+import type { Email } from "@/types";
 
 // Nodes call db/rag functions directly, never tool.invoke() — a tool invoked inside a node emits
 // AG-UI TOOL_CALL events with no toolCallId, which kills the client's event stream mid-run.

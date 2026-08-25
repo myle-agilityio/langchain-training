@@ -3,6 +3,7 @@ import tseslint from "typescript-eslint";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import prettierConfig from "eslint-config-prettier";
+import stylistic from "@stylistic/eslint-plugin";
 import globals from "globals";
 
 export default tseslint.config(
@@ -48,4 +49,35 @@ export default tseslint.config(
     },
   },
   prettierConfig,
+  {
+    plugins: {
+      "@stylistic": stylistic,
+    },
+    rules: {
+      // Blank lines split a body into sections: declarations, work, return.
+      "@stylistic/padding-line-between-statements": [
+        "error",
+        { blankLine: "always", prev: "block-like", next: "*" },
+        { blankLine: "always", prev: "*", next: "block-like" },
+        { blankLine: "always", prev: "*", next: ["return", "throw"] },
+        { blankLine: "always", prev: ["const", "let", "var"], next: "*" },
+        {
+          blankLine: "any",
+          prev: ["const", "let", "var"],
+          next: ["const", "let", "var"],
+        },
+        { blankLine: "always", prev: "directive", next: "*" },
+        { blankLine: "always", prev: "import", next: "*" },
+        { blankLine: "any", prev: "import", next: "import" },
+        // Forcing a gap between switch cases breaks empty fall-through cases.
+        {
+          blankLine: "any",
+          prev: ["case", "default"],
+          next: ["case", "default"],
+        },
+      ],
+      // eslint-config-prettier turns curly off; we want every branch braced.
+      curly: ["error", "all"],
+    },
+  },
 );

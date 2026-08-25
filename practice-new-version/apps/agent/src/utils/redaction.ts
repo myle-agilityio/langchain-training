@@ -1,4 +1,4 @@
-import type { Email } from "@/types/index";
+import type { Email } from "@/types";
 
 // Heuristic regexes, not NER — good enough to keep obvious PII out of every model call without
 // a dependency. Order matters: address before phone, since street numbers can look phone-ish.
@@ -34,6 +34,7 @@ export const redactEmailForModel = (
   email: Email,
 ): Omit<Email, "from"> & { from: { name: string } } => {
   const { from, ...rest } = email;
+
   return {
     ...rest,
     from: { name: from.name },

@@ -9,12 +9,20 @@ import {
 export const findReplyCall = (messages: BaseMessage[]) => {
   for (let i = messages.length - 1; i >= 0; i--) {
     const message = messages[i];
-    if (!AIMessage.isInstance(message)) continue;
+
+    if (!AIMessage.isInstance(message)) {
+      continue;
+    }
+
     const call = (message.tool_calls ?? []).find(
       (c) => c.name === "reply_to_email",
     );
-    if (call) return call;
+
+    if (call) {
+      return call;
+    }
   }
+
   return undefined;
 };
 
@@ -22,10 +30,15 @@ export const findReplyCall = (messages: BaseMessage[]) => {
 // already-answered call would push a duplicate ToolMessage and break the next turn's history.
 export const findUnansweredReplyCall = (messages: BaseMessage[]) => {
   const call = findReplyCall(messages);
-  if (!call) return undefined;
+
+  if (!call) {
+    return undefined;
+  }
+
   const answered = messages.some(
     (m) => ToolMessage.isInstance(m) && m.tool_call_id === call.id,
   );
+
   return answered ? undefined : call;
 };
 
@@ -36,15 +49,22 @@ export const collectRevisionNotes = (
   emailId: string,
 ): string => {
   const callIndices = messages.reduce<number[]>((acc, message, i) => {
-    if (!AIMessage.isInstance(message)) return acc;
+    if (!AIMessage.isInstance(message)) {
+      return acc;
+    }
+
     const call = (message.tool_calls ?? []).find(
       (c) =>
         c.name === "reply_to_email" &&
         (c.args as { id?: string }).id === emailId,
     );
+
     return call ? [...acc, i] : acc;
   }, []);
-  if (callIndices.length === 0) return "";
+
+  if (callIndices.length === 0) {
+    return "";
+  }
 
   const currentIdx = callIndices[callIndices.length - 1];
   const sinceIdx =

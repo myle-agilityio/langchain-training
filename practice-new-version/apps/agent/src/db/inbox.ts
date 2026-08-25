@@ -1,6 +1,7 @@
-﻿import { getPool, EMAIL_COLUMNS, toEmail, type EmailRow } from "./index";
-import type { Email } from "@/types/index";
-import { seedEmails } from "@/data/seedEmails";
+import { EMAIL_COLUMNS, toEmail, type EmailRow } from "./emails";
+import { getPool } from "./pool";
+import type { Email } from "@/types";
+import { seedEmails } from "@/data";
 
 // Queries for the HTTP inbox routes (http/emails.ts) — distinct from the graph-tool queries
 // above; these need shapes (bulk status update, reply patch, seeding) tools never do.
@@ -9,6 +10,7 @@ export const listEmailsSeeded = async (): Promise<Email[]> => {
   const { rows } = await getPool().query<EmailRow>(
     `SELECT ${EMAIL_COLUMNS} FROM emails ORDER BY received_at DESC`,
   );
+
   if (rows.length === 0) {
     await Promise.all(
       seedEmails.map((email) =>
@@ -33,11 +35,13 @@ export const listEmailsSeeded = async (): Promise<Email[]> => {
         ),
       ),
     );
+
     return [...seedEmails].sort(
       (a, b) =>
         new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime(),
     );
   }
+
   return rows.map(toEmail);
 };
 
@@ -49,6 +53,7 @@ export const updateEmailsStatus = async (
     `UPDATE emails SET status = $1 WHERE id = ANY($2::text[]) RETURNING ${EMAIL_COLUMNS}`,
     [status, ids],
   );
+
   return rows.map(toEmail);
 };
 
@@ -76,5 +81,6 @@ export const patchEmail = async (
       patch.reply ? JSON.stringify(patch.reply) : null,
     ],
   );
+
   return rows[0] ? toEmail(rows[0]) : null;
 };

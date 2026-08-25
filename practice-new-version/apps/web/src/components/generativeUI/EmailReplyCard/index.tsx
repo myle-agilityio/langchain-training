@@ -36,6 +36,7 @@ export const EmailReplyCard = ({
   // Tool args arrive empty on the first ("inProgress") render, only populating at "executing" —
   // useState's initializer runs once, so without this the fields would stay blank.
   const [syncedDraft, setSyncedDraft] = useState({ draftSubject, draftBody });
+
   if (
     syncedDraft.draftSubject !== draftSubject ||
     syncedDraft.draftBody !== draftBody

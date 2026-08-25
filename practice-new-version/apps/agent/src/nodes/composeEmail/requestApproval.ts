@@ -1,9 +1,9 @@
 import { ToolMessage } from "@langchain/core/messages";
 import { interrupt } from "@langchain/langgraph";
 
-import { COMPOSE_REPLY_ACTION } from "@/constants/index";
-import type { ComposeEmailStateShape, RejectedDraft } from "@/types/index";
-import { findReplyCall } from "@/utils/index";
+import { COMPOSE_REPLY_ACTION } from "@/constants";
+import type { ComposeEmailStateShape, RejectedDraft } from "@/types";
+import { findReplyCall } from "@/utils";
 
 // Pauses for the teacher's approval card, then answers the dangling reply_to_email tool call with their decision.
 export const requestApproval = async (state: ComposeEmailStateShape) => {
@@ -33,6 +33,7 @@ export const requestApproval = async (state: ComposeEmailStateShape) => {
       : null;
 
   const call = findReplyCall(state.messages);
+
   return {
     lastRejectedDraft,
     // Cleared so the inbox stops showing this email as being drafted.

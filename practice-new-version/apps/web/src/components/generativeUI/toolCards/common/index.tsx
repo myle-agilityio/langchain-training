@@ -111,6 +111,7 @@ export const EmailLine = ({
 }) => {
   const lookup = useEmailLookup();
   const email = lookup.get(id);
+
   if (!email) {
     return (
       <span className="text-xs text-muted-foreground">
@@ -118,6 +119,7 @@ export const EmailLine = ({
       </span>
     );
   }
+
   return (
     <span className="min-w-0 truncate text-xs">
       <span className="font-semibold text-foreground">{email.from.name}</span>
@@ -130,7 +132,11 @@ export const FilterChips = ({ filter }: { filter: EmailFilterArgs }) => {
   const chips = Object.entries(filter).filter(
     ([, v]) => v !== undefined && v !== "",
   );
-  if (chips.length === 0) return null;
+
+  if (chips.length === 0) {
+    return null;
+  }
+
   return (
     <div className="mb-2 flex flex-wrap gap-1.5">
       {chips.map(([key, value]) => (
