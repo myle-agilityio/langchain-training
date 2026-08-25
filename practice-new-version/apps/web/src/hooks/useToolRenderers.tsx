@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { useRenderTool } from "@copilotkit/react-core/v2";
 
+import { TOOL } from "@/constants";
 import {
   ClassifyEmailsCard,
   CountEmailsCard,
@@ -59,7 +60,7 @@ const manageableStatusSchema = z.enum([
 export const useToolRenderers = () => {
   useRenderTool(
     {
-      name: "get_emails",
+      name: TOOL.GET_EMAILS,
       parameters: z.object({ filter: filterSchema.optional() }),
       render: (props) => <GetEmailsCard {...props} />,
     },
@@ -68,7 +69,7 @@ export const useToolRenderers = () => {
 
   useRenderTool(
     {
-      name: "count_emails",
+      name: TOOL.COUNT_EMAILS,
       parameters: z.object({
         filter: filterSchema.optional(),
         groupBy: z
@@ -82,7 +83,7 @@ export const useToolRenderers = () => {
 
   useRenderTool(
     {
-      name: "classify_emails",
+      name: TOOL.CLASSIFY_EMAILS,
       parameters: z.object({ ids: z.array(z.string()) }),
       render: (props) => <ClassifyEmailsCard {...props} />,
     },
@@ -91,7 +92,7 @@ export const useToolRenderers = () => {
 
   useRenderTool(
     {
-      name: "update_email_status",
+      name: TOOL.UPDATE_EMAIL_STATUS,
       parameters: z.object({
         patches: z.array(
           z.object({ id: z.string(), status: manageableStatusSchema }),
@@ -104,7 +105,7 @@ export const useToolRenderers = () => {
 
   useRenderTool(
     {
-      name: "search_knowledge_base",
+      name: TOOL.SEARCH_KNOWLEDGE_BASE,
       parameters: z.object({ query: z.string() }),
       render: (props) => <SearchKnowledgeBaseCard {...props} />,
     },
@@ -113,7 +114,7 @@ export const useToolRenderers = () => {
 
   useRenderTool(
     {
-      name: "update_contact_profile",
+      name: TOOL.UPDATE_CONTACT_PROFILE,
       parameters: z.object({
         sender: z.string(),
         tone: z.string().optional(),
