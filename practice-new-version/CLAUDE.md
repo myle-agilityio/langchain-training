@@ -75,7 +75,7 @@ These are how we work on this project, not style preferences. Follow them on eve
 
 1. **Reuse the patterns above before inventing new ones.** Don't introduce a second way to do
    something that already has one without saying why.
-2. **Keep comments to 1 short line.** No multi-line or paragraph comments explaining rationale —
+2. **Keep comments to max 2 short line.** No multi-line or paragraph comments explaining rationale —
    If it needs more than a line to explain, say it in the PR/response instead.
 3. **YOU MUST exercise the feature before calling it done.** Not "the code looks right" — run it.
    Say in your response what you verified and what you didn't. See the `verify-feature` skill.
