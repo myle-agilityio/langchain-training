@@ -1,64 +1,15 @@
-import { useMemo, type ReactNode } from "react";
-import {
-  CopilotKit,
-  CopilotChatConfigurationProvider,
-} from "@copilotkit/react-core/v2";
+import { useMemo } from "react";
+import { CopilotKit } from "@copilotkit/react-core/v2";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib";
 import { useOpenAIKey } from "@/stores";
 import {
   // A2UI catalog: definitions + renderers in @/components/declarativeGenerativeUI/
   demonstrationCatalog,
-  ChatSidebar,
   Toaster,
-  EmailChat,
-  EmailInbox,
-  ThreadsMenu,
 } from "@/components";
-import {
-  useGenerativeUIExamples,
-  useExampleSuggestions,
-  useEmailAgent,
-  useSyncComposeApproval,
-  useSyncInbox,
-  useSyncThreads,
-  useSyncTheme,
-} from "@/hooks";
-
-// Needs useAgent()/useCopilotChatConfiguration(), which only resolve inside
-// CopilotChatConfigurationProvider — wraps both chat and inbox since both use it.
-const AgentSync = ({ children }: { children: ReactNode }) => {
-  useSyncInbox();
-  useSyncThreads();
-  useSyncComposeApproval();
-
-  return <>{children}</>;
-};
-
-const Inbox = () => {
-  useGenerativeUIExamples();
-  useExampleSuggestions();
-  useEmailAgent();
-
-  const body = (
-    <div className="flex h-dvh w-full overflow-hidden gap-3 p-3 bg-background">
-      <div className="flex-1 min-w-0 h-full overflow-hidden">
-        <EmailInbox />
-      </div>
-      <ChatSidebar threadsMenu={<ThreadsMenu />}>
-        <EmailChat />
-      </ChatSidebar>
-    </div>
-  );
-
-  return (
-    /* Uncontrolled provider: the threads menu drives the active thread directly (row picks it,
-       "+ New" resets it) — chat and canvas both read it via useAgent(), no host wiring needed. */
-    <CopilotChatConfigurationProvider agentId="default">
-      <AgentSync>{body}</AgentSync>
-    </CopilotChatConfigurationProvider>
-  );
-};
+import { useSyncTheme } from "@/hooks";
+import { Inbox } from "./Inbox";
 
 const App = () => {
   useSyncTheme();
