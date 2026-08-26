@@ -1,7 +1,14 @@
 # Architecture
 
-Diagrams of the AI Email Assistant: overall system, the main agent graph, and the
-`compose_email` subgraph. All rendered top-to-bottom (vertical).
+Diagrams of the AI Email Assistant, ordered by zoom level — start at the system, then drop into
+each piece it's made of:
+
+1. **System overview** — browser, agent server, Postgres, and how they talk to each other.
+2. **Main agent graph** — what runs inside "the agent server" box above.
+3. **`compose_email` subgraph** — what runs inside that graph's `compose_email` node.
+4. **Tools available to `call_model`** — what's inside that graph's `tools` node.
+5. **Frontend tools** — a separate mechanism, tools the model can call that run in the browser
+   instead of node 4's `ToolNode`.
 
 ## System overview
 
@@ -21,10 +28,10 @@ graph TD
     end
 
     subgraph Postgres["Postgres — DATABASE_URL"]
-        EmailsTbl[("emails / contact_profiles")]
+        EmailsTbl[("emails")]
         KB[("kb_documents (pgvector)")]
         Checkpoints[("checkpoints*")]
-        Store[("store* (cross-thread memory)")]
+        Store[("store* — cross-thread memory,\nincl. contact_profiles")]
     end
 
     User --> UI
@@ -42,10 +49,11 @@ graph TD
 
 ## Main agent graph (`apps/agent/src/graphs/index.ts`)
 
-A ReAct loop gated by a `moderator` node; `compose_email` is a subgraph node (detailed below).
-`moderator` hard-blocks unsafe/abusive chat input before it reaches `call_model` — distinct from
-`call_model`'s own `SCOPE_GUIDE` (declines out-of-scope-but-safe requests) and `check_compliance`
-below (checks outgoing drafts, not chat input).
+A ReAct loop gated by a `moderator` node. `moderator` hard-blocks unsafe/abusive chat input
+before it reaches `call_model` — distinct from `call_model`'s own `SCOPE_GUIDE` (declines
+out-of-scope-but-safe requests) and `check_compliance` below (checks outgoing drafts, not chat
+input). `tools` is expanded in [Tools available to `call_model`](#tools-available-to-call_model);
+`compose_email` is expanded in [the next section](#compose_email-subgraph-appsagentsrcgraphscomposeemailsubgraphts).
 
 ```mermaid
 graph TD
@@ -69,7 +77,9 @@ graph TD
 
 ## `compose_email` subgraph (`apps/agent/src/graphs/composeEmailSubgraph.ts`)
 
-Fixed prompt-chaining pipeline run for every reply.
+Fixed prompt-chaining pipeline run for every reply — this is the `compose_email` node from the
+[main agent graph](#main-agent-graph-appsagentsrcgraphsindexts) above; it returns control to
+`call_model` once `request_approval` resolves.
 
 ```mermaid
 graph TD
