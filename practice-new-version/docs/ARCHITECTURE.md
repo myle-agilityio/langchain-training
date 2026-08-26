@@ -49,11 +49,10 @@ graph TD
 
 ## Main agent graph (`apps/agent/src/graphs/index.ts`)
 
-A ReAct loop gated by a `moderator` node. `moderator` hard-blocks unsafe/abusive chat input
-before it reaches `call_model` — distinct from `call_model`'s own `SCOPE_GUIDE` (declines
-out-of-scope-but-safe requests) and `check_compliance` below (checks outgoing drafts, not chat
-input). `tools` is expanded in [Tools available to `call_model`](#tools-available-to-call_model);
-`compose_email` is expanded in [the next section](#compose_email-subgraph-appsagentsrcgraphscomposeemailsubgraphts).
+`moderator` is distinct from `call_model`'s own `SCOPE_GUIDE` (declines out-of-scope-but-safe
+requests) and `check_compliance` below (checks outgoing drafts, not chat input). `tools` is
+expanded in [Tools available to `call_model`](#tools-available-to-call_model); `compose_email`
+in [the next section](#compose_email-subgraph-appsagentsrcgraphscomposeemailsubgraphts).
 
 ```mermaid
 graph TD
@@ -125,13 +124,10 @@ graph TD
 
 ## Frontend tools
 
-UI components register tools with `useFrontendTool` (`@copilotkit/react-core/v2`). CopilotKit
-sends them up as `copilotkit.actions` on agent state; `callModel` (`apps/agent/src/nodes/index.ts`)
-converts each into OpenAI tool format and binds it alongside `modelTools` for that invocation
-only — they are not in `executableTools`, so `routeAfterModel` never sends their calls to the
-`tools` node. A call to one ends the graph turn; CopilotKit's frontend runtime matches it back
-to the registered handler and runs it in the browser (e.g. filtering the inbox list, opening an
-email, toggling the theme), then resumes the thread with the result.
+UI components register these with `useFrontendTool` (`@copilotkit/react-core/v2`); `callModel`
+(`apps/agent/src/nodes/index.ts`) binds them alongside `modelTools` for that invocation only.
+They're deliberately left out of `executableTools`, so `routeAfterModel` never routes a call to
+the `tools` node — that's what forces the turn to end instead.
 
 ```mermaid
 graph TD
