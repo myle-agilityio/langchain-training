@@ -1,11 +1,7 @@
 # `web` — Vite inbox UI
 
 The frontend half of the AI Email Assistant: a single-page Vite + React app (no router) that
-renders the teacher's inbox next to a CopilotKit chat sidebar. All server state comes from the
-agent — this package has no backend of its own.
-
-For the agent it talks to see [`apps/agent`](../agent/README.md); for the system diagram see
-[ARCHITECTURE.md](../../docs/ARCHITECTURE.md).
+renders the teacher's inbox next to a CopilotKit chat sidebar.
 
 ## Running it
 
@@ -15,32 +11,13 @@ pnpm --filter web typecheck
 pnpm build              # vite build → apps/web/dist
 ```
 
-`vite.config.ts` proxies `/api` → `http://localhost:8123` (hard-coded), so the dev server needs
-the agent running for the inbox and chat to work. `@` is aliased to `src/`.
-
-Deployment is static: `vercel.json` serves `dist` and rewrites `/api/*` to `$AGENT_URL`.
-
 ## Environment
-
-This package has its own `.env` (copy `.env.example` next to it) but reads **nothing at
-runtime** — the agent owns configuration and keeps its own `apps/agent/.env`. Both entries below
-are consumed outside `src/`, by tooling. `vite.config.ts` picks the file up via `loadEnv`, so no
-`VITE_` prefix is needed.
 
 | Variable                          | Required | Read by                             | Purpose                                                                                                                        |
 | --------------------------------- | -------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `COPILOTKIT_LICENSE_TOKEN`        | No       | `vite.config.ts`, at build/dev time | Server-side token, also set in `apps/agent/.env`. Its presence derives the Threads flag below — set the token, never the flag. |
 | `AGENT_URL`                       | No       | `vercel.json`, at deploy time       | Rewrite target for `/api/*` in production; set on the deploy platform. Ignored in dev, where the Vite proxy handles it.        |
-| `VITE_COPILOTKIT_THREADS_ENABLED` | Derived  | —                                   | Injected by `vite.config.ts` as `"true"`/`"false"`. **Currently read by nothing** — see below.                                 |
-
-The visitor's OpenAI key is not an env var: it's entered in the browser, kept in `localStorage`,
-and sent per-request as the `x-openai-api-key` header (see [BYOK](#byok) below).
-
-> **Note on the Threads flag.** `vite.config.ts` still defines
-> `import.meta.env.VITE_COPILOTKIT_THREADS_ENABLED`, but no file in `src/` reads it — the UI
-> always uses the self-managed thread list (`useSelfManagedThreads` + `ThreadsMenu`). Setting
-> `COPILOTKIT_LICENSE_TOKEN` currently changes agent behaviour only. Either wire the flag up or
-> drop the `define`; leaving it implies a switch that isn't there.
+| `VITE_COPILOTKIT_THREADS_ENABLED` | Derived  | —                                   | Injected by `vite.config.ts` as `"true"`/`"false"`.                                 |
 
 ## Structure
 
@@ -69,6 +46,7 @@ src/
 │   ├── useSharedInbox.ts        # Inbox query + patch mutations
 │   ├── useSelfManagedThreads.ts # Threads query + rename/delete/save
 │   ├── useEmailAgent.tsx        # Wires the selected email into the agent's context
+│   ├── useComposingEmail.ts     # The email the compose pipeline is drafting for
 │   ├── useGenerativeUI.tsx      # Frontend tools + interrupt rendering
 │   ├── useToolRenderers.tsx     # Maps tool calls to their cards
 │   ├── useEmailLookup.ts        # id -> Email map for the tool cards
@@ -81,30 +59,10 @@ src/
 │   ├── emailFilters.ts  # Filter predicates for the inbox list
 │   ├── formatDate.ts
 │   └── parseResult.ts   # Safe JSON.parse of a tool result
-├── constants/           # One file per facet (tone, topic, urgency, status, course, workType)
-└── types/               # email, thread, tools
+├── constants/           # One file per facet (tone, topic, urgency, status, course, workType, errors)
+└── types/               # email, errors, tools; ChatThread re-exported from @repo/shared
 public/                  # Static assets (kebab-case, by rule)
 ```
-
-## The two state systems
-
-Keeping these apart is the rule this app is organised around:
-
-| State                                                  | Where it lives                                                                                                           |
-| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
-| **Server state** — emails, threads                     | TanStack Query: a `useX` query hook per resource, a mutation hook per write, `useSync*` invalidating on `onRunFinalized` |
-| **Client state** — theme, OpenAI key, compose approval | zustand stores in `src/stores/`                                                                                          |
-
-Hooks never call `fetch`/`axios` directly — every request goes through a module in `src/api/`,
-which is also where request errors get their uniform shape for `queryClient` to log.
-
-## BYOK
-
-There is no shared server key for chat. `useOpenAIKey` holds the visitor's key in
-`localStorage`; `App.tsx` subscribes to it and passes it as a `headers` memo to `<CopilotKit>`,
-which forwards it to the graph as `copilotkit_forwarded_headers`. The subscription matters —
-CopilotKit only re-reads `headers` when its provider re-renders, so reading the store on demand
-would keep using a stale key until reload.
 
 ## Stack
 

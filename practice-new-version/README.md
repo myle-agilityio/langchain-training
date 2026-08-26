@@ -8,7 +8,7 @@ An inbox triage assistant for a high school math teacher, built with [LangGraph]
 
 ## Timeline
 
-16 Days
+30 Working Days (2026-07-15 to 2026-08-26)
 
 ## Author
 
@@ -20,36 +20,27 @@ My Le
 
 ## Key Features
 
-- 🤖 **AI Chat Assistant** — conversational inbox-triage assistant for classifying, drafting, and sending replies (CopilotKit + LangGraph ReAct agent)
-- 📧 **Email Classification** — auto-tags topic, course, work type, and urgency via structured LLM output (Zod + `withStructuredOutput`)
-- ✅ **Human-in-the-Loop Approval** — editable draft cards with approve/reject before anything sends, using LangGraph `interrupt()` + `Command(resume)` pattern
-- 🔀 **Compose-Email Subgraph** — dedicated triage → research → draft → compliance pipeline as a nested `StateGraph`, so every reply is grounded and checked
-- 📚 **RAG-Grounded Replies** — policy and curriculum answers pulled from a pgvector knowledge base via semantic search (`PGVectorStore` + `text-embedding-3-small`)
-- 🛡️ **Guardrails** — a `moderator` node hard-blocks unsafe/abusive chat input before it reaches the model, plus an advisory compliance check on every draft and regex-based PII redaction before any model call
-- 🎨 **Generative UI** — dynamic dashboards and approval cards rendered live in chat via A2UI, `useInterrupt`, and `useFrontendTool`
-- 🧠 **Cross-thread Memory** — remembers sender tone and facts across conversations via a Postgres-backed `BaseStore`
-- 🔁 **Thread Durability** — resumable, restart-safe agent runs via a `PostgresSaver` checkpointer
-- 💾 **PostgreSQL Persistence** — inbox, checkpoints, vector KB, and cross-thread store all live in one Postgres via a shared `pg.Pool`
-- 🔑 **Bring Your Own Key** — each visitor supplies their own OpenAI key in the browser (`localStorage`, forwarded per-request via CopilotKit's `copilotkit_forwarded_headers`); no shared server-side key required for chat/classify/draft/RAG
+| Feature                           | Description                                                                                                                                                                                                       |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🤖 **AI Chat Assistant**          | Conversational inbox-triage assistant for classifying, drafting, and sending replies (CopilotKit + LangGraph ReAct agent)                                                                                         |
+| 📧 **Email Classification**       | Auto-tags topic, course, work type, and urgency via structured LLM output (Zod + `withStructuredOutput`)                                                                                                          |
+| ✅ **Human-in-the-Loop Approval** | Editable draft cards with approve/reject before anything sends, using LangGraph `interrupt()` + `Command(resume)` pattern                                                                                         |
+| 🔀 **Compose-Email Subgraph**     | Dedicated triage → research → draft → compliance pipeline as a nested `StateGraph`, so every reply is grounded and checked                                                                                        |
+| 📚 **RAG-Grounded Replies**       | Policy and curriculum answers pulled from a pgvector knowledge base via semantic search (`PGVectorStore` + `text-embedding-3-small`)                                                                              |
+| 🛡️ **Guardrails**                 | A `moderator` node hard-blocks unsafe/abusive chat input before it reaches the model, plus an advisory compliance check on every draft and regex-based PII redaction before any model call                        |
+| 🎨 **Generative UI**              | Dynamic dashboards and approval cards rendered live in chat via A2UI, `useInterrupt`, and `useFrontendTool`                                                                                                       |
+| 🧠 **Cross-thread Memory**        | Remembers sender tone and facts across conversations via a Postgres-backed `BaseStore`                                                                                                                            |
+| 🔁 **Thread Durability**          | Resumable, restart-safe agent runs via a `PostgresSaver` checkpointer                                                                                                                                             |
+| 💾 **PostgreSQL Persistence**     | Inbox, checkpoints, vector KB, and cross-thread store all live in one Postgres via a shared `pg.Pool`                                                                                                             |
+| 🔑 **Bring Your Own Key**         | Each visitor supplies their own OpenAI key in the browser (`localStorage`, forwarded per-request via CopilotKit's `copilotkit_forwarded_headers`); no shared server-side key required for chat/classify/draft/RAG |
 
 ## Prerequisites
 
-[![Node.js](https://img.shields.io/badge/Node.js-20%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![pnpm](https://img.shields.io/badge/pnpm-10.30.3-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/installation)
+[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18.0.0-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-pgvector-4169E1?logo=postgresql&logoColor=white)](https://github.com/pgvector/pgvector)
 [![OpenAI](https://img.shields.io/badge/OpenAI-API_key-412991?logo=openai&logoColor=white)](https://platform.openai.com/)
-
-[![pnpm](https://img.shields.io/badge/pnpm-F69220?logo=pnpm&logoColor=white)](https://pnpm.io/installation)
-
-`apps/web` and `apps/agent` are one [pnpm workspace](https://pnpm.io/workspaces) — pnpm is required, not
-just preferred (npm/yarn won't resolve the workspace lockfile).
-
-- A Postgres database with the `pgvector` extension available — local install, Neon, Supabase, etc. all work.
-  - Setting up your own is optional — please contact the author (My Le) to get a shared `DATABASE_URL`.
-- An OpenAI API key — BYOK: each visitor pastes their own into the browser prompt on first
-  load (stored only in that browser's `localStorage`), so you don't need to set one up front to
-  run the app. `apps/agent/.env`'s `OPENAI_API_KEY` is now optional, used only to seed the shared
-  knowledge base on a brand-new database and as a fallback for `/api/threads`' title generation.
 
 ## Getting Started
 
@@ -75,30 +66,11 @@ AGENT_URL=http://localhost:8123
 DATABASE_URL=your-postgres-connection-string
 ```
 
-`apps/web/.env` is optional — everything in it is commented out by default, and nothing in it is
-read at runtime (see [`apps/web/README.md`](apps/web/README.md#environment)).
+An empty database is fine — tables, the `vector` extension, and seed data (sample emails, the
+knowledge base) are all created automatically on first run.
 
-You'll be prompted for an OpenAI key in the browser the first time you open the app — that's
-what actually powers chat/classify/draft/RAG, not anything in `.env`.
-
-Optional values in `apps/agent/.env.example`:
-
-- `OPENAI_API_KEY` — bootstrap-only now (see "Prerequisites" above)
-- `RAG_SCORE_THRESHOLD` — defaults to `0.65`
-- `LANGSMITH_API_KEY` / `LANGSMITH_TRACING` / `LANGSMITH_PROJECT` / `LANGSMITH_ENDPOINT`
-- `COPILOTKIT_LICENSE_TOKEN`
-- `INTELLIGENCE_API_URL`
-- `INTELLIGENCE_GATEWAY_WS_URL`
-- `INTELLIGENCE_API_KEY`
-
-`apps/web/.env.example` holds only the two values the UI's tooling reads outside `src/`:
-`COPILOTKIT_LICENSE_TOKEN` (build/dev time, via `vite.config.ts`) and `AGENT_URL` (deploy time,
-via `vercel.json`). Both are also set on the agent side — enabling Threads means setting the
-license token in **both** files.
-
-The Intelligence ones are commented out by default — see "CopilotKit Intelligence" below for why.
-
-Everything persistent — the inbox, contact profiles, embedded knowledge base, graph checkpoints, and cross-thread store — lives in the Postgres database behind `DATABASE_URL`. Tables, indexes, and the `vector` extension are created automatically on first connect.
+The rest of `apps/agent/.env.example`'s values (`RAG_SCORE_THRESHOLD`, LangSmith tracing,
+CopilotKit Intelligence) are optional — each has a comment explaining it right there in the file.
 
 3. Start the development server:
 
@@ -112,26 +84,20 @@ This starts both the Vite UI on port `3000` and the LangGraph agent on port `812
 
 Run from the repo root — all of these go through Turborepo:
 
-- `dev` - Starts both UI and agent servers in development mode
-- `dev:ui` - Starts only the Vite UI server (`:3000`)
-- `dev:agent` - Starts only the LangGraph agent server (`:8123`)
-- `typecheck` - Type-checks both packages; must be clean before a task is done
-- `lint` / `lint:fix` - ESLint across the workspace (flat config, `eslint.config.mjs`)
-- `format` / `format:check` - Prettier across the workspace
-- `build` - Builds the UI for production (`apps/web/dist`)
-- `build:agent` - Builds the agent image target (`langgraphjs build`)
-
-A pre-push hook re-runs lint and format, but only on the files in the commits being pushed.
-
-If agent dependencies fail to install automatically, run:
-
-```bash
-pnpm install
-```
+| Script                    | Description                                                    |
+| ------------------------- | -------------------------------------------------------------- |
+| `dev`                     | Starts both UI and agent servers in development mode           |
+| `dev:ui`                  | Starts only the Vite UI server (`:3000`)                       |
+| `dev:agent`               | Starts only the LangGraph agent server (`:8123`)               |
+| `typecheck`               | Type-checks both packages; must be clean before a task is done |
+| `lint` / `lint:fix`       | ESLint across the workspace (flat config, `eslint.config.mjs`) |
+| `format` / `format:check` | Prettier across the workspace                                  |
+| `build`                   | Builds the UI for production (`apps/web/dist`)                 |
+| `build:agent`             | Builds the agent image target (`langgraphjs build`)            |
 
 ## Project Structure
 
-A [Turborepo](https://turborepo.com) + pnpm workspace with two packages. Each has its own
+A [Turborepo](https://turborepo.com) + pnpm workspace with three packages. Each has its own
 README covering its layout and stack:
 
 ```
@@ -140,21 +106,16 @@ README covering its layout and stack:
 │   │   └── .env        # Web-only env, read by vite.config.ts at build/dev time
 │   └── agent/          # LangGraph.js agent + Hono HTTP app     → apps/agent/README.md
 │       └── .env        # Agent-only env, read via langgraph.json's "env": ".env"
+├── packages/
+│   └── shared/         # @repo/shared — tool names, ChatThread type, shared constants
 ├── docs/               # FEATURES, ARCHITECTURE, TEST-SCENARIOS
 ├── fixtures/           # Sample data for manual runs
 ├── turbo.json          # Task graph: dev, typecheck, build
-├── pnpm-workspace.yaml # packages: apps/*
+├── pnpm-workspace.yaml # packages: apps/*, packages/*
 ├── eslint.config.mjs   # Flat config, workspace-wide
 ├── vercel.json         # Static UI deploy; /api/* rewritten to $AGENT_URL
 └── package.json        # Root scripts, all delegating to turbo
 ```
-
-**Each package owns its env — there is no root `.env`.** The agent reads `apps/agent/.env`
-(wired by `apps/agent/langgraph.json`'s `"env": ".env"`); Vite reads `apps/web/.env` through
-`loadEnv` in `vite.config.ts`. The two values that matter on both sides —
-`COPILOTKIT_LICENSE_TOKEN` and `AGENT_URL` — have to be set in each file that needs them.
-Everything persistent — the inbox, contact profiles, embedded knowledge base, graph
-checkpoints, and the cross-thread store — lives in the one Postgres behind `DATABASE_URL`.
 
 ### Shared tooling
 
@@ -176,6 +137,7 @@ checkpoints, and the cross-thread store — lives in the one Postgres behind `DA
 - [`apps/agent` README](./apps/agent/README.md) - the LangGraph agent: graph, HTTP app, tables, and stack
 - [Features](./docs/FEATURES.md) - what the assistant does, from the teacher's point of view
 - [Architecture](./docs/ARCHITECTURE.md) - system, main graph, and `compose_email` subgraph diagrams
+- [Error Handling](./docs/ERROR-HANDLING.md) - the error taxonomy and how HTTP/node/tool failures are caught and logged
 - [Test Scenarios](./docs/TEST-SCENARIOS.md) - scenarios the assistant is expected to handle
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraph/) - Learn more about LangGraph and its features
 - [CopilotKit Documentation](https://docs.copilotkit.ai) - Explore CopilotKit's capabilities

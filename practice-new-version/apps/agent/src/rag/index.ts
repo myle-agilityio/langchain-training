@@ -13,7 +13,7 @@ import { getPool } from "@/db";
 import { knowledgeBase } from "./knowledgeBase";
 import { loadDirectoryAsChunks } from "./loaders";
 
-const SAMPLE_DOCS_DIR = join(import.meta.dirname, "sampleDocs");
+const SAMPLE_DOCS_DIR = join(import.meta.dirname, "sample-docs");
 
 // initialize() creates the vector extension + table on first use (idempotent — IF NOT EXISTS —
 // so calling this per request, with whichever embeddings client the caller needs, is fine).
