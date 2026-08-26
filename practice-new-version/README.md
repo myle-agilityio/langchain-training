@@ -106,7 +106,7 @@ Run from the repo root — all of these go through Turborepo:
 
 ## Project Structure
 
-A [Turborepo](https://turborepo.com) + pnpm workspace with two packages. Each has its own
+A [Turborepo](https://turborepo.com) + pnpm workspace with three packages. Each has its own
 README covering its layout and stack:
 
 ```
@@ -115,10 +115,12 @@ README covering its layout and stack:
 │   │   └── .env        # Web-only env, read by vite.config.ts at build/dev time
 │   └── agent/          # LangGraph.js agent + Hono HTTP app     → apps/agent/README.md
 │       └── .env        # Agent-only env, read via langgraph.json's "env": ".env"
+├── packages/
+│   └── shared/         # @repo/shared — tool names, ChatThread type, shared constants
 ├── docs/               # FEATURES, ARCHITECTURE, TEST-SCENARIOS
 ├── fixtures/           # Sample data for manual runs
 ├── turbo.json          # Task graph: dev, typecheck, build
-├── pnpm-workspace.yaml # packages: apps/*
+├── pnpm-workspace.yaml # packages: apps/*, packages/*
 ├── eslint.config.mjs   # Flat config, workspace-wide
 ├── vercel.json         # Static UI deploy; /api/* rewritten to $AGENT_URL
 └── package.json        # Root scripts, all delegating to turbo
