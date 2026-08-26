@@ -121,6 +121,14 @@ result in the **Result** line. Status key: ⬜ not run · ✅ pass · ⚠️ par
   - Expect: the change appears — the list is a snapshot that refetches on demand.
   - Result: ✅ pass
 
+- [ ] **10.2 Inbox infinite scroll** — With more than 20 emails, scroll the inbox list to the bottom.
+  - Expect: a "Loading more…" row appears briefly, then more emails appear automatically. Keep scrolling until the count stops growing.
+  - Result: ✅ pass
+
+- [x] **10.3 Thread menu infinite scroll** — With more than 10 chat threads, open the **conversation history** dropdown (clock icon) and scroll its list to the bottom.
+  - Expect: more conversations appear automatically as you scroll, until the whole history has loaded.
+  - Result: ✅ pass
+
 ---
 
 ## Watch on `gpt-4o-mini`
