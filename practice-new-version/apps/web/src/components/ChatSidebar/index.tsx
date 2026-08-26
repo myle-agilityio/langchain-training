@@ -70,7 +70,7 @@ export const ChatSidebar = ({ threadsMenu, children }: ChatSidebarProps) => {
           size="icon"
           onClick={() => setCollapsed(false)}
           aria-label="Open chat"
-          className="fixed top-4 right-4 z-50 bg-card shadow-sm"
+          className="fixed top-4 right-7 z-50 bg-card shadow-sm"
         >
           <PanelRightOpen className="h-4 w-4" />
         </Button>
