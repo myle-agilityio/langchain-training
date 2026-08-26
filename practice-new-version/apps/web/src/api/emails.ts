@@ -1,10 +1,20 @@
+import { EMAILS_PAGE_SIZE } from "@/constants";
 import type { Email } from "@/types";
 import { apiClient } from "./client";
 
 const EMAILS_PATH = "/api/emails";
 
-export const fetchEmails = async (): Promise<Email[]> =>
-  (await apiClient.get<{ emails: Email[] }>(EMAILS_PATH)).data.emails;
+export interface EmailsPage {
+  emails: Email[];
+  hasNext: boolean;
+}
+
+export const fetchEmails = async (offset: number): Promise<EmailsPage> =>
+  (
+    await apiClient.get<EmailsPage>(EMAILS_PATH, {
+      params: { limit: EMAILS_PAGE_SIZE, offset },
+    })
+  ).data;
 
 export const patchEmail = async (
   id: string,

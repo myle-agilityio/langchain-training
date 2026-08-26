@@ -1,10 +1,20 @@
+import { THREADS_PAGE_SIZE } from "@/constants";
 import type { ChatThread } from "@/types";
 import { apiClient } from "./client";
 
 const THREADS_PATH = "/api/threads";
 
-export const fetchThreads = async (): Promise<ChatThread[]> =>
-  (await apiClient.get<{ threads: ChatThread[] }>(THREADS_PATH)).data.threads;
+export interface ThreadsPage {
+  threads: ChatThread[];
+  hasNext: boolean;
+}
+
+export const fetchThreads = async (offset: number): Promise<ThreadsPage> =>
+  (
+    await apiClient.get<ThreadsPage>(THREADS_PATH, {
+      params: { limit: THREADS_PAGE_SIZE, offset },
+    })
+  ).data;
 
 // Upsert — creates the row on a thread's first touch, else just bumps updated_at. The key is
 // the teacher's own (BYOK): the route spends it on the generated title.

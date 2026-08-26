@@ -25,7 +25,15 @@ import { EmailDetail } from "./EmailDetail";
 import { FilterDialog } from "./FilterDialog";
 
 export const EmailInbox = () => {
-  const { emails, isLoading, isRefreshing, refresh } = useSharedInbox();
+  const {
+    emails,
+    isLoading,
+    isRefreshing,
+    refresh,
+    loadMore,
+    hasMore,
+    isLoadingMore,
+  } = useSharedInbox();
   const patchEmail = usePatchEmail();
   const patchEmails = usePatchEmails();
   const { agent } = useAgent();
@@ -224,6 +232,9 @@ export const EmailInbox = () => {
             onMarkAllUnread={markAllUnread}
             isFiltered={isFiltered}
             onOpenFilters={() => setFiltersOpen(true)}
+            hasMore={hasMore}
+            isLoadingMore={isLoadingMore}
+            onLoadMore={loadMore}
           />
         </div>
         <FilterDialog

@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Clock, SquarePen } from "lucide-react";
+import { Clock, Loader2, SquarePen } from "lucide-react";
 import { useCopilotChatConfiguration } from "@copilotkit/react-core/v2";
 import {
   useSelfManagedThreads,
   useRenameThread,
   useDeleteThread,
+  useLoadMoreSentinel,
 } from "@/hooks";
 import {
   Button,
@@ -18,12 +19,13 @@ import { cn, formatRelative } from "@/utils";
 // same data/actions, just a popover; outside-click-to-close comes free from Radix.
 export const ThreadsMenu = () => {
   const config = useCopilotChatConfiguration();
-  const threads = useSelfManagedThreads();
+  const { threads, loadMore, hasMore, isLoadingMore } = useSelfManagedThreads();
   const renameThread = useRenameThread();
   const deleteThread = useDeleteThread();
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftTitle, setDraftTitle] = useState("");
+  const sentinelRef = useLoadMoreSentinel(hasMore, loadMore);
 
   if (!config) {
     return null;
@@ -158,6 +160,16 @@ export const ThreadsMenu = () => {
               );
             })}
           </ul>
+          {threads.length > 0 && hasMore && (
+            <div
+              ref={sentinelRef}
+              className="flex items-center justify-center py-2"
+            >
+              {isLoadingMore && (
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+              )}
+            </div>
+          )}
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
