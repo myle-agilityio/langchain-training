@@ -206,4 +206,59 @@ export const seedEmails: Email[] = [
     receivedAt: "2026-07-15T15:22:40.410Z",
     status: "unread",
   },
+  {
+    id: "30f28d1a-120e-47a6-8c77-fbd7989d4d38",
+    from: {
+      name: "Nolan Pruitt",
+      email: "nolan.pruitt@westbrookhigh.edu",
+    },
+    subject: "Confused on #5 from the related rates worksheet",
+    body: "Hi Ms. Lam,\n\nI'm going back over the related rates worksheet before tomorrow's quiz and I'm stuck on #5, the one with the ladder sliding down the wall. I set up x^2 + y^2 = 25 and differentiated both sides, but I'm not sure what to plug in for dx/dt versus what I'm solving for.\n\nCould you point me to which example in the notes matches this one closest?\n\nThanks,\nNolan",
+    receivedAt: "2026-07-15T09:41:12.204Z",
+    status: "unread",
+  },
+  {
+    id: "fdcb6f5c-29c5-4cc6-8206-1df8e0fe6fd3",
+    from: {
+      name: "Priya Castellano",
+      email: "priya.castellano21@gmail.com",
+    },
+    subject: "Out sick tomorrow, missing the quiz",
+    body: "Hi Ms. Lam,\n\nI woke up with a fever this morning so I'll be out tomorrow and I'm going to miss the quadratics quiz in Period 2. I've already gone through the review sheet, especially the completing-the-square questions.\n\nCould you let me know how to arrange a makeup once I'm back? I don't want to fall behind on the next unit.\n\nThanks,\nPriya",
+    receivedAt: "2026-07-14T20:07:55.912Z",
+    status: "unread",
+  },
+  {
+    id: "423c5c93-8214-4189-9d13-0f687eba7a0e",
+    from: {
+      name: "Desmond Okafor",
+      email: "desmond.okafor@hotmail.com",
+    },
+    subject: "Submitting the trig identities project a day early",
+    body: "Hi Ms. Lam,\n\nI finished the trig identities project early so I'm attaching it now instead of waiting until Friday. I focused the last section on proving the double-angle identities using the sum formulas like we covered in class.\n\nLet me know if anything needs fixing before the real deadline.\n\nDesmond",
+    receivedAt: "2026-07-14T14:33:08.550Z",
+    status: "unread",
+  },
+  {
+    id: "dfdd7691-2139-460c-9153-6285256ecdae",
+    from: {
+      name: "Rosalind Vance",
+      email: "rosalind.vance@yahoo.com",
+    },
+    subject: "Regrade request for Marcus - logarithms test",
+    body: "Ms. Lam,\n\nMarcus came home upset about his logarithms test from Tuesday. He says #9 and #12 were marked wrong even though he thinks his steps were correct, just written in a different order than the answer key.\n\nWould it be possible to look at those two questions again? He's happy to walk through his reasoning with you in person if that's easier.\n\nThank you,\nRosalind Vance",
+    receivedAt: "2026-07-13T18:52:31.077Z",
+    status: "unread",
+  },
+  {
+    id: "723c18ef-6c4b-4985-8af4-0048e23eaba3",
+    from: {
+      name: "Tobias Whitfield",
+      email: "tobias.whitfield@westbrookhigh.edu",
+    },
+    subject: "When is the make-up window for Period 6?",
+    body: "Hi Ms. Lam — a couple of Period 6 students asked me about the make-up testing window for the unit test they missed during the assembly last week. Do you have a day/time already set aside, or should I send them to the testing center on their own? Let me know so I can pass it along.\n\nThanks,\nTobias",
+    receivedAt: "2026-07-13T09:15:47.339Z",
+    status: "unread",
+  },
 ];
