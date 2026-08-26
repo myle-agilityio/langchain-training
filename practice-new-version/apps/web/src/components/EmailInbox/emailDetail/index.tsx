@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { Email } from "@/types";
 import { Badge, Button, Spinner } from "@/components";
-import { ComposeForm } from "./components/ComposeForm";
+import { ComposeForm } from "./ComposeForm";
 import {
   COURSE_LABEL,
   STATUS_TONE,

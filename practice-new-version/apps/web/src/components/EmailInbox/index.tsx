@@ -21,7 +21,7 @@ import {
   type EmailFilters,
 } from "@/utils";
 import { InboxList } from "./InboxList";
-import { EmailDetail } from "./emailDetail";
+import { EmailDetail } from "./EmailDetail";
 import { FilterDialog } from "./FilterDialog";
 
 export const EmailInbox = () => {

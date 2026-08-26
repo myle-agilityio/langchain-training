@@ -1,6 +1,5 @@
 import { useEffect } from "react";
-import { TriangleAlert, Info, X } from "lucide-react";
-
+import { Info, TriangleAlert, X } from "lucide-react";
 import { cn } from "@/utils";
 import { useToast, type Toast as ToastItem } from "@/stores";
 
@@ -11,7 +10,7 @@ const toneClass = {
   info: "border-border text-foreground",
 };
 
-const ToastRow = ({ toast }: { toast: ToastItem }) => {
+export const ToastRow = ({ toast }: { toast: ToastItem }) => {
   const dismiss = useToast((s) => s.dismiss);
   const Icon = toast.tone === "error" ? TriangleAlert : Info;
 
@@ -39,23 +38,6 @@ const ToastRow = ({ toast }: { toast: ToastItem }) => {
       >
         <X className="h-3.5 w-3.5" />
       </button>
-    </div>
-  );
-};
-
-// Mounted once at the app root; everything else pushes through the store's `toast` helper.
-export const Toaster = () => {
-  const toasts = useToast((s) => s.toasts);
-
-  if (toasts.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="pointer-events-none fixed bottom-4 right-4 z-50 flex w-80 max-w-[calc(100vw-2rem)] flex-col gap-2">
-      {toasts.map((toast) => (
-        <ToastRow key={toast.id} toast={toast} />
-      ))}
     </div>
   );
 };

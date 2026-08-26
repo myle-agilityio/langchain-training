@@ -52,7 +52,7 @@ src/
 │   ├── App.tsx          # Providers: QueryClientProvider → CopilotKit → chat config → layout
 │   └── globals.css      # Tailwind v4 entry, theme tokens, CopilotKit overrides
 ├── components/          # index.ts barrel; one folder per component, each with an index.tsx
-│   ├── EmailInbox/      # Inbox shell + InboxList, FilterDialog, emailDetail/ComposeForm
+│   ├── EmailInbox/      # Inbox shell + InboxList, FilterDialog, EmailDetail/ComposeForm
 │   ├── EmailChat/       # The CopilotKit chat surface
 │   ├── ChatSidebar/     # Collapsible right-hand sidebar hosting the chat
 │   ├── ThreadsMenu/     # Conversation history dropdown
