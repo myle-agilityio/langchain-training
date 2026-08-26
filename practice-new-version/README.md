@@ -69,17 +69,8 @@ DATABASE_URL=your-postgres-connection-string
 An empty database is fine — tables, the `vector` extension, and seed data (sample emails, the
 knowledge base) are all created automatically on first run.
 
-Optional values in `apps/agent/.env.example`:
-
-| Variable | Description |
-| --- | --- |
-| `OPENAI_API_KEY` | Server-side fallback only — `/api/threads`' title-gen and the one-time KB seed on a fresh database. Not used for chat/classify/draft/RAG, each visitor pastes their own key in the browser |
-| `RAG_SCORE_THRESHOLD` | Minimum cosine similarity (0-1) a KB match must clear to ground a reply; defaults to `0.65` |
-| `LANGSMITH_API_KEY` / `LANGSMITH_TRACING` / `LANGSMITH_PROJECT` / `LANGSMITH_ENDPOINT` | Turns on LangSmith tracing for every graph run, for project tracing |
-| `COPILOTKIT_LICENSE_TOKEN` | Enables CopilotKit Intelligence's Threads; must also be set in `apps/web/.env` |
-| `INTELLIGENCE_API_URL` | CopilotKit Intelligence API endpoint (only relevant once the license token is set) |
-| `INTELLIGENCE_GATEWAY_WS_URL` | CopilotKit Intelligence realtime WebSocket gateway |
-| `INTELLIGENCE_API_KEY` | Auth key for CopilotKit Intelligence |
+The rest of `apps/agent/.env.example`'s values (`RAG_SCORE_THRESHOLD`, LangSmith tracing,
+CopilotKit Intelligence) are optional — each has a comment explaining it right there in the file.
 
 3. Start the development server:
 
@@ -146,6 +137,7 @@ README covering its layout and stack:
 - [`apps/agent` README](./apps/agent/README.md) - the LangGraph agent: graph, HTTP app, tables, and stack
 - [Features](./docs/FEATURES.md) - what the assistant does, from the teacher's point of view
 - [Architecture](./docs/ARCHITECTURE.md) - system, main graph, and `compose_email` subgraph diagrams
+- [Error Handling](./docs/ERROR-HANDLING.md) - the error taxonomy and how HTTP/node/tool failures are caught and logged
 - [Test Scenarios](./docs/TEST-SCENARIOS.md) - scenarios the assistant is expected to handle
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraph/) - Learn more about LangGraph and its features
 - [CopilotKit Documentation](https://docs.copilotkit.ai) - Explore CopilotKit's capabilities
