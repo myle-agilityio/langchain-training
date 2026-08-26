@@ -1,6 +1,7 @@
 export * from "@repo/shared";
 export * from "./course";
 export * from "./errors";
+export * from "./pagination";
 export * from "./status";
 export * from "./tone";
 export * from "./topic";

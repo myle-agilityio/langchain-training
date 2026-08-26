@@ -1,4 +1,11 @@
-import { Filter, Mail, MailOpen, MoreVertical, RefreshCw } from "lucide-react";
+import {
+  Filter,
+  Loader2,
+  Mail,
+  MailOpen,
+  MoreVertical,
+  RefreshCw,
+} from "lucide-react";
 import type { Email } from "@/types";
 import {
   Badge,
@@ -8,6 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components";
+import { useLoadMoreSentinel } from "@/hooks";
 import { InboxSkeleton } from "./InboxSkeleton";
 import {
   COURSE_LABEL,
@@ -33,6 +41,9 @@ interface InboxListProps {
   onMarkAllUnread: () => void;
   isFiltered: boolean;
   onOpenFilters: () => void;
+  hasMore: boolean;
+  isLoadingMore: boolean;
+  onLoadMore: () => void;
 }
 
 export const InboxList = ({
@@ -48,9 +59,13 @@ export const InboxList = ({
   onMarkAllUnread,
   isFiltered,
   onOpenFilters,
+  hasMore,
+  isLoadingMore,
+  onLoadMore,
 }: InboxListProps) => {
   const hasUnread = emails.some((e) => e.status === "unread");
   const hasRead = emails.some((e) => e.status === "read");
+  const sentinelRef = useLoadMoreSentinel(hasMore, onLoadMore);
 
   return (
     <div>
@@ -299,6 +314,19 @@ export const InboxList = ({
             </div>
           );
         })
+      )}
+      {!isLoading && emails.length > 0 && hasMore && (
+        <div
+          ref={sentinelRef}
+          className="pt-3 pb-5 flex items-center justify-center"
+        >
+          {isLoadingMore && (
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Loading more…
+            </span>
+          )}
+        </div>
       )}
     </div>
   );

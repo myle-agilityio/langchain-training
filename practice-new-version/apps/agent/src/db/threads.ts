@@ -19,12 +19,21 @@ const toChatThread = (row: ChatThreadRow): ChatThread => {
   };
 };
 
-export const listThreads = async (): Promise<ChatThread[]> => {
+export const listThreads = async (
+  limit: number,
+  offset: number,
+): Promise<{ threads: ChatThread[]; hasNext: boolean }> => {
+  // Ask for one extra row — its presence past `limit` is how we know there's another page,
+  // without a second COUNT(*) query.
   const { rows } = await getPool().query<ChatThreadRow>(
-    `SELECT ${CHAT_THREAD_COLUMNS} FROM chat_threads ORDER BY updated_at DESC`,
+    `SELECT ${CHAT_THREAD_COLUMNS} FROM chat_threads ORDER BY updated_at DESC LIMIT $1 OFFSET $2`,
+    [limit + 1, offset],
   );
 
-  return rows.map(toChatThread);
+  return {
+    threads: rows.slice(0, limit).map(toChatThread),
+    hasNext: rows.length > limit,
+  };
 };
 
 // Upsert: creates the row the first time a thread is touched, and just bumps updated_at on

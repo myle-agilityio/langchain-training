@@ -1,6 +1,17 @@
-import { useCallback } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchThreads, renameThread, deleteThread, saveThread } from "@/api";
+import { useCallback, useMemo } from "react";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+  type InfiniteData,
+} from "@tanstack/react-query";
+import {
+  fetchThreads,
+  renameThread,
+  deleteThread,
+  saveThread,
+  type ThreadsPage,
+} from "@/api";
 import { optimisticContext, rollback } from "@/lib";
 import type { ChatThread } from "@/types";
 import { useOpenAIKey } from "@/stores";
@@ -9,16 +20,52 @@ export const threadsQueryKey = ["threads"] as const;
 
 const EMPTY: ChatThread[] = [];
 
+type ThreadsData = InfiniteData<ThreadsPage, number>;
+
 // Stands in for CopilotKit's <CopilotThreadsDrawer>/useThreads (Intelligence mode drops runs
 // in prod). History survives via the Postgres checkpointer; this just adds list/rename/delete UI.
-export const useSelfManagedThreads = (): ChatThread[] => {
-  const { data } = useQuery({
-    queryKey: threadsQueryKey,
-    queryFn: fetchThreads,
-  });
+export const useSelfManagedThreads = () => {
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: threadsQueryKey,
+      queryFn: ({ pageParam }) => fetchThreads(pageParam),
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, pages) =>
+        lastPage.hasNext
+          ? pages.reduce((count, page) => count + page.threads.length, 0)
+          : undefined,
+    });
 
-  return data ?? EMPTY;
+  const threads = useMemo(
+    () => data?.pages.flatMap((page) => page.threads) ?? EMPTY,
+    [data],
+  );
+
+  return {
+    threads,
+    loadMore: fetchNextPage,
+    hasMore: hasNextPage,
+    isLoadingMore: isFetchingNextPage,
+  };
 };
+
+const applyToThreads =
+  (updater: (threads: ChatThread[]) => ChatThread[]) =>
+  (old?: ThreadsData): ThreadsData | undefined => {
+    if (!old) {
+      return old;
+    }
+
+    // Renaming/deleting doesn't change which page a thread belongs to, so each page's threads
+    // can be updated independently — no need to re-flatten and re-paginate.
+    return {
+      ...old,
+      pages: old.pages.map((page) => ({
+        ...page,
+        threads: updater(page.threads),
+      })),
+    };
+  };
 
 export const useRenameThread = () => {
   const queryClient = useQueryClient();
@@ -27,15 +74,19 @@ export const useRenameThread = () => {
     mutationFn: ({ id, title }: { id: string; title: string }) =>
       renameThread(id, title),
     onMutate: ({ id, title }) =>
-      optimisticContext<ChatThread[]>(queryClient, threadsQueryKey, (old) =>
-        (old ?? []).map((thread) =>
-          thread.id === id ? { ...thread, title } : thread,
+      optimisticContext<ThreadsData>(
+        queryClient,
+        threadsQueryKey,
+        applyToThreads((threads) =>
+          threads.map((thread) =>
+            thread.id === id ? { ...thread, title } : thread,
+          ),
         ),
       ),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: threadsQueryKey }),
     onError: (_error, _variables, context) =>
-      rollback<ChatThread[]>(queryClient, threadsQueryKey, context),
+      rollback<ThreadsData>(queryClient, threadsQueryKey, context),
   });
 
   return useCallback(
@@ -50,11 +101,15 @@ export const useDeleteThread = () => {
     mutationKey: ["threads", "delete"],
     mutationFn: deleteThread,
     onMutate: (id) =>
-      optimisticContext<ChatThread[]>(queryClient, threadsQueryKey, (old) =>
-        (old ?? []).filter((thread) => thread.id !== id),
+      optimisticContext<ThreadsData>(
+        queryClient,
+        threadsQueryKey,
+        applyToThreads((threads) =>
+          threads.filter((thread) => thread.id !== id),
+        ),
       ),
     onError: (_error, _variables, context) =>
-      rollback<ChatThread[]>(queryClient, threadsQueryKey, context),
+      rollback<ThreadsData>(queryClient, threadsQueryKey, context),
   });
 
   return mutate;

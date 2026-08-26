@@ -1,6 +1,11 @@
-import { useCallback, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchEmails, patchEmail, patchEmails } from "@/api";
+import { useCallback, useMemo, useState } from "react";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+  type InfiniteData,
+} from "@tanstack/react-query";
+import { fetchEmails, patchEmail, patchEmails, type EmailsPage } from "@/api";
 import { optimisticContext, rollback } from "@/lib";
 import type { Email } from "@/types";
 
@@ -8,14 +13,33 @@ export const inboxQueryKey = ["emails"] as const;
 
 const EMPTY: Email[] = [];
 
+type EmailsData = InfiniteData<EmailsPage, number>;
+
 // The inbox everything reads. Query's structural sharing keeps the array reference stable when a
 // refetch returns identical data — load-bearing: a fresh one on onRunFinalized's refetch can feed
 // back into another finalize cycle and trip "Maximum update depth exceeded".
 export const useSharedInbox = () => {
-  const { data, isPending, refetch } = useQuery({
+  const {
+    data,
+    isPending,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: inboxQueryKey,
-    queryFn: fetchEmails,
+    queryFn: ({ pageParam }) => fetchEmails(pageParam),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) =>
+      lastPage.hasNext
+        ? pages.reduce((count, page) => count + page.emails.length, 0)
+        : undefined,
   });
+
+  const emails = useMemo(
+    () => data?.pages.flatMap((page) => page.emails) ?? EMPTY,
+    [data],
+  );
 
   // Manual-refresh spinner only — isFetching would also spin on the silent onRunFinalized refetch.
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -29,20 +53,52 @@ export const useSharedInbox = () => {
     }
   }, [refetch]);
 
-  return { emails: data ?? EMPTY, isLoading: isPending, isRefreshing, refresh };
+  return {
+    emails,
+    isLoading: isPending,
+    isRefreshing,
+    refresh,
+    loadMore: fetchNextPage,
+    hasMore: hasNextPage,
+    isLoadingMore: isFetchingNextPage,
+  };
 };
 
 const applyPatch =
-  (ids: Set<string>, patch: Partial<Email>) => (old?: Email[]) =>
-    (old ?? []).map((email) =>
-      ids.has(email.id) ? { ...email, ...patch } : email,
-    );
+  (ids: Set<string>, patch: Partial<Email>) =>
+  (old?: EmailsData): EmailsData | undefined => {
+    if (!old) {
+      return old;
+    }
 
-const replaceEmails = (updated: Email[]) => (old?: Email[]) => {
-  const byId = new Map(updated.map((email) => [email.id, email]));
+    return {
+      ...old,
+      pages: old.pages.map((page) => ({
+        ...page,
+        emails: page.emails.map((email) =>
+          ids.has(email.id) ? { ...email, ...patch } : email,
+        ),
+      })),
+    };
+  };
 
-  return (old ?? []).map((email) => byId.get(email.id) ?? email);
-};
+const replaceEmails =
+  (updated: Email[]) =>
+  (old?: EmailsData): EmailsData | undefined => {
+    if (!old) {
+      return old;
+    }
+
+    const byId = new Map(updated.map((email) => [email.id, email]));
+
+    return {
+      ...old,
+      pages: old.pages.map((page) => ({
+        ...page,
+        emails: page.emails.map((email) => byId.get(email.id) ?? email),
+      })),
+    };
+  };
 
 // Separate hooks per mutation so a component that only writes (EmailReplyCard) doesn't
 // subscribe to the inbox data and re-render on every refetch.
@@ -53,17 +109,20 @@ export const usePatchEmail = () => {
     mutationFn: ({ id, patch }: { id: string; patch: Partial<Email> }) =>
       patchEmail(id, patch),
     onMutate: ({ id, patch }) =>
-      optimisticContext<Email[]>(
+      optimisticContext<EmailsData>(
         queryClient,
         inboxQueryKey,
         applyPatch(new Set([id]), patch),
       ),
     // The server echoes the saved row, so write that instead of spending a refetch on it.
     onSuccess: (email) =>
-      queryClient.setQueryData<Email[]>(inboxQueryKey, replaceEmails([email])),
+      queryClient.setQueryData<EmailsData>(
+        inboxQueryKey,
+        replaceEmails([email]),
+      ),
     // Logging and the toast happen once in queryClient.ts — this only undoes the optimism.
     onError: (_error, _variables, context) =>
-      rollback<Email[]>(queryClient, inboxQueryKey, context),
+      rollback<EmailsData>(queryClient, inboxQueryKey, context),
   });
 
   return useCallback(
@@ -79,16 +138,19 @@ export const usePatchEmails = () => {
     mutationFn: ({ ids, patch }: { ids: string[]; patch: Partial<Email> }) =>
       patchEmails(ids, patch),
     onMutate: ({ ids, patch }) =>
-      optimisticContext<Email[]>(
+      optimisticContext<EmailsData>(
         queryClient,
         inboxQueryKey,
         applyPatch(new Set(ids), patch),
       ),
     onSuccess: (emails) =>
-      queryClient.setQueryData<Email[]>(inboxQueryKey, replaceEmails(emails)),
+      queryClient.setQueryData<EmailsData>(
+        inboxQueryKey,
+        replaceEmails(emails),
+      ),
     // Logging and the toast happen once in queryClient.ts — this only undoes the optimism.
     onError: (_error, _variables, context) =>
-      rollback<Email[]>(queryClient, inboxQueryKey, context),
+      rollback<EmailsData>(queryClient, inboxQueryKey, context),
   });
 
   return useCallback(

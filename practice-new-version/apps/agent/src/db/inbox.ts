@@ -3,46 +3,57 @@ import { getPool } from "./pool";
 import type { Email } from "@/types";
 import { seedEmails } from "@/data";
 
-// Queries for the HTTP inbox routes (http/emails.ts) — distinct from the graph-tool queries
-// above; these need shapes (bulk status update, reply patch, seeding) tools never do.
-
-export const listEmailsSeeded = async (): Promise<Email[]> => {
-  const { rows } = await getPool().query<EmailRow>(
-    `SELECT ${EMAIL_COLUMNS} FROM emails ORDER BY received_at DESC`,
+const ensureSeeded = async (): Promise<void> => {
+  const { rows } = await getPool().query<{ count: string }>(
+    `SELECT COUNT(*) AS count FROM emails`,
   );
 
-  if (rows.length === 0) {
-    await Promise.all(
-      seedEmails.map((email) =>
-        getPool().query(
-          `INSERT INTO emails (${EMAIL_COLUMNS})
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
-           ON CONFLICT (id) DO NOTHING`,
-          [
-            email.id,
-            email.from.name,
-            email.from.email,
-            email.subject,
-            email.body,
-            email.receivedAt,
-            email.status,
-            email.classification?.topic ?? null,
-            email.classification?.course ?? null,
-            email.classification?.workType ?? null,
-            email.classification?.urgency ?? null,
-            email.reply ? JSON.stringify(email.reply) : null,
-          ],
-        ),
-      ),
-    );
-
-    return [...seedEmails].sort(
-      (a, b) =>
-        new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime(),
-    );
+  if (Number(rows[0].count) > 0) {
+    return;
   }
 
-  return rows.map(toEmail);
+  await Promise.all(
+    seedEmails.map((email) =>
+      getPool().query(
+        `INSERT INTO emails (${EMAIL_COLUMNS})
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+         ON CONFLICT (id) DO NOTHING`,
+        [
+          email.id,
+          email.from.name,
+          email.from.email,
+          email.subject,
+          email.body,
+          email.receivedAt,
+          email.status,
+          email.classification?.topic ?? null,
+          email.classification?.course ?? null,
+          email.classification?.workType ?? null,
+          email.classification?.urgency ?? null,
+          email.reply ? JSON.stringify(email.reply) : null,
+        ],
+      ),
+    ),
+  );
+};
+
+export const listEmailsSeeded = async (
+  limit: number,
+  offset: number,
+): Promise<{ emails: Email[]; hasNext: boolean }> => {
+  await ensureSeeded();
+
+  // Ask for one extra row — its presence past `limit` is how we know there's another page,
+  // without a second COUNT(*) query.
+  const { rows } = await getPool().query<EmailRow>(
+    `SELECT ${EMAIL_COLUMNS} FROM emails ORDER BY received_at DESC LIMIT $1 OFFSET $2`,
+    [limit + 1, offset],
+  );
+
+  return {
+    emails: rows.slice(0, limit).map(toEmail),
+    hasNext: rows.length > limit,
+  };
 };
 
 export const updateEmailsStatus = async (
