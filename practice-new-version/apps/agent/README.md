@@ -5,9 +5,6 @@ both served by `langgraphjs dev` on port `8123`. It classifies email, searches a
 knowledge base, drafts replies behind a human approval interrupt, and owns every Postgres table
 the app uses.
 
-For the graph and subgraph diagrams see [ARCHITECTURE.md](../../docs/ARCHITECTURE.md); for the
-UI that talks to it see [`apps/web`](../web/README.md).
-
 ## Running it
 
 ```bash
@@ -16,11 +13,6 @@ pnpm --filter agent typecheck
 ```
 
 ## Environment
-
-Env lives in **this package's own `.env`** (`apps/agent/.env`, wired up by `langgraph.json`'s
-`"env": ".env"`); copy `.env.example` next to it to start. The web app has a separate
-`apps/web/.env` — there is no root env file, so `COPILOTKIT_LICENSE_TOKEN` and `AGENT_URL` are
-set in each file that needs them.
 
 | Variable                      | Required                             | Read by                                 | Purpose                                                                                     |
 | ----------------------------- | ------------------------------------ | --------------------------------------- | ------------------------------------------------------------------------------------------- |
@@ -38,17 +30,6 @@ set in each file that needs them.
 | `INTELLIGENCE_API_KEY`        | No                                   | `http/copilotkit.ts`                    | Only read when the license token is set.                                                    |
 | `INTELLIGENCE_API_URL`        | No — default `http://localhost:4201` | `http/copilotkit.ts`                    | Only read when the license token is set.                                                    |
 | `INTELLIGENCE_GATEWAY_WS_URL` | No — default `ws://localhost:4401`   | `http/copilotkit.ts`                    | Only read when the license token is set.                                                    |
-
-The `INTELLIGENCE_*` trio and the license token are commented out in `.env.example` — see the
-root README's "CopilotKit Intelligence" section for why. Enabling Threads means setting
-`COPILOTKIT_LICENSE_TOKEN` here **and** in `apps/web/.env`, which is where `vite.config.ts`
-derives the UI's flag from.
-
-**BYOK:** chat, classification, drafting, and RAG all run on the key the browser forwards
-per-request as the `x-openai-api-key` header, resolved in `config/model.ts`'s
-`getApiKeyFromConfig`. `OPENAI_API_KEY` is only the fallback for the two paths with no visitor
-request to read a header from: seeding the KB at startup, and `/api/threads` title generation.
-Once the KB is seeded it can be left unset.
 
 ## The HTTP surface
 
@@ -72,6 +53,8 @@ src/
 ├── nodes/
 │   ├── callModel.ts      # Model call + routeAfterModel (tools / compose_email / END)
 │   ├── moderator.ts      # Hard block on unsafe input + afterModeration router
+│   ├── errorHandler.ts   # nodeErrorHandler — last line of defence, attached to every node
+│   ├── withNode.ts       # Shared try/catch every node runs behind (logging + retry semantics)
 │   └── composeEmail/     # triage, research, writeDraft, checkCompliance,
 │                         #   requestApproval (interrupt()), errorHandler
 ├── tools/                # One file per tool; index.ts splits modelTools vs executableTools
@@ -136,7 +119,7 @@ src/
 
 All in the one Postgres behind `DATABASE_URL`, created on first connect:
 
-- `emails`, `contact_profiles` — the inbox
+- `emails` — the inbox
 - `kb_documents` — the embedded knowledge base (pgvector)
 - `checkpoints*` — graph checkpoints (`PostgresSaver`)
 - `store*` — cross-thread memory (`PostgresStore`)
