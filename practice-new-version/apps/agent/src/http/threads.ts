@@ -14,9 +14,11 @@ import { logWarn } from "@/logging";
 import { titlePrompt } from "@/prompts";
 import { validate } from "./middleware";
 import {
+  ListQuerySchema,
   RenameThreadBodySchema,
   SaveThreadBodySchema,
   ThreadIdQuerySchema,
+  type ListQuery,
   type RenameThreadBody,
   type SaveThreadBody,
   type ThreadIdQuery,
@@ -80,8 +82,10 @@ const generateTitle = async (
 
 export const threadsApp = new Hono<AppEnv>();
 
-threadsApp.get("/", async (c) => {
-  return c.json({ threads: await listThreads() });
+threadsApp.get("/", validate("query", ListQuerySchema), async (c) => {
+  const { limit, offset } = c.get("valid") as ListQuery;
+
+  return c.json(await listThreads(limit, offset));
 });
 
 // Upsert: creates the row (title from firstMessage) on a thread's first touch, else just bumps

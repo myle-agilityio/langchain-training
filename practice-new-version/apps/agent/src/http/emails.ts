@@ -3,13 +3,20 @@ import { Hono } from "hono";
 import { listEmailsSeeded, updateEmailsStatus, patchEmail } from "@/db";
 import { AppError, ERROR_CODE } from "@/errors";
 import { validate } from "./middleware";
-import { PatchEmailBodySchema, type PatchEmailBody } from "./schemas";
+import {
+  ListQuerySchema,
+  PatchEmailBodySchema,
+  type ListQuery,
+  type PatchEmailBody,
+} from "./schemas";
 import type { AppEnv } from "./types";
 
 export const emailsApp = new Hono<AppEnv>();
 
-emailsApp.get("/", async (c) => {
-  return c.json({ emails: await listEmailsSeeded() });
+emailsApp.get("/", validate("query", ListQuerySchema), async (c) => {
+  const { limit, offset } = c.get("valid") as ListQuery;
+
+  return c.json(await listEmailsSeeded(limit, offset));
 });
 
 emailsApp.patch("/", validate("json", PatchEmailBodySchema), async (c) => {

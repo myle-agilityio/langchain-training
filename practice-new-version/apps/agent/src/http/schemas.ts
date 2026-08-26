@@ -52,3 +52,10 @@ export type RenameThreadBody = z.infer<typeof RenameThreadBodySchema>;
 
 export const ThreadIdQuerySchema = z.object({ id: z.string().min(1) });
 export type ThreadIdQuery = z.infer<typeof ThreadIdQuerySchema>;
+
+// Shared by GET /api/emails and GET /api/threads — both list routes page the same way.
+export const ListQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  offset: z.coerce.number().int().min(0).default(0),
+});
+export type ListQuery = z.infer<typeof ListQuerySchema>;
