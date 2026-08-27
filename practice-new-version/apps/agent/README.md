@@ -26,10 +26,6 @@ pnpm --filter agent typecheck
 | `LANGSMITH_TRACING`           | No                                   | `langgraphjs dev`                       | Turns tracing on for every graph run.                                                       |
 | `LANGSMITH_PROJECT`           | No                                   | `langgraphjs dev`                       | LangSmith project name.                                                                     |
 | `LANGSMITH_ENDPOINT`          | No                                   | `langgraphjs dev`                       | Override the LangSmith API host.                                                            |
-| `COPILOTKIT_LICENSE_TOKEN`    | No                                   | `http/copilotkit.ts`                    | Enables CopilotKit Intelligence. Unset → an `InMemoryAgentRunner` instead.                  |
-| `INTELLIGENCE_API_KEY`        | No                                   | `http/copilotkit.ts`                    | Only read when the license token is set.                                                    |
-| `INTELLIGENCE_API_URL`        | No — default `http://localhost:4201` | `http/copilotkit.ts`                    | Only read when the license token is set.                                                    |
-| `INTELLIGENCE_GATEWAY_WS_URL` | No — default `ws://localhost:4401`   | `http/copilotkit.ts`                    | Only read when the license token is set.                                                    |
 
 ## The HTTP surface
 

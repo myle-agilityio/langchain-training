@@ -16,9 +16,8 @@ reference — don't copy patterns from `practice/`'s agent without deciding they
   the `/api/emails`/`/api/threads`/`/api/knowledge` routes) are both registered in
   `apps/agent/langgraph.json`.
   **Each app owns its env — there is no root `.env`:** the agent reads `apps/agent/.env`
-  (`langgraph.json`'s `"env": ".env"`), the UI reads `apps/web/.env` (`vite.config.ts`'s
-  `loadEnv`). `COPILOTKIT_LICENSE_TOKEN` and `AGENT_URL` are needed on both sides, so they live
-  in both files.
+  (`langgraph.json`'s `"env": ".env"`); the UI's `apps/web/.env` only matters at deploy time
+  (`vercel.json`'s `AGENT_URL` rewrite target), not in dev.
 
 ## Where things live
 

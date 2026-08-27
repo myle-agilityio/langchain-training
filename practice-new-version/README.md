@@ -69,8 +69,8 @@ DATABASE_URL=your-postgres-connection-string
 An empty database is fine — tables, the `vector` extension, and seed data (sample emails, the
 knowledge base) are all created automatically on first run.
 
-The rest of `apps/agent/.env.example`'s values (`RAG_SCORE_THRESHOLD`, LangSmith tracing,
-CopilotKit Intelligence) are optional — each has a comment explaining it right there in the file.
+The rest of `apps/agent/.env.example`'s values (`RAG_SCORE_THRESHOLD`, LangSmith tracing) are
+optional — each has a comment explaining it right there in the file.
 
 3. Start the development server:
 
@@ -170,25 +170,3 @@ If you encounter agent import errors:
 pnpm install
 ```
 
-## CopilotKit Intelligence
-
-This app is connected to the CopilotKit Intelligence project **practice-new-version**.
-The project details are recorded in `.copilotkit/project.json`.
-
-- **License:** a token can be stored in `COPILOTKIT_LICENSE_TOKEN` — in `apps/agent/.env` for
-  the server, and in `apps/web/.env` for the UI's derived Threads flag
-- **Currently disabled:** the token is commented out in both files. Enabling it hits an unresolved
-  upstream bug in `IntelligenceAgent.connectAgent`'s realtime WebSocket transport (`verifyEvents`
-  rejects the first event), which drops runs in production with `RUNNER_CONNECTION_DROPPED`.
-  Leave it commented out until CopilotKit fixes this.
-- **Threads without it:** with the token unset, `VITE_COPILOTKIT_THREADS_ENABLED`
-  (derived in `apps/web/vite.config.ts`) resolves to `false` and the UI falls back to a
-  self-managed thread list — the agent's `/api/threads` routes,
-  `apps/web/src/hooks/useSelfManagedThreads.ts`, and
-  `apps/web/src/components/ThreadsMenu` — backed by our own Postgres (a `chat_threads` table)
-  instead of the Intelligence platform. Message history itself still comes from the graph's
-  `PostgresSaver` checkpointer either way; this only replaces the list/rename/delete UI.
-- **Run it:** install dependencies, set your env vars, then `pnpm dev`
-- **Switch project:** run `copilotkit project select` from this directory
-
-Learn more at https://docs.copilotkit.ai.
