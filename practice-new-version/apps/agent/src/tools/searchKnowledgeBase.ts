@@ -1,12 +1,13 @@
 import { z } from "zod";
 
+import { getEmbeddingsForConfig } from "@/config";
 import { TOOL } from "@/constants";
 import { searchKnowledge } from "@/rag";
 import { defineTool } from "./defineTool";
 
 export const search_knowledge_base = defineTool({
   run: async ({ query }, config) => ({
-    articles: await searchKnowledge(query, config),
+    articles: await searchKnowledge(query, getEmbeddingsForConfig(config)),
   }),
   name: TOOL.SEARCH_KNOWLEDGE_BASE,
   description:

@@ -13,7 +13,8 @@ reference — don't copy patterns from `practice/`'s agent without deciding they
 - `pnpm lint` / `pnpm format` — ESLint (flat config, `eslint.config.mjs`) and Prettier, scoped to
   this project. A pre-push hook re-runs both, but only on the files in the commits being pushed.
 - The agent runs under `langgraphjs dev`; the graph entry and the custom HTTP app (CopilotKit +
-  the `/api/emails`/`/api/threads` routes) are both registered in `apps/agent/langgraph.json`.
+  the `/api/emails`/`/api/threads`/`/api/knowledge` routes) are both registered in
+  `apps/agent/langgraph.json`.
   **Each app owns its env — there is no root `.env`:** the agent reads `apps/agent/.env`
   (`langgraph.json`'s `"env": ".env"`), the UI reads `apps/web/.env` (`vite.config.ts`'s
   `loadEnv`). `COPILOTKIT_LICENSE_TOKEN` and `AGENT_URL` are needed on both sides, so they live
@@ -44,7 +45,8 @@ Agent (`apps/agent/src/`), organized by role:
 - `config/` — env validation + model instances; `constants/` — tool names; `utils/` — helpers.
 - `http/` — the custom Hono app mounted onto `langgraphjs dev` via `langgraph.json`'s
   `http.app`: `copilotkit.ts` (the CopilotKit endpoint), `emails.ts`/`threads.ts` (the inbox's
-  REST routes, proxied to from Vite in dev via `vite.config.ts`'s `server.proxy`).
+  REST routes) and `knowledge.ts` (KB semantic search, no LLM turn) — all proxied to from Vite
+  in dev via `vite.config.ts`'s `server.proxy`.
 
 Frontend (`apps/web/`, Vite SPA, single page — no router):
 
