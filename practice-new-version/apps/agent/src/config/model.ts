@@ -30,7 +30,7 @@ export const getApiKeyFromConfig = (
 };
 
 // One tool call per turn, which the router relies on.
-export const getModelForConfig = (
+export const getModelWithConfig = (
   config: LangGraphRunnableConfig,
 ): ChatOpenAI => {
   return new ChatOpenAI({
@@ -41,7 +41,7 @@ export const getModelForConfig = (
 };
 
 // The A2UI tool's secondary model — same BYOK key, its own model id.
-export const getA2uiModelForConfig = (
+export const getA2uiModelWithConfig = (
   config: LangGraphRunnableConfig,
 ): ChatOpenAI => {
   return new ChatOpenAI({
@@ -51,19 +51,19 @@ export const getA2uiModelForConfig = (
 };
 
 // No tool kwargs — withStructuredOutput 400s if parallel_tool_calls rides along.
-export const getPlainModelForConfig = (
+export const getPlainModelWithConfig = (
   config: LangGraphRunnableConfig,
 ): ChatOpenAI => {
   return new ChatOpenAI({ model: MODEL, apiKey: getApiKeyFromConfig(config) });
 };
 
 // Embeddings for RAG queries against the shared pgvector knowledge base.
-export const getEmbeddingsForConfig = (
+export const getEmbeddingsWithConfig = (
   config: LangGraphRunnableConfig,
-): OpenAIEmbeddings => getEmbeddingsForApiKey(getApiKeyFromConfig(config));
+): OpenAIEmbeddings => getEmbeddingsWithApiKey(getApiKeyFromConfig(config));
 
 // Same, for the HTTP routes — they read the visitor's key off a header, not a runnable config.
-export const getEmbeddingsForApiKey = (
+export const getEmbeddingsWithApiKey = (
   apiKey: string | undefined,
 ): OpenAIEmbeddings => {
   if (!apiKey) {

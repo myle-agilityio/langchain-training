@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 
-import { getEmbeddingsForApiKey } from "@/config";
+import { getEmbeddingsWithApiKey } from "@/config";
 import { searchKnowledge } from "@/rag";
 import { validate } from "./middleware";
 import {
@@ -22,7 +22,7 @@ knowledgeApp.get(
       c.req.header("x-openai-api-key") ?? process.env.OPENAI_API_KEY;
 
     return c.json({
-      articles: await searchKnowledge(q, getEmbeddingsForApiKey(apiKey), k),
+      articles: await searchKnowledge(q, getEmbeddingsWithApiKey(apiKey), k),
     });
   },
 );

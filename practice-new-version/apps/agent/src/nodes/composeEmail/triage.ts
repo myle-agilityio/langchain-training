@@ -1,7 +1,7 @@
 import { ToolMessage } from "@langchain/core/messages";
 import { END, type LangGraphRunnableConfig } from "@langchain/langgraph";
 
-import { getPlainModelForConfig, hidden } from "@/config";
+import { getPlainModelWithConfig, hidden } from "@/config";
 import { needsResearchPrompt } from "@/prompts";
 import { classifyEmail } from "@/tools";
 import { NeedsResearchSchema, type ComposeEmailStateShape } from "@/types";
@@ -37,7 +37,7 @@ export const triage = async (
     email.classification = result.ok ? result.classification : undefined;
   }
 
-  const { needsResearch } = await getPlainModelForConfig(config)
+  const { needsResearch } = await getPlainModelWithConfig(config)
     .withStructuredOutput(NeedsResearchSchema)
     .invoke(needsResearchPrompt(email), hidden(config));
 

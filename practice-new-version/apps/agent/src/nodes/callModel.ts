@@ -5,7 +5,7 @@ import {
 } from "@langchain/core/prompts";
 import { END, type LangGraphRunnableConfig } from "@langchain/langgraph";
 
-import { getModelForConfig } from "@/config";
+import { getModelWithConfig } from "@/config";
 import { TOOL } from "@/constants";
 import { currentDateLine, SYSTEM_PROMPT } from "@/prompts";
 import { executableTools, modelTools } from "@/tools";
@@ -58,7 +58,7 @@ const callModelPrompt = ChatPromptTemplate.fromMessages([
 export const callModel = withNode(
   "call_model",
   async (state: AgentStateShape, config: LangGraphRunnableConfig) => {
-    const bound = getModelForConfig(config).bindTools!([
+    const bound = getModelWithConfig(config).bindTools!([
       ...modelTools,
       ...frontendTools(state),
     ]);

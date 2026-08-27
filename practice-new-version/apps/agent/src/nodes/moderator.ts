@@ -6,7 +6,7 @@ import {
 import { END, type LangGraphRunnableConfig } from "@langchain/langgraph";
 import { copilotkitCustomizeConfig } from "@copilotkit/sdk-js/langgraph";
 
-import { getPlainModelForConfig } from "@/config";
+import { getPlainModelWithConfig } from "@/config";
 import { moderationPrompt } from "@/prompts";
 import { ModerationCheckSchema, type AgentStateShape } from "@/types";
 import { withNode } from "./withNode";
@@ -30,7 +30,7 @@ export const moderator = withNode(
     }
 
     const chain = moderationPromptTemplate.pipe(
-      getPlainModelForConfig(config).withStructuredOutput(
+      getPlainModelWithConfig(config).withStructuredOutput(
         ModerationCheckSchema,
       ),
     );
