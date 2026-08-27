@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Hono } from "hono";
 
-import { MODEL } from "@/config";
+import { GENERATE_TITLE_MODEL } from "@/config";
 import { OPENAI_API_KEY_HEADER } from "@/constants";
 import {
   listThreads,
@@ -51,7 +51,7 @@ const generateTitle = async (
     }>(
       "https://api.openai.com/v1/chat/completions",
       {
-        model: MODEL,
+        model: GENERATE_TITLE_MODEL,
         messages: [
           { role: "system", content: titlePrompt() },
           { role: "user", content: text },

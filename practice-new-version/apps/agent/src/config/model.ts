@@ -11,6 +11,9 @@ import {
 } from "@/constants";
 
 export const EMBEDDING_MODEL = "text-embedding-3-small";
+// Thread titles are a cheap, fixed side task — not part of the chat reply, so the teacher's
+// picked model doesn't apply here.
+export const GENERATE_TITLE_MODEL = "gpt-4o-mini";
 
 const CHAT_MODEL_IDS = new Set<string>(CHAT_MODEL_OPTIONS.map((o) => o.id));
 
