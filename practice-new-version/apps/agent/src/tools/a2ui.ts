@@ -2,7 +2,7 @@ import { z } from "zod";
 import { tool, type ToolRuntime } from "@langchain/core/tools";
 import { SystemMessage } from "@langchain/core/messages";
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
-import { getA2uiModelForConfig } from "@/config";
+import { getA2uiModelWithConfig } from "@/config";
 import { CUSTOM_CATALOG_ID, TOOL } from "@/constants";
 import { AppError, ERROR_CODE } from "@/errors";
 import { defineTool } from "./defineTool";
@@ -92,7 +92,7 @@ export const generate_a2ui = defineTool({
       .join("\n\n");
 
     // Same BYOK key as every other model call — this used to fall back to process.env only.
-    const modelWithTool = getA2uiModelForConfig(config).bindTools!(
+    const modelWithTool = getA2uiModelWithConfig(config).bindTools!(
       [renderA2ui],
       {
         tool_choice: "render_a2ui",

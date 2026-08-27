@@ -1,6 +1,6 @@
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
-import { getPlainModelForConfig, hidden } from "@/config";
+import { getPlainModelWithConfig, hidden } from "@/config";
 import { CONTACT_PROFILE_NAMESPACE } from "@/constants";
 import { getEmail } from "@/db";
 import { draftPrompt } from "@/prompts";
@@ -42,7 +42,7 @@ export const writeDraft = async (
       ? state.lastRejectedDraft
       : undefined;
 
-  const draft = await getPlainModelForConfig(config)
+  const draft = await getPlainModelWithConfig(config)
     .withStructuredOutput(DraftSchema)
     .invoke(
       draftPrompt({

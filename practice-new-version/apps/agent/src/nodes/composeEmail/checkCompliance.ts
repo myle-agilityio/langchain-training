@@ -1,6 +1,6 @@
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
-import { getPlainModelForConfig, hidden } from "@/config";
+import { getPlainModelWithConfig, hidden } from "@/config";
 import { checkCompliancePrompt } from "@/prompts";
 import { ComplianceCheckSchema, type ComposeEmailStateShape } from "@/types";
 
@@ -10,7 +10,7 @@ export const checkCompliance = async (
   config: LangGraphRunnableConfig,
 ) => {
   const draft = state.draft!;
-  const compliance = await getPlainModelForConfig(config)
+  const compliance = await getPlainModelWithConfig(config)
     .withStructuredOutput(ComplianceCheckSchema)
     .invoke(checkCompliancePrompt(draft), hidden(config));
 

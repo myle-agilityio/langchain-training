@@ -2,7 +2,7 @@ import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 import { copilotkitCustomizeConfig } from "@copilotkit/sdk-js/langgraph";
 import { z } from "zod";
 
-import { getPlainModelForConfig } from "@/config";
+import { getPlainModelWithConfig } from "@/config";
 import { CLASSIFY_CONCURRENCY, TOOL } from "@/constants";
 import { getEmail, updateEmail } from "@/db";
 import { AppError, ERROR_CODE, ERRORS } from "@/errors";
@@ -34,7 +34,7 @@ export const classifyEmail = async (
     }
 
     // Internal per-email classifier call — hide its forced tool call from the chat UI.
-    const classification = await getPlainModelForConfig(config)
+    const classification = await getPlainModelWithConfig(config)
       .withStructuredOutput(ClassificationSchema)
       .invoke(
         classifyPrompt(email),
