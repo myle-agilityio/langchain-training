@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Email } from "@/types";
 import { Badge, Button, Spinner } from "@/components";
 import { ComposeForm } from "./ComposeForm";
+import { RelatedArticles } from "./RelatedArticles";
 import {
   COURSE_LABEL,
   STATUS_TONE,
@@ -103,6 +104,10 @@ export const EmailDetail = ({
       <p className="text-[15px] leading-relaxed whitespace-pre-wrap text-foreground">
         {email.body}
       </p>
+
+      <div className="mt-8">
+        <RelatedArticles query={`${email.subject}\n${email.body}`} />
+      </div>
 
       <div className="mt-10 pt-8 border-t border-border">
         {email.reply ? (

@@ -129,6 +129,10 @@ result in the **Result** line. Status key: ⬜ not run · ✅ pass · ⚠️ par
   - Expect: more conversations appear automatically as you scroll, until the whole history has loaded.
   - Result: ✅ pass
 
+- [ ] **10.4 Related knowledge in the reading pane** — Select **Ezra Konopelski** ("missed test") or **Felix Gislason** ("late project").
+  - Expect: a "Related knowledge" card appears in the reading pane showing the matching policy article's title and a short excerpt, with no chat message sent. Select an email with no matching policy and confirm the card shows a "no articles found" message instead of a match.
+  - Result: ✅ pass
+
 ---
 
 ## Watch on `gpt-4o-mini`

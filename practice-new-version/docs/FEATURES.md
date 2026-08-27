@@ -42,6 +42,16 @@ never send a rule they didn't mean to commit to.
   base instead of an invented rule.
 - Cited details (penalty %, floor, makeup window/location) match the real policy text.
 
+## Related knowledge in the reading pane
+
+**Teacher can** see knowledge-base articles relevant to the open email without asking the
+assistant, **so that** they can check the policy themselves before deciding how to reply.
+
+- Opening an email searches the same knowledge base the assistant's drafts pull from; a
+  matching article appears as a small card in the reading pane, with no chat turn involved.
+- An email with no matching policy shows a "no articles found" message instead of an empty
+  card; a failed search shows an error message instead.
+
 ## Guardrail: no promises on grade disputes
 
 **Teacher can** trust that grade-dispute drafts offer the review process rather than a result,
