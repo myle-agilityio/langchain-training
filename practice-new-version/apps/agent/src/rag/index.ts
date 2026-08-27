@@ -2,12 +2,11 @@ import { join } from "node:path";
 
 import { PGVectorStore } from "@langchain/community/vectorstores/pgvector";
 import { Document } from "@langchain/core/documents";
-import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 import type { OpenAIEmbeddings } from "@langchain/openai";
 
 import { getRagScoreThreshold } from "../config";
 import { logWarn } from "@/logging";
-import { getEmbeddingsWithConfig, getServerEmbeddings } from "@/config";
+import { getServerEmbeddings } from "@/config";
 import { KB_TABLE } from "@/constants";
 import { getPool } from "@/db";
 import { knowledgeBase } from "./knowledgeBase";
@@ -52,7 +51,7 @@ export const ensureIndexed = async (): Promise<void> => {
   const seedDocs = knowledgeBase.map(
     (a) =>
       new Document({
-        pageContent: `${a.title}\n\n${a.content}`,
+        pageContent: a.content,
         metadata: { id: a.id, title: a.title, tags: a.tags },
       }),
   );
@@ -65,14 +64,14 @@ export const ensureIndexed = async (): Promise<void> => {
 // convert to similarity (0-1, higher=better) so the threshold reads the way a relevance score should.
 const distanceToSimilarity = (distance: number): number => 1 - distance / 2;
 
-// Semantic search over the embedded KB — replaces the old keyword matcher. Embeds the query
-// with the visitor's own key (BYOK, via getEmbeddingsWithConfig), not the seed-time server key.
+// Semantic search over the embedded KB. Takes the caller's own embeddings client so graph nodes
+// (BYOK via config) and HTTP routes (BYOK via header) run the same search, never the seed key.
 export const searchKnowledge = async (
   query: string,
-  config: LangGraphRunnableConfig,
+  embeddings: OpenAIEmbeddings,
   k = 3,
 ): Promise<{ title: string; content: string }[]> => {
-  const store = await getVectorStore(getEmbeddingsWithConfig(config));
+  const store = await getVectorStore(embeddings);
   const results = await store.similaritySearchWithScore(query, k);
   const threshold = getRagScoreThreshold();
 

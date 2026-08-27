@@ -1,5 +1,6 @@
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
+import { getEmbeddingsWithConfig } from "@/config";
 import { searchKnowledge } from "@/rag";
 import type { ComposeEmailStateShape, KBArticle } from "@/types";
 import { fetchEmailById } from "@/utils";
@@ -16,7 +17,10 @@ export const research = async (
   }
 
   const query = `${email.subject} ${email.body} ${Object.values(email.classification ?? {}).join(" ")}`;
-  const articles = (await searchKnowledge(query, config)) as KBArticle[];
+  const articles = (await searchKnowledge(
+    query,
+    getEmbeddingsWithConfig(config),
+  )) as KBArticle[];
   const kbContext = articles.length
     ? articles.map((a) => `## ${a.title}\n${a.content}`).join("\n\n")
     : "No relevant articles found. Do not state any policy you cannot ground here.";

@@ -74,9 +74,10 @@ src/
 │   ├── loaders.ts        # PDF/DOCX → chunks; titles derived from the filename
 │   └── sample-docs/      # Policy source documents (kebab-case, by rule)
 ├── http/
-│   ├── index.ts          # Hono app: mounts the three routers below
+│   ├── index.ts          # Hono app: mounts the routers below
 │   ├── copilotkit.ts     # CopilotKit runtime endpoint (/api/copilotkit)
 │   ├── emails.ts         # GET/PATCH /api/emails
+│   ├── knowledge.ts      # GET /api/knowledge?query= — searchKnowledge over HTTP, no LLM turn
 │   └── threads.ts        # GET/POST/PATCH/DELETE /api/threads + LLM title generation
 ├── config/
 │   ├── env.ts            # DATABASE_URL / RAG_SCORE_THRESHOLD / pg TLS options, read at call time

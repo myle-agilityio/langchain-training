@@ -2,6 +2,7 @@ import { Hono } from "hono";
 
 import { copilotkitApp } from "./copilotkit";
 import { emailsApp } from "./emails";
+import { knowledgeApp } from "./knowledge";
 import { errorHandler, notFoundHandler, requestContext } from "./middleware";
 import { threadsApp } from "./threads";
 import type { AppEnv } from "./types";
@@ -16,6 +17,7 @@ app.use("*", requestContext);
 app.route("/", copilotkitApp);
 app.route("/api/emails", emailsApp);
 app.route("/api/threads", threadsApp);
+app.route("/api/knowledge", knowledgeApp);
 
 // The single exit for every failure raised anywhere above.
 app.onError(errorHandler);

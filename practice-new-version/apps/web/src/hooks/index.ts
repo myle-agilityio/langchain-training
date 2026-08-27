@@ -3,6 +3,7 @@ export * from "./useEmailAgent";
 export * from "./useEmailLookup";
 export * from "./useExampleSuggestions";
 export * from "./useGenerativeUI";
+export * from "./useKnowledgeSearch";
 export * from "./useLoadMoreSentinel";
 export * from "./useSelfManagedThreads";
 export * from "./useSharedInbox";

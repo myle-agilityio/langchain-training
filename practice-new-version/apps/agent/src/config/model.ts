@@ -60,11 +60,17 @@ export const getPlainModelWithConfig = (
 // Embeddings for RAG queries against the shared pgvector knowledge base.
 export const getEmbeddingsWithConfig = (
   config: LangGraphRunnableConfig,
+): OpenAIEmbeddings => getEmbeddingsWithApiKey(getApiKeyFromConfig(config));
+
+// Same, for the HTTP routes — they read the visitor's key off a header, not a runnable config.
+export const getEmbeddingsWithApiKey = (
+  apiKey: string | undefined,
 ): OpenAIEmbeddings => {
-  return new OpenAIEmbeddings({
-    model: EMBEDDING_MODEL,
-    apiKey: getApiKeyFromConfig(config),
-  });
+  if (!apiKey) {
+    throw new AppError(ERROR_CODE.API_KEY_MISSING);
+  }
+
+  return new OpenAIEmbeddings({ model: EMBEDDING_MODEL, apiKey });
 };
 
 // These internal structured-output calls are classifier/drafting steps, not chat replies — hide
