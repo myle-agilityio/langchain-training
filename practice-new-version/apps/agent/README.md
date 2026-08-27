@@ -77,7 +77,7 @@ src/
 │   ├── index.ts          # Hono app: mounts the routers below
 │   ├── copilotkit.ts     # CopilotKit runtime endpoint (/api/copilotkit)
 │   ├── emails.ts         # GET/PATCH /api/emails
-│   ├── knowledge.ts      # GET /api/knowledge?q= — searchKnowledge over HTTP, no LLM turn
+│   ├── knowledge.ts      # GET /api/knowledge?query= — searchKnowledge over HTTP, no LLM turn
 │   └── threads.ts        # GET/POST/PATCH/DELETE /api/threads + LLM title generation
 ├── config/
 │   ├── env.ts            # DATABASE_URL / RAG_SCORE_THRESHOLD / pg TLS options, read at call time
