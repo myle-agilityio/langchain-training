@@ -17,7 +17,7 @@ pnpm build              # vite build → apps/web/dist
 | --------------------------------- | -------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `COPILOTKIT_LICENSE_TOKEN`        | No       | `vite.config.ts`, at build/dev time | Server-side token, also set in `apps/agent/.env`. Its presence derives the Threads flag below — set the token, never the flag. |
 | `AGENT_URL`                       | No       | `vercel.json`, at deploy time       | Rewrite target for `/api/*` in production; set on the deploy platform. Ignored in dev, where the Vite proxy handles it.        |
-| `VITE_COPILOTKIT_THREADS_ENABLED` | Derived  | —                                   | Injected by `vite.config.ts` as `"true"`/`"false"`.                                 |
+| `VITE_COPILOTKIT_THREADS_ENABLED` | Derived  | —                                   | Injected by `vite.config.ts` as `"true"`/`"false"`.                                                                            |
 
 ## Structure
 
