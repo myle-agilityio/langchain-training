@@ -2,6 +2,7 @@ import axios from "axios";
 import { Hono } from "hono";
 
 import { MODEL } from "@/config";
+import { OPENAI_API_KEY_HEADER } from "@/constants";
 import {
   listThreads,
   upsertThread,
@@ -96,7 +97,8 @@ threadsApp.post("/", validate("json", SaveThreadBodySchema), async (c) => {
   const exists = await threadExists(id);
   // Visitor's own key (BYOK — see agent/src/config/model.ts) first; process.env.OPENAI_API_KEY
   // is only a leftover fallback for as long as it's still set on this deployment.
-  const apiKey = c.req.header("x-openai-api-key") ?? process.env.OPENAI_API_KEY;
+  const apiKey =
+    c.req.header(OPENAI_API_KEY_HEADER) ?? process.env.OPENAI_API_KEY;
   // Only spend an LLM call the first time this thread is created, not on every touch.
   const title = exists
     ? null

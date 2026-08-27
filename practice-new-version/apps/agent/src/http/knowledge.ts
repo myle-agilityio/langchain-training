@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 
 import { getEmbeddingsWithApiKey } from "@/config";
+import { OPENAI_API_KEY_HEADER } from "@/constants";
 import { searchKnowledge } from "@/rag";
 import { validate } from "./middleware";
 import {
@@ -19,7 +20,7 @@ knowledgeApp.get(
     const { query, k } = c.get("valid") as SearchKnowledgeQuery;
     // Visitor's own key (BYOK) first, same as threads.ts — process.env is the leftover fallback.
     const apiKey =
-      c.req.header("x-openai-api-key") ?? process.env.OPENAI_API_KEY;
+      c.req.header(OPENAI_API_KEY_HEADER) ?? process.env.OPENAI_API_KEY;
 
     return c.json({
       articles: await searchKnowledge(

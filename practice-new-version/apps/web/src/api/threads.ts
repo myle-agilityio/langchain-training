@@ -1,4 +1,4 @@
-import { THREADS_PAGE_SIZE } from "@/constants";
+import { OPENAI_API_KEY_HEADER, THREADS_PAGE_SIZE } from "@/constants";
 import type { ChatThread } from "@/types";
 import { apiClient } from "./client";
 
@@ -23,7 +23,7 @@ export const saveThread = async (
   openaiKey?: string | null,
 ): Promise<void> => {
   await apiClient.post(THREADS_PATH, body, {
-    headers: openaiKey ? { "x-openai-api-key": openaiKey } : undefined,
+    headers: openaiKey ? { [OPENAI_API_KEY_HEADER]: openaiKey } : undefined,
   });
 };
 

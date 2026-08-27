@@ -2,7 +2,8 @@ import { useMemo } from "react";
 import { CopilotKit } from "@copilotkit/react-core/v2";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib";
-import { useOpenAIKey } from "@/stores";
+import { useChatModel, useOpenAIKey } from "@/stores";
+import { CHAT_MODEL_HEADER, OPENAI_API_KEY_HEADER } from "@/constants";
 import {
   // A2UI catalog: definitions + renderers in @/components/declarativeGenerativeUI/
   demonstrationCatalog,
@@ -14,12 +15,15 @@ import { Inbox } from "./Inbox";
 const App = () => {
   useSyncTheme();
   // Subscribed, not read on demand: CopilotKit re-evaluates `headers` only when its own provider
-  // re-renders, so without this a changed key kept using the old one until a reload.
+  // re-renders, so without this a changed key/model kept using the old one until a reload.
   const apiKey = useOpenAIKey((s) => s.apiKey);
+  const modelId = useChatModel((s) => s.modelId);
   const headers = useMemo(
-    (): Record<string, string> =>
-      apiKey ? { "x-openai-api-key": apiKey } : {},
-    [apiKey],
+    (): Record<string, string> => ({
+      ...(apiKey ? { [OPENAI_API_KEY_HEADER]: apiKey } : {}),
+      [CHAT_MODEL_HEADER]: modelId,
+    }),
+    [apiKey, modelId],
   );
 
   return (

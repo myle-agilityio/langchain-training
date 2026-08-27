@@ -3,23 +3,36 @@ import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
 import { copilotkitCustomizeConfig } from "@copilotkit/sdk-js/langgraph";
 
 import { AppError, ERROR_CODE } from "@/errors";
+import {
+  CHAT_MODEL_HEADER,
+  CHAT_MODEL_OPTIONS,
+  DEFAULT_CHAT_MODEL_ID,
+  OPENAI_API_KEY_HEADER,
+} from "@/constants";
 
-export const MODEL = "gpt-4o-mini";
-export const A2UI_MODEL = "gpt-4.1";
 export const EMBEDDING_MODEL = "text-embedding-3-small";
+
+const CHAT_MODEL_IDS = new Set<string>(CHAT_MODEL_OPTIONS.map((o) => o.id));
+
+// Reads a forwarded header, case-insensitively, off copilotkit_forwarded_headers.
+const getForwardedHeader = (
+  config: LangGraphRunnableConfig,
+  name: string,
+): string | undefined => {
+  const headers = config.configurable?.copilotkit_forwarded_headers as
+    Record<string, string> | undefined;
+
+  return headers
+    ? Object.entries(headers).find(([key]) => key.toLowerCase() === name)?.[1]
+    : undefined;
+};
 
 // BYOK: CopilotKit forwards the visitor's key via config.configurable.copilotkit_forwarded_headers.
 // Falls back to process.env.OPENAI_API_KEY when unset (e.g. running from LangSmith Studio).
 export const getApiKeyFromConfig = (
   config: LangGraphRunnableConfig,
 ): string => {
-  const headers = config.configurable?.copilotkit_forwarded_headers as
-    Record<string, string> | undefined;
-  const key = headers
-    ? Object.entries(headers).find(
-        ([name]) => name.toLowerCase() === "x-openai-api-key",
-      )?.[1]
-    : undefined;
+  const key = getForwardedHeader(config, OPENAI_API_KEY_HEADER);
   const resolved = key ?? process.env.OPENAI_API_KEY;
 
   if (!resolved) {
@@ -29,32 +42,46 @@ export const getApiKeyFromConfig = (
   return resolved;
 };
 
-// One tool call per turn, which the router relies on.
+// The teacher's model pick from the chat header, same forwarding path as the API key. Falls
+// back to the default when absent or not one of the offered options.
+const getChatModelIdFromConfig = (config: LangGraphRunnableConfig): string => {
+  const requested = getForwardedHeader(config, CHAT_MODEL_HEADER);
+
+  return requested && CHAT_MODEL_IDS.has(requested)
+    ? requested
+    : DEFAULT_CHAT_MODEL_ID;
+};
+
+// One tool call per turn, which the router relies on. Honors the teacher's picked model.
 export const getModelWithConfig = (
   config: LangGraphRunnableConfig,
 ): ChatOpenAI => {
   return new ChatOpenAI({
-    model: MODEL,
+    model: getChatModelIdFromConfig(config),
     apiKey: getApiKeyFromConfig(config),
     modelKwargs: { parallel_tool_calls: false },
   });
 };
 
-// The A2UI tool's secondary model — same BYOK key, its own model id.
+// The A2UI tool's model — same BYOK key, same teacher-picked model as the chat turn.
 export const getA2uiModelWithConfig = (
   config: LangGraphRunnableConfig,
 ): ChatOpenAI => {
   return new ChatOpenAI({
-    model: A2UI_MODEL,
+    model: getChatModelIdFromConfig(config),
     apiKey: getApiKeyFromConfig(config),
   });
 };
 
-// No tool kwargs — withStructuredOutput 400s if parallel_tool_calls rides along.
+// No tool kwargs — withStructuredOutput 400s if parallel_tool_calls rides along. Same
+// teacher-picked model as the chat turn — these are internal steps within the same reply.
 export const getPlainModelWithConfig = (
   config: LangGraphRunnableConfig,
 ): ChatOpenAI => {
-  return new ChatOpenAI({ model: MODEL, apiKey: getApiKeyFromConfig(config) });
+  return new ChatOpenAI({
+    model: getChatModelIdFromConfig(config),
+    apiKey: getApiKeyFromConfig(config),
+  });
 };
 
 // Embeddings for RAG queries against the shared pgvector knowledge base.

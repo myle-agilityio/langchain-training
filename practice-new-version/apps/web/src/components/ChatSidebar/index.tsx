@@ -2,7 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { PanelRightClose, PanelRightOpen } from "lucide-react";
 import { useFrontendTool } from "@copilotkit/react-core/v2";
-import { Button, ChangeKeyButton } from "@/components";
+import { Button, ChangeKeyButton, ModelPicker } from "@/components";
 
 interface ChatSidebarProps {
   threadsMenu?: ReactNode;
@@ -141,6 +141,7 @@ export const ChatSidebar = ({ threadsMenu, children }: ChatSidebarProps) => {
               />
             </div>
             <div className="flex items-center gap-1 shrink-0">
+              <ModelPicker />
               <ChangeKeyButton />
               {threadsMenu}
               <Button

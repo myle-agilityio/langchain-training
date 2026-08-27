@@ -1,6 +1,7 @@
 export * from "./ChatSidebar";
 export * from "./EmailChat";
 export * from "./EmailInbox";
+export * from "./ModelPicker";
 export * from "./openAIKey";
 export * from "./ThreadsMenu";
 export * from "./ToolRendering";
