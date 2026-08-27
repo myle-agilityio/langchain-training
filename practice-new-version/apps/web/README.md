@@ -13,8 +13,8 @@ pnpm build              # vite build → apps/web/dist
 
 ## Environment
 
-| Variable    | Required | Read by                       | Purpose                                                                                                                  |
-| ----------- | -------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| Variable    | Required | Read by                       | Purpose                                                                                                                 |
+| ----------- | -------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `AGENT_URL` | No       | `vercel.json`, at deploy time | Rewrite target for `/api/*` in production; set on the deploy platform. Ignored in dev, where the Vite proxy handles it. |
 
 ## Structure
