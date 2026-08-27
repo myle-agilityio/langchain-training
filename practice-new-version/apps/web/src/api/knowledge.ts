@@ -9,12 +9,12 @@ export interface KnowledgeArticle {
 
 // The same pgvector search the agent's search_knowledge_base tool runs, without an LLM turn.
 export const searchKnowledgeBase = async (
-  q: string,
+  query: string,
   apiKey?: string | null,
 ): Promise<KnowledgeArticle[]> =>
   (
     await apiClient.get<{ articles: KnowledgeArticle[] }>(KNOWLEDGE_PATH, {
-      params: { q },
+      params: { query },
       headers: apiKey ? { "x-openai-api-key": apiKey } : undefined,
     })
   ).data.articles;
