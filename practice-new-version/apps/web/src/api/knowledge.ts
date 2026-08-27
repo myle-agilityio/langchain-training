@@ -1,3 +1,4 @@
+import { OPENAI_API_KEY_HEADER } from "@/constants";
 import { apiClient } from "./client";
 
 const KNOWLEDGE_PATH = "/api/knowledge";
@@ -15,6 +16,6 @@ export const searchKnowledgeBase = async (
   (
     await apiClient.get<{ articles: KnowledgeArticle[] }>(KNOWLEDGE_PATH, {
       params: { query },
-      headers: apiKey ? { "x-openai-api-key": apiKey } : undefined,
+      headers: apiKey ? { [OPENAI_API_KEY_HEADER]: apiKey } : undefined,
     })
   ).data.articles;
