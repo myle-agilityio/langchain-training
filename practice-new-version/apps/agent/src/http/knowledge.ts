@@ -22,7 +22,11 @@ knowledgeApp.get(
       c.req.header("x-openai-api-key") ?? process.env.OPENAI_API_KEY;
 
     return c.json({
-      articles: await searchKnowledge(query, getEmbeddingsWithApiKey(apiKey), k),
+      articles: await searchKnowledge(
+        query,
+        getEmbeddingsWithApiKey(apiKey),
+        k,
+      ),
     });
   },
 );
