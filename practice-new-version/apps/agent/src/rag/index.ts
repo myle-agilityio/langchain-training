@@ -7,7 +7,7 @@ import type { OpenAIEmbeddings } from "@langchain/openai";
 
 import { getRagScoreThreshold } from "../config";
 import { logWarn } from "@/logging";
-import { getEmbeddingsForConfig, getServerEmbeddings } from "@/config";
+import { getEmbeddingsWithConfig, getServerEmbeddings } from "@/config";
 import { KB_TABLE } from "@/constants";
 import { getPool } from "@/db";
 import { knowledgeBase } from "./knowledgeBase";
@@ -66,13 +66,13 @@ export const ensureIndexed = async (): Promise<void> => {
 const distanceToSimilarity = (distance: number): number => 1 - distance / 2;
 
 // Semantic search over the embedded KB — replaces the old keyword matcher. Embeds the query
-// with the visitor's own key (BYOK, via getEmbeddingsForConfig), not the seed-time server key.
+// with the visitor's own key (BYOK, via getEmbeddingsWithConfig), not the seed-time server key.
 export const searchKnowledge = async (
   query: string,
   config: LangGraphRunnableConfig,
   k = 3,
 ): Promise<{ title: string; content: string }[]> => {
-  const store = await getVectorStore(getEmbeddingsForConfig(config));
+  const store = await getVectorStore(getEmbeddingsWithConfig(config));
   const results = await store.similaritySearchWithScore(query, k);
   const threshold = getRagScoreThreshold();
 
