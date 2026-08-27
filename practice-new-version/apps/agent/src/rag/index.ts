@@ -51,7 +51,7 @@ export const ensureIndexed = async (): Promise<void> => {
   const seedDocs = knowledgeBase.map(
     (a) =>
       new Document({
-        pageContent: `${a.title}\n\n${a.content}`,
+        pageContent: a.content,
         metadata: { id: a.id, title: a.title, tags: a.tags },
       }),
   );
