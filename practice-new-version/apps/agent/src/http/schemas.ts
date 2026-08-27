@@ -55,7 +55,7 @@ export type ThreadIdQuery = z.infer<typeof ThreadIdQuerySchema>;
 
 // GET /api/knowledge — k mirrors searchKnowledge's own default of 3.
 export const SearchKnowledgeQuerySchema = z.object({
-  q: z.string().min(1),
+  query: z.string().min(1),
   k: z.coerce.number().int().min(1).max(10).default(3),
 });
 export type SearchKnowledgeQuery = z.infer<typeof SearchKnowledgeQuerySchema>;

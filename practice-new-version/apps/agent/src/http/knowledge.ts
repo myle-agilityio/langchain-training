@@ -16,13 +16,13 @@ knowledgeApp.get(
   "/",
   validate("query", SearchKnowledgeQuerySchema),
   async (c) => {
-    const { q, k } = c.get("valid") as SearchKnowledgeQuery;
+    const { query, k } = c.get("valid") as SearchKnowledgeQuery;
     // Visitor's own key (BYOK) first, same as threads.ts — process.env is the leftover fallback.
     const apiKey =
       c.req.header("x-openai-api-key") ?? process.env.OPENAI_API_KEY;
 
     return c.json({
-      articles: await searchKnowledge(q, getEmbeddingsWithApiKey(apiKey), k),
+      articles: await searchKnowledge(query, getEmbeddingsWithApiKey(apiKey), k),
     });
   },
 );
