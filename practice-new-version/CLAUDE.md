@@ -91,7 +91,7 @@ These are how we work on this project, not style preferences. Follow them on eve
    folder holding that component's `index.tsx` (`components/InboxList/`,
    `components/common/DropdownMenu/`). Barrel `index.ts`/`index.tsx` files keep their name. **Assets and scripts stay kebab-case**:
    `public/copilotkit-logo-mark.svg` and the KB documents in `rag/sampleDocs/`
-   (`loaders.ts` derives their titles from the filename).
+   (`loaders.ts` titles each from its own heading line, falling back to the filename).
 7. **Barrels re-export whole modules with `export *`.** When the barrel takes everything a file
    exports, write `export * from "./x"` — `export type * from "./x"` if that file is types only —
    instead of listing every name. Spell out names only when the barrel deliberately takes a
