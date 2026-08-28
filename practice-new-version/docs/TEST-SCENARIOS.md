@@ -134,6 +134,10 @@ result in the **Result** line. Status key: ⬜ not run · ✅ pass · ⚠️ par
   - Expect: a "Related knowledge" card appears in the reading pane showing the matching policy article's title and a short excerpt, with no chat message sent. Select an email with no matching policy and confirm the card shows a "no articles found" message instead of a match.
   - Result: ✅ pass
 
+- [ ] **10.5 Search conversation history** — Open the conversation history dropdown (clock icon) and use the search box at the top. Try a word that only appears in a conversation's title, then clear it and try a word that was only said partway through a conversation (not its title, not its first message).
+  - Expect: both searches narrow the list to the matching conversation(s) — search covers a conversation's title and everything said in it, not just how it started. Clearing the box brings back the full history.
+  - Result: ✅ pass
+
 ---
 
 ## Watch on `gpt-4o-mini`

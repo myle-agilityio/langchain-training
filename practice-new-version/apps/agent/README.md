@@ -131,7 +131,8 @@ All in the one Postgres behind `DATABASE_URL`, created on first connect:
 - `kb_documents` — the embedded knowledge base (pgvector)
 - `checkpoints*` — graph checkpoints (`PostgresSaver`)
 - `store*` — cross-thread memory (`PostgresStore`)
-- `chat_threads` — the self-managed thread list (title, created/updated timestamps)
+- `chat_threads` — the self-managed thread list (title, full-conversation content for search,
+  created/updated timestamps)
 
 ## Deploying
 
