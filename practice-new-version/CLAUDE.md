@@ -15,9 +15,9 @@ reference — don't copy patterns from `practice/`'s agent without deciding they
 - The agent runs under `langgraphjs dev`; the graph entry and the custom HTTP app (CopilotKit +
   the `/api/emails`/`/api/threads`/`/api/knowledge` routes) are both registered in
   `apps/agent/langgraph.json`.
-  **Each app owns its env — there is no root `.env`:** the agent reads `apps/agent/.env`
-  (`langgraph.json`'s `"env": ".env"`); the UI's `apps/web/.env` only matters at deploy time
-  (`vercel.json`'s `AGENT_URL` rewrite target), not in dev.
+  **Only the agent has a `.env`, no root one:** it reads `apps/agent/.env` (`langgraph.json`'s
+  `"env": ".env"`). The UI reads no env vars at all — `vercel.json`'s `AGENT_URL` rewrite is set
+  directly on the Vercel project (dashboard/`vercel env add`), not from any file in the repo.
 
 ## Where things live
 

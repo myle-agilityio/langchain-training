@@ -52,11 +52,11 @@ pnpm install
 
 This installs both `apps/web` (the Vite app) and `apps/agent` in one pass — one pnpm workspace.
 
-2. Copy the example environment files — **each app owns its own `.env`**, there is no root one:
+2. Copy the agent's example environment file — **`apps/web` has no env vars of its own**, only
+   `apps/agent` needs a `.env`:
 
 ```bash
 cp apps/agent/.env.example apps/agent/.env
-cp apps/web/.env.example apps/web/.env
 ```
 
 Then update the required values in `apps/agent/.env`:
@@ -103,7 +103,6 @@ README covering its layout and stack:
 ```
 ├── apps/
 │   ├── web/            # Vite SPA — inbox UI + CopilotKit chat  → apps/web/README.md
-│   │   └── .env        # Web-only env, read by vite.config.ts at build/dev time
 │   └── agent/          # LangGraph.js agent + Hono HTTP app     → apps/agent/README.md
 │       └── .env        # Agent-only env, read via langgraph.json's "env": ".env"
 ├── packages/

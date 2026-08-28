@@ -11,11 +11,14 @@ pnpm --filter web typecheck
 pnpm build              # vite build → apps/web/dist
 ```
 
-## Environment
+This app reads no env vars of its own — no `.env`, no `import.meta.env`. In dev, Vite's proxy
+(`vite.config.ts`'s `server.proxy`) sends `/api/*` to `http://localhost:8123`.
 
-| Variable    | Required | Read by                       | Purpose                                                                                                                 |
-| ----------- | -------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `AGENT_URL` | No       | `vercel.json`, at deploy time | Rewrite target for `/api/*` in production; set on the deploy platform. Ignored in dev, where the Vite proxy handles it. |
+## Deploying
+
+Static build on Vercel (`vercel.json`: `outputDirectory: apps/web/dist`). Its `routes` rewrite
+`/api/*` to `${AGENT_URL}` — set `AGENT_URL` as an environment variable on the Vercel project
+itself (dashboard or `vercel env add`), not in a file; Vercel doesn't read a checked-in `.env`.
 
 ## Structure
 
