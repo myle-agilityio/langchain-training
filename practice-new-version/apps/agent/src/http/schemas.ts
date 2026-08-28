@@ -40,7 +40,10 @@ export type PatchEmailBody = z.infer<typeof PatchEmailBodySchema>;
 
 export const SaveThreadBodySchema = z.object({
   id: z.string().min(1),
+  // Used only to generate the title on a thread's first save.
   firstMessage: z.string().optional(),
+  // Full-conversation snapshot the search index is built from — refreshed on every save.
+  content: z.string().optional(),
 });
 export type SaveThreadBody = z.infer<typeof SaveThreadBodySchema>;
 
@@ -66,3 +69,9 @@ export const ListQuerySchema = z.object({
   offset: z.coerce.number().int().min(0).default(0),
 });
 export type ListQuery = z.infer<typeof ListQuerySchema>;
+
+// GET /api/threads — same paging as ListQuerySchema, plus an optional title/content search term.
+export const ListThreadsQuerySchema = ListQuerySchema.extend({
+  search: z.string().min(1).optional(),
+});
+export type ListThreadsQuery = z.infer<typeof ListThreadsQuerySchema>;

@@ -24,11 +24,19 @@ type ThreadsData = InfiniteData<ThreadsPage, number>;
 
 // Stands in for CopilotKit's <CopilotThreadsDrawer>/useThreads (Intelligence mode drops runs
 // in prod). History survives via the Postgres checkpointer; this just adds list/rename/delete UI.
-export const useSelfManagedThreads = () => {
+export const useSelfManagedThreads = (search = "") => {
+  const trimmedSearch = search.trim();
+  // Keep the unsearched key identical to threadsQueryKey — rename/delete/save optimistically
+  // write to that exact key, and a mismatch here would silently break their optimistic updates.
+  const queryKey = trimmedSearch
+    ? [...threadsQueryKey, trimmedSearch]
+    : threadsQueryKey;
+
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: threadsQueryKey,
-      queryFn: ({ pageParam }) => fetchThreads(pageParam),
+      queryKey,
+      queryFn: ({ pageParam }) =>
+        fetchThreads(pageParam, trimmedSearch || undefined),
       initialPageParam: 0,
       getNextPageParam: (lastPage, pages) =>
         lastPage.hasNext
@@ -123,7 +131,7 @@ export const useSaveThread = () => {
     // Background upsert after a run — a failed title write shouldn't interrupt the teacher.
     meta: { silent: true },
     // Read at call time, not render time: the teacher can change the key mid-session.
-    mutationFn: (body: { id: string; firstMessage?: string }) =>
+    mutationFn: (body: { id: string; firstMessage?: string; content?: string }) =>
       saveThread(body, useOpenAIKey.getState().apiKey),
     onSettled: () =>
       queryClient.invalidateQueries({ queryKey: threadsQueryKey }),
