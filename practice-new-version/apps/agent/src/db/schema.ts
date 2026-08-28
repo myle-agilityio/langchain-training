@@ -34,11 +34,4 @@ export const ensureSchema = async (): Promise<void> => {
       updated_at timestamptz NOT NULL DEFAULT now()
     )
   `);
-  // Backfills the column on a database that already has chat_threads from before user scoping.
-  await pool.query(
-    `ALTER TABLE chat_threads ADD COLUMN IF NOT EXISTS user_id text NOT NULL DEFAULT ''`,
-  );
-  await pool.query(
-    `CREATE INDEX IF NOT EXISTS chat_threads_user_id_updated_at_idx ON chat_threads (user_id, updated_at DESC)`,
-  );
 };
