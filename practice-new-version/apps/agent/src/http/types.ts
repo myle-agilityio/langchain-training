@@ -3,5 +3,6 @@ export interface AppEnv {
   Variables: {
     requestId: string;
     valid: unknown;
+    userId: string;
   };
 }

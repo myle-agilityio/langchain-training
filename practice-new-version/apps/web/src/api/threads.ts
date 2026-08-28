@@ -1,5 +1,10 @@
-import { OPENAI_API_KEY_HEADER, THREADS_PAGE_SIZE } from "@/constants";
+import {
+  OPENAI_API_KEY_HEADER,
+  THREADS_PAGE_SIZE,
+  USER_ID_HEADER,
+} from "@/constants";
 import type { ChatThread } from "@/types";
+import { useUserId } from "@/stores";
 import { apiClient } from "./client";
 
 const THREADS_PATH = "/api/threads";
@@ -9,6 +14,10 @@ export interface ThreadsPage {
   hasNext: boolean;
 }
 
+// Scopes every /api/threads request to this browser's id — read at call time since it's a
+// module-level function, not a component.
+const userIdHeaders = () => ({ [USER_ID_HEADER]: useUserId.getState().userId });
+
 export const fetchThreads = async (
   offset: number,
   search?: string,
@@ -16,6 +25,7 @@ export const fetchThreads = async (
   (
     await apiClient.get<ThreadsPage>(THREADS_PATH, {
       params: { limit: THREADS_PAGE_SIZE, offset, search },
+      headers: userIdHeaders(),
     })
   ).data;
 
@@ -26,7 +36,10 @@ export const saveThread = async (
   openaiKey?: string | null,
 ): Promise<void> => {
   await apiClient.post(THREADS_PATH, body, {
-    headers: openaiKey ? { [OPENAI_API_KEY_HEADER]: openaiKey } : undefined,
+    headers: {
+      ...userIdHeaders(),
+      ...(openaiKey ? { [OPENAI_API_KEY_HEADER]: openaiKey } : {}),
+    },
   });
 };
 
@@ -34,9 +47,16 @@ export const renameThread = async (
   id: string,
   title: string,
 ): Promise<void> => {
-  await apiClient.patch(THREADS_PATH, { id, title });
+  await apiClient.patch(
+    THREADS_PATH,
+    { id, title },
+    { headers: userIdHeaders() },
+  );
 };
 
 export const deleteThread = async (id: string): Promise<void> => {
-  await apiClient.delete(THREADS_PATH, { params: { id } });
+  await apiClient.delete(THREADS_PATH, {
+    params: { id },
+    headers: userIdHeaders(),
+  });
 };

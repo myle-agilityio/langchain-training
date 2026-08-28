@@ -6,6 +6,7 @@ export {
   DEFAULT_CHAT_MODEL_ID,
   OPENAI_API_KEY_HEADER,
   TOOL,
+  USER_ID_HEADER,
 } from "@repo/shared";
 export type { ChatModelId } from "@repo/shared";
 export * from "./a2ui";

@@ -27,6 +27,7 @@ export const ensureSchema = async (): Promise<void> => {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS chat_threads (
       id         text PRIMARY KEY,
+      user_id    text NOT NULL DEFAULT '',
       title      text,
       content    text,
       created_at timestamptz NOT NULL DEFAULT now(),

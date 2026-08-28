@@ -9,6 +9,8 @@ const DB_CODES = new Set([
   "28P01", // invalid_password
   "3D000", // invalid_catalog_name
   "08006", // connection_failure
+  "53300", // too_many_connections
+  "57P03", // cannot_connect_now
   "ECONNREFUSED",
   "ENOTFOUND",
 ]);
