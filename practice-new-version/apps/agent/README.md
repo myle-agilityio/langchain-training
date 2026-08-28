@@ -14,18 +14,17 @@ pnpm --filter agent typecheck
 
 ## Environment
 
-| Variable                   | Required            | Read by                                 | Purpose                                                                                     |
-| -------------------------- | ------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`             | **Yes**             | `config/env.ts`                         | The one Postgres holding inbox, KB, checkpoints, and store. Throws on startup if unset.     |
-| `OPENAI_API_KEY`           | No                  | `config/model.ts`, `http/threads.ts`    | Bootstrap fallback only — the one-time KB seed and thread title generation. See BYOK below. |
-| `RAG_SCORE_THRESHOLD`      | No — default `0.65` | `config/env.ts`                         | Minimum cosine similarity (0–1) a KB match must clear to be used as grounding.              |
-| `PORT`                     | No — default `8123` | `http/copilotkit.ts`, `pnpm start`      | Port the agent listens on.                                                                  |
-| `AGENT_URL`                | No                  | `http/copilotkit.ts`                    | Deployment URL the CopilotKit runtime points its `LangGraphAgent` at.                       |
-| `LANGGRAPH_DEPLOYMENT_URL` | No                  | `http/copilotkit.ts`                    | Second fallback for the above, before `http://127.0.0.1:$PORT`.                             |
-| `LANGSMITH_API_KEY`        | No                  | `http/copilotkit.ts`, `langgraphjs dev` | Tracing; passed to the agent and picked up by the CLI.                                      |
-| `LANGSMITH_TRACING`        | No                  | `langgraphjs dev`                       | Turns tracing on for every graph run.                                                       |
-| `LANGSMITH_PROJECT`        | No                  | `langgraphjs dev`                       | LangSmith project name.                                                                     |
-| `LANGSMITH_ENDPOINT`       | No                  | `langgraphjs dev`                       | Override the LangSmith API host.                                                            |
+| Variable              | Required            | Read by                                 | Purpose                                                                                     |
+| --------------------- | ------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`        | **Yes**             | `config/env.ts`                         | The one Postgres holding inbox, KB, checkpoints, and store. Throws on startup if unset.     |
+| `OPENAI_API_KEY`      | No                  | `config/model.ts`, `http/threads.ts`    | Bootstrap fallback only — the one-time KB seed and thread title generation. See BYOK below. |
+| `RAG_SCORE_THRESHOLD` | No — default `0.65` | `config/env.ts`                         | Minimum cosine similarity (0–1) a KB match must clear to be used as grounding.              |
+| `PORT`                | No — default `8123` | `http/copilotkit.ts`, `pnpm start`      | Port the agent listens on.                                                                  |
+| `AGENT_URL`           | No                  | `http/copilotkit.ts`                    | Deployment URL the CopilotKit runtime points its `LangGraphAgent` at.                       |
+| `LANGSMITH_API_KEY`   | No                  | `http/copilotkit.ts`, `langgraphjs dev` | Tracing; passed to the agent and picked up by the CLI.                                      |
+| `LANGSMITH_TRACING`   | No                  | `langgraphjs dev`                       | Turns tracing on for every graph run.                                                       |
+| `LANGSMITH_PROJECT`   | No                  | `langgraphjs dev`                       | LangSmith project name.                                                                     |
+| `LANGSMITH_ENDPOINT`  | No                  | `langgraphjs dev`                       | Override the LangSmith API host.                                                            |
 
 ## The HTTP surface
 
