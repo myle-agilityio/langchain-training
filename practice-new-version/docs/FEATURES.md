@@ -159,6 +159,8 @@ long-running conversation doesn't get in the way of starting a fresh, unrelated 
 
 - A threads drawer lists past conversations; picking one resumes it, **+ New** starts a clean
   thread without losing the others.
+- The list is specific to the browser it was started in — opening the app in a different browser
+  (or after clearing site data) starts with an empty list of its own.
 
 ## Manual reply path
 

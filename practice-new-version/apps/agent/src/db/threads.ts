@@ -22,14 +22,17 @@ const toChatThread = (row: ChatThreadRow): ChatThread => {
 export const listThreads = async (
   limit: number,
   offset: number,
+  userId: string,
   search?: string,
 ): Promise<{ threads: ChatThread[]; hasNext: boolean }> => {
   // Ask for one extra row — its presence past `limit` is how we know there's another page,
   // without a second COUNT(*) query.
-  const where = search ? `WHERE title ILIKE $3 OR content ILIKE $3` : "";
+  const where = search
+    ? `WHERE user_id = $3 AND (title ILIKE $4 OR content ILIKE $4)`
+    : `WHERE user_id = $3`;
   const params = search
-    ? [limit + 1, offset, `%${search}%`]
-    : [limit + 1, offset];
+    ? [limit + 1, offset, userId, `%${search}%`]
+    : [limit + 1, offset, userId];
 
   const { rows } = await getPool().query<ChatThreadRow>(
     `SELECT ${CHAT_THREAD_COLUMNS} FROM chat_threads ${where} ORDER BY updated_at DESC LIMIT $1 OFFSET $2`,
@@ -49,17 +52,19 @@ export const listThreads = async (
 // call that omits content wiping out what's already there.
 export const upsertThread = async (
   id: string,
+  userId: string,
   title: string | null,
   content: string | null = null,
 ): Promise<ChatThread> => {
+  // ON CONFLICT never touches user_id — a thread keeps its original owner even if re-touched.
   const { rows } = await getPool().query<ChatThreadRow>(
-    `INSERT INTO chat_threads (id, title, content)
-     VALUES ($1, $2, $3)
+    `INSERT INTO chat_threads (id, user_id, title, content)
+     VALUES ($1, $2, $3, $4)
      ON CONFLICT (id) DO UPDATE SET
        updated_at = now(),
        content = COALESCE(EXCLUDED.content, chat_threads.content)
      RETURNING ${CHAT_THREAD_COLUMNS}`,
-    [id, title, content],
+    [id, userId, title, content],
   );
 
   return toChatThread(rows[0]);
@@ -76,17 +81,24 @@ export const threadExists = async (id: string): Promise<boolean> => {
 
 export const renameThread = async (
   id: string,
+  userId: string,
   title: string,
 ): Promise<ChatThread | null> => {
   const { rows } = await getPool().query<ChatThreadRow>(
-    `UPDATE chat_threads SET title = $2, updated_at = now() WHERE id = $1
+    `UPDATE chat_threads SET title = $3, updated_at = now() WHERE id = $1 AND user_id = $2
      RETURNING ${CHAT_THREAD_COLUMNS}`,
-    [id, title],
+    [id, userId, title],
   );
 
   return rows[0] ? toChatThread(rows[0]) : null;
 };
 
-export const deleteThread = async (id: string): Promise<void> => {
-  await getPool().query(`DELETE FROM chat_threads WHERE id = $1`, [id]);
+export const deleteThread = async (
+  id: string,
+  userId: string,
+): Promise<void> => {
+  await getPool().query(
+    `DELETE FROM chat_threads WHERE id = $1 AND user_id = $2`,
+    [id, userId],
+  );
 };

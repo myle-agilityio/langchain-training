@@ -13,7 +13,7 @@ import {
 import { AppError, ERROR_CODE } from "@/errors";
 import { logWarn } from "@/logging";
 import { titlePrompt } from "@/prompts";
-import { validate } from "./middleware";
+import { requireUserId, validate } from "./middleware";
 import {
   ListThreadsQuerySchema,
   RenameThreadBodySchema,
@@ -83,10 +83,13 @@ const generateTitle = async (
 
 export const threadsApp = new Hono<AppEnv>();
 
+// Every route below is scoped to the browser that created the thread — see useUserId in apps/web.
+threadsApp.use("*", requireUserId);
+
 threadsApp.get("/", validate("query", ListThreadsQuerySchema), async (c) => {
   const { limit, offset, search } = c.get("valid") as ListThreadsQuery;
 
-  return c.json(await listThreads(limit, offset, search));
+  return c.json(await listThreads(limit, offset, c.get("userId"), search));
 });
 
 // Upsert: creates the row (title from firstMessage) on a thread's first touch, else just bumps
@@ -105,13 +108,18 @@ threadsApp.post("/", validate("json", SaveThreadBodySchema), async (c) => {
     : await generateTitle(firstMessage, apiKey, c.get("requestId"));
 
   return c.json({
-    thread: await upsertThread(id, title, content?.trim() || null),
+    thread: await upsertThread(
+      id,
+      c.get("userId"),
+      title,
+      content?.trim() || null,
+    ),
   });
 });
 
 threadsApp.patch("/", validate("json", RenameThreadBodySchema), async (c) => {
   const { id, title } = c.get("valid") as RenameThreadBody;
-  const thread = await renameThread(id, title);
+  const thread = await renameThread(id, c.get("userId"), title);
 
   if (!thread) {
     throw new AppError(ERROR_CODE.THREAD_NOT_FOUND, {
@@ -125,7 +133,7 @@ threadsApp.patch("/", validate("json", RenameThreadBodySchema), async (c) => {
 threadsApp.delete("/", validate("query", ThreadIdQuerySchema), async (c) => {
   const { id } = c.get("valid") as ThreadIdQuery;
 
-  await deleteThread(id);
+  await deleteThread(id, c.get("userId"));
 
   return c.json({ ok: true });
 });

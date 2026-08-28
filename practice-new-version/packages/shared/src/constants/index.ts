@@ -3,3 +3,4 @@ export * from "./apiKey";
 export * from "./compose";
 export * from "./model";
 export * from "./tool";
+export * from "./user";
