@@ -27,7 +27,9 @@ export const listThreads = async (
   // Ask for one extra row — its presence past `limit` is how we know there's another page,
   // without a second COUNT(*) query.
   const where = search ? `WHERE title ILIKE $3 OR content ILIKE $3` : "";
-  const params = search ? [limit + 1, offset, `%${search}%`] : [limit + 1, offset];
+  const params = search
+    ? [limit + 1, offset, `%${search}%`]
+    : [limit + 1, offset];
 
   const { rows } = await getPool().query<ChatThreadRow>(
     `SELECT ${CHAT_THREAD_COLUMNS} FROM chat_threads ${where} ORDER BY updated_at DESC LIMIT $1 OFFSET $2`,

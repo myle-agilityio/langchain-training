@@ -13,9 +13,7 @@ interface AgentWithMessages {
 
 // AG-UI message content is either a plain string or an array of parts (text/image, for
 // attachments) — pull the first text part out of either shape.
-const messageText = (message: {
-  content?: unknown;
-}): string | undefined => {
+const messageText = (message: { content?: unknown }): string | undefined => {
   const { content } = message;
 
   if (typeof content === "string") {

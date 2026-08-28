@@ -131,8 +131,11 @@ export const useSaveThread = () => {
     // Background upsert after a run — a failed title write shouldn't interrupt the teacher.
     meta: { silent: true },
     // Read at call time, not render time: the teacher can change the key mid-session.
-    mutationFn: (body: { id: string; firstMessage?: string; content?: string }) =>
-      saveThread(body, useOpenAIKey.getState().apiKey),
+    mutationFn: (body: {
+      id: string;
+      firstMessage?: string;
+      content?: string;
+    }) => saveThread(body, useOpenAIKey.getState().apiKey),
     onSettled: () =>
       queryClient.invalidateQueries({ queryKey: threadsQueryKey }),
   });
