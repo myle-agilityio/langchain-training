@@ -35,8 +35,9 @@ src/
 │   ├── ChatSidebar/     # Collapsible right-hand sidebar hosting the chat
 │   ├── ThreadsMenu/     # Conversation history dropdown
 │   ├── openAIKey/       # BYOK — key form, chat gate card, change-key button
+│   ├── ModelPicker/     # Chat-model dropdown (GPT-4o mini/4o/4.1 mini/4.1)
 │   ├── ToolRendering/   # Tool-call reasoning renderer
-│   ├── common/          # Primitives: Badge, Button, Card, Dialog, DropdownMenu, Field, Spinner
+│   ├── common/          # Primitives: Badge, Button, Card, Dialog, DropdownMenu, Field, Spinner, Toast
 │   ├── generativeUI/    # EmailReplyCard (approve/reject) + one card per tool
 │   └── declarativeGenerativeUI/  # A2UI catalog: definitions.ts, renderers.tsx, theme.ts
 ├── api/                 # The only place that talks HTTP
@@ -53,8 +54,11 @@ src/
 │   ├── useEmailLookup.ts        # id -> Email map for the tool cards
 │   ├── useExampleSuggestions.tsx
 │   └── useSync*.ts              # Invalidate queries / mirror state on run lifecycle
-├── stores/              # zustand — client-only state (theme, OpenAI key, compose approval)
-├── lib/queryClient.ts   # Configured library instances — one QueryClient, one error log point
+├── stores/              # zustand — client-only state (theme, OpenAI key, chat model, compose approval)
+├── lib/
+│   ├── queryClient.ts   # One QueryClient, one error log point
+│   ├── errors.ts        # ApiError — normalizes axios failures for the toast/log path
+│   └── logger.ts        # Browser JSON logger, same shape as the agent's
 ├── utils/               # Pure helpers, re-exported from index.ts
 │   ├── cn.ts            # clsx + tailwind-merge
 │   ├── emailFilters.ts  # Filter predicates for the inbox list

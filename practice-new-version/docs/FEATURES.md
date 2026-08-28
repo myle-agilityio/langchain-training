@@ -86,6 +86,15 @@ student/parent PII isn't exposed to the LLM provider.
 - Email addresses, phone numbers, and street addresses are redacted before any prompt is built.
 - The actual send still reaches the real recipient (via the email's id), unaffected by redaction.
 
+## Pick which model answers
+
+**Teacher can** choose which OpenAI model powers the chat, **so that** they can trade off speed,
+cost, and quality for the task at hand instead of being stuck with one fixed model.
+
+- A model icon next to the chat opens a picker with GPT-4o mini (default), GPT-4o, GPT-4.1 mini,
+  and GPT-4.1; the choice is remembered in the browser and applies to every message from then on.
+- Switching models doesn't affect anything already sent — only the next reply.
+
 ## Remembers within a conversation
 
 **Teacher can** rely on the assistant tracking what's being discussed across a long chat,

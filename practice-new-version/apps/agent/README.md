@@ -83,7 +83,7 @@ src/
 │       └── errorHandler.ts    # Maps AppError to the HTTP error body
 ├── config/
 │   ├── env.ts            # DATABASE_URL / RAG_SCORE_THRESHOLD / pg TLS options, read at call time
-│   └── model.ts          # MODEL, EMBEDDING_MODEL, per-request key resolution
+│   └── model.ts          # EMBEDDING_MODEL + per-request key/chat-model resolution (BYOK)
 ├── constants/            # Tool names, table names, A2UI and compose constants
 ├── data/seedEmails.ts    # Inbox seed, inserted on first boot against an empty `emails` table
 └── utils/                # a2ui, email, messages, redaction (PII), apiKeyNotice
@@ -108,7 +108,7 @@ src/
 | `@langchain/langgraph`                               | 1.4.8          | StateGraph, subgraphs, `interrupt()`        |
 | `@langchain/langgraph-cli`                           | 1.4.3          | `langgraphjs dev` — server + Studio         |
 | `langchain` / `@langchain/core`                      | 1.3.4 / 1.1.49 | Messages, tools, structured output          |
-| `@langchain/openai`                                  | 1.4.4          | `gpt-4o-mini`, `text-embedding-3-small`     |
+| `@langchain/openai`                                  | 1.4.4          | Chat (teacher-picked model, default `gpt-4o-mini`), `text-embedding-3-small` |
 | `@langchain/community`                               | ^1.1.29        | `PGVectorStore`                             |
 | `@langchain/langgraph-checkpoint-postgres`           | ^1.0.4         | `PostgresSaver`, `PostgresStore`            |
 | `@copilotkit/runtime` / `@copilotkit/sdk-js`         | 1.62.3         | CopilotKit endpoint + state schema          |

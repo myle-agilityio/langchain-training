@@ -6,8 +6,9 @@ view. Scenarios use the real seed inbox (sender names are real), so you can foll
 **How to use:** run `pnpm dev`, then work through each scenario. Mark the box, and jot the
 result in the **Result** line. Status key: ⬜ not run · ✅ pass · ⚠️ partial / flaky · ❌ fail.
 
-> Model note: this runs on `gpt-4o-mini`. Small-model drift is expected on a few of these —
-> the ones most affected are flagged inline.
+> Model note: scenarios below assume the default `gpt-4o-mini` (the model picker next to chat
+> can switch it). Small-model drift is expected on a few of these — the ones most affected are
+> flagged inline.
 
 ---
 

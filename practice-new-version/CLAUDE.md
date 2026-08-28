@@ -25,7 +25,9 @@ Turborepo + pnpm workspace: `apps/web` (Vite SPA), `apps/agent`, and `packages/s
 `turbo.json` drives `dev`/`typecheck`/`build` across the packages.
 
 `packages/shared` (`@repo/shared`) holds the contracts both sides must agree on — the tool
-names (`TOOL`), `COMPOSE_REPLY_ACTION`, `CUSTOM_CATALOG_ID`, and the `ChatThread` type. It ships
+names (`TOOL`), `COMPOSE_REPLY_ACTION`, `CUSTOM_CATALOG_ID`, the `ChatThread` type, and the BYOK/
+chat-model headers (`OPENAI_API_KEY_HEADER`, `CHAT_MODEL_HEADER`, `CHAT_MODEL_OPTIONS`) the web
+app forwards and the agent's `config/model.ts` reads per request. It ships
 TS source (no build step; `exports` points at `src/index.ts`), so tsx and Vite compile it in
 place. Each app re-exports what it needs through its own `constants/index.ts` / `types/index.ts`
 barrel — use sites keep importing from `@/constants` and `@/types`, never from `@repo/shared`
@@ -66,9 +68,9 @@ Frontend (`apps/web/`, Vite SPA, single page — no router):
   helpers and `src/constants/` is values — both one file per concept behind an `index.ts`
   barrel, and neither holds React hooks (those go in `src/hooks/`).
 
-Everything persistent is in the one Postgres behind `DATABASE_URL`: the inbox (`emails`,
-`contact_profiles`), the embedded KB (`kb_documents`), graph checkpoints (`checkpoints*`) and
-the cross-thread store (`store*`).
+Everything persistent is in the one Postgres behind `DATABASE_URL`: the inbox (`emails`), the
+embedded KB (`kb_documents`), graph checkpoints (`checkpoints*`), and the cross-thread store
+(`store*` — contact profiles live here as a namespaced key, not their own table).
 
 ## Rules
 
@@ -82,15 +84,15 @@ These are how we work on this project, not style preferences. Follow them on eve
    Say in your response what you verified and what you didn't. See the `verify-feature` skill.
 4. **Tear down anything you started.** Agent (:8123), Vite dev server (:3000), monitors, probe
    scripts. An orphaned server holds its port and collides with the user's next `pnpm dev`.
-5. **Never let secrets leak.** `.env` stays untracked; a new env var goes into the owning app's
-   `.env.example` (`apps/agent/` or `apps/web/`) in the same change.
+5. **Never let secrets leak.** `.env` stays untracked; a new agent env var goes into
+   `apps/agent/.env.example` in the same change. `apps/web` has no env vars of its own.
 6. **Name source files and folders in camelCase** — `useSharedInbox.ts`, `emailFilters.ts`,
    `components/generativeUI/` — except anything whose export is a React component, which is
    PascalCase matching it: a component file (`renderers.tsx`'s siblings), and a component
    folder holding that component's `index.tsx` (`components/InboxList/`,
    `components/common/DropdownMenu/`). Barrel `index.ts`/`index.tsx` files keep their name. **Assets and scripts stay kebab-case**:
-   `public/copilotkit-logo-mark.svg` and the KB documents in `rag/sampleDocs/`
-   (`loaders.ts` titles each from its own heading line, falling back to the filename).
+   `public/copilotkit-logo-mark.svg` and the KB documents in `rag/sample-docs/`
+   (`loaders.ts` derives each title from its filename).
 7. **Barrels re-export whole modules with `export *`.** When the barrel takes everything a file
    exports, write `export * from "./x"` — `export type * from "./x"` if that file is types only —
    instead of listing every name. Spell out names only when the barrel deliberately takes a

@@ -166,8 +166,8 @@ One JSON line per event, `console.log/warn/error`:
   `runId`, `node`, `tool`, `method`, `path`, `status`, `durationMs`, `detail`, `stack`.
 - `redactSecrets()` runs on every string: credentials first (`sk-…`, `Bearer …`,
   `postgres://…`), then PII (email, phone, address).
-- `userId` is still the `demo-user` stub from `http/copilotkit.ts`; `threadId` is the real
-  correlation key until auth lands.
+- No real `userId` yet — `threadId` (`utils/runContext.ts`) is the correlation key every log line
+  carries until auth lands.
 - The browser writes the same shape via `lib/logger.ts` — the one place to attach Sentry/Datadog.
 
 ## Adding a new error
