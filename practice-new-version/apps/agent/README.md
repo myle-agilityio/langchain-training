@@ -69,11 +69,18 @@ src/
 │   ├── loaders.ts        # PDF/DOCX → chunks; titles derived from the filename
 │   └── sample-docs/      # Policy source documents (kebab-case, by rule)
 ├── http/
-│   ├── index.ts          # Hono app: mounts the routers below
-│   ├── copilotkit.ts     # CopilotKit runtime endpoint (/api/copilotkit)
-│   ├── emails.ts         # GET/PATCH /api/emails
-│   ├── knowledge.ts      # GET /api/knowledge?query= — searchKnowledge over HTTP, no LLM turn
-│   └── threads.ts        # GET/POST/PATCH/DELETE /api/threads + LLM title generation
+│   ├── index.ts             # Hono app: mounts the routers + middleware below
+│   ├── copilotkit.ts        # CopilotKit runtime endpoint (/api/copilotkit)
+│   ├── threadHistoryRunner.ts  # Custom AgentRunner — thread history via the LangGraph SDK
+│   ├── emails.ts            # GET/PATCH /api/emails
+│   ├── knowledge.ts         # GET /api/knowledge?query= — searchKnowledge over HTTP, no LLM turn
+│   ├── threads.ts           # GET/POST/PATCH/DELETE /api/threads + LLM title generation
+│   ├── schemas.ts           # Zod request/response schemas for the routes above
+│   ├── types.ts             # AppEnv — Hono binding shared by the middleware below
+│   └── middleware/
+│       ├── requestContext.ts  # Correlation id per request, carried by every log line
+│       ├── validate.ts        # Parses+validates json/query against a schemas.ts schema
+│       └── errorHandler.ts    # Maps AppError to the HTTP error body
 ├── config/
 │   ├── env.ts            # DATABASE_URL / RAG_SCORE_THRESHOLD / pg TLS options, read at call time
 │   └── model.ts          # MODEL, EMBEDDING_MODEL, per-request key resolution
@@ -108,7 +115,12 @@ src/
 | `hono`                                               | ^4.12.10       | The custom HTTP app                         |
 | `pg`                                                 | ^8.22.0        | Postgres driver (one shared pool)           |
 | `zod`                                                | ^3.23.8        | Tool args, structured output, state schemas |
+| `@repo/shared`                                       | workspace:\*   | Constants + `ChatThread` type, shared with `web` |
+| `axios`                                              | ^1.19.0        | Direct OpenAI call for thread title-gen (`http/threads.ts`) |
+| `@langchain/langgraph-sdk`                           | ^1.8.8         | `Client` — fetches thread history for `ThreadHistoryRunner` |
+| `@ag-ui/client` / `rxjs`                             | 0.0.57 / 7.8.1 | AG-UI event types + `Observable` used by `ThreadHistoryRunner` |
 | `pdf-parse` / `mammoth` / `@langchain/textsplitters` | —              | KB document loading and chunking            |
+| `d3-dsv` / `word-extractor`                          | —              | Peer deps for `@langchain/community`'s CSV/`.doc` loaders  |
 | TypeScript                                           | ^5.6.3         | `tsc --noEmit` via `pnpm typecheck`         |
 
 ## Tables it owns
@@ -119,7 +131,7 @@ All in the one Postgres behind `DATABASE_URL`, created on first connect:
 - `kb_documents` — the embedded knowledge base (pgvector)
 - `checkpoints*` — graph checkpoints (`PostgresSaver`)
 - `store*` — cross-thread memory (`PostgresStore`)
-- `chat_threads` — the self-managed thread list, used when Threads is off
+- `chat_threads` — the self-managed thread list (title, created/updated timestamps)
 
 ## Deploying
 
