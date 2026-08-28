@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Clock, Loader2, SquarePen } from "lucide-react";
+import { Clock, Loader2, Search, SquarePen } from "lucide-react";
 import { useCopilotChatConfiguration } from "@copilotkit/react-core/v2";
 import {
   useSelfManagedThreads,
@@ -12,6 +12,7 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
+  Input,
 } from "@/components/common";
 import { cn, formatRelative } from "@/utils";
 
@@ -19,7 +20,9 @@ import { cn, formatRelative } from "@/utils";
 // same data/actions, just a popover; outside-click-to-close comes free from Radix.
 export const ThreadsMenu = () => {
   const config = useCopilotChatConfiguration();
-  const { threads, loadMore, hasMore, isLoadingMore } = useSelfManagedThreads();
+  const [search, setSearch] = useState("");
+  const { threads, loadMore, hasMore, isLoadingMore } =
+    useSelfManagedThreads(search);
   const renameThread = useRenameThread();
   const deleteThread = useDeleteThread();
   const [open, setOpen] = useState(false);
@@ -49,6 +52,7 @@ export const ThreadsMenu = () => {
 
         if (!next) {
           setEditingId(null);
+          setSearch("");
         }
       }}
     >
@@ -75,10 +79,21 @@ export const ThreadsMenu = () => {
             <SquarePen className="h-3.5 w-3.5" /> New chat
           </button>
         </div>
+        <div className="p-2 border-b border-border relative">
+          <Search className="absolute left-4 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search conversations…"
+            className="h-8 pl-7 text-sm"
+          />
+        </div>
         <div className="max-h-80 overflow-y-auto thin-scrollbar p-1">
           {threads.length === 0 && (
             <p className="px-2 py-4 text-sm text-muted-foreground">
-              No conversations yet.
+              {search.trim()
+                ? "No matching conversations."
+                : "No conversations yet."}
             </p>
           )}
           <ul className="flex flex-col gap-0.5">

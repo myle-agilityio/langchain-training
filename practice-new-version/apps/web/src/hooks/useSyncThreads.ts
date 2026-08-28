@@ -11,10 +11,10 @@ interface AgentWithMessages {
   messages: ReadonlyArray<{ role?: string; content?: unknown }>;
 }
 
-// AG-UI user message content is either a plain string or an array of parts (text/image, for
+// AG-UI message content is either a plain string or an array of parts (text/image, for
 // attachments) — pull the first text part out of either shape.
-const firstUserMessageText = (agent: AgentWithMessages): string | undefined => {
-  const { content } = agent.messages.find((m) => m.role === "user") ?? {};
+const messageText = (message: { content?: unknown }): string | undefined => {
+  const { content } = message;
 
   if (typeof content === "string") {
     return content;
@@ -32,6 +32,20 @@ const firstUserMessageText = (agent: AgentWithMessages): string | undefined => {
   }
 
   return undefined;
+};
+
+const firstUserMessageText = (agent: AgentWithMessages): string | undefined =>
+  messageText(agent.messages.find((m) => m.role === "user") ?? {});
+
+// Full-conversation snapshot the thread-search index is built from — every message's text,
+// not just the first, so search finds a thread by anything said in it.
+const allMessagesText = (agent: AgentWithMessages): string | undefined => {
+  const text = agent.messages
+    .map(messageText)
+    .filter((part): part is string => Boolean(part))
+    .join("\n");
+
+  return text || undefined;
 };
 
 // Keeps the threads query in sync with the agent's run lifecycle; call once from a
@@ -59,7 +73,11 @@ export const useSyncThreads = () => {
           return;
         }
 
-        saveThread({ id: threadId, firstMessage: firstUserMessageText(agent) });
+        saveThread({
+          id: threadId,
+          firstMessage: firstUserMessageText(agent),
+          content: allMessagesText(agent),
+        });
       },
     });
 

@@ -22,12 +22,18 @@ const toChatThread = (row: ChatThreadRow): ChatThread => {
 export const listThreads = async (
   limit: number,
   offset: number,
+  search?: string,
 ): Promise<{ threads: ChatThread[]; hasNext: boolean }> => {
   // Ask for one extra row — its presence past `limit` is how we know there's another page,
   // without a second COUNT(*) query.
+  const where = search ? `WHERE title ILIKE $3 OR content ILIKE $3` : "";
+  const params = search
+    ? [limit + 1, offset, `%${search}%`]
+    : [limit + 1, offset];
+
   const { rows } = await getPool().query<ChatThreadRow>(
-    `SELECT ${CHAT_THREAD_COLUMNS} FROM chat_threads ORDER BY updated_at DESC LIMIT $1 OFFSET $2`,
-    [limit + 1, offset],
+    `SELECT ${CHAT_THREAD_COLUMNS} FROM chat_threads ${where} ORDER BY updated_at DESC LIMIT $1 OFFSET $2`,
+    params,
   );
 
   return {
@@ -37,17 +43,23 @@ export const listThreads = async (
 };
 
 // Upsert: creates the row the first time a thread is touched, and just bumps updated_at on
-// every later touch, without ever clobbering a title (LLM-generated or teacher-renamed).
+// every later touch. Title never gets clobbered (LLM-generated or teacher-renamed), but content
+// is refreshed with the caller's latest full-conversation snapshot every time, so search stays
+// current with the whole thread rather than just its first message. COALESCE guards against a
+// call that omits content wiping out what's already there.
 export const upsertThread = async (
   id: string,
   title: string | null,
+  content: string | null = null,
 ): Promise<ChatThread> => {
   const { rows } = await getPool().query<ChatThreadRow>(
-    `INSERT INTO chat_threads (id, title)
-     VALUES ($1, $2)
-     ON CONFLICT (id) DO UPDATE SET updated_at = now()
+    `INSERT INTO chat_threads (id, title, content)
+     VALUES ($1, $2, $3)
+     ON CONFLICT (id) DO UPDATE SET
+       updated_at = now(),
+       content = COALESCE(EXCLUDED.content, chat_threads.content)
      RETURNING ${CHAT_THREAD_COLUMNS}`,
-    [id, title],
+    [id, title, content],
   );
 
   return toChatThread(rows[0]);

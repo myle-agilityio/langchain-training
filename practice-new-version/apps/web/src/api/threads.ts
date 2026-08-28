@@ -9,17 +9,20 @@ export interface ThreadsPage {
   hasNext: boolean;
 }
 
-export const fetchThreads = async (offset: number): Promise<ThreadsPage> =>
+export const fetchThreads = async (
+  offset: number,
+  search?: string,
+): Promise<ThreadsPage> =>
   (
     await apiClient.get<ThreadsPage>(THREADS_PATH, {
-      params: { limit: THREADS_PAGE_SIZE, offset },
+      params: { limit: THREADS_PAGE_SIZE, offset, search },
     })
   ).data;
 
 // Upsert — creates the row on a thread's first touch, else just bumps updated_at. The key is
 // the teacher's own (BYOK): the route spends it on the generated title.
 export const saveThread = async (
-  body: { id: string; firstMessage?: string },
+  body: { id: string; firstMessage?: string; content?: string },
   openaiKey?: string | null,
 ): Promise<void> => {
   await apiClient.post(THREADS_PATH, body, {

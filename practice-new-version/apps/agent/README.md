@@ -103,25 +103,25 @@ src/
 
 ## Stack
 
-| Package                                              | Version        | Role                                        |
-| ---------------------------------------------------- | -------------- | ------------------------------------------- |
-| `@langchain/langgraph`                               | 1.4.8          | StateGraph, subgraphs, `interrupt()`        |
-| `@langchain/langgraph-cli`                           | 1.4.3          | `langgraphjs dev` — server + Studio         |
-| `langchain` / `@langchain/core`                      | 1.3.4 / 1.1.49 | Messages, tools, structured output          |
+| Package                                              | Version        | Role                                                                         |
+| ---------------------------------------------------- | -------------- | ---------------------------------------------------------------------------- |
+| `@langchain/langgraph`                               | 1.4.8          | StateGraph, subgraphs, `interrupt()`                                         |
+| `@langchain/langgraph-cli`                           | 1.4.3          | `langgraphjs dev` — server + Studio                                          |
+| `langchain` / `@langchain/core`                      | 1.3.4 / 1.1.49 | Messages, tools, structured output                                           |
 | `@langchain/openai`                                  | 1.4.4          | Chat (teacher-picked model, default `gpt-4o-mini`), `text-embedding-3-small` |
-| `@langchain/community`                               | ^1.1.29        | `PGVectorStore`                             |
-| `@langchain/langgraph-checkpoint-postgres`           | ^1.0.4         | `PostgresSaver`, `PostgresStore`            |
-| `@copilotkit/runtime` / `@copilotkit/sdk-js`         | 1.62.3         | CopilotKit endpoint + state schema          |
-| `hono`                                               | ^4.12.10       | The custom HTTP app                         |
-| `pg`                                                 | ^8.22.0        | Postgres driver (one shared pool)           |
-| `zod`                                                | ^3.23.8        | Tool args, structured output, state schemas |
-| `@repo/shared`                                       | workspace:\*   | Constants + `ChatThread` type, shared with `web` |
-| `axios`                                              | ^1.19.0        | Direct OpenAI call for thread title-gen (`http/threads.ts`) |
-| `@langchain/langgraph-sdk`                           | ^1.8.8         | `Client` — fetches thread history for `ThreadHistoryRunner` |
-| `@ag-ui/client` / `rxjs`                             | 0.0.57 / 7.8.1 | AG-UI event types + `Observable` used by `ThreadHistoryRunner` |
-| `pdf-parse` / `mammoth` / `@langchain/textsplitters` | —              | KB document loading and chunking            |
-| `d3-dsv` / `word-extractor`                          | —              | Peer deps for `@langchain/community`'s CSV/`.doc` loaders  |
-| TypeScript                                           | ^5.6.3         | `tsc --noEmit` via `pnpm typecheck`         |
+| `@langchain/community`                               | ^1.1.29        | `PGVectorStore`                                                              |
+| `@langchain/langgraph-checkpoint-postgres`           | ^1.0.4         | `PostgresSaver`, `PostgresStore`                                             |
+| `@copilotkit/runtime` / `@copilotkit/sdk-js`         | 1.62.3         | CopilotKit endpoint + state schema                                           |
+| `hono`                                               | ^4.12.10       | The custom HTTP app                                                          |
+| `pg`                                                 | ^8.22.0        | Postgres driver (one shared pool)                                            |
+| `zod`                                                | ^3.23.8        | Tool args, structured output, state schemas                                  |
+| `@repo/shared`                                       | workspace:\*   | Constants + `ChatThread` type, shared with `web`                             |
+| `axios`                                              | ^1.19.0        | Direct OpenAI call for thread title-gen (`http/threads.ts`)                  |
+| `@langchain/langgraph-sdk`                           | ^1.8.8         | `Client` — fetches thread history for `ThreadHistoryRunner`                  |
+| `@ag-ui/client` / `rxjs`                             | 0.0.57 / 7.8.1 | AG-UI event types + `Observable` used by `ThreadHistoryRunner`               |
+| `pdf-parse` / `mammoth` / `@langchain/textsplitters` | —              | KB document loading and chunking                                             |
+| `d3-dsv` / `word-extractor`                          | —              | Peer deps for `@langchain/community`'s CSV/`.doc` loaders                    |
+| TypeScript                                           | ^5.6.3         | `tsc --noEmit` via `pnpm typecheck`                                          |
 
 ## Tables it owns
 

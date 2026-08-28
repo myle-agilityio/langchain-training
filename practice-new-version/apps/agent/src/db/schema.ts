@@ -28,6 +28,7 @@ export const ensureSchema = async (): Promise<void> => {
     CREATE TABLE IF NOT EXISTS chat_threads (
       id         text PRIMARY KEY,
       title      text,
+      content    text,
       created_at timestamptz NOT NULL DEFAULT now(),
       updated_at timestamptz NOT NULL DEFAULT now()
     )

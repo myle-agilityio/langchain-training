@@ -15,11 +15,11 @@ import { logWarn } from "@/logging";
 import { titlePrompt } from "@/prompts";
 import { validate } from "./middleware";
 import {
-  ListQuerySchema,
+  ListThreadsQuerySchema,
   RenameThreadBodySchema,
   SaveThreadBodySchema,
   ThreadIdQuerySchema,
-  type ListQuery,
+  type ListThreadsQuery,
   type RenameThreadBody,
   type SaveThreadBody,
   type ThreadIdQuery,
@@ -83,16 +83,16 @@ const generateTitle = async (
 
 export const threadsApp = new Hono<AppEnv>();
 
-threadsApp.get("/", validate("query", ListQuerySchema), async (c) => {
-  const { limit, offset } = c.get("valid") as ListQuery;
+threadsApp.get("/", validate("query", ListThreadsQuerySchema), async (c) => {
+  const { limit, offset, search } = c.get("valid") as ListThreadsQuery;
 
-  return c.json(await listThreads(limit, offset));
+  return c.json(await listThreads(limit, offset, search));
 });
 
 // Upsert: creates the row (title from firstMessage) on a thread's first touch, else just bumps
 // updated_at — never clobbers an existing title (LLM-generated or teacher-renamed).
 threadsApp.post("/", validate("json", SaveThreadBodySchema), async (c) => {
-  const { id, firstMessage } = c.get("valid") as SaveThreadBody;
+  const { id, firstMessage, content } = c.get("valid") as SaveThreadBody;
 
   const exists = await threadExists(id);
   // Visitor's own key (BYOK — see agent/src/config/model.ts) first; process.env.OPENAI_API_KEY
@@ -104,7 +104,9 @@ threadsApp.post("/", validate("json", SaveThreadBodySchema), async (c) => {
     ? null
     : await generateTitle(firstMessage, apiKey, c.get("requestId"));
 
-  return c.json({ thread: await upsertThread(id, title) });
+  return c.json({
+    thread: await upsertThread(id, title, content?.trim() || null),
+  });
 });
 
 threadsApp.patch("/", validate("json", RenameThreadBodySchema), async (c) => {
