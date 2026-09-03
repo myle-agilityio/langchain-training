@@ -3,6 +3,7 @@ export * from "./EmailChat";
 export * from "./EmailInbox";
 export * from "./ModelPicker";
 export * from "./openAIKey";
+export * from "./ThemeToggle";
 export * from "./ThreadsMenu";
 export * from "./ToolRendering";
 export * from "./common";

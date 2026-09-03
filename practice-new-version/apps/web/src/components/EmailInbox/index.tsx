@@ -14,6 +14,7 @@ import {
   useComposingEmail,
 } from "@/hooks";
 import { useComposeApproval, useOpenAIKey } from "@/stores";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   EMPTY_FILTERS,
   filterEmails,
@@ -244,7 +245,8 @@ export const EmailInbox = () => {
           onApply={setFilters}
         />
       </div>
-      <div className="flex-1 min-w-0 rounded-xl bg-panel overflow-y-auto">
+      <div className="flex-1 min-w-0 relative rounded-xl bg-panel overflow-y-auto">
+        <ThemeToggle className="absolute top-4 right-4" />
         <EmailDetail
           email={selected}
           isLoading={isLoading}
