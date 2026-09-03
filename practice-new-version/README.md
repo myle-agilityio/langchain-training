@@ -68,7 +68,7 @@ DATABASE_URL=your-postgres-connection-string
 
 An empty database is fine — tables, the `vector` extension, and seed data (sample emails, the
 knowledge base) are all created automatically on first run.
-Or you can contact Slack my.le to have an already created DB URL
+Or you can contact Slack my.le to have an already created DB URL.
 
 The rest of `apps/agent/.env.example`'s values (`RAG_SCORE_THRESHOLD`, LangSmith tracing) are
 optional — each has a comment explaining it right there in the file.
