@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { z } from "zod";
+import { Bot } from "lucide-react";
 import {
   useAgent,
   useAgentContext,
@@ -14,6 +15,7 @@ import {
   useComposingEmail,
 } from "@/hooks";
 import { useComposeApproval, useOpenAIKey } from "@/stores";
+import { Button } from "@/components/common";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   EMPTY_FILTERS,
@@ -25,7 +27,12 @@ import { InboxList } from "./InboxList";
 import { EmailDetail } from "./EmailDetail";
 import { FilterDialog } from "./FilterDialog";
 
-export const EmailInbox = () => {
+interface EmailInboxProps {
+  chatCollapsed: boolean;
+  onOpenChat: () => void;
+}
+
+export const EmailInbox = ({ chatCollapsed, onOpenChat }: EmailInboxProps) => {
   const {
     emails,
     isLoading,
@@ -246,7 +253,21 @@ export const EmailInbox = () => {
         />
       </div>
       <div className="flex-1 min-w-0 relative rounded-xl bg-panel overflow-y-auto">
-        <ThemeToggle className="absolute top-4 right-4" />
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+          <ThemeToggle />
+          {chatCollapsed && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onOpenChat}
+              aria-label="Open chat"
+              className="bg-card shadow-sm"
+            >
+              <Bot className="h-4 w-4" />
+              AI Assistant
+            </Button>
+          )}
+        </div>
         <EmailDetail
           email={selected}
           isLoading={isLoading}
