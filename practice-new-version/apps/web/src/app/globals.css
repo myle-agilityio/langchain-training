@@ -166,6 +166,29 @@
   @apply border-ring bg-ring/15;
 }
 
+/* Welcome-screen orb (WelcomeScreen/index.tsx): slow breathing glow behind the icon. */
+@keyframes chat-orb-breathe {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.1);
+  }
+}
+
+.chat-orb-glow {
+  animation: chat-orb-breathe 3.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-orb-glow {
+    animation: none;
+  }
+}
+
 /*
  * The Threads drawer is a custom element with a shadow root, so ::part() is the only selector
  * that reaches its scroll container; `!important` beats its own rule inside the shadow tree.
