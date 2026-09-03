@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Wrench, Check, ChevronDown } from "lucide-react";
-import { Spinner } from "@/components/common";
+import { ToolBusyIndicator } from "@/components/generativeUI/toolCards/common";
 
 interface ToolReasoningProps {
   name: string;
@@ -39,7 +39,7 @@ export const ToolReasoning = ({ name, args, status }: ToolReasoningProps) => {
   }, [isRunning]);
 
   const statusIcon = isRunning ? (
-    <Spinner size="sm" className="h-3 w-3" />
+    <ToolBusyIndicator />
   ) : (
     <Check className="h-3 w-3 text-tone-green" />
   );

@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import { Check } from "lucide-react";
-import { Spinner } from "@/components/common";
+import { ToolBusyIndicator } from "../ToolBusyIndicator";
 import type { ToolStatus } from "@/types";
 
 export const Shell = ({
@@ -25,7 +25,7 @@ export const Shell = ({
           {status === "complete" ? (
             <Check className="h-3 w-3 text-tone-green" />
           ) : (
-            <Spinner size="sm" className="h-3 w-3" />
+            <ToolBusyIndicator />
           )}
         </span>
       </div>

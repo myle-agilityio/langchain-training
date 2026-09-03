@@ -4,5 +4,6 @@ export * from "./Card";
 export * from "./Dialog";
 export * from "./DropdownMenu";
 export * from "./Field";
+export * from "./PulsingDot";
 export * from "./Spinner";
 export * from "./Toast";
