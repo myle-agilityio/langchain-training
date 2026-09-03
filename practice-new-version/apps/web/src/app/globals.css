@@ -200,6 +200,22 @@ copilotkit-threads-drawer::part(list) {
 }
 
 /*
+ * Message list (data-testid="copilot-message-list") also carries [data-copilotkit], whose own
+ * rule sets `background-color: var(--background)` directly on it; need to override.
+ */
+[data-testid="copilot-message-list"] {
+  background-color: transparent;
+}
+
+[data-testid="copilot-user-message"] {
+  background-color: transparent;
+}
+
+[data-testid="copilot-assistant-message"] {
+  background-color: transparent;
+}
+
+/*
  * User's own chat bubble, tinted with --tone-violet. Passed in via CopilotChat's
  * `messageView.userMessage.messageRenderer` slot (EmailChat), not a global selector override.
  * The bubble's text colour comes from a fixed (non-theme-aware) `--tw-prose-body` /

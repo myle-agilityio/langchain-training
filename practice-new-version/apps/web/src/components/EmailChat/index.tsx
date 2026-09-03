@@ -27,13 +27,18 @@ export const EmailChat = () => {
         reportFailure(toChatError(event), "chat.stream");
       }}
       attachments={{ enabled: true }}
+      className="bg-transparent"
+      suggestionView={{
+        suggestion: "bg-transparent",
+        container: "bg-transparent",
+      }}
       welcomeScreen={WelcomeScreen}
       messageView={{
         userMessage: { messageRenderer: "userMessageBubble" },
       }}
       input={{
         disclaimer: () => null,
-        className: "pb-6",
+        className: "pb-6 bg-transparent",
         textArea: awaitingApproval
           ? {
               disabled: true,
