@@ -1,5 +1,5 @@
-/* CopilotKit brand fonts */
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300..800&family=Spline+Sans+Mono:wght@400;500;600&display=swap");
+/* App brand fonts */
+@import url("https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300..800&family=Spline+Sans+Mono:wght@400;500;600&display=swap");
 
 @import "tailwindcss";
 
@@ -11,23 +11,34 @@
  * Also consumed directly by the A2UI renderers, which style with inline `var(--…)`.
  */
 :root {
-  --background: #f1f8fd;
-  --foreground: #010507;
+  --background: #f3e9fb;
+  --foreground: #000000;
   --card: #ffffff;
-  --card-foreground: #010507;
-  --primary: #010507;
+  --card-foreground: #000000;
+  /* Frosted variant of --card, for the 3 large panels only (inbox list, email detail,
+     chat sidebar) — everything else (Dialog, DropdownMenu, Toast...) stays solid --card. */
+  --panel: rgb(255 255 255 / 70%);
+  --primary: #000000;
   --primary-foreground: #ffffff;
-  --secondary: #ededf5;
-  --secondary-foreground: #010507;
-  --muted: #ededf5;
-  --muted-foreground: #57575b;
-  --accent: #eee6fe;
-  --accent-foreground: #010507;
-  --destructive: #fa5f67;
+  --secondary: #ede1fa;
+  --secondary-foreground: #000000;
+  --muted: #f0eaf7;
+  --muted-foreground: #6b7280;
+  --accent: #fce6dc;
+  --accent-foreground: #000000;
+  --destructive: #f0684a;
   --destructive-foreground: #ffffff;
-  --border: #dbdbe5;
-  --input: #dbdbe5;
-  --ring: #bec2ff;
+  --border: #e4d9f2;
+  --input: #e4d9f2;
+  --ring: #f67b56;
+  /* Coral-to-lavender wash for the app canvas only — small elements (inputs, outline
+     buttons) stay on the flat `--background` above, not this gradient. */
+  --background-gradient: linear-gradient(
+    135deg,
+    #fce6dc 0%,
+    #f3e9fb 55%,
+    #ede1fa 100%
+  );
 
   /* One hue per meaning (category / urgency / status). Light mode darkens them so the
      tinted-fill badges stay readable; dark mode swaps in the lighter brand accents. */
@@ -41,23 +52,24 @@
 
 :root.dark,
 .dark {
-  --background: #031118;
+  --background: #040415;
   --foreground: #ffffff;
-  --card: #191a1e;
+  --card: #12121f;
   --card-foreground: #ffffff;
-  --primary: #ffffff;
-  --primary-foreground: #010507;
-  --secondary: #242529;
+  --panel: #12121f;
+  --primary: #4d4de4;
+  --primary-foreground: #ffffff;
+  --secondary: #1c1c30;
   --secondary-foreground: #ffffff;
-  --muted: #242529;
-  --muted-foreground: #adadb2;
-  --accent: #303136;
+  --muted: #1c1c30;
+  --muted-foreground: #9497ac;
+  --accent: #23233f;
   --accent-foreground: #ffffff;
-  --destructive: #fa5f67;
+  --destructive: #f2685d;
   --destructive-foreground: #ffffff;
-  --border: #303136;
-  --input: #303136;
-  --ring: #bec2ff;
+  --border: #23233a;
+  --input: #23233a;
+  --ring: #4d4de4;
 
   --tone-blue: #8fb0ff;
   --tone-red: #fa5f67;
@@ -68,7 +80,7 @@
 }
 
 @theme {
-  --font-sans: "Plus Jakarta Sans", "DM Sans", "Segoe UI", sans-serif;
+  --font-sans: "Hanken Grotesk", "DM Sans", "Segoe UI", sans-serif;
   --font-mono:
     "Spline Sans Mono", "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
 }
@@ -80,6 +92,7 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-panel: var(--panel);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
@@ -113,6 +126,13 @@
     /* CopilotKit reads this for its own chrome. */
     --cpk-default-font-family: var(--font-sans);
   }
+}
+
+/* App canvas: the coral-to-lavender wash in light mode, flat `--background` in dark mode
+   (no `--background-gradient` is defined under `.dark`, so it falls back to `none`). */
+@utility bg-canvas {
+  background-color: var(--background);
+  background-image: var(--background-gradient, none);
 }
 
 /* Slim, low-contrast scrollbar for containers that shouldn't draw attention to themselves. */
