@@ -54,6 +54,9 @@
 .dark {
   --background: #040415;
   --foreground: #ffffff;
+  /* :root always matches the root element too, so without this override dark mode would
+     inherit :root's --background-gradient instead of falling back to none. */
+  --background-gradient: none;
   --card: #12121f;
   --card-foreground: #ffffff;
   --panel: #12121f;
