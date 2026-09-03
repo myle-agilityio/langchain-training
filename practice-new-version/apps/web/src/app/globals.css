@@ -172,15 +172,3 @@ copilotkit-threads-drawer::part(list) {
   scrollbar-width: thin !important;
   scrollbar-color: var(--border) transparent !important;
 }
-
-/*
- * Force the inspector FAB to bottom-left. `inspectorDefaultAnchor` (App.tsx) does NOT work:
- * React passes that object prop to <cpk-web-inspector> as a DOM attribute, stringifying it to
- * "[object Object]". The default (top-right) would sit under the chat sidebar's header buttons.
- */
-cpk-web-inspector {
-  top: auto !important;
-  bottom: 16px !important;
-  right: auto !important;
-  left: 16px !important;
-}
