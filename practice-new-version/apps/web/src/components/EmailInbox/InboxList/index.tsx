@@ -182,7 +182,7 @@ export const InboxList = ({
                 "group w-full text-left px-4 py-3.5 transition-colors cursor-pointer",
                 railTone,
                 isSelected
-                  ? "mx-2 my-1 rounded-xl border-t border-b border-border bg-card shadow-[inset_3px_0_0_0_var(--tone)]"
+                  ? "border-b border-border bg-card shadow-[inset_3px_0_0_0_var(--tone)]"
                   : "border-b border-border hover:bg-secondary/50",
               )}
             >
