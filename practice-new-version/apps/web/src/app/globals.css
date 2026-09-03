@@ -46,6 +46,7 @@
   --tone-red: #cf2f36;
   --tone-amber: #b45309;
   --tone-violet: #7c3aed;
+  --tone-violet-foreground: #ffffff;
   --tone-teal: #0d9488;
   --tone-green: #15803d;
 }
@@ -78,6 +79,7 @@
   --tone-red: #fa5f67;
   --tone-amber: #ffac4d;
   --tone-violet: #bec2ff;
+  --tone-violet-foreground: #1c1c30;
   --tone-teal: #85ecce;
   --tone-green: #6ee7b7;
 }
@@ -114,6 +116,7 @@
   --color-tone-red: var(--tone-red);
   --color-tone-amber: var(--tone-amber);
   --color-tone-violet: var(--tone-violet);
+  --color-tone-violet-foreground: var(--tone-violet-foreground);
   --color-tone-teal: var(--tone-teal);
   --color-tone-green: var(--tone-green);
 }
@@ -171,4 +174,16 @@ copilotkit-threads-drawer::part(root),
 copilotkit-threads-drawer::part(list) {
   scrollbar-width: thin !important;
   scrollbar-color: var(--border) transparent !important;
+}
+
+/*
+ * User's own chat bubble, tinted with --tone-violet. Passed in via CopilotChat's
+ * `messageView.userMessage.messageRenderer` slot (EmailChat), not a global selector override.
+ * The bubble's text colour comes from a fixed (non-theme-aware) `--tw-prose-body` /
+ * `--tw-prose-invert-body`, not `--muted-foreground`, so both need setting; `!important` beats
+ * the slot's own `cpk:bg-muted` utility, which shares this class's specificity.
+ */
+.userMessageBubble {
+  background-color: var(--tone-violet);
+  --tw-prose-body: var(--tone-violet-foreground);
 }

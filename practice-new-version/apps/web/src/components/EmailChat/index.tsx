@@ -26,6 +26,9 @@ export const EmailChat = () => {
         reportFailure(toChatError(event), "chat.stream");
       }}
       attachments={{ enabled: true }}
+      messageView={{
+        userMessage: { messageRenderer: "userMessageBubble" },
+      }}
       input={{
         disclaimer: () => null,
         className: "pb-6",
