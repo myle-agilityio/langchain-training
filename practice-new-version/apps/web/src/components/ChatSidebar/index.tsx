@@ -80,7 +80,7 @@ export const ChatSidebar = ({ threadsMenu, children }: ChatSidebarProps) => {
           "fixed inset-0 z-40 flex h-full flex-col bg-background",
           isResizing ? "" : "transition-transform duration-200 ease-in-out",
           collapsed ? "translate-x-full" : "translate-x-0",
-          "lg:relative lg:z-auto lg:translate-x-0 lg:rounded-xl lg:border lg:border-border lg:bg-card",
+          "lg:relative lg:z-auto lg:translate-x-0 lg:rounded-xl lg:bg-panel",
           isResizing
             ? ""
             : "lg:transition-[width] lg:duration-200 lg:ease-in-out",

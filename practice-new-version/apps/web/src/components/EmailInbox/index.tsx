@@ -217,7 +217,7 @@ export const EmailInbox = () => {
 
   return (
     <div className="h-full flex gap-3">
-      <div className="w-[360px] shrink-0 rounded-xl border border-border bg-card overflow-hidden flex flex-col">
+      <div className="w-[360px] shrink-0 rounded-xl bg-panel overflow-hidden flex flex-col">
         <div className="flex-1 min-h-0 overflow-y-auto thin-scrollbar">
           <InboxList
             emails={visibleEmails}
@@ -244,7 +244,7 @@ export const EmailInbox = () => {
           onApply={setFilters}
         />
       </div>
-      <div className="flex-1 min-w-0 rounded-xl border border-border bg-card overflow-y-auto">
+      <div className="flex-1 min-w-0 rounded-xl bg-panel overflow-y-auto">
         <EmailDetail
           email={selected}
           isLoading={isLoading}
