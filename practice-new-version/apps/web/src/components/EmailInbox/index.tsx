@@ -218,7 +218,7 @@ export const EmailInbox = () => {
   return (
     <div className="h-full flex gap-3">
       <div className="w-[360px] shrink-0 rounded-xl bg-panel overflow-hidden flex flex-col">
-        <div className="flex-1 min-h-0 overflow-y-auto thin-scrollbar">
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden thin-scrollbar">
           <InboxList
             emails={visibleEmails}
             totalCount={emails.length}
