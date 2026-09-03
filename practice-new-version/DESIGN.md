@@ -168,10 +168,10 @@ still visibly rounded, for the tightest inline elements only.
   color stay confined to badges and the single primary accent — the
   gradient background is the only place light mode gets soft.
 - **Do** let dark mode's indigo accent do double duty (primary actions
-  *and* selected/active state) rather than introducing a second
+  _and_ selected/active state) rather than introducing a second
   dark-mode accent beyond the yellow reserved for status badges.
 - **Don't** mix the two themes' accent roles — coral has no place in dark
   mode, indigo has no place in light mode.
 - **Don't** use pill shape outside of badges — buttons, inputs, and
-  containers stay on the `md`/`lg` radius scale.
+containers stay on the `md`/`lg` radius scale.
 </content>
