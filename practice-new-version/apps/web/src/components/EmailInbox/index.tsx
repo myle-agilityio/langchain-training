@@ -252,7 +252,7 @@ export const EmailInbox = ({ chatCollapsed, onOpenChat }: EmailInboxProps) => {
           onApply={setFilters}
         />
       </div>
-      <div className="flex-1 min-w-0 relative rounded-xl bg-panel overflow-y-auto">
+      <div className="flex-1 min-w-0 relative rounded-xl bg-panel overflow-y-auto thin-scrollbar">
         <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
           <ThemeToggle />
           {chatCollapsed && (
