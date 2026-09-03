@@ -1,12 +1,16 @@
 import type { CSSProperties, ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
-import { PanelRightClose, PanelRightOpen } from "lucide-react";
+import { PanelRightClose } from "lucide-react";
 import { useFrontendTool } from "@copilotkit/react-core/v2";
 import { Button, ChangeKeyButton, ModelPicker } from "@/components";
 
 interface ChatSidebarProps {
   threadsMenu?: ReactNode;
   children: ReactNode;
+  // Owned by Inbox.tsx, not this component — EmailInbox's corner toolbar renders the
+  // matching "open chat" button, so both live in one cluster instead of two.
+  collapsed: boolean;
+  onCollapsedChange: (collapsed: boolean) => void;
 }
 
 const DEFAULT_WIDTH = 420;
@@ -15,11 +19,12 @@ const MAX_WIDTH = 640;
 
 // Collapsible, resizable chat sidebar on the right; EmailInbox is now the main/left content,
 // so this just needs its own drag handle on its left edge, not a 50/50 split.
-export const ChatSidebar = ({ threadsMenu, children }: ChatSidebarProps) => {
-  // Mobile starts collapsed so the inbox is what teachers land on — matches the old default "app" mode.
-  const [collapsed, setCollapsed] = useState(
-    () => window.matchMedia("(max-width: 1023px)").matches,
-  );
+export const ChatSidebar = ({
+  threadsMenu,
+  children,
+  collapsed,
+  onCollapsedChange,
+}: ChatSidebarProps) => {
   const [width, setWidth] = useState(DEFAULT_WIDTH);
   const [isResizing, setIsResizing] = useState(false);
 
@@ -52,35 +57,23 @@ export const ChatSidebar = ({ threadsMenu, children }: ChatSidebarProps) => {
     name: "enableChatMode",
     description:
       "Open the chat sidebar so the teacher can see the conversation.",
-    handler: async () => setCollapsed(false),
+    handler: async () => onCollapsedChange(false),
   });
 
   useFrontendTool({
     name: "enableAppMode",
     description: "Collapse the chat sidebar to give the inbox the full window.",
-    handler: async () => setCollapsed(true),
+    handler: async () => onCollapsedChange(true),
   });
 
   return (
     <>
-      {collapsed && (
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          onClick={() => setCollapsed(false)}
-          aria-label="Open chat"
-          className="fixed top-4 right-7 z-50 bg-card shadow-sm"
-        >
-          <PanelRightOpen className="h-4 w-4" />
-        </Button>
-      )}
       <div
         className={[
           "fixed inset-0 z-40 flex h-full flex-col bg-background",
           isResizing ? "" : "transition-transform duration-200 ease-in-out",
           collapsed ? "translate-x-full" : "translate-x-0",
-          "lg:relative lg:z-auto lg:translate-x-0 lg:rounded-xl lg:border lg:border-border lg:bg-card",
+          "lg:relative lg:z-auto lg:translate-x-0 lg:rounded-xl lg:bg-panel",
           isResizing
             ? ""
             : "lg:transition-[width] lg:duration-200 lg:ease-in-out",
@@ -148,7 +141,7 @@ export const ChatSidebar = ({ threadsMenu, children }: ChatSidebarProps) => {
                 type="button"
                 variant="ghost"
                 size="icon"
-                onClick={() => setCollapsed(true)}
+                onClick={() => onCollapsedChange(true)}
                 aria-label="Collapse chat"
               >
                 <PanelRightClose className="h-4 w-4" />

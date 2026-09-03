@@ -2,6 +2,7 @@ import { CopilotChat, isAbortError } from "@copilotkit/react-core/v2";
 import { reportFailure, toChatError } from "@/lib/errors";
 import { useComposeApproval, useOpenAIKey } from "@/stores";
 import { KeyRequiredCard } from "@/components/openAIKey";
+import { WelcomeScreen } from "./WelcomeScreen";
 
 // Locks the composer while paused on a compose_reply interrupt: answer the card, not the chat.
 export const EmailChat = () => {
@@ -26,6 +27,10 @@ export const EmailChat = () => {
         reportFailure(toChatError(event), "chat.stream");
       }}
       attachments={{ enabled: true }}
+      welcomeScreen={WelcomeScreen}
+      messageView={{
+        userMessage: { messageRenderer: "userMessageBubble" },
+      }}
       input={{
         disclaimer: () => null,
         className: "pb-6",

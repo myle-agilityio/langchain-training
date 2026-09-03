@@ -182,14 +182,14 @@ export const InboxList = ({
                 "group w-full text-left px-4 py-3.5 transition-colors cursor-pointer",
                 railTone,
                 isSelected
-                  ? "mx-2 my-1 rounded-xl border border-border bg-card shadow-[inset_3px_0_0_0_var(--tone)]"
+                  ? "border-b border-border bg-card shadow-[inset_3px_0_0_0_var(--tone)]"
                   : "border-b border-border hover:bg-secondary/50",
               )}
             >
               <div className="flex items-center justify-between gap-2">
                 <span
                   className={cn(
-                    "text-sm truncate",
+                    "text-sm truncate min-w-0",
                     isUnread
                       ? "font-bold text-foreground"
                       : "font-medium text-muted-foreground",

@@ -26,7 +26,7 @@ export const RelatedArticles = ({ query }: RelatedArticlesProps) => {
         {isLoading ? (
           <Spinner size="sm" />
         ) : isError ? (
-          <p className="text-sm text-destructive">
+          <p className="text-sm text-muted-foreground">
             Couldn't load related knowledge-base articles.
           </p>
         ) : articles.length === 0 ? (

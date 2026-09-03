@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { CopilotChatConfigurationProvider } from "@copilotkit/react-core/v2";
 import { ChatSidebar, EmailChat, EmailInbox, ThreadsMenu } from "@/components";
 import {
@@ -12,12 +13,25 @@ export const Inbox = () => {
   useExampleSuggestions();
   useEmailAgent();
 
+  // Lifted out of ChatSidebar so EmailInbox's corner toolbar can show its own "open chat"
+  // button in the same cluster as ThemeToggle, instead of two independently-positioned buttons.
+  const [chatCollapsed, setChatCollapsed] = useState(
+    () => window.matchMedia("(max-width: 1023px)").matches,
+  );
+
   const body = (
-    <div className="flex h-dvh w-full overflow-hidden gap-3 p-3 bg-background">
+    <div className="flex h-dvh w-full overflow-hidden gap-3 p-3 bg-canvas">
       <div className="flex-1 min-w-0 h-full overflow-hidden">
-        <EmailInbox />
+        <EmailInbox
+          chatCollapsed={chatCollapsed}
+          onOpenChat={() => setChatCollapsed(false)}
+        />
       </div>
-      <ChatSidebar threadsMenu={<ThreadsMenu />}>
+      <ChatSidebar
+        threadsMenu={<ThreadsMenu />}
+        collapsed={chatCollapsed}
+        onCollapsedChange={setChatCollapsed}
+      >
         <EmailChat />
       </ChatSidebar>
     </div>

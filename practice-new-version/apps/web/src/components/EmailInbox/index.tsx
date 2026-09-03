@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { z } from "zod";
+import { Bot } from "lucide-react";
 import {
   useAgent,
   useAgentContext,
@@ -14,6 +15,8 @@ import {
   useComposingEmail,
 } from "@/hooks";
 import { useComposeApproval, useOpenAIKey } from "@/stores";
+import { Button } from "@/components/common";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   EMPTY_FILTERS,
   filterEmails,
@@ -24,7 +27,12 @@ import { InboxList } from "./InboxList";
 import { EmailDetail } from "./EmailDetail";
 import { FilterDialog } from "./FilterDialog";
 
-export const EmailInbox = () => {
+interface EmailInboxProps {
+  chatCollapsed: boolean;
+  onOpenChat: () => void;
+}
+
+export const EmailInbox = ({ chatCollapsed, onOpenChat }: EmailInboxProps) => {
   const {
     emails,
     isLoading,
@@ -217,8 +225,8 @@ export const EmailInbox = () => {
 
   return (
     <div className="h-full flex gap-3">
-      <div className="w-[360px] shrink-0 rounded-xl border border-border bg-card overflow-hidden flex flex-col">
-        <div className="flex-1 min-h-0 overflow-y-auto thin-scrollbar">
+      <div className="w-[360px] shrink-0 rounded-xl bg-panel overflow-hidden flex flex-col">
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden thin-scrollbar">
           <InboxList
             emails={visibleEmails}
             totalCount={emails.length}
@@ -244,7 +252,22 @@ export const EmailInbox = () => {
           onApply={setFilters}
         />
       </div>
-      <div className="flex-1 min-w-0 rounded-xl border border-border bg-card overflow-y-auto">
+      <div className="flex-1 min-w-0 relative rounded-xl bg-panel overflow-y-auto">
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+          <ThemeToggle />
+          {chatCollapsed && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onOpenChat}
+              aria-label="Open chat"
+              className="bg-card shadow-sm"
+            >
+              <Bot className="h-4 w-4" />
+              AI Assistant
+            </Button>
+          )}
+        </div>
         <EmailDetail
           email={selected}
           isLoading={isLoading}
