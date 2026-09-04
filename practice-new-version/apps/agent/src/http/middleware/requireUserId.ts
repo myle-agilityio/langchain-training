@@ -1,6 +1,6 @@
 import { createMiddleware } from "hono/factory";
 
-import { USER_ID_HEADER } from "@/constants";
+import { USER_ID_HEADER } from "@repo/constants";
 import { AppError, ERROR_CODE } from "@/errors";
 import type { AppEnv } from "../types";
 

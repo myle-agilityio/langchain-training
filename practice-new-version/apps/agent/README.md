@@ -146,7 +146,8 @@ src/
 | `hono`                                               | ^4.12.10         | The custom HTTP app                                                          |
 | `pg`                                                 | ^8.22.0          | Postgres driver (one shared pool)                                            |
 | `zod`                                                | ^3.23.8          | Tool args, structured output, state schemas                                  |
-| `@repo/shared`                                       | workspace:\*     | Constants + `ChatThread` type, shared with `web`                             |
+| `@repo/constants`                                    | workspace:\*     | Tool names + shared constants, shared with `web`                             |
+| `@repo/types`                                        | workspace:\*     | `ChatThread` type, shared with `web`                                         |
 | `axios`                                              | ^1.19.0          | Direct OpenAI call for thread title-gen (`http/threads.ts`)                  |
 | `@langchain/langgraph-sdk`                           | ^1.8.8           | `Client` — fetches thread history for `ThreadHistoryRunner`                  |
 | `@ag-ui/client` / `rxjs`                             | 0.0.57 / 7.8.1   | AG-UI event types + `Observable` used by `ThreadHistoryRunner`               |

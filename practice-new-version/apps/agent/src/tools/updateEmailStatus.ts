@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { TOOL } from "@/constants";
+import { TOOL } from "@repo/constants";
 import { getEmail, updateEmail } from "@/db";
 import { AppError, ERROR_CODE, ERRORS } from "@/errors";
 import type { Email, ToolError } from "@/types";

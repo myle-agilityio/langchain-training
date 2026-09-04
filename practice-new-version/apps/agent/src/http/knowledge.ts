@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 
 import { getEmbeddingsWithApiKey } from "@/config";
-import { OPENAI_API_KEY_HEADER } from "@/constants";
+import { OPENAI_API_KEY_HEADER } from "@repo/constants";
 import { searchKnowledge } from "@/rag";
 import { validate } from "./middleware";
 import {

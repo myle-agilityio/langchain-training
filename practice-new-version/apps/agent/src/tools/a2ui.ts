@@ -3,7 +3,7 @@ import { tool, type ToolRuntime } from "@langchain/core/tools";
 import { SystemMessage } from "@langchain/core/messages";
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 import { getA2uiModelWithConfig } from "@/config";
-import { CUSTOM_CATALOG_ID, TOOL } from "@/constants";
+import { CUSTOM_CATALOG_ID, TOOL } from "@repo/constants";
 import { AppError, ERROR_CODE } from "@/errors";
 import { defineTool } from "./defineTool";
 import {

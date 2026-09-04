@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { getEmbeddingsWithConfig } from "@/config";
-import { TOOL } from "@/constants";
+import { TOOL } from "@repo/constants";
 import { searchKnowledge } from "@/rag";
 import { defineTool } from "./defineTool";
 
