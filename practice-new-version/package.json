@@ -13,8 +13,8 @@
     "eval:agent": "turbo run eval --filter=agent",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint -- --fix"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

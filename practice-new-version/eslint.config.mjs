@@ -15,6 +15,8 @@ export default tseslint.config(
       "**/.langgraph_api",
       "**/*.tsbuildinfo",
       "**/.turbo",
+      "**/evalite-export",
+      "**/.evalite",
     ],
   },
   js.configs.recommended,

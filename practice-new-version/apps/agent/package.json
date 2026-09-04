@@ -11,6 +11,7 @@
     "dev": "langgraphjs dev --port 8123 --no-browser",
     "start": "langgraphjs dev --host 0.0.0.0 --port $PORT --no-browser",
     "build": "langgraphjs build -t agent",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "eval": "evalite",
     "eval:dev": "evalite watch",

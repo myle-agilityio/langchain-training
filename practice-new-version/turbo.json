@@ -10,6 +10,9 @@
     "typecheck": {
       "outputs": []
     },
+    "lint": {
+      "outputs": []
+    },
     "web#build": {
       "inputs": ["$TURBO_DEFAULT$", ".env"],
       "outputs": ["dist/**"]
