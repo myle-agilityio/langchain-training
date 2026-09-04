@@ -1,14 +1,4 @@
 {
-  "compilerOptions": {
-    "target": "es2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "noEmit": true,
-    "isolatedModules": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
-  },
+  "extends": "@repo/typescript-config/library.json",
   "include": ["src/**/*.ts"]
 }
