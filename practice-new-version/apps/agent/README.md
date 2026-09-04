@@ -16,11 +16,7 @@ pnpm --filter agent typecheck
 
 [Evalite](https://www.evalite.dev/) scores the agent's structured-output LLM calls against fixture
 datasets, so a prompt change that breaks classification/moderation/compliance shows up before it
-hits the graph. Suites live in `evals/*.eval.ts`, one file per node/tool. They call the LLM through
-`evals/evalModel.ts`, which reads `OPENAI_API_KEY` directly — evals don't run inside a real
-request, so they can't use the app's BYOK trick of forwarding the teacher's key from a header.
-So **you must set `OPENAI_API_KEY` yourself to run these**, even though the app itself doesn't
-require it (see BYOK below).
+hits the graph.
 
 ```bash
 pnpm --filter agent eval:dev     # watch mode, local UI at localhost:3006 — recommended day-to-day
