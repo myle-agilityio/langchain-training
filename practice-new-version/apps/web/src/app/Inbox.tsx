@@ -3,14 +3,14 @@ import { CopilotChatConfigurationProvider } from "@copilotkit/react-core/v2";
 import { ChatSidebar, EmailChat, EmailInbox, ThreadsMenu } from "@/components";
 import {
   useEmailAgent,
-  useExampleSuggestions,
+  useChatSuggestions,
   useGenerativeUIExamples,
 } from "@/hooks";
 import { AgentSync } from "./AgentSync";
 
 export const Inbox = () => {
   useGenerativeUIExamples();
-  useExampleSuggestions();
+  useChatSuggestions();
   useEmailAgent();
 
   // Lifted out of ChatSidebar so EmailInbox's corner toolbar can show its own "open chat"
