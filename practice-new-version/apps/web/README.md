@@ -1,7 +1,8 @@
 # `web` — Vite inbox UI
 
-The frontend half of the AI Email Assistant: a single-page Vite + React app (no router) that
-renders the teacher's inbox next to a CopilotKit chat sidebar.
+The frontend half of the AI Email Assistant: a single-page Vite + React app that renders the
+teacher's inbox next to a CopilotKit chat sidebar. A `react-router-dom` router is wired in with
+one route — it exists to keep state (the selected email) in the URL, not for multi-page nav.
 
 ## Running it
 
@@ -27,8 +28,11 @@ index.html               # Entry document
 src/
 ├── main.tsx             # createRoot → <App />, globals.css, CopilotKit v2 styles
 ├── app/
-│   ├── App.tsx          # Providers: QueryClientProvider → CopilotKit → chat config → page
+│   ├── App.tsx          # QueryClientProvider → RouterProvider(router)
+│   ├── Root.tsx         # The route's element: CopilotKit → chat config → page
 │   └── globals.css      # Tailwind v4 entry, theme tokens, CopilotKit overrides
+├── router/
+│   └── index.tsx        # createBrowserRouter — single "/" route rendering Root
 ├── pages/                # index.ts barrel; one folder per page, each with an index.tsx
 │   └── Inbox/            # The (only, single-page) screen: EmailInbox + ChatSidebar layout
 │       ├── index.tsx
@@ -85,6 +89,7 @@ public/                  # Static assets (kebab-case, by rule)
 | `@copilotkit/react-core` (v2)                          | 1.62.3   | Chat, agent state, interrupts             |
 | `@copilotkit/a2ui-renderer`                            | 1.62.3   | Declarative generative UI catalog         |
 | `@tanstack/react-query`                                | ^5.101.4 | All server state                          |
+| `react-router-dom`                                     | ^7.18.3  | Single route — keeps selected email in URL |
 | `zustand`                                              | ^5.0.15  | Client-only state                         |
 | `axios`                                                | ^1.19.0  | The single API client                     |
 | Radix UI (`dialog`, `dropdown-menu`)                   | ^1.1–2.1 | Accessible primitives                     |

@@ -49,10 +49,12 @@ Agent (`apps/agent/src/`), organized by role:
   REST routes) and `knowledge.ts` (KB semantic search, no LLM turn) — all proxied to from Vite
   in dev via `vite.config.ts`'s `server.proxy`.
 
-Frontend (`apps/web/`, Vite SPA, single page — no router):
+Frontend (`apps/web/`, Vite SPA, single page):
 
-- `index.html` + `src/main.tsx` — entry point; `src/app/App.tsx` — providers (TanStack Query,
-  CopilotKit, theme, OpenAI-key gate) wrapping the page below.
+- `index.html` + `src/main.tsx` — entry point; `src/app/App.tsx` sets up `QueryClientProvider`
+  and renders `src/router/index.tsx`'s router — a single `"/"` route (kept for URL-backed state,
+  not multi-page nav) whose element is `src/app/Root.tsx`, wrapping the rest of the providers
+  (CopilotKit, theme, OpenAI-key gate) around the page below.
 - `src/pages/` — one folder per page, each with an `index.tsx` (`Inbox/` is the only one today,
   since this is a single-page SPA); `src/pages/index.ts` re-exports all. A page's own private
   pieces get their own folder beside its `index.tsx` (`Inbox/AgentSync/`), not `src/components/`.

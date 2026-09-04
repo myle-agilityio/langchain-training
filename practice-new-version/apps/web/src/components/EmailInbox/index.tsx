@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { z } from "zod";
 import { Bot } from "lucide-react";
 import {
@@ -48,7 +49,9 @@ export const EmailInbox = ({ chatCollapsed, onOpenChat }: EmailInboxProps) => {
   // Run through the CopilotKit core, not agent.runAgent() directly — same interrupt-aware path
   // CopilotChat uses, so compose_reply's pause routes to useEmailAgent's useInterrupt card.
   const { copilotkit } = useCopilotKit();
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Kept in the URL (not useState) so refreshing the page reopens the same email.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedId = searchParams.get("emailId");
   const [filters, setFilters] = useState<EmailFilters>(EMPTY_FILTERS);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const isFiltered = hasActiveFilters(filters);
@@ -127,7 +130,16 @@ export const EmailInbox = ({ chatCollapsed, onOpenChat }: EmailInboxProps) => {
   });
 
   const selectEmail = (email: Email) => {
-    setSelectedId(email.id);
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+
+        next.set("emailId", email.id);
+
+        return next;
+      },
+      { replace: true },
+    );
 
     if (email.status === "unread") {
       patchEmail(email.id, { status: "read" });
