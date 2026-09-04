@@ -17,6 +17,10 @@
     "agent#build": {
       "cache": false,
       "outputs": []
+    },
+    "agent#eval": {
+      "cache": false,
+      "outputs": []
     }
   }
 }

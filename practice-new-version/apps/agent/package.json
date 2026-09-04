@@ -11,7 +11,10 @@
     "dev": "langgraphjs dev --port 8123 --no-browser",
     "start": "langgraphjs dev --host 0.0.0.0 --port $PORT --no-browser",
     "build": "langgraphjs build -t agent",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "eval": "evalite",
+    "eval:dev": "evalite watch",
+    "eval:report": "evalite export"
   },
   "dependencies": {
     "@ag-ui/client": "0.0.57",
@@ -42,6 +45,9 @@
     "@types/html-to-text": "^9.0.4",
     "@types/node": "^22.9.0",
     "@types/pg": "^8.20.0",
-    "typescript": "^5.6.3"
+    "dotenv": "^17.4.2",
+    "evalite": "^0.19.0",
+    "typescript": "^5.6.3",
+    "vitest": "^5.0.0"
   }
 }

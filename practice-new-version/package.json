@@ -10,6 +10,7 @@
     "typecheck": "turbo run typecheck",
     "build": "turbo run build --filter=web",
     "build:agent": "turbo run build --filter=agent",
+    "eval:agent": "turbo run eval --filter=agent",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
