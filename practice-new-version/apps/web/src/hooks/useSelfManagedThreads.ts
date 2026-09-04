@@ -135,6 +135,7 @@ export const useSaveThread = () => {
       id: string;
       firstMessage?: string;
       content?: string;
+      messages?: readonly unknown[];
     }) => saveThread(body, useOpenAIKey.getState().apiKey),
     onSettled: () =>
       queryClient.invalidateQueries({ queryKey: threadsQueryKey }),

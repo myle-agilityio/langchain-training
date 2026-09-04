@@ -44,6 +44,8 @@ export const SaveThreadBodySchema = z.object({
   firstMessage: z.string().optional(),
   // Full-conversation snapshot the search index is built from — refreshed on every save.
   content: z.string().optional(),
+  // Verbatim AG-UI Message[] transcript, replayed back when the thread is reopened.
+  messages: z.array(z.unknown()).optional(),
 });
 export type SaveThreadBody = z.infer<typeof SaveThreadBodySchema>;
 

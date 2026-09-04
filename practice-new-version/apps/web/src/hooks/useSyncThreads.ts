@@ -77,6 +77,7 @@ export const useSyncThreads = () => {
           id: threadId,
           firstMessage: firstUserMessageText(agent),
           content: allMessagesText(agent),
+          messages: agent.messages,
         });
       },
     });

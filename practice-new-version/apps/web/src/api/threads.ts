@@ -29,7 +29,12 @@ export const fetchThreads = async (
 // Upsert — creates the row on a thread's first touch, else just bumps updated_at. The key is
 // the teacher's own (BYOK): the route spends it on the generated title.
 export const saveThread = async (
-  body: { id: string; firstMessage?: string; content?: string },
+  body: {
+    id: string;
+    firstMessage?: string;
+    content?: string;
+    messages?: readonly unknown[];
+  },
   openaiKey?: string | null,
 ): Promise<void> => {
   await apiClient.post(THREADS_PATH, body, {
