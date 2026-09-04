@@ -3,7 +3,7 @@ import {
   CHAT_MODEL_OPTIONS,
   DEFAULT_CHAT_MODEL_ID,
   type ChatModelId,
-} from "@/constants";
+} from "@repo/constants";
 
 const STORAGE_KEY = "chat_model_id";
 

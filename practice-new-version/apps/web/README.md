@@ -74,7 +74,7 @@ src/
 │   ├── formatDate.ts
 │   └── parseResult.ts   # Safe JSON.parse of a tool result
 ├── constants/           # One file per facet (tone, topic, urgency, status, course, workType, errors)
-└── types/               # email, errors, tools; ChatThread re-exported from @repo/shared
+└── types/               # email, errors, tools
 public/                  # Static assets (kebab-case, by rule)
 ```
 

@@ -1,4 +1,3 @@
-export * from "@repo/shared";
 export * from "./course";
 export * from "./errors";
 export * from "./pagination";

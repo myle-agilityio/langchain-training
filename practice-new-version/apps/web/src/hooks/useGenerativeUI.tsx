@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { COMPOSE_REPLY_ACTION, TOOL } from "@/constants";
+import { COMPOSE_REPLY_ACTION, TOOL } from "@repo/constants";
 import { useTheme } from "@/stores";
 
 import {

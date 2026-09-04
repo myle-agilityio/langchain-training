@@ -77,9 +77,12 @@ importers:
       '@langchain/textsplitters':
         specifier: ^1.0.0
         version: 1.0.1(@langchain/core@1.1.49(@opentelemetry/api@1.9.1)(openai@6.49.0(ws@8.21.1)(zod@3.25.76))(ws@8.21.1))
-      '@repo/shared':
+      '@repo/constants':
         specifier: workspace:*
-        version: link:../../packages/shared
+        version: link:../../packages/constants
+      '@repo/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       axios:
         specifier: ^1.19.0
         version: 1.19.0
@@ -147,9 +150,12 @@ importers:
       '@radix-ui/react-dropdown-menu':
         specifier: ^2.1.24
         version: 2.1.24(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@repo/shared':
+      '@repo/constants':
         specifier: workspace:*
-        version: link:../../packages/shared
+        version: link:../../packages/constants
+      '@repo/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@tanstack/react-query':
         specifier: ^5.101.4
         version: 5.101.4(react@19.2.8)
@@ -218,7 +224,13 @@ importers:
         specifier: ^7
         version: 7.3.6(@types/node@20.19.43)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.12)(yaml@2.9.0)
 
-  packages/shared:
+  packages/constants:
+    devDependencies:
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+
+  packages/types:
     devDependencies:
       typescript:
         specifier: ^5

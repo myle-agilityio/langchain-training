@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-import { CONTACT_PROFILE_NAMESPACE, TOOL } from "@/constants";
+import { CONTACT_PROFILE_NAMESPACE } from "@/constants";
+import { TOOL } from "@repo/constants";
 import { listEmails } from "@/db";
 import { AppError, ERROR_CODE } from "@/errors";
 import type { ContactProfileValue } from "@/types";

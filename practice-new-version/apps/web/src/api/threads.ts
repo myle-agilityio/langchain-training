@@ -1,9 +1,6 @@
-import {
-  OPENAI_API_KEY_HEADER,
-  THREADS_PAGE_SIZE,
-  USER_ID_HEADER,
-} from "@/constants";
-import type { ChatThread } from "@/types";
+import { THREADS_PAGE_SIZE } from "@/constants";
+import { OPENAI_API_KEY_HEADER, USER_ID_HEADER } from "@repo/constants";
+import type { ChatThread } from "@repo/types";
 import { useUserId } from "@/stores";
 import { apiClient } from "./client";
 

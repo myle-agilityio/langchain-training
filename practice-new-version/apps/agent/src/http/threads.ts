@@ -2,7 +2,7 @@ import axios from "axios";
 import { Hono } from "hono";
 
 import { GENERATE_TITLE_MODEL } from "@/config";
-import { OPENAI_API_KEY_HEADER } from "@/constants";
+import { OPENAI_API_KEY_HEADER } from "@repo/constants";
 import {
   listThreads,
   upsertThread,

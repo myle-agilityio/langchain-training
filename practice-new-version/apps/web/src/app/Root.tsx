@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { CopilotKit } from "@copilotkit/react-core/v2";
 import { useChatModel, useOpenAIKey } from "@/stores";
-import { CHAT_MODEL_HEADER, OPENAI_API_KEY_HEADER } from "@/constants";
+import { CHAT_MODEL_HEADER, OPENAI_API_KEY_HEADER } from "@repo/constants";
 import {
   // A2UI catalog: definitions + renderers in @/components/declarativeGenerativeUI/
   demonstrationCatalog,
