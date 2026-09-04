@@ -10,7 +10,7 @@ import {
   Toaster,
 } from "@/components";
 import { useSyncTheme } from "@/hooks";
-import { Inbox } from "./Inbox";
+import { Inbox } from "@/pages";
 
 const App = () => {
   useSyncTheme();

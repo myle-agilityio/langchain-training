@@ -27,8 +27,13 @@ index.html               # Entry document
 src/
 ├── main.tsx             # createRoot → <App />, globals.css, CopilotKit v2 styles
 ├── app/
-│   ├── App.tsx          # Providers: QueryClientProvider → CopilotKit → chat config → layout
+│   ├── App.tsx          # Providers: QueryClientProvider → CopilotKit → chat config → page
 │   └── globals.css      # Tailwind v4 entry, theme tokens, CopilotKit overrides
+├── pages/                # index.ts barrel; one folder per page, each with an index.tsx
+│   └── Inbox/            # The (only, single-page) screen: EmailInbox + ChatSidebar layout
+│       ├── index.tsx
+│       └── AgentSync/    # Page-private: wires useSyncInbox/Threads/ComposeApproval
+│           └── index.tsx
 ├── components/          # index.ts barrel; one folder per component, each with an index.tsx
 │   ├── EmailInbox/      # Inbox shell + InboxList, FilterDialog, EmailDetail/ComposeForm
 │   ├── EmailChat/       # The CopilotKit chat surface

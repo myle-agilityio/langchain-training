@@ -52,7 +52,10 @@ Agent (`apps/agent/src/`), organized by role:
 Frontend (`apps/web/`, Vite SPA, single page — no router):
 
 - `index.html` + `src/main.tsx` — entry point; `src/app/App.tsx` — providers (TanStack Query,
-  CopilotKit, theme, OpenAI-key gate) wrapping the inbox + chat layout.
+  CopilotKit, theme, OpenAI-key gate) wrapping the page below.
+- `src/pages/` — one folder per page, each with an `index.tsx` (`Inbox/` is the only one today,
+  since this is a single-page SPA); `src/pages/index.ts` re-exports all. A page's own private
+  pieces get their own folder beside its `index.tsx` (`Inbox/AgentSync/`), not `src/components/`.
 - `src/components/` — one folder per component, each with an `index.tsx`; a folder whose
   `index` is a barrel groups them (`common/` primitives, `generativeUI/`,
   `declarativeGenerativeUI/` — the A2UI catalog). `src/components/index.ts` re-exports all.
