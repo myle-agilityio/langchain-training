@@ -32,6 +32,7 @@
     "@langchain/textsplitters": "^1.0.0",
     "@repo/constants": "workspace:*",
     "@repo/types": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "axios": "^1.19.0",
     "d3-dsv": "^3.0.1",
     "hono": "^4.12.10",
@@ -44,7 +45,6 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@repo/typescript-config": "workspace:*",
     "@types/html-to-text": "^9.0.4",
     "@types/node": "^22.9.0",
     "@types/pg": "^8.20.0",
