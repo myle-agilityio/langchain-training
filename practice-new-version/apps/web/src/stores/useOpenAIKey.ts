@@ -1,15 +1,6 @@
 import { create } from "zustand";
-
-const STORAGE_KEY = "openai_api_key";
-
-// localStorage throws in some privacy modes; a missing key just means "not entered yet".
-const readStored = (): string | null => {
-  try {
-    return window.localStorage.getItem(STORAGE_KEY);
-  } catch {
-    return null;
-  }
-};
+import { persist } from "zustand/middleware";
+import { STORAGE_KEY } from "@/constants";
 
 interface OpenAIKeyState {
   apiKey: string | null;
@@ -19,14 +10,13 @@ interface OpenAIKeyState {
 
 // The one source of truth for the visitor's key. Outside React (CopilotKit's headers callback,
 // plain fetch) read useOpenAIKey.getState().apiKey — never localStorage directly.
-export const useOpenAIKey = create<OpenAIKeyState>((set) => ({
-  apiKey: readStored(),
-  setApiKey: (apiKey) => {
-    window.localStorage.setItem(STORAGE_KEY, apiKey);
-    set({ apiKey });
-  },
-  clearApiKey: () => {
-    window.localStorage.removeItem(STORAGE_KEY);
-    set({ apiKey: null });
-  },
-}));
+export const useOpenAIKey = create<OpenAIKeyState>()(
+  persist(
+    (set) => ({
+      apiKey: null,
+      setApiKey: (apiKey) => set({ apiKey }),
+      clearApiKey: () => set({ apiKey: null }),
+    }),
+    { name: STORAGE_KEY.openAIKey },
+  ),
+);

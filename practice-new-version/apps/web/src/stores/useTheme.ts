@@ -1,38 +1,31 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { STORAGE_KEY } from "@/constants";
 
 type Theme = "dark" | "light" | "system";
 
-const STORAGE_KEY = "theme";
-
-// localStorage throws in some privacy modes; a missing/invalid value just means "system".
-const readStored = (): Theme => {
-  try {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-
-    if (stored === "dark" || stored === "light" || stored === "system") {
-      return stored;
-    }
-
-    return "system";
-  } catch {
-    return "system";
-  }
-};
+const isTheme = (value: unknown): value is Theme =>
+  value === "dark" || value === "light" || value === "system";
 
 interface ThemeState {
   theme: Theme;
   setTheme: (theme: Theme) => void;
 }
 
-export const useTheme = create<ThemeState>((set) => ({
-  theme: readStored(),
-  setTheme: (theme) => {
-    try {
-      window.localStorage.setItem(STORAGE_KEY, theme);
-    } catch {
-      // ignore write failures (e.g. private browsing)
-    }
+export const useTheme = create<ThemeState>()(
+  persist(
+    (set) => ({
+      theme: "system",
+      setTheme: (theme) => set({ theme }),
+    }),
+    {
+      name: STORAGE_KEY.theme,
+      // A stale or hand-edited stored value shouldn't become the theme.
+      merge: (persisted, current) => {
+        const { theme } = (persisted ?? {}) as Partial<ThemeState>;
 
-    set({ theme });
-  },
-}));
+        return { ...current, theme: isTheme(theme) ? theme : current.theme };
+      },
+    },
+  ),
+);
