@@ -2,6 +2,7 @@ export * from "./course";
 export * from "./errors";
 export * from "./pagination";
 export * from "./status";
+export * from "./suggestions";
 export * from "./storageKeys";
 export * from "./tone";
 export * from "./topic";

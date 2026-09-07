@@ -11,9 +11,6 @@ import {
 } from "@repo/constants";
 
 export const EMBEDDING_MODEL = "text-embedding-3-small";
-// Thread titles are a cheap, fixed side task — not part of the chat reply, so the teacher's
-// picked model doesn't apply here.
-export const GENERATE_TITLE_MODEL = "gpt-4o-mini";
 
 const CHAT_MODEL_IDS = new Set<string>(CHAT_MODEL_OPTIONS.map((o) => o.id));
 
@@ -85,6 +82,19 @@ export const getPlainModelWithConfig = (
     model: getChatModelIdFromConfig(config),
     apiKey: getApiKeyFromConfig(config),
   });
+};
+
+// Fixed-model call for the HTTP routes — they read the visitor's BYOK key off a request header
+// rather than a runnable config.
+export const getPlainModelWithApiKey = (
+  apiKey: string | undefined,
+  model: string,
+): ChatOpenAI => {
+  if (!apiKey) {
+    throw new AppError(ERROR_CODE.API_KEY_MISSING);
+  }
+
+  return new ChatOpenAI({ model, apiKey });
 };
 
 // Embeddings for RAG queries against the shared pgvector knowledge base.

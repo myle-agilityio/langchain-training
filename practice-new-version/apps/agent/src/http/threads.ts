@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Hono } from "hono";
 
-import { GENERATE_TITLE_MODEL } from "@/config";
+import { SIDE_TASK_MODEL } from "@/constants";
 import { OPENAI_API_KEY_HEADER } from "@repo/constants";
 import {
   listThreads,
@@ -51,7 +51,7 @@ const generateTitle = async (
     }>(
       "https://api.openai.com/v1/chat/completions",
       {
-        model: GENERATE_TITLE_MODEL,
+        model: SIDE_TASK_MODEL,
         messages: [
           { role: "system", content: titlePrompt() },
           { role: "user", content: text },

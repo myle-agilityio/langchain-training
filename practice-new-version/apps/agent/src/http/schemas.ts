@@ -65,6 +65,13 @@ export const SearchKnowledgeQuerySchema = z.object({
 });
 export type SearchKnowledgeQuery = z.infer<typeof SearchKnowledgeQuerySchema>;
 
+// POST /api/suggestions — the finished conversation, flattened to text by the caller.
+export const SuggestionsBodySchema = z.object({
+  transcript: z.string().min(1),
+  count: z.coerce.number().int().min(1).max(5).default(3),
+});
+export type SuggestionsBody = z.infer<typeof SuggestionsBodySchema>;
+
 // Shared by GET /api/emails and GET /api/threads — both list routes page the same way.
 export const ListQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(20),

@@ -5,5 +5,6 @@ export {
   needsResearchPrompt,
 } from "./composeEmail";
 export { moderationPrompt } from "./moderation";
+export { suggestionsPrompt } from "./suggestions";
 export { currentDateLine, SYSTEM_PROMPT } from "./systemPrompt";
 export { titlePrompt } from "./title";
