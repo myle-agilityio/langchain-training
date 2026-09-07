@@ -21,7 +21,7 @@ export const useChatSuggestions = () => {
   useConfigureSuggestions({
     available: "always",
     instructions: DYNAMIC_INSTRUCTIONS,
-    minSuggestions: 2,
-    maxSuggestions: 3,
+    minSuggestions: 3,
+    maxSuggestions: 5,
   });
 };
