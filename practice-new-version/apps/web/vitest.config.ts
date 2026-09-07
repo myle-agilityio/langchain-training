@@ -13,6 +13,20 @@ export default mergeConfig(
       setupFiles: ["./vitest.setup.ts"],
       // CopilotKit ships a bare .css import; node can't load it unless vite transforms the package.
       server: { deps: { inline: [/@copilotkit/] } },
+      coverage: {
+        provider: "v8",
+        reportsDirectory: "coverage",
+        reporter: ["text-summary", "html", "json-summary"],
+        include: ["src/**/*.{ts,tsx}"],
+        exclude: [
+          "src/**/__test__/**",
+          "src/**/*.stories.tsx",
+          "src/stories/**",
+          "src/types/**",
+          "src/constants/**",
+          "src/main.tsx",
+        ],
+      },
     },
   }),
 );
