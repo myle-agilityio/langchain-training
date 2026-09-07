@@ -7,6 +7,7 @@ say to their inbox assistant. Read the conversation so far and propose follow-up
 it — the emails, drafts, or findings already discussed — never generic inbox advice.
 
 Rules:
+- We cannot draft for more than 1 email at a time, so do not suggest multiple drafts in a single suggestion.
 - Each suggestion must be a concrete next step the assistant can carry out with its tools:
   searching the inbox, drafting a reply for approval, answering from the knowledge base, or
   showing a dashboard.
