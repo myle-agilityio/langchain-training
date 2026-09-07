@@ -53,23 +53,15 @@ const callModelPrompt = ChatPromptTemplate.fromMessages([
   new MessagesPlaceholder("messages"),
 ]);
 
-// CopilotKit's suggestion engine forces this tool via `tools` on its generate-suggestions run,
-// but never sets toolChoice through to the graph — without forcing it here, the model treats it
-// as just another optional tool and only calls it some of the time.
-const SUGGESTION_TOOL_NAME = "copilotkitSuggest";
-
 // Invokes model with system prompt, context, and available tools. Errors (missing/rejected key,
 // rate limits) are handled once by withNode, not here.
 export const callModel = withNode(
   "call_model",
   async (state: AgentStateShape, config: LangGraphRunnableConfig) => {
-    const suggestionRequested = (state.copilotkit?.actions ?? []).some(
-      (a) => a.name === SUGGESTION_TOOL_NAME,
-    );
-    const bound = getModelWithConfig(config).bindTools!(
-      [...modelTools, ...frontendTools(state)],
-      suggestionRequested ? { tool_choice: SUGGESTION_TOOL_NAME } : undefined,
-    );
+    const bound = getModelWithConfig(config).bindTools!([
+      ...modelTools,
+      ...frontendTools(state),
+    ]);
     // config threaded through so token callbacks stream assistant text into the chat UI.
     const response = await callModelPrompt.pipe(bound).invoke(
       {

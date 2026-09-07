@@ -4,35 +4,11 @@ import {
   useCopilotChatConfiguration,
 } from "@copilotkit/react-core/v2";
 import { useSaveThread } from "@/hooks/useSelfManagedThreads";
+import { messageText, type AgentMessage } from "@/utils";
 
-// Loose shape instead of importing AbstractAgent/Message from @ag-ui/client directly — that
-// package is only a transitive dependency here, not one of ours to import from.
 interface AgentWithMessages {
-  messages: ReadonlyArray<{ role?: string; content?: unknown }>;
+  messages: ReadonlyArray<AgentMessage>;
 }
-
-// AG-UI message content is either a plain string or an array of parts (text/image, for
-// attachments) — pull the first text part out of either shape.
-const messageText = (message: { content?: unknown }): string | undefined => {
-  const { content } = message;
-
-  if (typeof content === "string") {
-    return content;
-  }
-
-  if (Array.isArray(content)) {
-    const textPart = content.find(
-      (part) =>
-        typeof part === "object" &&
-        part !== null &&
-        (part as { type?: unknown }).type === "text",
-    ) as { text?: string } | undefined;
-
-    return textPart?.text;
-  }
-
-  return undefined;
-};
 
 const firstUserMessageText = (agent: AgentWithMessages): string | undefined =>
   messageText(agent.messages.find((m) => m.role === "user") ?? {});

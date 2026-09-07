@@ -1,28 +1,97 @@
-// Two configs, split by availability: curated pills on the empty welcome screen (no chat
-// context to work from yet), then agent-generated ones off the live conversation.
-import { useConfigureSuggestions } from "@copilotkit/react-core/v2";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useAgent, useConfigureSuggestions } from "@copilotkit/react-core/v2";
+import { generateSuggestions } from "@/api";
+import { RECENT_MESSAGE_COUNT, SUGGESTION_COUNT } from "@/constants";
+import { useOpenAIKey } from "@/stores";
+import type { ChatSuggestion } from "@/types";
+import { messageText, type AgentMessage } from "@/utils";
 
-const DYNAMIC_INSTRUCTIONS = `You are suggesting the next thing a high-school math teacher could
-say to their inbox assistant. Read the conversation so far and propose follow-ups that build on
-it — the emails, drafts, or findings already discussed — never generic inbox advice.
+// isLoading renders the pill as a disabled spinner — shown while generating so the row never
+// displays the previous turn's suggestions as if they were current.
+type SuggestionPill = ChatSuggestion & { isLoading?: boolean };
 
-Rules:
-- We cannot draft for more than 1 email at a time, so do not suggest multiple drafts in a single suggestion.
-- Each suggestion must be a concrete next step the assistant can carry out with its tools:
-  searching the inbox, drafting a reply for approval, answering from the knowledge base, or
-  showing a dashboard.
-- Refer to the specific emails, senders, or topics from the conversation by name.
-- Never suggest work the conversation already shows done. If the inbox was already classified,
-  do not suggest classifying it — suggest what to do with the result instead.
-- title: at most 5 words.
-- message: an instruction the teacher gives the assistant, like "Draft a reply to Ezra about the
-  retake, for my approval." Never the text of an email to the sender.`;
+const LOADING_SUGGESTIONS: SuggestionPill[] = [
+  { title: "Thinking of suggestions…", message: "", isLoading: true },
+];
 
+// Curated pills for the empty welcome screen — there's no conversation to build on yet.
+const WELCOME_SUGGESTIONS: ChatSuggestion[] = [
+  {
+    title: "Triage my inbox",
+    message:
+      "Classify the emails in my inbox and show me what needs attention.",
+  },
+  {
+    title: "What's unread?",
+    message: "Show me my unread emails, grouped by how urgent they are.",
+  },
+  {
+    title: "Draft a reply",
+    message:
+      "Find the email that most needs a response and draft a reply for my approval.",
+  },
+];
+
+// Roles included so the model can tell who said what — the thread-search snapshot in
+// useSyncThreads deliberately drops them, so the two don't share a formatter.
+const transcript = (messages: ReadonlyArray<AgentMessage>): string =>
+  messages
+    .map((m) => {
+      const text = messageText(m)?.trim();
+
+      return text ? `${m.role ?? "unknown"}: ${text}` : "";
+    })
+    .filter(Boolean)
+    .slice(-RECENT_MESSAGE_COUNT)
+    .join("\n\n");
+
+// Self-managed suggestions: CopilotKit's dynamic mode forces a `copilotkitSuggest` tool call that
+// this graph never answers, leaving the generation run open forever, so we generate them
+// ourselves and hand CopilotKit a static list.
 export const useChatSuggestions = () => {
-  useConfigureSuggestions({
-    available: "always",
-    instructions: DYNAMIC_INSTRUCTIONS,
-    minSuggestions: 3,
-    maxSuggestions: 5,
-  });
+  const { agent } = useAgent({ updates: [] });
+  const apiKey = useOpenAIKey((s) => s.apiKey);
+  const [suggestions, setSuggestions] =
+    useState<ChatSuggestion[]>(WELCOME_SUGGESTIONS);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const refresh = useCallback(async () => {
+    const text = transcript(agent.messages as ReadonlyArray<AgentMessage>);
+
+    if (!text || !apiKey) {
+      return;
+    }
+
+    setIsGenerating(true);
+
+    try {
+      const next = await generateSuggestions(text, SUGGESTION_COUNT, apiKey);
+
+      // An empty result would blank the row; keep the previous pills instead.
+      if (next.length > 0) {
+        setSuggestions(next);
+      }
+    } catch {
+      // Nice-to-have: a failed refresh leaves the previous pills in place, no toast.
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [agent, apiKey]);
+
+  useEffect(() => {
+    const { unsubscribe } = agent.subscribe({
+      onRunFinalized: () => void refresh(),
+    });
+
+    return unsubscribe;
+  }, [agent, refresh]);
+
+  // Memoized so the identity only changes on a real swap — useConfigureSuggestions reloads on
+  // every dep change, and a fresh array each render would reload on every render.
+  const shown = useMemo(
+    () => (isGenerating ? LOADING_SUGGESTIONS : suggestions),
+    [isGenerating, suggestions],
+  );
+
+  useConfigureSuggestions({ available: "always", suggestions: shown }, [shown]);
 };

@@ -4,6 +4,7 @@ import { copilotkitApp } from "./copilotkit";
 import { emailsApp } from "./emails";
 import { knowledgeApp } from "./knowledge";
 import { errorHandler, notFoundHandler, requestContext } from "./middleware";
+import { suggestionsApp } from "./suggestions";
 import { threadsApp } from "./threads";
 import type { AppEnv } from "./types";
 
@@ -18,6 +19,7 @@ app.route("/", copilotkitApp);
 app.route("/api/emails", emailsApp);
 app.route("/api/threads", threadsApp);
 app.route("/api/knowledge", knowledgeApp);
+app.route("/api/suggestions", suggestionsApp);
 
 // The single exit for every failure raised anywhere above.
 app.onError(errorHandler);

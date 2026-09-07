@@ -106,6 +106,7 @@ src/
 │   ├── emails.ts            # GET/PATCH /api/emails
 │   ├── knowledge.ts         # GET /api/knowledge?query= — searchKnowledge over HTTP, no LLM turn
 │   ├── threads.ts           # GET/POST/PATCH/DELETE /api/threads + LLM title generation
+│   ├── suggestions.ts       # POST /api/suggestions — chat follow-up pills, structured output
 │   ├── schemas.ts           # Zod request/response schemas for the routes above
 │   ├── types.ts             # AppEnv — Hono binding shared by the middleware below
 │   └── middleware/
@@ -115,7 +116,7 @@ src/
 ├── config/
 │   ├── env.ts            # DATABASE_URL / RAG_SCORE_THRESHOLD / pg TLS options, read at call time
 │   └── model.ts          # EMBEDDING_MODEL + per-request key/chat-model resolution (BYOK)
-├── constants/            # Tool names, table names, A2UI and compose constants
+├── constants/            # Tool names, table names, side-task model, A2UI and compose constants
 ├── data/seedEmails.ts    # Inbox seed, inserted on first boot against an empty `emails` table
 └── utils/                # a2ui, email, messages, redaction (PII), apiKeyNotice
 ```
