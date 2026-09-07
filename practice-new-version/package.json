@@ -8,6 +8,7 @@
     "dev:ui": "turbo run dev --filter=web",
     "dev:agent": "turbo run dev --filter=agent",
     "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
     "build": "turbo run build --filter=web",
     "storybook": "turbo run storybook --filter=web",
     "build-storybook": "turbo run build-storybook --filter=web",

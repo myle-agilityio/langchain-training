@@ -9,4 +9,9 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  test: {
+    // evalite forces its own include ("**/*.eval.ts") and ignores this one.
+    include: ["src/**/__test__/*.test.ts"],
+    environment: "node",
+  },
 });

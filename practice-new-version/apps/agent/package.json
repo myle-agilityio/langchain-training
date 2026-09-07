@@ -13,6 +13,8 @@
     "build": "langgraphjs build -t agent",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "eval": "evalite",
     "eval:dev": "evalite watch",
     "eval:report": "evalite export"
