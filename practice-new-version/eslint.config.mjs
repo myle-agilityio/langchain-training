@@ -11,6 +11,7 @@ export default tseslint.config(
     ignores: [
       "**/node_modules",
       "**/dist",
+      "**/storybook-static",
       "**/build",
       "**/.langgraph_api",
       "**/*.tsbuildinfo",
