@@ -8,8 +8,10 @@ one route — it exists to keep state (the selected email) in the URL, not for m
 
 ```bash
 pnpm dev:ui             # from the repo root — Vite on :3000
+pnpm storybook          # Storybook on :6006 — every component in isolation
 pnpm --filter web typecheck
 pnpm build              # vite build → apps/web/dist
+pnpm build-storybook    # storybook build → apps/web/storybook-static
 ```
 
 This app reads no env vars of its own — no `.env`, no `import.meta.env`. In dev, Vite's proxy
@@ -17,9 +19,23 @@ This app reads no env vars of its own — no `.env`, no `import.meta.env`. In de
 
 ## Deploying
 
-Static build on Vercel (`vercel.json`: `outputDirectory: apps/web/dist`). Its `routes` rewrite
-`/api/*` to `${AGENT_URL}` — set `AGENT_URL` as an environment variable on the Vercel project
-itself (dashboard or `vercel env add`), not in a file; Vercel doesn't read a checked-in `.env`.
+### Main app
+
+Static build on Vercel (`vercel.json`: `outputDirectory: apps/web/dist`), deployed via git.
+
+- Set `AGENT_URL` as an environment variable on the Vercel project itself (dashboard or
+  `vercel env add`) — Vercel doesn't read a checked-in `.env`.
+- `vercel.json`'s `routes` rewrite `/api/*` to that `${AGENT_URL}`.
+
+### Storybook
+
+Ships separately, by hand: `pnpm deploy:storybook` (`scripts/deploy-storybook.mjs`) builds and
+pushes `storybook-static` to its own Vercel project. No git connection, no env vars.
+
+- Live at <https://practice-storybook.vercel.app> — the only public URL; the deployment URL the
+  script prints sits behind Vercel Authentication.
+- Note: the script re-links on every run, because the build wipes `.vercel` and deletes the
+  token file the linker leaves behind.
 
 ## Structure
 
@@ -74,9 +90,33 @@ src/
 │   ├── formatDate.ts
 │   └── parseResult.ts   # Safe JSON.parse of a tool result
 ├── constants/           # One file per facet (tone, topic, urgency, status, course, workType, errors)
+├── stories/             # Storybook-only support: fixtures, providers, decorators
 └── types/               # email, errors, tools
+.storybook/              # Storybook config: main.ts, preview.tsx, preview.css
+scripts/                 # deploy-storybook.mjs
 public/                  # Static assets (kebab-case, by rule)
 ```
+
+## Storybook
+
+`pnpm storybook` opens the workshop on :6006. Every component has a `*.stories.tsx` beside its
+`index.tsx` (`common/Button/Button.stories.tsx`), grouped by title: `Common/`, `Inbox/`, `Chat/`,
+`Tool cards/`, `Generative UI/`, `Declarative UI/`, `OpenAI key/`, `Chrome/`.
+
+Stories run against the app's real providers, no mock layer: `src/stories/StoryProviders.tsx`
+gives each story a fresh QueryClient with the inbox pre-seeded from `src/stories/fixtures.ts`
+(so `useEmailLookup` and the tool cards resolve ids offline) plus a `MemoryRouter`.
+`withQueryData(seed)` from `src/stories/decorators.tsx` seeds any other query — that's how the
+knowledge-base pane renders without a request. The zustand stores are the real ones, so a story
+can just `useOpenAIKey.setState(...)` in `beforeEach`. Light/dark comes from the toolbar's theme
+switch, which puts `.dark` on `<html>` exactly like `useSyncTheme` does.
+
+Four components call CopilotKit hooks and need the agent running (`pnpm dev:agent`) to do more
+than render their chrome — `EmailInbox`, `EmailChat`, `ChatSidebar`, `ThreadsMenu`. They carry
+the `withCopilotRuntime` decorator, and `src/stories/RuntimeBoundary.tsx` catches the mount
+error to say so instead of showing a crash overlay. The A2UI renderers in
+`declarativeGenerativeUI/renderers.tsx` have no stories: they're driven by the A2UI runtime, not
+props — only `ActionButton`, which is a plain component, has one.
 
 ## Stack
 
@@ -98,3 +138,4 @@ public/                  # Static assets (kebab-case, by rule)
 | `date-fns`                                             | ^4.4.0   | Relative timestamps                        |
 | `class-variance-authority` / `clsx` / `tailwind-merge` | —        | Variant + class composition                |
 | `zod`                                                  | ^3.23.8  | Shared schemas with the agent's tool args  |
+| `storybook` + `@storybook/react-vite`                  | ^10.6.0  | Component workshop (`pnpm storybook`)      |
