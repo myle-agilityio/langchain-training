@@ -1,5 +1,5 @@
 import { getPool } from "./pool";
-import type { ChatThread } from "@/types";
+import type { ChatThread } from "@repo/types";
 
 interface ChatThreadRow {
   id: string;
@@ -47,27 +47,42 @@ export const listThreads = async (
 
 // Upsert: creates the row the first time a thread is touched, and just bumps updated_at on
 // every later touch. Title never gets clobbered (LLM-generated or teacher-renamed), but content
-// is refreshed with the caller's latest full-conversation snapshot every time, so search stays
-// current with the whole thread rather than just its first message. COALESCE guards against a
-// call that omits content wiping out what's already there.
+// and messages are refreshed with the caller's latest full-conversation snapshot every time, so
+// search and history-replay stay current with the whole thread rather than just its first
+// message. COALESCE guards against a call that omits either, wiping out what's already there.
 export const upsertThread = async (
   id: string,
   userId: string,
   title: string | null,
   content: string | null = null,
+  messages: unknown[] | null = null,
 ): Promise<ChatThread> => {
   // ON CONFLICT never touches user_id — a thread keeps its original owner even if re-touched.
   const { rows } = await getPool().query<ChatThreadRow>(
-    `INSERT INTO chat_threads (id, user_id, title, content)
-     VALUES ($1, $2, $3, $4)
+    `INSERT INTO chat_threads (id, user_id, title, content, messages)
+     VALUES ($1, $2, $3, $4, $5)
      ON CONFLICT (id) DO UPDATE SET
        updated_at = now(),
-       content = COALESCE(EXCLUDED.content, chat_threads.content)
+       content = COALESCE(EXCLUDED.content, chat_threads.content),
+       messages = COALESCE(EXCLUDED.messages, chat_threads.messages)
      RETURNING ${CHAT_THREAD_COLUMNS}`,
-    [id, userId, title, content],
+    [id, userId, title, content, messages ? JSON.stringify(messages) : null],
   );
 
   return toChatThread(rows[0]);
+};
+
+// Full stored transcript for a thread — the AG-UI Message[] the frontend last saved, replayed
+// back verbatim when a closed thread is reopened (see ThreadHistoryRunner).
+export const getThreadMessages = async (
+  id: string,
+): Promise<unknown[] | null> => {
+  const { rows } = await getPool().query<{ messages: unknown[] | null }>(
+    `SELECT messages FROM chat_threads WHERE id = $1`,
+    [id],
+  );
+
+  return rows[0]?.messages ?? null;
 };
 
 export const threadExists = async (id: string): Promise<boolean> => {

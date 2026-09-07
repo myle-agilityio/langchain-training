@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-import { FILTER_DESCRIPTION, TOOL } from "@/constants";
+import { FILTER_DESCRIPTION } from "@/constants";
+import { TOOL } from "@repo/constants";
 import { aggregateEmails } from "@/db";
 import { EmailFilterSchema, EmailGroupBySchema } from "@/types";
 import { defineTool } from "./defineTool";

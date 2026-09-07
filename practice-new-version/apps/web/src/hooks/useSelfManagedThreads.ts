@@ -13,7 +13,7 @@ import {
   type ThreadsPage,
 } from "@/api";
 import { optimisticContext, rollback } from "@/lib";
-import type { ChatThread } from "@/types";
+import type { ChatThread } from "@repo/types";
 import { useOpenAIKey } from "@/stores";
 
 export const threadsQueryKey = ["threads"] as const;
@@ -135,6 +135,7 @@ export const useSaveThread = () => {
       id: string;
       firstMessage?: string;
       content?: string;
+      messages?: readonly unknown[];
     }) => saveThread(body, useOpenAIKey.getState().apiKey),
     onSettled: () =>
       queryClient.invalidateQueries({ queryKey: threadsQueryKey }),

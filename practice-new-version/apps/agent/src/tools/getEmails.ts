@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-import { FILTER_DESCRIPTION, TOOL } from "@/constants";
+import { FILTER_DESCRIPTION } from "@/constants";
+import { TOOL } from "@repo/constants";
 import { listEmails } from "@/db";
 import { EmailFilterSchema } from "@/types";
 import { redactEmailForModel } from "@/utils";

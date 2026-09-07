@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Clock, Loader2, Search, SquarePen } from "lucide-react";
+import { Clock, Loader2, Pencil, Search, SquarePen, X } from "lucide-react";
 import { useCopilotChatConfiguration } from "@copilotkit/react-core/v2";
 import {
   useSelfManagedThreads,
@@ -153,7 +153,7 @@ export const ThreadsMenu = () => {
                         setDraftTitle(thread.title ?? "");
                       }}
                     >
-                      ✎
+                      <Pencil className="h-3.5 w-3.5" />
                     </button>
                     <button
                       type="button"
@@ -168,7 +168,7 @@ export const ThreadsMenu = () => {
                         }
                       }}
                     >
-                      ✕
+                      <X className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 </li>

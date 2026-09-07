@@ -2,7 +2,7 @@ import axios from "axios";
 import { Hono } from "hono";
 
 import { GENERATE_TITLE_MODEL } from "@/config";
-import { OPENAI_API_KEY_HEADER } from "@/constants";
+import { OPENAI_API_KEY_HEADER } from "@repo/constants";
 import {
   listThreads,
   upsertThread,
@@ -95,7 +95,9 @@ threadsApp.get("/", validate("query", ListThreadsQuerySchema), async (c) => {
 // Upsert: creates the row (title from firstMessage) on a thread's first touch, else just bumps
 // updated_at — never clobbers an existing title (LLM-generated or teacher-renamed).
 threadsApp.post("/", validate("json", SaveThreadBodySchema), async (c) => {
-  const { id, firstMessage, content } = c.get("valid") as SaveThreadBody;
+  const { id, firstMessage, content, messages } = c.get(
+    "valid",
+  ) as SaveThreadBody;
 
   const exists = await threadExists(id);
   // Visitor's own key (BYOK — see agent/src/config/model.ts) first; process.env.OPENAI_API_KEY
@@ -113,6 +115,7 @@ threadsApp.post("/", validate("json", SaveThreadBodySchema), async (c) => {
       c.get("userId"),
       title,
       content?.trim() || null,
+      messages ?? null,
     ),
   });
 });

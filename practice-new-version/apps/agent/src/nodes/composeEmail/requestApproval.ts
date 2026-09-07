@@ -1,7 +1,7 @@
 import { ToolMessage } from "@langchain/core/messages";
 import { interrupt } from "@langchain/langgraph";
 
-import { COMPOSE_REPLY_ACTION } from "@/constants";
+import { COMPOSE_REPLY_ACTION } from "@repo/constants";
 import type { ComposeEmailStateShape, RejectedDraft } from "@/types";
 import { findReplyCall } from "@/utils";
 

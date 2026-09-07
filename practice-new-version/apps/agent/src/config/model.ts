@@ -8,7 +8,7 @@ import {
   CHAT_MODEL_OPTIONS,
   DEFAULT_CHAT_MODEL_ID,
   OPENAI_API_KEY_HEADER,
-} from "@/constants";
+} from "@repo/constants";
 
 export const EMBEDDING_MODEL = "text-embedding-3-small";
 // Thread titles are a cheap, fixed side task — not part of the chat reply, so the teacher's

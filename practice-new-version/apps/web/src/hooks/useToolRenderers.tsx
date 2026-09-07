@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { useRenderTool } from "@copilotkit/react-core/v2";
 
-import { TOOL } from "@/constants";
+import { TOOL } from "@repo/constants";
 import {
   ClassifyEmailsCard,
   CountEmailsCard,

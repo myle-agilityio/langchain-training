@@ -16,7 +16,7 @@ import {
 } from "recharts";
 import { createCatalog } from "@copilotkit/a2ui-renderer";
 import type { CatalogRenderers } from "@copilotkit/a2ui-renderer";
-import { CUSTOM_CATALOG_ID } from "@/constants";
+import { CUSTOM_CATALOG_ID } from "@repo/constants";
 import { demonstrationCatalogDefinitions } from "./definitions";
 import type { DemonstrationCatalogDefinitions } from "./definitions";
 import { colors } from "./theme";

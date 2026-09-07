@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
 } from "@/components/common";
 import { useChatModel } from "@/stores";
-import { CHAT_MODEL_OPTIONS } from "@/constants";
+import { CHAT_MODEL_OPTIONS } from "@repo/constants";
 import { cn } from "@/utils";
 
 // Picks which model powers the chat's replies — forwarded as a header, see App.tsx.

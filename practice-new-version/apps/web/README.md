@@ -1,7 +1,8 @@
 # `web` — Vite inbox UI
 
-The frontend half of the AI Email Assistant: a single-page Vite + React app (no router) that
-renders the teacher's inbox next to a CopilotKit chat sidebar.
+The frontend half of the AI Email Assistant: a single-page Vite + React app that renders the
+teacher's inbox next to a CopilotKit chat sidebar. A `react-router-dom` router is wired in with
+one route — it exists to keep state (the selected email) in the URL, not for multi-page nav.
 
 ## Running it
 
@@ -27,8 +28,16 @@ index.html               # Entry document
 src/
 ├── main.tsx             # createRoot → <App />, globals.css, CopilotKit v2 styles
 ├── app/
-│   ├── App.tsx          # Providers: QueryClientProvider → CopilotKit → chat config → layout
+│   ├── App.tsx          # QueryClientProvider → RouterProvider(router)
+│   ├── Root.tsx         # The route's element: CopilotKit → chat config → page
 │   └── globals.css      # Tailwind v4 entry, theme tokens, CopilotKit overrides
+├── router/
+│   └── index.tsx        # createBrowserRouter — single "/" route rendering Root
+├── pages/                # index.ts barrel; one folder per page, each with an index.tsx
+│   └── Inbox/            # The (only, single-page) screen: EmailInbox + ChatSidebar layout
+│       ├── index.tsx
+│       └── AgentSync/    # Page-private: wires useSyncInbox/Threads/ComposeApproval
+│           └── index.tsx
 ├── components/          # index.ts barrel; one folder per component, each with an index.tsx
 │   ├── EmailInbox/      # Inbox shell + InboxList, FilterDialog, EmailDetail/ComposeForm
 │   ├── EmailChat/       # The CopilotKit chat surface
@@ -65,26 +74,27 @@ src/
 │   ├── formatDate.ts
 │   └── parseResult.ts   # Safe JSON.parse of a tool result
 ├── constants/           # One file per facet (tone, topic, urgency, status, course, workType, errors)
-└── types/               # email, errors, tools; ChatThread re-exported from @repo/shared
+└── types/               # email, errors, tools
 public/                  # Static assets (kebab-case, by rule)
 ```
 
 ## Stack
 
-| Package                                                | Version  | Role                                      |
-| ------------------------------------------------------ | -------- | ----------------------------------------- |
-| Vite                                                   | ^7       | Dev server + build                        |
-| React / React DOM                                      | ^19.2.4  | UI                                        |
-| TypeScript                                             | ^5       | `tsc --noEmit` via `pnpm typecheck`       |
-| Tailwind CSS + `@tailwindcss/vite`                     | ^4       | Styling (CSS-first config in globals.css) |
-| `@copilotkit/react-core` (v2)                          | 1.62.3   | Chat, agent state, interrupts             |
-| `@copilotkit/a2ui-renderer`                            | 1.62.3   | Declarative generative UI catalog         |
-| `@tanstack/react-query`                                | ^5.101.4 | All server state                          |
-| `zustand`                                              | ^5.0.15  | Client-only state                         |
-| `axios`                                                | ^1.19.0  | The single API client                     |
-| Radix UI (`dialog`, `dropdown-menu`)                   | ^1.1–2.1 | Accessible primitives                     |
-| `lucide-react`                                         | ^0.577.0 | Icons                                     |
-| `recharts`                                             | ^3.7.0   | Charts in generative UI                   |
-| `date-fns`                                             | ^4.4.0   | Relative timestamps                       |
-| `class-variance-authority` / `clsx` / `tailwind-merge` | —        | Variant + class composition               |
-| `zod`                                                  | ^3.23.8  | Shared schemas with the agent's tool args |
+| Package                                                | Version  | Role                                       |
+| ------------------------------------------------------ | -------- | ------------------------------------------ |
+| Vite                                                   | ^7       | Dev server + build                         |
+| React / React DOM                                      | ^19.2.4  | UI                                         |
+| TypeScript                                             | ^5       | `tsc --noEmit` via `pnpm typecheck`        |
+| Tailwind CSS + `@tailwindcss/vite`                     | ^4       | Styling (CSS-first config in globals.css)  |
+| `@copilotkit/react-core` (v2)                          | 1.62.3   | Chat, agent state, interrupts              |
+| `@copilotkit/a2ui-renderer`                            | 1.62.3   | Declarative generative UI catalog          |
+| `@tanstack/react-query`                                | ^5.101.4 | All server state                           |
+| `react-router-dom`                                     | ^7.18.3  | Single route — keeps selected email in URL |
+| `zustand`                                              | ^5.0.15  | Client-only state                          |
+| `axios`                                                | ^1.19.0  | The single API client                      |
+| Radix UI (`dialog`, `dropdown-menu`)                   | ^1.1–2.1 | Accessible primitives                      |
+| `lucide-react`                                         | ^0.577.0 | Icons                                      |
+| `recharts`                                             | ^3.7.0   | Charts in generative UI                    |
+| `date-fns`                                             | ^4.4.0   | Relative timestamps                        |
+| `class-variance-authority` / `clsx` / `tailwind-merge` | —        | Variant + class composition                |
+| `zod`                                                  | ^3.23.8  | Shared schemas with the agent's tool args  |

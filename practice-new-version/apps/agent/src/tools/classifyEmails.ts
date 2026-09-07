@@ -3,7 +3,8 @@ import { copilotkitCustomizeConfig } from "@copilotkit/sdk-js/langgraph";
 import { z } from "zod";
 
 import { getPlainModelWithConfig } from "@/config";
-import { CLASSIFY_CONCURRENCY, TOOL } from "@/constants";
+import { CLASSIFY_CONCURRENCY } from "@/constants";
+import { TOOL } from "@repo/constants";
 import { getEmail, updateEmail } from "@/db";
 import { AppError, ERROR_CODE, ERRORS } from "@/errors";
 import { logError } from "@/logging";

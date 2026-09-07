@@ -1,4 +1,3 @@
-export type { ChatThread } from "@repo/shared";
 export type * from "./agentState";
 export * from "./compose";
 export type * from "./contactProfile";

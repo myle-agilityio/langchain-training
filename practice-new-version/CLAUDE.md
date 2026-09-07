@@ -21,17 +21,17 @@ reference — don't copy patterns from `practice/`'s agent without deciding they
 
 ## Where things live
 
-Turborepo + pnpm workspace: `apps/web` (Vite SPA), `apps/agent`, and `packages/shared`.
-`turbo.json` drives `dev`/`typecheck`/`build` across the packages.
+Turborepo + pnpm workspace: `apps/web` (Vite SPA), `apps/agent`, and `packages/constants` +
+`packages/types`. `turbo.json` drives `dev`/`typecheck`/`build` across the packages.
 
-`packages/shared` (`@repo/shared`) holds the contracts both sides must agree on — the tool
-names (`TOOL`), `COMPOSE_REPLY_ACTION`, `CUSTOM_CATALOG_ID`, the `ChatThread` type, and the BYOK/
-chat-model headers (`OPENAI_API_KEY_HEADER`, `CHAT_MODEL_HEADER`, `CHAT_MODEL_OPTIONS`) the web
-app forwards and the agent's `config/model.ts` reads per request. It ships
-TS source (no build step; `exports` points at `src/index.ts`), so tsx and Vite compile it in
-place. Each app re-exports what it needs through its own `constants/index.ts` / `types/index.ts`
-barrel — use sites keep importing from `@/constants` and `@/types`, never from `@repo/shared`
-directly. Anything one side alone cares about (prompts, labels, error wording) stays in that app.
+`packages/constants` (`@repo/constants`) and `packages/types` (`@repo/types`) hold the contracts
+both sides must agree on — the tool names (`TOOL`), `COMPOSE_REPLY_ACTION`, `CUSTOM_CATALOG_ID`,
+the `ChatThread` type, and the BYOK/chat-model headers (`OPENAI_API_KEY_HEADER`,
+`CHAT_MODEL_HEADER`, `CHAT_MODEL_OPTIONS`) the web app forwards and the agent's `config/model.ts`
+reads per request. Both ship TS source (no build step; `exports` points at `src/index.ts`), so
+tsx and Vite compile them in place. Use sites import directly from `@repo/constants` /
+`@repo/types` — apps' own `constants/index.ts` / `types/index.ts` barrels hold only what that
+app alone cares about (prompts, labels, error wording), not re-exports of the shared packages.
 
 Agent (`apps/agent/src/`), organized by role:
 
@@ -49,10 +49,15 @@ Agent (`apps/agent/src/`), organized by role:
   REST routes) and `knowledge.ts` (KB semantic search, no LLM turn) — all proxied to from Vite
   in dev via `vite.config.ts`'s `server.proxy`.
 
-Frontend (`apps/web/`, Vite SPA, single page — no router):
+Frontend (`apps/web/`, Vite SPA, single page):
 
-- `index.html` + `src/main.tsx` — entry point; `src/app/App.tsx` — providers (TanStack Query,
-  CopilotKit, theme, OpenAI-key gate) wrapping the inbox + chat layout.
+- `index.html` + `src/main.tsx` — entry point; `src/app/App.tsx` sets up `QueryClientProvider`
+  and renders `src/router/index.tsx`'s router — a single `"/"` route (kept for URL-backed state,
+  not multi-page nav) whose element is `src/app/Root.tsx`, wrapping the rest of the providers
+  (CopilotKit, theme, OpenAI-key gate) around the page below.
+- `src/pages/` — one folder per page, each with an `index.tsx` (`Inbox/` is the only one today,
+  since this is a single-page SPA); `src/pages/index.ts` re-exports all. A page's own private
+  pieces get their own folder beside its `index.tsx` (`Inbox/AgentSync/`), not `src/components/`.
 - `src/components/` — one folder per component, each with an `index.tsx`; a folder whose
   `index` is a barrel groups them (`common/` primitives, `generativeUI/`,
   `declarativeGenerativeUI/` — the A2UI catalog). `src/components/index.ts` re-exports all.
@@ -96,7 +101,7 @@ These are how we work on this project, not style preferences. Follow them on eve
 7. **Barrels re-export whole modules with `export *`.** When the barrel takes everything a file
    exports, write `export * from "./x"` — `export type * from "./x"` if that file is types only —
    instead of listing every name. Spell out names only when the barrel deliberately takes a
-   subset, e.g. each app picking its share of `@repo/shared`.
+   subset, e.g. `agent/src/errors/index.ts` picking specific names out of `./catalog`.
 
 8. **Blank lines separate sections; every branch gets braces.** A body reads as declarations →
    work → return, split by blank lines: one after each block (`if {}`, `for {}`), one before a

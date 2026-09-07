@@ -107,7 +107,8 @@ README covering its layout and stack:
 │   └── agent/          # LangGraph.js agent + Hono HTTP app     → apps/agent/README.md
 │       └── .env        # Agent-only env, read via langgraph.json's "env": ".env"
 ├── packages/
-│   └── shared/         # @repo/shared — tool names, ChatThread type, shared constants
+│   ├── constants/       # @repo/constants — tool names, shared constants
+│   └── types/           # @repo/types — ChatThread type
 ├── docs/               # FEATURES, ARCHITECTURE, TEST-SCENARIOS
 ├── fixtures/           # Sample data for manual runs
 ├── turbo.json          # Task graph: dev, typecheck, build

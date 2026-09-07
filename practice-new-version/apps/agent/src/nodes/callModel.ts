@@ -6,7 +6,7 @@ import {
 import { END, type LangGraphRunnableConfig } from "@langchain/langgraph";
 
 import { getModelWithConfig } from "@/config";
-import { TOOL } from "@/constants";
+import { TOOL } from "@repo/constants";
 import { currentDateLine, SYSTEM_PROMPT } from "@/prompts";
 import { executableTools, modelTools } from "@/tools";
 import type { AgentStateShape } from "@/types";

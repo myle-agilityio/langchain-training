@@ -1,5 +1,5 @@
 import { useInterrupt } from "@copilotkit/react-core/v2";
-import { COMPOSE_REPLY_ACTION } from "@/constants";
+import { COMPOSE_REPLY_ACTION } from "@repo/constants";
 import { EmailReplyCard } from "@/components/generativeUI/EmailReplyCard";
 
 interface ComposeReplyInterrupt {

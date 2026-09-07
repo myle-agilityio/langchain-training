@@ -10,11 +10,18 @@
     "typecheck": {
       "outputs": []
     },
+    "lint": {
+      "outputs": []
+    },
     "web#build": {
       "inputs": ["$TURBO_DEFAULT$", ".env"],
       "outputs": ["dist/**"]
     },
     "agent#build": {
+      "cache": false,
+      "outputs": []
+    },
+    "agent#eval": {
       "cache": false,
       "outputs": []
     }

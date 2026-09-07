@@ -1,4 +1,10 @@
-import { CopilotChat, isAbortError } from "@copilotkit/react-core/v2";
+import { useRef } from "react";
+import {
+  CopilotChat,
+  isAbortError,
+  useAgent,
+  useCopilotKit,
+} from "@copilotkit/react-core/v2";
 import { reportFailure, toChatError } from "@/lib/errors";
 import { useComposeApproval, useOpenAIKey } from "@/stores";
 import { KeyRequiredCard } from "@/components/openAIKey";
@@ -9,6 +15,12 @@ export const EmailChat = () => {
   const apiKey = useOpenAIKey((s) => s.apiKey);
   const awaitingApproval = useComposeApproval((s) => s.awaitingApproval);
   const locked = awaitingApproval ? { disabled: true as const } : undefined;
+  const { copilotkit } = useCopilotKit();
+  const { agent } = useAgent();
+
+  // Clicking stop can still surface as a normal run error, not an AbortError — this flag
+  // marks "we just stopped it ourselves" so that error gets ignored instead of toasted.
+  const userStoppedRef = useRef(false);
 
   if (!apiKey) {
     return <KeyRequiredCard />;
@@ -20,11 +32,22 @@ export const EmailChat = () => {
       // back — a dropped stream otherwise just stops, with nothing said.
       onError={(event) => {
         // The prop also carries the div's DOM onError, so take only CopilotKit's error event.
-        if (!("error" in event) || isAbortError(event.error)) {
+        if (
+          !("error" in event) ||
+          isAbortError(event.error) ||
+          userStoppedRef.current
+        ) {
           return;
         }
 
         reportFailure(toChatError(event), "chat.stream");
+      }}
+      onStop={() => {
+        userStoppedRef.current = true;
+        copilotkit.stopAgent({ agent });
+        setTimeout(() => {
+          userStoppedRef.current = false;
+        }, 1000);
       }}
       attachments={{ enabled: true }}
       className="bg-transparent"

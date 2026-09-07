@@ -1,4 +1,4 @@
-import { OPENAI_API_KEY_HEADER } from "@/constants";
+import { OPENAI_API_KEY_HEADER } from "@repo/constants";
 import { apiClient } from "./client";
 
 const KNOWLEDGE_PATH = "/api/knowledge";
