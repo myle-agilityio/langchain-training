@@ -1,0 +1,6 @@
+/* The workshop canvas is the plain card surface, not the app's lilac wash — a story sits in a
+   framed box on it (see withStoryFrame), so its own edges stay visible. */
+body {
+  background-color: var(--card);
+  background-image: none;
+}

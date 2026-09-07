@@ -8,6 +8,9 @@ reference — don't copy patterns from `practice/`'s agent without deciding they
 ## Commands
 
 - `pnpm dev` — UI on :3000 + agent on :8123 together. `dev:ui` / `dev:agent` to isolate one.
+- `pnpm storybook` — Storybook on :6006 (`build-storybook` for the static build). Every
+  component has a `*.stories.tsx` beside its `index.tsx`; shared fixtures/decorators live in
+  `apps/web/src/stories`, config in `apps/web/.storybook`. See the web README's Storybook section.
 - `pnpm typecheck` — runs `turbo run typecheck` across both packages; must be clean
   before a task is done.
 - `pnpm lint` / `pnpm format` — ESLint (flat config, `eslint.config.mjs`) and Prettier, scoped to

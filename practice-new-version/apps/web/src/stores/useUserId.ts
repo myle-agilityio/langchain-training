@@ -1,12 +1,11 @@
 import { create } from "zustand";
-
-const STORAGE_KEY = "user_id";
+import { STORAGE_KEY } from "@/constants";
 
 // localStorage throws in some privacy modes; falling back to a fresh id just means it won't
 // persist across reloads there.
 const readOrCreate = (): string => {
   try {
-    const existing = window.localStorage.getItem(STORAGE_KEY);
+    const existing = window.localStorage.getItem(STORAGE_KEY.userId);
 
     if (existing) {
       return existing;
@@ -14,7 +13,7 @@ const readOrCreate = (): string => {
 
     const id = crypto.randomUUID();
 
-    window.localStorage.setItem(STORAGE_KEY, id);
+    window.localStorage.setItem(STORAGE_KEY.userId, id);
 
     return id;
   } catch {
