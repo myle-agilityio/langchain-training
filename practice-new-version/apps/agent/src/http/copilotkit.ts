@@ -18,7 +18,7 @@ const defaultAgent = new LangGraphAgent({
 
 const runtime = new CopilotRuntime({
   agents: { default: defaultAgent },
-  runner: new ThreadHistoryRunner(deploymentUrl),
+  runner: new ThreadHistoryRunner(),
   openGenerativeUI: true,
   a2ui: {
     injectA2UITool: false,

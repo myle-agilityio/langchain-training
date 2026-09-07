@@ -30,8 +30,13 @@ export const ensureSchema = async (): Promise<void> => {
       user_id    text NOT NULL DEFAULT '',
       title      text,
       content    text,
+      messages   jsonb,
       created_at timestamptz NOT NULL DEFAULT now(),
       updated_at timestamptz NOT NULL DEFAULT now()
     )
   `);
+  // Backfills the column on a database that already has chat_threads from before this existed.
+  await pool.query(
+    `ALTER TABLE chat_threads ADD COLUMN IF NOT EXISTS messages jsonb`,
+  );
 };
