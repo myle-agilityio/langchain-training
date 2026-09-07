@@ -1,10 +1,27 @@
 import "@testing-library/jest-dom/vitest";
-import { setProjectAnnotations } from "@storybook/react-vite";
-import { beforeAll } from "vitest";
+import { cleanup } from "@testing-library/react";
+import { afterEach } from "vitest";
 
-import preview from "./.storybook/preview";
+// Testing Library only auto-cleans with globals:true — without this, renders pile up in the DOM.
+afterEach(cleanup);
 
-// Stories pulled into a test with composeStories get the same decorators the canvas applies.
-const annotations = setProjectAnnotations([preview]);
+// jsdom has no IntersectionObserver, which useLoadMoreSentinel needs to exist to observe with.
+if (!("IntersectionObserver" in globalThis)) {
+  globalThis.IntersectionObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+    takeRecords() {
+      return [];
+    }
+  } as unknown as typeof IntersectionObserver;
+}
 
-beforeAll(annotations.beforeAll);
+// jsdom implements neither pointer-capture method; the resize handle calls both on drag.
+if (!Element.prototype.setPointerCapture) {
+  Element.prototype.setPointerCapture = () => {};
+
+  Element.prototype.releasePointerCapture = () => {};
+
+  Element.prototype.hasPointerCapture = () => false;
+}
