@@ -120,3 +120,23 @@ describe("collectRevisionNotes", () => {
     expect(collectRevisionNotes([], "e1")).toBe("");
   });
 });
+
+describe("edge cases with no tool_calls at all", () => {
+  it("findReplyCall and findUnansweredReplyCall skip a message with no tool_calls array", () => {
+    const bare = new AIMessage("just talking");
+
+    expect(findReplyCall([bare])).toBeUndefined();
+    expect(findUnansweredReplyCall([bare])).toBeUndefined();
+  });
+
+  it("collectRevisionNotes stringifies a non-string human message instead of dropping it", () => {
+    const messages: BaseMessage[] = [
+      new HumanMessage({ content: [{ type: "text", text: "reply to Flo" }] }),
+      replyCall("call_1", "e1"),
+    ];
+
+    expect(collectRevisionNotes(messages, "e1")).toBe(
+      JSON.stringify([{ type: "text", text: "reply to Flo" }]),
+    );
+  });
+});

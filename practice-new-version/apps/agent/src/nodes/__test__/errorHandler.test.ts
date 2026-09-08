@@ -66,3 +66,16 @@ describe("nodeErrorHandler", () => {
     expect(message.content).not.toContain("pool exhausted");
   });
 });
+
+describe("nodeErrorHandler — a call with no id", () => {
+  it('falls back to "unknown" rather than sending an undefined tool_call_id', () => {
+    const call = new AIMessage({
+      content: "",
+      tool_calls: [{ id: undefined, name: TOOL.REPLY_TO_EMAIL, args: {} }],
+    });
+    const command = handle([call], new AppError(ERROR_CODE.EMAIL_NOT_FOUND));
+    const [message] = (command.update as { messages: ToolMessage[] }).messages;
+
+    expect(message.tool_call_id).toBe("unknown");
+  });
+});
