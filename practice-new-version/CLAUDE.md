@@ -13,8 +13,11 @@ reference — don't copy patterns from `practice/`'s agent without deciding they
   `apps/web/src/stories`, config in `apps/web/.storybook`. See the web README's Storybook section.
 - `pnpm typecheck` — runs `turbo run typecheck` across both packages; must be clean
   before a task is done.
+- `pnpm test` — Vitest across both apps (`test:watch` inside one). Tests live in `__test__/`
+  subfolders; see rule 7.
 - `pnpm lint` / `pnpm format` — ESLint (flat config, `eslint.config.mjs`) and Prettier, scoped to
-  this project. A pre-push hook re-runs both, but only on the files in the commits being pushed.
+  this project. A pre-push hook re-runs both on the files in the commits being pushed, plus
+  `pnpm test` once for the whole push.
 - The agent runs under `langgraphjs dev`; the graph entry and the custom HTTP app (CopilotKit +
   the `/api/emails`/`/api/threads`/`/api/knowledge` routes) are both registered in
   `apps/agent/langgraph.json`.
@@ -101,12 +104,19 @@ These are how we work on this project, not style preferences. Follow them on eve
    `components/common/DropdownMenu/`). Barrel `index.ts`/`index.tsx` files keep their name. **Assets and scripts stay kebab-case**:
    `public/copilotkit-logo-mark.svg` and the KB documents in `rag/sample-docs/`
    (`loaders.ts` derives each title from its filename).
-7. **Barrels re-export whole modules with `export *`.** When the barrel takes everything a file
+7. **Unit tests live in a `__test__/` subfolder beside the code they cover**, named after that
+   file — `utils/__test__/emailFilters.test.ts`, `common/Badge/__test__/Badge.test.tsx`. Both
+   vitest configs only pick up `src/**/__test__/*.test.*`, so a test anywhere else silently
+   never runs. `pnpm test` runs both apps; the pre-push hook runs it for the whole push.
+   **Anything that calls a model gets an eval, not a unit test** — a node, tool or route that
+   reaches `getModelWithConfig`/`withStructuredOutput`/embeddings belongs in `evals/*.eval.ts`
+   (`pnpm eval:agent`). Unit tests cover the deterministic code around it.
+8. **Barrels re-export whole modules with `export *`.** When the barrel takes everything a file
    exports, write `export * from "./x"` — `export type * from "./x"` if that file is types only —
    instead of listing every name. Spell out names only when the barrel deliberately takes a
    subset, e.g. `agent/src/errors/index.ts` picking specific names out of `./catalog`.
 
-8. **Blank lines separate sections; every branch gets braces.** A body reads as declarations →
+9. **Blank lines separate sections; every branch gets braces.** A body reads as declarations →
    work → return, split by blank lines: one after each block (`if {}`, `for {}`), one before a
    `return`/`throw`, one after a run of declarations. No single-line `if (x) doThing();`.
    `@stylistic/padding-line-between-statements` + `curly` in `eslint.config.mjs` enforce this —
