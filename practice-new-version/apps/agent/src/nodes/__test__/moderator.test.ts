@@ -9,9 +9,7 @@ describe("afterModeration", () => {
   });
 
   it("carries on to summarize when nothing was flagged", () => {
-    expect(afterModeration({ messages: [], blocked: false })).toBe(
-      "summarize",
-    );
+    expect(afterModeration({ messages: [], blocked: false })).toBe("summarize");
     expect(afterModeration({ messages: [] })).toBe("summarize");
   });
 });
