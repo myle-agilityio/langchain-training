@@ -1,4 +1,8 @@
-import { QueryClient, QueryClientProvider, useInfiniteQuery } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useInfiniteQuery,
+} from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -11,7 +15,9 @@ describe("probe", () => {
     const wrapper = ({ children }: { children: ReactNode }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
-    const queryFn = vi.fn().mockResolvedValue({ emails: [{ id: "a" }], hasNext: false });
+    const queryFn = vi
+      .fn()
+      .mockResolvedValue({ emails: [{ id: "a" }], hasNext: false });
 
     const { result } = renderHook(
       () =>
