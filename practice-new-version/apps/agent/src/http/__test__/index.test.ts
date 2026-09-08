@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { listEmailsSeeded } from "@/db";
 
@@ -37,14 +37,20 @@ vi.mock("@copilotkit/runtime/langgraph", () => ({
 vi.spyOn(console, "log").mockImplementation(() => {});
 vi.spyOn(console, "error").mockImplementation(() => {});
 
+let app: Awaited<typeof import("../index")>["app"];
+
+// The first import transforms the whole app graph (CopilotKit, LangGraph, axios, rxjs,
+// ag-ui/client, pg...) — pay that cost once here instead of racing per-test timeouts.
+beforeAll(async () => {
+  ({ app } = await import("../index"));
+}, 30000);
+
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
 describe("http app", () => {
   it("mounts the emails route under /api/emails", async () => {
-    const { app } = await import("../index");
-
     vi.mocked(listEmailsSeeded).mockResolvedValue({
       emails: [],
       hasNext: false,
@@ -56,8 +62,6 @@ describe("http app", () => {
   });
 
   it("answers an unknown route with the catalog's not-found shape", async () => {
-    const { app } = await import("../index");
-
     const response = await app.request("/nope");
     const body = await response.json();
 
@@ -66,8 +70,6 @@ describe("http app", () => {
   });
 
   it("stamps a correlation id on every response, success or not", async () => {
-    const { app } = await import("../index");
-
     vi.mocked(listEmailsSeeded).mockResolvedValue({
       emails: [],
       hasNext: false,
@@ -81,7 +83,6 @@ describe("http app", () => {
   });
 
   it("rejects a thread request with no owning browser before it reaches the db", async () => {
-    const { app } = await import("../index");
     const { listThreads } = await import("@/db");
 
     const response = await app.request("/api/threads");
