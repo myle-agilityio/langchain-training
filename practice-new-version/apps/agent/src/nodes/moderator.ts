@@ -60,6 +60,6 @@ export const moderator = withNode(
   { blocked: true },
 );
 
-// Routes to call_model or ends if the message was flagged
+// Routes to summarize (then call_model) or ends if the message was flagged
 export const afterModeration = (state: AgentStateShape) =>
-  state.blocked ? END : "call_model";
+  state.blocked ? END : "summarize";

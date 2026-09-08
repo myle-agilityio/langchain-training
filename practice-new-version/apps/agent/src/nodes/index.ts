@@ -9,4 +9,5 @@ export {
 } from "./composeEmail";
 export { nodeErrorHandler } from "./errorHandler";
 export { afterModeration, moderator } from "./moderator";
+export { summarizeConversation } from "./summarize";
 export { withNode } from "./withNode";

@@ -30,6 +30,13 @@ const renderFrontendContext = (state: AgentStateShape): string => {
   return `\n\nContext from the app UI:\n${lines.join("\n")}`;
 };
 
+// Older turns folded away by summarize — "" once the thread is short enough not to need it.
+const renderSummaryContext = (state: AgentStateShape): string => {
+  return state.summary
+    ? `\n\nSummary of earlier conversation:\n${state.summary}`
+    : "";
+};
+
 // Wraps frontend actions in OpenAI tool format
 const frontendTools = (state: AgentStateShape) => {
   return (state.copilotkit?.actions ?? []).map((a) =>
@@ -49,7 +56,7 @@ const frontendTools = (state: AgentStateShape) => {
 // System prompt + message history, as a template rather than manual array-spreading — the
 // placeholder marks exactly where state.messages goes, instead of `[new SystemMessage(...), ...]`.
 const callModelPrompt = ChatPromptTemplate.fromMessages([
-  ["system", SYSTEM_PROMPT + "{dateLine}{frontendContext}"],
+  ["system", SYSTEM_PROMPT + "{dateLine}{summaryContext}{frontendContext}"],
   new MessagesPlaceholder("messages"),
 ]);
 
@@ -66,12 +73,13 @@ export const callModel = withNode(
     const response = await callModelPrompt.pipe(bound).invoke(
       {
         dateLine: currentDateLine(),
+        summaryContext: renderSummaryContext(state),
         frontendContext: renderFrontendContext(state),
         messages: state.messages,
       },
       config,
     );
-
+    console.log("callModel response", response);
     return { messages: [response] };
   },
 );

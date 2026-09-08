@@ -8,10 +8,10 @@ describe("afterModeration", () => {
     expect(afterModeration({ messages: [], blocked: true })).toBe(END);
   });
 
-  it("carries on to the model when nothing was flagged", () => {
+  it("carries on to summarize when nothing was flagged", () => {
     expect(afterModeration({ messages: [], blocked: false })).toBe(
-      "call_model",
+      "summarize",
     );
-    expect(afterModeration({ messages: [] })).toBe("call_model");
+    expect(afterModeration({ messages: [] })).toBe("summarize");
   });
 });

@@ -14,6 +14,7 @@ import {
   moderator,
   nodeErrorHandler,
   routeAfterModel,
+  summarizeConversation,
 } from "@/nodes";
 import { ensureIndexed } from "@/rag";
 import { AgentState } from "@/state";
@@ -49,6 +50,9 @@ export const buildGraph = async () => {
     .addNode("moderator", moderator, {
       errorHandler: nodeErrorHandler("moderator"),
     })
+    .addNode("summarize", summarizeConversation, {
+      errorHandler: nodeErrorHandler("summarize"),
+    })
     .addNode("call_model", callModel, {
       errorHandler: nodeErrorHandler("call_model"),
     })
@@ -64,9 +68,11 @@ export const buildGraph = async () => {
 
     // Flagged message → decline message, end; otherwise into the normal ReAct loop.
     .addConditionalEdges("moderator", afterModeration, {
-      call_model: "call_model",
+      summarize: "summarize",
       __end__: END,
     })
+
+    .addEdge("summarize", "call_model")
 
     // reply_to_email → subgraph; backend tool → tools; frontend tool or plain answer → end.
     .addConditionalEdges("call_model", routeAfterModel, {
