@@ -1,4 +1,5 @@
 export * from "./AppHeader";
+export * from "./AppLogo";
 export * from "./ChatPanel";
 export * from "./EmailChat";
 export * from "./EmailInbox";
