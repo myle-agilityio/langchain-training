@@ -19,13 +19,15 @@ graph TD
     subgraph Frontend["Vite — :3000"]
         UI["src/components/EmailInbox/*"]
         Hook["useSharedInbox.ts (TanStack Query)"]
-        EmailsAPI["/api/emails"]
-        ThreadsAPI["/api/threads"]
-        KnowledgeAPI["/api/knowledge"]
-        CopilotRoute["/api/copilotkit"]
     end
 
-    subgraph AgentServer["LangGraph agent — :8123 (langgraphjs dev)"]
+    subgraph AgentServer["Agent server — :8123 (langgraphjs dev)"]
+        subgraph HonoApp["Hono app (apps/agent/src/http/index.ts)"]
+            EmailsAPI["/api/emails"]
+            ThreadsAPI["/api/threads"]
+            KnowledgeAPI["/api/knowledge"]
+            CopilotRoute["/api/copilotkit"]
+        end
         Graph["graph (apps/agent/src/agent.ts,\nexported via src/index.ts)"]
     end
 
