@@ -79,7 +79,7 @@ export const callModel = withNode(
       },
       config,
     );
-    console.log("callModel response", response);
+
     return { messages: [response] };
   },
 );
