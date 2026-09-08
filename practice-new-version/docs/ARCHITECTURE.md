@@ -20,11 +20,13 @@ graph TD
         UI["src/components/EmailInbox/*"]
         Hook["useSharedInbox.ts (TanStack Query)"]
         EmailsAPI["/api/emails"]
-        CopilotRoute["/api/copilotkit/[[...slug]]"]
+        ThreadsAPI["/api/threads"]
+        KnowledgeAPI["/api/knowledge"]
+        CopilotRoute["/api/copilotkit"]
     end
 
     subgraph AgentServer["LangGraph agent — :8123 (langgraphjs dev)"]
-        Graph["graph (apps/agent/src/graphs/index.ts)"]
+        Graph["graph (apps/agent/src/agent.ts,\nexported via src/index.ts)"]
     end
 
     subgraph Postgres["Postgres — DATABASE_URL"]
@@ -38,6 +40,8 @@ graph TD
     UI --> Hook
     Hook --> EmailsAPI
     EmailsAPI --> EmailsTbl
+    ThreadsAPI --> Checkpoints
+    KnowledgeAPI --> KB
     UI -- "CopilotKit chat" --> CopilotRoute
     CopilotRoute -- "runs" --> Graph
 
@@ -47,7 +51,14 @@ graph TD
     Graph --> Store
 ```
 
+`apps/agent/langgraph.json` also registers a second, debug-only graph, `compose_email_debug`,
+pointing straight at `composeEmailSubgraph.ts` — useful for exercising that subgraph in isolation
+via LangGraph Studio, not part of the request flow above.
+
 ## Main agent graph (`apps/agent/src/graphs/index.ts`)
+
+Built by that file's `buildGraph`; the compiled `graph` symbol registered in `langgraph.json` as
+`inbox_assistant` actually lives in `apps/agent/src/agent.ts`, re-exported via `src/index.ts`.
 
 `moderator` is distinct from `call_model`'s own `SCOPE_GUIDE` (declines out-of-scope-but-safe
 requests) and `check_compliance` below (checks outgoing drafts, not chat input). `tools` is
@@ -77,8 +88,9 @@ graph TD
 ## `compose_email` subgraph (`apps/agent/src/graphs/composeEmailSubgraph.ts`)
 
 Fixed prompt-chaining pipeline run for every reply — this is the `compose_email` node from the
-[main agent graph](#main-agent-graph-appsagentsrcgraphsindexts) above; it returns control to
-`call_model` once `request_approval` resolves.
+[main agent graph](#main-agent-graph-appsagentsrcgraphsindexts) above. Every `END` below is this
+subgraph's own end, not the run's — reaching it just returns control to the `compose_email` node
+in the main graph, which then continues on to `call_model`, same as a function return.
 
 ```mermaid
 graph TD
@@ -87,12 +99,12 @@ graph TD
     triage{{"triage"}}
     triage -- "needs research" --> research
     triage -- "no research needed" --> write_draft
-    triage -- "email not found" --> END_missing(["END"])
+    triage -- "email not found" --> END_missing(["END\n(back to call_model)"])
 
     research["research"] --> write_draft
     write_draft["write_draft"] --> check_compliance
     check_compliance["check_compliance"] --> request_approval
-    request_approval["request_approval"] --> END_interrupt(["END\n(interrupt for approval)"])
+    request_approval["request_approval\n(interrupt() pauses here for approval,\nresumes into this same node)"] --> END_interrupt(["END\n(back to call_model)"])
 ```
 
 ## Tools available to `call_model`
@@ -110,6 +122,7 @@ graph TD
     call_model --> classify_emails
     call_model --> update_email_status
     call_model --> search_knowledge_base
+    call_model --> update_contact_profile
     call_model --> generate_a2ui
     call_model --> reply_to_email
 
@@ -118,6 +131,7 @@ graph TD
     classify_emails["classify_emails"]
     update_email_status["update_email_status"]
     search_knowledge_base["search_knowledge_base"]
+    update_contact_profile["update_contact_profile"]
     generate_a2ui["generate_a2ui"]
     reply_to_email["reply_to_email\n(routes to compose_email, not executed)"]
 ```
@@ -132,14 +146,14 @@ the `tools` node — that's what forces the turn to end instead.
 ```mermaid
 graph TD
     subgraph Frontend["Vite — :3000"]
-        FilterInbox["filterInbox\n(emailInbox/index.tsx)"]
-        ShowEmail["showEmail\n(emailInbox/index.tsx)"]
+        FilterInbox["filterInbox\n(EmailInbox/index.tsx)"]
+        ShowEmail["showEmail\n(EmailInbox/index.tsx)"]
         ToggleTheme["toggleTheme\n(useGenerativeUI.tsx)"]
-        EnableAppMode["enableAppMode\n(chatSidebar/index.tsx)"]
-        EnableChatMode["enableChatMode\n(chatSidebar/index.tsx)"]
+        EnableAppMode["enableAppMode\n(ChatSidebar/index.tsx)"]
+        EnableChatMode["enableChatMode\n(ChatSidebar/index.tsx)"]
     end
 
-    FilterInbox -- "useFrontendTool" --> CopilotRoute["/api/copilotkit/[[...slug]]"]
+    FilterInbox -- "useFrontendTool" --> CopilotRoute["/api/copilotkit"]
     ShowEmail -- "useFrontendTool" --> CopilotRoute
     ToggleTheme -- "useFrontendTool" --> CopilotRoute
     EnableAppMode -- "useFrontendTool" --> CopilotRoute
