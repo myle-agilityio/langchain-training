@@ -1,11 +1,12 @@
-import { useState } from "react";
 import { CopilotChatConfigurationProvider } from "@copilotkit/react-core/v2";
-import { ChatSidebar, EmailChat, EmailInbox, ThreadsMenu } from "@/components";
+import { AppHeader, ChatPanel, EmailInbox } from "@/components";
 import {
   useEmailAgent,
   useChatSuggestions,
   useGenerativeUIExamples,
 } from "@/hooks";
+import { useViewMode } from "@/stores";
+import { cn } from "@/utils";
 import { AgentSync } from "./AgentSync";
 
 export const Inbox = () => {
@@ -13,27 +14,32 @@ export const Inbox = () => {
   useChatSuggestions();
   useEmailAgent();
 
-  // Lifted out of ChatSidebar so EmailInbox's corner toolbar can show its own "open chat"
-  // button in the same cluster as ThemeToggle, instead of two independently-positioned buttons.
-  const [chatCollapsed, setChatCollapsed] = useState(
-    () => window.matchMedia("(max-width: 1023px)").matches,
-  );
+  const mode = useViewMode((s) => s.mode);
+  const isApp = mode === "app";
 
+  // Both panes stay mounted whichever tab is open — EmailInbox registers filterInbox/showEmail
+  // and publishes the open email as agent context, which the chat tab still needs.
   const body = (
-    <div className="flex h-dvh w-full overflow-hidden gap-3 p-3 bg-canvas">
-      <div className="flex-1 min-w-0 h-full overflow-hidden">
-        <EmailInbox
-          chatCollapsed={chatCollapsed}
-          onOpenChat={() => setChatCollapsed(false)}
-        />
+    <div className="flex h-dvh w-full flex-col overflow-hidden bg-canvas">
+      <AppHeader />
+      <div className="flex flex-1 min-h-0 w-full gap-3 px-3 pb-3">
+        <div
+          className={cn(
+            "h-full min-w-0 flex-col overflow-hidden rounded-xl bg-panel",
+            isApp ? "hidden lg:flex lg:w-1/2" : "flex w-full",
+          )}
+        >
+          <ChatPanel />
+        </div>
+        <div
+          className={cn(
+            "h-full min-w-0 overflow-hidden rounded-xl bg-panel",
+            isApp ? "w-full lg:w-1/2" : "hidden",
+          )}
+        >
+          <EmailInbox />
+        </div>
       </div>
-      <ChatSidebar
-        threadsMenu={<ThreadsMenu />}
-        collapsed={chatCollapsed}
-        onCollapsedChange={setChatCollapsed}
-      >
-        <EmailChat />
-      </ChatSidebar>
     </div>
   );
 

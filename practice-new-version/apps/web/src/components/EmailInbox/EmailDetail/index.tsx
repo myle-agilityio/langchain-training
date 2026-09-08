@@ -58,9 +58,7 @@ export const EmailDetail = ({
   }
 
   return (
-    // pt-20 clears the ChatSidebar's floating "Open chat" button (fixed top-4 right-4) that
-    // appears in this corner when the sidebar is collapsed and the inbox goes full-width.
-    <div className="mx-auto px-8 pb-8 pt-20">
+    <div className="mx-auto px-6 pt-6 pb-8">
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
           {email.subject}
