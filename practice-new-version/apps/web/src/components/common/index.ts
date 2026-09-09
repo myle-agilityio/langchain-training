@@ -6,4 +6,5 @@ export * from "./DropdownMenu";
 export * from "./Field";
 export * from "./PulsingDot";
 export * from "./Spinner";
+export * from "./SplitDivider";
 export * from "./Toast";
