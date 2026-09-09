@@ -18,7 +18,7 @@ const meta = {
     ),
     (Story) => (
       <div className="h-dvh bg-canvas p-3">
-        <div className="flex h-full overflow-hidden rounded-xl bg-panel">
+        <div className="@container flex h-full overflow-hidden rounded-xl bg-panel">
           <Story />
           <div className="flex-1 p-6 text-sm text-muted-foreground">
             The chat goes here — see Chat/ChatPanel for the whole pane.
@@ -33,6 +33,6 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-// Below `md` the sidebar hides itself and the ThreadsMenu button takes over — narrow the
-// viewport to see that.
+// The sidebar only opens once its `@container` parent is at least 1400px wide — resize the
+// viewport (this story renders fullscreen) to see it collapse.
 export const Default: Story = {};
