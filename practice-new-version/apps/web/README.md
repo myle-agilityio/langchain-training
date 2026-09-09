@@ -1,8 +1,9 @@
 # `web` — Vite inbox UI
 
 The frontend half of the AI Email Assistant: a single-page Vite + React app that renders the
-teacher's inbox next to a CopilotKit chat sidebar. A `react-router-dom` router is wired in with
-one route — it exists to keep state (the selected email) in the URL, not for multi-page nav.
+two tabs: **Chat**, where the CopilotKit chat fills the window, and **App**, where the teacher's
+inbox sits beside it. A `react-router-dom` router is wired in with one route — it exists to keep
+state (the selected email) in the URL, not for multi-page nav.
 
 ## Running it
 
@@ -50,15 +51,20 @@ src/
 ├── router/
 │   └── index.tsx        # createBrowserRouter — single "/" route rendering Root
 ├── pages/                # index.ts barrel; one folder per page, each with an index.tsx
-│   └── Inbox/            # The (only, single-page) screen: EmailInbox + ChatSidebar layout
+│   └── Inbox/            # The (only, single-page) screen: AppHeader + the Chat/App tab panes
 │       ├── index.tsx
 │       └── AgentSync/    # Page-private: wires useSyncInbox/Threads/ComposeApproval
 │           └── index.tsx
 ├── components/          # index.ts barrel; one folder per component, each with an index.tsx
 │   ├── EmailInbox/      # Inbox shell + InboxList, FilterDialog, EmailDetail/ComposeForm
 │   ├── EmailChat/       # The CopilotKit chat surface
-│   ├── ChatSidebar/     # Collapsible right-hand sidebar hosting the chat
-│   ├── ThreadsMenu/     # Conversation history dropdown
+│   ├── ChatPanel/       # The chat pane: threads sidebar + toolbar (model, key) + EmailChat
+│   ├── AppHeader/       # Top bar above both tabs: AppLogo, theme toggle, ViewTabs
+│   ├── AppLogo/         # Paper-plane mark + "AI Email Inbox" wordmark
+│   ├── ViewTabs/        # The Chat/App tab switch (also the enable*Mode frontend tools)
+│   ├── ThreadsList/     # The conversation list itself — shared by the two below
+│   ├── ThreadsSidebar/  # Always-open list, chat tab only (≥ md)
+│   ├── ThreadsMenu/     # The same list behind a clock button, for the app tab
 │   ├── openAIKey/       # BYOK — key form, chat gate card, change-key button
 │   ├── ModelPicker/     # Chat-model dropdown (GPT-4o mini/4o/4.1 mini/4.1)
 │   ├── ToolRendering/   # Tool-call reasoning renderer
@@ -79,7 +85,7 @@ src/
 │   ├── useEmailLookup.ts        # id -> Email map for the tool cards
 │   ├── useExampleSuggestions.tsx
 │   └── useSync*.ts              # Invalidate queries / mirror state on run lifecycle
-├── stores/              # zustand — client-only state (theme, OpenAI key, chat model, compose approval)
+├── stores/              # zustand — client-only state (theme, view mode, OpenAI key, chat model, compose approval)
 ├── lib/
 │   ├── queryClient.ts   # One QueryClient, one error log point
 │   ├── errors.ts        # ApiError — normalizes axios failures for the toast/log path
@@ -111,8 +117,9 @@ knowledge-base pane renders without a request. The zustand stores are the real o
 can just `useOpenAIKey.setState(...)` in `beforeEach`. Light/dark comes from the toolbar's theme
 switch, which puts `.dark` on `<html>` exactly like `useSyncTheme` does.
 
-Four components call CopilotKit hooks and need the agent running (`pnpm dev:agent`) to do more
-than render their chrome — `EmailInbox`, `EmailChat`, `ChatSidebar`, `ThreadsMenu`. They carry
+Eight components call CopilotKit hooks and need the agent running (`pnpm dev:agent`) to do more
+than render their chrome — `EmailInbox`, `EmailChat`, `ChatPanel`, `AppHeader`, `ViewTabs`,
+`ThreadsList`, `ThreadsSidebar`, `ThreadsMenu`. They carry
 the `withCopilotRuntime` decorator, and `src/stories/RuntimeBoundary.tsx` catches the mount
 error to say so instead of showing a crash overlay. The A2UI renderers in
 `declarativeGenerativeUI/renderers.tsx` have no stories: they're driven by the A2UI runtime, not

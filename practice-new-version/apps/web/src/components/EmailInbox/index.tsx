@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { z } from "zod";
-import { Bot } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import {
   useAgent,
   useAgentContext,
@@ -15,9 +15,8 @@ import {
   usePatchEmails,
   useComposingEmail,
 } from "@/hooks";
-import { useComposeApproval, useOpenAIKey } from "@/stores";
+import { useComposeApproval, useOpenAIKey, useViewMode } from "@/stores";
 import { Button } from "@/components/common";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   EMPTY_FILTERS,
   filterEmails,
@@ -25,15 +24,10 @@ import {
   type EmailFilters,
 } from "@/utils";
 import { InboxList } from "./InboxList";
+import { InboxToolbar } from "./InboxToolbar";
 import { EmailDetail } from "./EmailDetail";
-import { FilterDialog } from "./FilterDialog";
 
-interface EmailInboxProps {
-  chatCollapsed: boolean;
-  onOpenChat: () => void;
-}
-
-export const EmailInbox = ({ chatCollapsed, onOpenChat }: EmailInboxProps) => {
+export const EmailInbox = () => {
   const {
     emails,
     isLoading,
@@ -52,13 +46,41 @@ export const EmailInbox = ({ chatCollapsed, onOpenChat }: EmailInboxProps) => {
   // Kept in the URL (not useState) so refreshing the page reopens the same email.
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedId = searchParams.get("emailId");
+  // The agent's inbox tools only pay off on the App tab, so they switch to it themselves.
+  const setMode = useViewMode((s) => s.setMode);
   const [filters, setFilters] = useState<EmailFilters>(EMPTY_FILTERS);
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const isFiltered = hasActiveFilters(filters);
   const visibleEmails = useMemo(
     () => filterEmails(emails, filters),
     [emails, filters],
   );
+  const selected = emails.find((e) => e.id === selectedId) ?? null;
+
+  // One pane, so opening an email replaces the list — the emailId param is what swaps them.
+  const setSelectedId = (id: string | null) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+
+        if (id === null) {
+          next.delete("emailId");
+        } else {
+          next.set("emailId", id);
+        }
+
+        return next;
+      },
+      { replace: true },
+    );
+  };
+
+  const selectEmail = (email: Email) => {
+    setSelectedId(email.id);
+
+    if (email.status === "unread") {
+      patchEmail(email.id, { status: "read" });
+    }
+  };
 
   // Same fields the filter dialog offers, so the agent can do anything the teacher can here.
   useFrontendTool(
@@ -105,6 +127,10 @@ export const EmailInbox = ({ chatCollapsed, onOpenChat }: EmailInboxProps) => {
         ) as EmailFilters;
 
         setFilters(next);
+        // The filtered list is what they asked to see, so leave any open email behind for it.
+        setSelectedId(null);
+        setMode("app");
+
         const visible = filterEmails(emails, next);
 
         return hasActiveFilters(next)
@@ -114,8 +140,6 @@ export const EmailInbox = ({ chatCollapsed, onOpenChat }: EmailInboxProps) => {
     },
     [emails],
   );
-
-  const selected = emails.find((e) => e.id === selectedId) ?? null;
 
   // Publish which email the teacher currently has open as readable agent context, so a bare
   // "reply this email" resolves without them pasting an id.
@@ -128,23 +152,6 @@ export const EmailInbox = ({ chatCollapsed, onOpenChat }: EmailInboxProps) => {
       ? { id: selected.id, from: selected.from.name, subject: selected.subject }
       : "No email is currently open in the inbox.",
   });
-
-  const selectEmail = (email: Email) => {
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-
-        next.set("emailId", email.id);
-
-        return next;
-      },
-      { replace: true },
-    );
-
-    if (email.status === "unread") {
-      patchEmail(email.id, { status: "read" });
-    }
-  };
 
   // Opens one email in the detail pane, same as the teacher clicking it in the list.
   useFrontendTool(
@@ -165,6 +172,7 @@ export const EmailInbox = ({ chatCollapsed, onOpenChat }: EmailInboxProps) => {
         }
 
         selectEmail(email);
+        setMode("app");
 
         return `Opened "${email.subject}" from ${email.from.name} in the reading pane.`;
       },
@@ -236,59 +244,66 @@ export const EmailInbox = ({ chatCollapsed, onOpenChat }: EmailInboxProps) => {
     composingEmailId !== null && composingEmailId === selected?.id;
 
   return (
-    <div className="h-full flex gap-3">
-      <div className="w-[360px] shrink-0 rounded-xl bg-panel overflow-hidden flex flex-col">
-        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden thin-scrollbar">
-          <InboxList
-            emails={visibleEmails}
-            totalCount={emails.length}
+    <div className="h-full flex flex-col gap-2 overflow-hidden">
+      {selectedId === null ? (
+        <>
+          <InboxToolbar
             isLoading={isLoading}
             isRefreshing={isRefreshing}
             onRefresh={refresh}
-            selectedId={selectedId}
-            onSelect={selectEmail}
-            onToggleRead={toggleRead}
-            onMarkAllRead={markAllRead}
-            onMarkAllUnread={markAllUnread}
+            filters={filters}
+            onApplyFilters={setFilters}
             isFiltered={isFiltered}
-            onOpenFilters={() => setFiltersOpen(true)}
-            hasMore={hasMore}
-            isLoadingMore={isLoadingMore}
-            onLoadMore={loadMore}
+            search={filters.search ?? ""}
+            onSearchChange={(search) =>
+              setFilters((f) => ({ ...f, search: search || undefined }))
+            }
           />
-        </div>
-        <FilterDialog
-          open={filtersOpen}
-          onOpenChange={setFiltersOpen}
-          filters={filters}
-          onApply={setFilters}
-        />
-      </div>
-      <div className="flex-1 min-w-0 relative rounded-xl bg-panel overflow-y-auto thin-scrollbar">
-        <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-          <ThemeToggle />
-          {chatCollapsed && (
+          {/* Only this card carries the frosted `bg-panel` — the toolbar above sits directly
+              on the canvas, same as ChatPanel's. */}
+          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden thin-scrollbar rounded-xl bg-panel">
+            <InboxList
+              emails={visibleEmails}
+              totalCount={emails.length}
+              isLoading={isLoading}
+              isFiltered={isFiltered}
+              onMarkAllRead={markAllRead}
+              onMarkAllUnread={markAllUnread}
+              selectedId={selectedId}
+              onSelect={selectEmail}
+              onToggleRead={toggleRead}
+              hasMore={hasMore}
+              isLoadingMore={isLoadingMore}
+              onLoadMore={loadMore}
+            />
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="shrink-0 flex items-center px-4 pt-3 pb-2">
             <Button
               type="button"
-              variant="outline"
-              onClick={onOpenChat}
-              aria-label="Open chat"
-              className="bg-card shadow-sm"
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedId(null)}
+              aria-label="Back to inbox"
             >
-              <Bot className="h-4 w-4" />
-              AI Assistant
+              <ArrowLeft className="h-4 w-4" />
+              Inbox
             </Button>
-          )}
-        </div>
-        <EmailDetail
-          email={selected}
-          isLoading={isLoading}
-          onSendReply={sendManualReply}
-          onAskAgent={askAgentToReply}
-          isAgentBusy={isAgentBusy}
-          isDrafting={isDrafting}
-        />
-      </div>
+          </div>
+          <div className="flex-1 min-h-0 overflow-y-auto thin-scrollbar rounded-xl bg-panel">
+            <EmailDetail
+              email={selected}
+              isLoading={isLoading}
+              onSendReply={sendManualReply}
+              onAskAgent={askAgentToReply}
+              isAgentBusy={isAgentBusy}
+              isDrafting={isDrafting}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 };

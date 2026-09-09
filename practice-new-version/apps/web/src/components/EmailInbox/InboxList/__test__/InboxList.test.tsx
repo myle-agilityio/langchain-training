@@ -18,12 +18,10 @@ const email = (id: string, overrides: Partial<Email> = {}): Email => ({
 type Props = Parameters<typeof InboxList>[0];
 
 const handlers = () => ({
-  onRefresh: vi.fn(),
-  onSelect: vi.fn(),
-  onToggleRead: vi.fn(),
   onMarkAllRead: vi.fn(),
   onMarkAllUnread: vi.fn(),
-  onOpenFilters: vi.fn(),
+  onSelect: vi.fn(),
+  onToggleRead: vi.fn(),
   onLoadMore: vi.fn(),
 });
 
@@ -33,9 +31,8 @@ const draw = (overrides: Partial<Props> = {}) => {
     emails: [email("a")],
     totalCount: 1,
     isLoading: false,
-    isRefreshing: false,
-    selectedId: null,
     isFiltered: false,
+    selectedId: null,
     hasMore: false,
     isLoadingMore: false,
     ...spies,
@@ -67,32 +64,6 @@ describe("InboxList — header", () => {
     expect(screen.getByText("(1 of 9)")).toBeInTheDocument();
   });
 
-  it("opens the filter dialog and marks the button as active when filtering", async () => {
-    const spies = draw({ isFiltered: true });
-
-    await userEvent.click(screen.getByRole("button", { name: "Filter inbox" }));
-
-    expect(spies.onOpenFilters).toHaveBeenCalledOnce();
-    expect(screen.getByRole("button", { name: "Filter inbox" })).toHaveClass(
-      "text-primary",
-    );
-  });
-
-  it("refreshes on demand, and refuses while a refresh is already running", async () => {
-    const spies = draw({ isRefreshing: true });
-
-    await userEvent.click(
-      screen.getByRole("button", { name: "Refresh inbox" }),
-    );
-
-    expect(spies.onRefresh).not.toHaveBeenCalled();
-    expect(
-      screen.getByRole("button", { name: "Refresh inbox" }),
-    ).toBeDisabled();
-  });
-});
-
-describe("InboxList — bulk actions", () => {
   it("offers mark-all-read only while something is unread", async () => {
     draw({ emails: [email("a", { status: "read" })] });
 
@@ -118,7 +89,7 @@ describe("InboxList — bulk actions", () => {
 
 describe("InboxList — rows", () => {
   it("says so plainly when nothing matched", () => {
-    draw({ emails: [], totalCount: 0 });
+    draw({ emails: [] });
 
     expect(screen.getByText("No emails")).toBeInTheDocument();
   });

@@ -1,13 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { withCopilotRuntime } from "@/stories";
-import { EmailInbox } from ".";
+import { ChatPanel } from ".";
 
 const meta = {
-  title: "Inbox/EmailInbox",
-  component: EmailInbox,
+  title: "Chat/ChatPanel",
+  component: ChatPanel,
   parameters: { layout: "fullscreen" },
-  // Publishes the open email as agent context and registers filterInbox/showEmail, so the
-  // whole screen needs the runtime — the list and detail pane below don't.
+  // The chat surface, model picker and threads menu all call CopilotKit hooks.
   decorators: [
     withCopilotRuntime,
     (Story) => (
@@ -18,12 +17,11 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta<typeof EmailInbox>;
+} satisfies Meta<typeof ChatPanel>;
 
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-// Emails come from the seeded inbox query, not the agent's Postgres. Click a row to swap the
-// list for the reading pane; "Inbox" at the top goes back.
+// Needs `pnpm dev:agent` for the chat itself; the toolbar renders either way.
 export const Default: Story = {};

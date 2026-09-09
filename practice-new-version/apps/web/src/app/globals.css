@@ -30,7 +30,7 @@
   --destructive-foreground: #ffffff;
   --border: #e4d9f2;
   --input: #e4d9f2;
-  --ring: #f67b56;
+  --ring: #f59d85;
   /* Coral-to-lavender wash for the app canvas only — small elements (inputs, outline
      buttons) stay on the flat `--background` above, not this gradient. */
   --background-gradient: linear-gradient(
