@@ -1,4 +1,4 @@
-# AI Email Assistant — practice project (restart)
+# AI Email Assistant — practice project
 
 CopilotKit + LangGraph.js inbox-triage assistant for a high-school math teacher. This is a
 fresh restart of the `practice/` project: the UI, test scenarios, and configuration were
@@ -14,7 +14,7 @@ reference — don't copy patterns from `practice/`'s agent without deciding they
 - `pnpm typecheck` — runs `turbo run typecheck` across both packages; must be clean
   before a task is done.
 - `pnpm test` — Vitest across both apps (`test:watch` inside one). Tests live in `__test__/`
-  subfolders; see rule 7.
+  subfolders; see the `shared` skill.
 - `pnpm lint` / `pnpm format` — ESLint (flat config, `eslint.config.mjs`) and Prettier, scoped to
   this project. A pre-push hook re-runs both on the files in the commits being pushed, plus
   `pnpm test` once for the whole push.
@@ -83,50 +83,21 @@ Everything persistent is in the one Postgres behind `DATABASE_URL`: the inbox (`
 embedded KB (`kb_documents`), graph checkpoints (`checkpoints*`), and the cross-thread store
 (`store*` — contact profiles live here as a namespaced key, not their own table).
 
-## Rules
-
-These are how we work on this project, not style preferences. Follow them on every change.
-
-1. **Reuse the patterns above before inventing new ones.** Don't introduce a second way to do
-   something that already has one without saying why.
-2. **Keep comments to max 2 short line.** No multi-line or paragraph comments explaining rationale —
-   If it needs more than a line to explain, say it in the PR/response instead.
-3. **YOU MUST exercise the feature before calling it done.** Not "the code looks right" — run it.
-   Say in your response what you verified and what you didn't. See the `verify-feature` skill.
-4. **Tear down anything you started.** Agent (:8123), Vite dev server (:3000), monitors, probe
-   scripts. An orphaned server holds its port and collides with the user's next `pnpm dev`.
-5. **Never let secrets leak.** `.env` stays untracked; a new agent env var goes into
-   `apps/agent/.env.example` in the same change. `apps/web` has no env vars of its own.
-6. **Name source files and folders in camelCase** — `useSharedInbox.ts`, `emailFilters.ts`,
-   `components/generativeUI/` — except anything whose export is a React component, which is
-   PascalCase matching it: a component file (`renderers.tsx`'s siblings), and a component
-   folder holding that component's `index.tsx` (`components/InboxList/`,
-   `components/common/DropdownMenu/`). Barrel `index.ts`/`index.tsx` files keep their name. **Assets and scripts stay kebab-case**:
-   `public/copilotkit-logo-mark.svg` and the KB documents in `rag/sample-docs/`
-   (`loaders.ts` derives each title from its filename).
-7. **Unit tests live in a `__test__/` subfolder beside the code they cover**, named after that
-   file — `utils/__test__/emailFilters.test.ts`, `common/Badge/__test__/Badge.test.tsx`. Both
-   vitest configs only pick up `src/**/__test__/*.test.*`, so a test anywhere else silently
-   never runs. `pnpm test` runs both apps; the pre-push hook runs it for the whole push.
-   **Anything that calls a model gets an eval, not a unit test** — a node, tool or route that
-   reaches `getModelWithConfig`/`withStructuredOutput`/embeddings belongs in `evals/*.eval.ts`
-   (`pnpm eval:agent`). Unit tests cover the deterministic code around it.
-8. **Barrels re-export whole modules with `export *`.** When the barrel takes everything a file
-   exports, write `export * from "./x"` — `export type * from "./x"` if that file is types only —
-   instead of listing every name. Spell out names only when the barrel deliberately takes a
-   subset, e.g. `agent/src/errors/index.ts` picking specific names out of `./catalog`.
-
-9. **Blank lines separate sections; every branch gets braces.** A body reads as declarations →
-   work → return, split by blank lines: one after each block (`if {}`, `for {}`), one before a
-   `return`/`throw`, one after a run of declarations. No single-line `if (x) doThing();`.
-   `@stylistic/padding-line-between-statements` + `curly` in `eslint.config.mjs` enforce this —
-   `pnpm lint:fix` applies it.
-
 ## Workflows
 
-Invoke these skills instead of improvising the workflow:
+Rules live in these skills now, not here — invoke the one matching what you're doing instead
+of improvising:
 
-- `verify-feature` — bringing the stack up, exercising a change end-to-end, tearing it down.
-- `finish-task` — the docs updates and done-checklist when wrapping up a task or day.
-- `agent-prompt-authoring` — where a given instruction belongs (tool description vs. system
-  prompt vs. `respond()` payload). Read it before editing any prompt or tool description.
+| Skill | Use when |
+| --- | --- |
+| `shared` | Always — naming, comments, secrets, style, zod, barrels, formatting, test placement. The other four all assume you've read it |
+| `implement` | Building something new — a component, hook, page, tool, or graph node |
+| `fix` | Triaging or fixing a reported bug |
+| `verify` | Proving an agent/tool/node/UI change actually works, before calling it done |
+| `review` | Wrapping up — docs, teardown, the done checklist |
+| `agent-prompt-authoring` | Editing any prompt text or tool description — decides whether it belongs in the tool description, system prompt, or a `respond()` payload |
+| `add-agent-tool` | Wiring a brand-new tool end to end — LangGraph tool → CopilotKit render → generative UI card |
+| `create-tool` | A backend-only tool, or an additional tool with no dedicated card |
+| `debug-graph` | A LangGraph run misbehaves — tool never called, approval never fires, state/persistence looks wrong |
+| `order-imports` | Writing or editing import statements in `apps/web` |
+| `review-copilotkit-layers` | Reviewing a tool + `useRenderTool` hook + card trio before calling it done |
