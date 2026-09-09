@@ -253,7 +253,6 @@ export const EmailInbox = () => {
             onRefresh={refresh}
             filters={filters}
             onApplyFilters={setFilters}
-            isFiltered={isFiltered}
             search={filters.search ?? ""}
             onSearchChange={(search) =>
               setFilters((f) => ({ ...f, search: search || undefined }))

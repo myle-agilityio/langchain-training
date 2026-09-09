@@ -19,7 +19,6 @@ const draw = (overrides: Partial<Props> = {}) => {
     isLoading: false,
     isRefreshing: false,
     filters: EMPTY_FILTERS,
-    isFiltered: false,
     search: "",
     ...spies,
     ...overrides,
@@ -32,7 +31,7 @@ const draw = (overrides: Partial<Props> = {}) => {
 
 describe("InboxToolbar — filter and refresh", () => {
   it("marks the filter button as active when filtering, and opens its panel", async () => {
-    draw({ isFiltered: true });
+    draw({ filters: { status: "unread" } });
 
     expect(screen.getByRole("button", { name: "Filter inbox" })).toHaveClass(
       "text-primary",

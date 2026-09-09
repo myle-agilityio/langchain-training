@@ -23,7 +23,6 @@ const meta = {
     onRefresh: noop,
     filters: EMPTY_FILTERS,
     onApplyFilters: noop,
-    isFiltered: false,
     search: "",
     onSearchChange: noop,
   },
@@ -47,4 +46,6 @@ export const Loading: Story = { args: { isLoading: true } };
 
 export const Refreshing: Story = { args: { isRefreshing: true } };
 
-export const Filtered: Story = { args: { isFiltered: true } };
+export const Filtered: Story = {
+  args: { filters: { status: "unread", urgency: "high" } },
+};
