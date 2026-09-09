@@ -15,20 +15,22 @@ export const ChatPanel = () => {
   return (
     <div className="@container flex h-full w-full overflow-hidden">
       <ThreadsSidebar />
-      <div
-        className={cn(
-          "flex h-full min-w-0 flex-1 flex-col overflow-hidden",
-          isChat && "mx-auto max-w-4xl",
-        )}
-      >
+      <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
         <div className="shrink-0 flex items-center justify-end gap-1 px-4 pt-3">
-          <ModelPicker />
-          <ChangeKeyButton />
           <div className="@min-[1400px]:hidden">
             <ThreadsMenu />
           </div>
+          <ModelPicker />
+          <ChangeKeyButton />
         </div>
-        <div className="flex-1 min-h-0 overflow-y-auto pb-3">
+        {/* Only the messages center to `max-w-4xl` on the chat tab — the toolbar above stays
+            full width so its icons sit at the card's right edge, not the centered column's. */}
+        <div
+          className={cn(
+            "flex-1 min-h-0 overflow-y-auto pb-3",
+            isChat && "mx-auto w-full max-w-4xl",
+          )}
+        >
           <EmailChat />
         </div>
       </div>
