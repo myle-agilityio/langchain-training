@@ -18,7 +18,7 @@ export default defineConfig({
       reportsDirectory: "coverage",
       reporter: ["text-summary", "html", "json-summary"],
       // Everything the unit suite could reach; the LLM-backed paths stay visible as gaps on
-      // purpose — they are covered by evals, not by this suite (see CLAUDE.md rule 7).
+      // purpose — they are covered by evals, not by this suite (see the `shared` skill).
       include: ["src/**/*.ts"],
       exclude: [
         "src/**/__test__/**",
