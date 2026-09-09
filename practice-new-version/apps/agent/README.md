@@ -24,8 +24,10 @@ pnpm --filter agent eval         # run once, results table in the terminal — C
 pnpm --filter agent eval:report  # static HTML snapshot in evalite-export/ — serve it, don't open the file directly
 ```
 
-Every run makes real OpenAI calls billed to `OPENAI_API_KEY` — there's no mock mode. `EVAL_MODEL`
-(optional, default `gpt-4o-mini`) picks which model the suites run against.
+Every run makes real calls to Groq's free-tier, OpenAI-compatible API, billed to `GROQ_API_KEY`
+— there's no mock mode. `EVAL_MODEL` (optional, default `llama-3.3-70b-versatile`) picks which
+model the suites run against; see [console.groq.com/docs/models](https://console.groq.com/docs/models)
+for other free-tier options.
 
 | Suite                     | Covers                                                            |
 | ------------------------- | ----------------------------------------------------------------- |
@@ -40,7 +42,8 @@ Every run makes real OpenAI calls billed to `OPENAI_API_KEY` — there's no mock
 | Variable              | Required                   | Read by                                                    | Purpose                                                                                                                                 |
 | --------------------- | -------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | `DATABASE_URL`        | **Yes**                    | `config/env.ts`                                            | The one Postgres holding inbox, KB, checkpoints, and store. Throws on startup if unset.                                                 |
-| `OPENAI_API_KEY`      | No — **Yes** for `evals/`  | `config/model.ts`, `http/threads.ts`, `evals/evalModel.ts` | Bootstrap fallback for the app (KB seed, title-gen; see BYOK below) — but `evals/` has no BYOK fallback, so it's required to run those. |
+| `OPENAI_API_KEY`      | No                          | `config/model.ts`, `http/threads.ts`                        | Bootstrap fallback for the app (KB seed, title-gen; see BYOK below).                                                                    |
+| `GROQ_API_KEY`        | No — **Yes** for `evals/`  | `evals/evalModel.ts`                                        | Free-tier key the `evals/` suites run against — no BYOK fallback, so it's required to run those. |
 | `RAG_SCORE_THRESHOLD` | No — default `0.65`        | `config/env.ts`                                            | Minimum cosine similarity (0–1) a KB match must clear to be used as grounding.                                                          |
 | `PORT`                | No — default `8123`        | `http/copilotkit.ts`, `pnpm start`                         | Port the agent listens on.                                                                                                              |
 | `AGENT_URL`           | No                         | `http/copilotkit.ts`                                       | Deployment URL the CopilotKit runtime points its `LangGraphAgent` at.                                                                   |
@@ -48,7 +51,7 @@ Every run makes real OpenAI calls billed to `OPENAI_API_KEY` — there's no mock
 | `LANGSMITH_TRACING`   | No                         | `langgraphjs dev`                                          | Turns tracing on for every graph run.                                                                                                   |
 | `LANGSMITH_PROJECT`   | No                         | `langgraphjs dev`                                          | LangSmith project name.                                                                                                                 |
 | `LANGSMITH_ENDPOINT`  | No                         | `langgraphjs dev`                                          | Override the LangSmith API host.                                                                                                        |
-| `EVAL_MODEL`          | No — default `gpt-4o-mini` | `evals/evalModel.ts`                                       | Model the `evals/` suites (`pnpm eval` / `eval:dev`) run against.                                                                       |
+| `EVAL_MODEL`          | No — default `llama-3.3-70b-versatile` | `evals/evalModel.ts`                           | Model the `evals/` suites (`pnpm eval` / `eval:dev`) run against.                                                                       |
 
 ## The HTTP surface
 
@@ -64,7 +67,7 @@ Every run makes real OpenAI calls billed to `OPENAI_API_KEY` — there's no mock
 
 ```
 evals/                    # Evalite suites — one *.eval.ts per LLM node/tool being scored
-├── evalModel.ts           # Plain ChatOpenAI off OPENAI_API_KEY (no LangGraphRunnableConfig here)
+├── evalModel.ts           # Plain ChatOpenAI pointed at Groq's free tier via GROQ_API_KEY (no LangGraphRunnableConfig here)
 ├── classifyEmail.eval.ts
 ├── moderator.eval.ts
 └── checkCompliance.eval.ts
