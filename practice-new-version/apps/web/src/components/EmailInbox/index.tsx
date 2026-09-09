@@ -26,7 +26,6 @@ import {
 import { InboxList } from "./InboxList";
 import { InboxToolbar } from "./InboxToolbar";
 import { EmailDetail } from "./EmailDetail";
-import { FilterDialog } from "./FilterDialog";
 
 export const EmailInbox = () => {
   const {
@@ -50,7 +49,6 @@ export const EmailInbox = () => {
   // The agent's inbox tools only pay off on the App tab, so they switch to it themselves.
   const setMode = useViewMode((s) => s.setMode);
   const [filters, setFilters] = useState<EmailFilters>(EMPTY_FILTERS);
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const isFiltered = hasActiveFilters(filters);
   const visibleEmails = useMemo(
     () => filterEmails(emails, filters),
@@ -253,8 +251,9 @@ export const EmailInbox = () => {
             isLoading={isLoading}
             isRefreshing={isRefreshing}
             onRefresh={refresh}
+            filters={filters}
+            onApplyFilters={setFilters}
             isFiltered={isFiltered}
-            onOpenFilters={() => setFiltersOpen(true)}
             search={filters.search ?? ""}
             onSearchChange={(search) =>
               setFilters((f) => ({ ...f, search: search || undefined }))
@@ -305,12 +304,6 @@ export const EmailInbox = () => {
           </div>
         </>
       )}
-      <FilterDialog
-        open={filtersOpen}
-        onOpenChange={setFiltersOpen}
-        filters={filters}
-        onApply={setFilters}
-      />
     </div>
   );
 };

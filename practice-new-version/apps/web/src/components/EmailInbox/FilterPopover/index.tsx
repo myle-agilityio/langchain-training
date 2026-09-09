@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Filter } from "lucide-react";
 import type {
   Course,
   EmailStatus,
@@ -8,12 +9,11 @@ import type {
 } from "@/types";
 import {
   Button,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
   Field,
   Input,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
   Select,
 } from "@/components/common";
 import {
@@ -23,22 +23,25 @@ import {
   URGENCY_LABEL,
   WORK_TYPE_LABEL,
 } from "@/constants";
-import { EMPTY_FILTERS, type EmailFilters } from "@/utils";
+import { cn, EMPTY_FILTERS, type EmailFilters } from "@/utils";
 
-interface FilterDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+interface FilterPopoverProps {
   filters: EmailFilters;
   onApply: (filters: EmailFilters) => void;
+  isFiltered: boolean;
+  disabled?: boolean;
 }
 
-export const FilterDialog = ({
-  open,
-  onOpenChange,
+// Gmail-style: the trigger is the toolbar's own filter icon, not a separate button elsewhere —
+// so this owns both, anchoring the form to wherever it's rendered instead of a modal dialog.
+export const FilterPopover = ({
   filters,
   onApply,
-}: FilterDialogProps) => {
-  // Draft state so Cancel/closing without Apply doesn't touch the active filters.
+  isFiltered,
+  disabled,
+}: FilterPopoverProps) => {
+  const [open, setOpen] = useState(false);
+  // Draft state so closing without Apply doesn't touch the active filters.
   const [draft, setDraft] = useState<EmailFilters>(filters);
 
   // Reset the draft on each open, adjusted during render rather than in an effect.
@@ -57,21 +60,37 @@ export const FilterDialog = ({
 
   const apply = () => {
     onApply(draft);
-    onOpenChange(false);
+    setOpen(false);
   };
 
   const reset = () => {
     setDraft(EMPTY_FILTERS);
     onApply(EMPTY_FILTERS);
-    onOpenChange(false);
+    setOpen(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Filter inbox</DialogTitle>
-        </DialogHeader>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn(
+            "h-7 w-7 relative shrink-0",
+            isFiltered ? "text-primary" : "text-muted-foreground",
+          )}
+          disabled={disabled}
+          title="Filter inbox"
+          aria-label="Filter inbox"
+        >
+          <Filter className="h-3.5 w-3.5" />
+          {isFiltered && (
+            <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-primary" />
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="max-h-[70vh] w-96 overflow-y-auto">
+        <p className="mb-4 text-sm font-bold text-foreground">Filter inbox</p>
 
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
@@ -200,11 +219,7 @@ export const FilterDialog = ({
             Clear filters
           </Button>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button variant="outline" size="sm" onClick={() => setOpen(false)}>
               Cancel
             </Button>
             <Button size="sm" onClick={apply}>
@@ -212,7 +227,7 @@ export const FilterDialog = ({
             </Button>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </PopoverContent>
+    </Popover>
   );
 };

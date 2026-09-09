@@ -2,13 +2,14 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
+import { EMPTY_FILTERS } from "@/utils";
 import { InboxToolbar } from "..";
 
 type Props = Parameters<typeof InboxToolbar>[0];
 
 const handlers = () => ({
   onRefresh: vi.fn(),
-  onOpenFilters: vi.fn(),
+  onApplyFilters: vi.fn(),
   onSearchChange: vi.fn(),
 });
 
@@ -17,6 +18,7 @@ const draw = (overrides: Partial<Props> = {}) => {
   const props: Props = {
     isLoading: false,
     isRefreshing: false,
+    filters: EMPTY_FILTERS,
     isFiltered: false,
     search: "",
     ...spies,
@@ -29,15 +31,16 @@ const draw = (overrides: Partial<Props> = {}) => {
 };
 
 describe("InboxToolbar — filter and refresh", () => {
-  it("opens the filter dialog and marks the button as active when filtering", async () => {
-    const spies = draw({ isFiltered: true });
+  it("marks the filter button as active when filtering, and opens its panel", async () => {
+    draw({ isFiltered: true });
 
-    await userEvent.click(screen.getByRole("button", { name: "Filter inbox" }));
-
-    expect(spies.onOpenFilters).toHaveBeenCalledOnce();
     expect(screen.getByRole("button", { name: "Filter inbox" })).toHaveClass(
       "text-primary",
     );
+
+    await userEvent.click(screen.getByRole("button", { name: "Filter inbox" }));
+
+    expect(await screen.findByPlaceholderText("Name or email")).toBeVisible();
   });
 
   it("refreshes on demand, and refuses while a refresh is already running", async () => {

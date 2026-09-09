@@ -1,13 +1,16 @@
-import { Filter, RefreshCw, Search } from "lucide-react";
+import { RefreshCw, Search } from "lucide-react";
 import { Button, Input } from "@/components";
+import type { EmailFilters } from "@/utils";
 import { cn } from "@/utils";
+import { FilterPopover } from "../FilterPopover";
 
 interface InboxToolbarProps {
   isLoading: boolean;
   isRefreshing: boolean;
   onRefresh: () => void;
+  filters: EmailFilters;
+  onApplyFilters: (filters: EmailFilters) => void;
   isFiltered: boolean;
-  onOpenFilters: () => void;
   search: string;
   onSearchChange: (value: string) => void;
 }
@@ -19,8 +22,9 @@ export const InboxToolbar = ({
   isLoading,
   isRefreshing,
   onRefresh,
+  filters,
+  onApplyFilters,
   isFiltered,
-  onOpenFilters,
   search,
   onSearchChange,
 }: InboxToolbarProps) => (
@@ -35,23 +39,12 @@ export const InboxToolbar = ({
         className="h-8 pl-8 text-sm"
       />
     </div>
-    <Button
-      variant="ghost"
-      size="icon"
-      className={cn(
-        "h-7 w-7 relative shrink-0",
-        isFiltered ? "text-primary" : "text-muted-foreground",
-      )}
-      onClick={onOpenFilters}
+    <FilterPopover
+      filters={filters}
+      onApply={onApplyFilters}
+      isFiltered={isFiltered}
       disabled={isLoading}
-      title="Filter inbox"
-      aria-label="Filter inbox"
-    >
-      <Filter className="h-3.5 w-3.5" />
-      {isFiltered && (
-        <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-primary" />
-      )}
-    </Button>
+    />
     {/* The list is a snapshot: it refetches on mount and when a chat run finishes, but
         nothing else pushes changes. This is the manual way to pull those in. */}
     <Button

@@ -1,5 +1,6 @@
 import { useState, type ComponentProps } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { EMPTY_FILTERS } from "@/utils";
 import { InboxToolbar } from ".";
 
 const noop = () => {};
@@ -20,8 +21,9 @@ const meta = {
     isLoading: false,
     isRefreshing: false,
     onRefresh: noop,
+    filters: EMPTY_FILTERS,
+    onApplyFilters: noop,
     isFiltered: false,
-    onOpenFilters: noop,
     search: "",
     onSearchChange: noop,
   },
