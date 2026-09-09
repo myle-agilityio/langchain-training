@@ -18,6 +18,7 @@ const email = (id: string, overrides: Partial<Email> = {}): Email => ({
 type Props = Parameters<typeof InboxList>[0];
 
 const handlers = () => ({
+  onRefresh: vi.fn(),
   onMarkAllRead: vi.fn(),
   onMarkAllUnread: vi.fn(),
   onSelect: vi.fn(),
@@ -32,6 +33,7 @@ const draw = (overrides: Partial<Props> = {}) => {
     totalCount: 1,
     isLoading: false,
     isFiltered: false,
+    isRefreshing: false,
     selectedId: null,
     hasMore: false,
     isLoadingMore: false,
@@ -62,6 +64,19 @@ describe("InboxList — header", () => {
     draw({ emails: [email("a")], totalCount: 9, isFiltered: true });
 
     expect(screen.getByText("(1 of 9)")).toBeInTheDocument();
+  });
+
+  it("refreshes on demand, and refuses while a refresh is already running", async () => {
+    const spies = draw({ isRefreshing: true });
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Refresh inbox" }),
+    );
+
+    expect(spies.onRefresh).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("button", { name: "Refresh inbox" }),
+    ).toBeDisabled();
   });
 
   it("offers mark-all-read only while something is unread", async () => {

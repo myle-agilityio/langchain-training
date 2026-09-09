@@ -249,8 +249,6 @@ export const EmailInbox = () => {
         <>
           <InboxToolbar
             isLoading={isLoading}
-            isRefreshing={isRefreshing}
-            onRefresh={refresh}
             filters={filters}
             onApplyFilters={setFilters}
             search={filters.search ?? ""}
@@ -266,6 +264,8 @@ export const EmailInbox = () => {
               totalCount={emails.length}
               isLoading={isLoading}
               isFiltered={isFiltered}
+              isRefreshing={isRefreshing}
+              onRefresh={refresh}
               onMarkAllRead={markAllRead}
               onMarkAllUnread={markAllUnread}
               selectedId={selectedId}
