@@ -38,7 +38,7 @@ export const FromTrigger: Story = {
   ),
 };
 
-// Controlled, the way FilterDialog is driven from the inbox header.
+// Controlled, the way ChangeKeyButton drives its own dialog.
 export const Controlled: Story = {
   render: function ControlledDialog() {
     const [open, setOpen] = useState(true);

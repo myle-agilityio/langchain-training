@@ -44,7 +44,7 @@ const draw = () =>
   render(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter>
-        <EmailInbox chatCollapsed={false} onOpenChat={vi.fn()} />
+        <EmailInbox />
       </MemoryRouter>
     </QueryClientProvider>,
   );
@@ -97,6 +97,23 @@ describe("EmailInbox — opening an email", () => {
       id: "a",
       patch: { status: "read" },
     });
+  });
+
+  it("swaps the list for the reading pane, and back again", async () => {
+    seed([email("a", { status: "read" }), email("b", { status: "read" })]);
+
+    draw();
+    await userEvent.click(screen.getByText("Subject a"));
+
+    // One pane: the other rows are gone while an email is open.
+    expect(screen.queryByText("Subject b")).not.toBeInTheDocument();
+    expect(screen.getByText("Body a")).toBeInTheDocument();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Back to inbox" }),
+    );
+
+    expect(screen.getByText("Subject b")).toBeInTheDocument();
   });
 
   it("spends no request opening one that was already read", async () => {

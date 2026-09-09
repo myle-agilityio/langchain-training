@@ -52,6 +52,14 @@ describe("filterEmails", () => {
     ).toHaveLength(0);
   });
 
+  it("search ors across sender, subject and body instead of anding them", () => {
+    expect(filterEmails(emails, { search: "beahan" })).toHaveLength(2);
+    expect(filterEmails(emails, { search: "late project" })).toHaveLength(1);
+    expect(
+      filterEmails(emails, { search: "nothing matches this" }),
+    ).toHaveLength(0);
+  });
+
   it("treats receivedBefore as an inclusive date, ignoring the time of day", () => {
     expect(filterEmails(emails, { receivedBefore: "2026-03-04" })).toHaveLength(
       2,

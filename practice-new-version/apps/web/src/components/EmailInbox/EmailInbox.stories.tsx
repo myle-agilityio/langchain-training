@@ -12,18 +12,18 @@ const meta = {
     withCopilotRuntime,
     (Story) => (
       <div className="h-dvh bg-canvas p-3">
-        <Story />
+        <div className="h-full overflow-hidden rounded-xl bg-panel">
+          <Story />
+        </div>
       </div>
     ),
   ],
-  args: { chatCollapsed: false, onOpenChat: () => {} },
 } satisfies Meta<typeof EmailInbox>;
 
 export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-// Emails come from the seeded inbox query, not the agent's Postgres.
+// Emails come from the seeded inbox query, not the agent's Postgres. Click a row to swap the
+// list for the reading pane; "Inbox" at the top goes back.
 export const Default: Story = {};
-
-export const ChatCollapsed: Story = { args: { chatCollapsed: true } };

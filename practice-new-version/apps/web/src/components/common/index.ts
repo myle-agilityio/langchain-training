@@ -4,6 +4,8 @@ export * from "./Card";
 export * from "./Dialog";
 export * from "./DropdownMenu";
 export * from "./Field";
+export * from "./Popover";
 export * from "./PulsingDot";
 export * from "./Spinner";
+export * from "./SplitDivider";
 export * from "./Toast";

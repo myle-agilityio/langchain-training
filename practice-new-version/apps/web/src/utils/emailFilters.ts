@@ -18,6 +18,9 @@ export interface EmailFilters {
   hasWords?: string;
   receivedAfter?: string;
   receivedBefore?: string;
+  // The toolbar's quick search — separate from the granular fields above, so it ORs across
+  // sender, subject and body instead of pinning down just one of them.
+  search?: string;
 }
 
 export const EMPTY_FILTERS: EmailFilters = {};
@@ -51,6 +54,12 @@ const FILTER_CHECKS: FilterCheck[] = [
   // ISO date and comparing lexicographically is fine since receivedAt is also ISO 8601.
   (email, { receivedBefore }) =>
     !receivedBefore || email.receivedAt.slice(0, 10) <= receivedBefore,
+  (email, { search }) =>
+    !search ||
+    includes(email.from.name, search) ||
+    includes(email.from.email, search) ||
+    includes(email.subject, search) ||
+    includes(email.body, search),
 ];
 
 export const filterEmails = (
