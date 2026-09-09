@@ -22,15 +22,12 @@ const meta = {
     emails: sampleEmails,
     totalCount: sampleEmails.length,
     isLoading: false,
-    isRefreshing: false,
-    onRefresh: noop,
+    isFiltered: false,
+    onMarkAllRead: noop,
+    onMarkAllUnread: noop,
     selectedId: null,
     onSelect: noop,
     onToggleRead: noop,
-    onMarkAllRead: noop,
-    onMarkAllUnread: noop,
-    isFiltered: false,
-    onOpenFilters: noop,
     hasMore: false,
     isLoadingMore: false,
     onLoadMore: noop,
@@ -41,7 +38,7 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-// Click a row: selection, the per-row menu and the header actions are all wired here.
+// Click a row: selection, the header's mark-all buttons and the per-row menu are all wired here.
 export const Default: Story = {
   render: function SelectableList(args) {
     const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -60,7 +57,6 @@ export const Default: Story = {
       <InboxList
         {...args}
         emails={emails}
-        totalCount={emails.length}
         selectedId={selectedId}
         onSelect={(email) => setSelectedId(email.id)}
         onToggleRead={toggleRead}
@@ -87,10 +83,7 @@ export const Selected: Story = {
   args: { selectedId: sampleEmails[1].id },
 };
 
-// A count of 0 while loading would read as "empty inbox" — the skeleton says "not known yet".
 export const Loading: Story = { args: { isLoading: true, emails: [] } };
-
-export const Refreshing: Story = { args: { isRefreshing: true } };
 
 export const Empty: Story = { args: { emails: [], totalCount: 0 } };
 

@@ -70,7 +70,7 @@ export const Inbox = () => {
         )}
         <div
           className={cn(
-            "h-full min-w-0 overflow-hidden rounded-xl bg-panel",
+            "h-full min-w-0 overflow-hidden",
             !isDragging && "transition-all duration-300 ease-in-out",
             isApp
               ? "w-full opacity-100 lg:w-[var(--inbox-ratio)]"

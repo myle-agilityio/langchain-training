@@ -24,6 +24,7 @@ import {
   type EmailFilters,
 } from "@/utils";
 import { InboxList } from "./InboxList";
+import { InboxToolbar } from "./InboxToolbar";
 import { EmailDetail } from "./EmailDetail";
 import { FilterDialog } from "./FilterDialog";
 
@@ -245,30 +246,42 @@ export const EmailInbox = () => {
     composingEmailId !== null && composingEmailId === selected?.id;
 
   return (
-    <div className="h-full flex flex-col overflow-hidden">
+    <div className="h-full flex flex-col gap-2 overflow-hidden">
       {selectedId === null ? (
-        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden thin-scrollbar">
-          <InboxList
-            emails={visibleEmails}
-            totalCount={emails.length}
+        <>
+          <InboxToolbar
             isLoading={isLoading}
             isRefreshing={isRefreshing}
             onRefresh={refresh}
-            selectedId={selectedId}
-            onSelect={selectEmail}
-            onToggleRead={toggleRead}
-            onMarkAllRead={markAllRead}
-            onMarkAllUnread={markAllUnread}
             isFiltered={isFiltered}
             onOpenFilters={() => setFiltersOpen(true)}
-            hasMore={hasMore}
-            isLoadingMore={isLoadingMore}
-            onLoadMore={loadMore}
+            search={filters.search ?? ""}
+            onSearchChange={(search) =>
+              setFilters((f) => ({ ...f, search: search || undefined }))
+            }
           />
-        </div>
+          {/* Only this card carries the frosted `bg-panel` — the toolbar above sits directly
+              on the canvas, same as ChatPanel's. */}
+          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden thin-scrollbar rounded-xl bg-panel">
+            <InboxList
+              emails={visibleEmails}
+              totalCount={emails.length}
+              isLoading={isLoading}
+              isFiltered={isFiltered}
+              onMarkAllRead={markAllRead}
+              onMarkAllUnread={markAllUnread}
+              selectedId={selectedId}
+              onSelect={selectEmail}
+              onToggleRead={toggleRead}
+              hasMore={hasMore}
+              isLoadingMore={isLoadingMore}
+              onLoadMore={loadMore}
+            />
+          </div>
+        </>
       ) : (
         <>
-          <div className="shrink-0 bg-card border-b border-border px-3 py-2">
+          <div className="shrink-0 flex items-center px-4 pt-3 pb-2">
             <Button
               type="button"
               variant="ghost"
@@ -280,7 +293,7 @@ export const EmailInbox = () => {
               Inbox
             </Button>
           </div>
-          <div className="flex-1 min-h-0 overflow-y-auto thin-scrollbar">
+          <div className="flex-1 min-h-0 overflow-y-auto thin-scrollbar rounded-xl bg-panel">
             <EmailDetail
               email={selected}
               isLoading={isLoading}
