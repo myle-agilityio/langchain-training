@@ -237,6 +237,10 @@ copilotkit-threads-drawer::part(list) {
   background-color: transparent;
 }
 
+[data-copilotkit] * {
+  scrollbar-color: var(--border) transparent;
+}
+
 /*
  * User's own chat bubble, tinted with --tone-violet. Passed in via CopilotChat's
  * `messageView.userMessage.messageRenderer` slot (EmailChat), not a global selector override.
