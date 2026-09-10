@@ -12,6 +12,11 @@ import { executableTools, modelTools } from "@/tools";
 import type { AgentStateShape } from "@/types";
 import { withNode } from "./withNode";
 
+// Messages already folded into `summary` are excluded here — `state.messages` itself keeps
+// everything so the UI still shows the full thread.
+const recentMessages = (state: AgentStateShape): BaseMessage[] =>
+  state.messages.slice(state.summarizedCount ?? 0);
+
 // Formats UI context for the prompt
 const renderFrontendContext = (state: AgentStateShape): string => {
   const entries = state.copilotkit?.context ?? [];
@@ -28,6 +33,13 @@ const renderFrontendContext = (state: AgentStateShape): string => {
   });
 
   return `\n\nContext from the app UI:\n${lines.join("\n")}`;
+};
+
+// Older turns folded away by summarize — "" once the thread is short enough not to need it.
+const renderSummaryContext = (state: AgentStateShape): string => {
+  return state.summary
+    ? `\n\nSummary of earlier conversation:\n${state.summary}`
+    : "";
 };
 
 // Wraps frontend actions in OpenAI tool format
@@ -49,7 +61,7 @@ const frontendTools = (state: AgentStateShape) => {
 // System prompt + message history, as a template rather than manual array-spreading — the
 // placeholder marks exactly where state.messages goes, instead of `[new SystemMessage(...), ...]`.
 const callModelPrompt = ChatPromptTemplate.fromMessages([
-  ["system", SYSTEM_PROMPT + "{dateLine}{frontendContext}"],
+  ["system", SYSTEM_PROMPT + "{dateLine}{summaryContext}{frontendContext}"],
   new MessagesPlaceholder("messages"),
 ]);
 
@@ -66,8 +78,9 @@ export const callModel = withNode(
     const response = await callModelPrompt.pipe(bound).invoke(
       {
         dateLine: currentDateLine(),
+        summaryContext: renderSummaryContext(state),
         frontendContext: renderFrontendContext(state),
-        messages: state.messages,
+        messages: recentMessages(state),
       },
       config,
     );

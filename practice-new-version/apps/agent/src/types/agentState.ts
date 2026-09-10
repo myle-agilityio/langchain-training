@@ -9,6 +9,8 @@ export type CopilotKitAction = {
 export type AgentStateShape = {
   messages: BaseMessage[];
   blocked?: boolean;
+  summary?: string;
+  summarizedCount?: number;
   emailId?: string;
   copilotkit?: { context?: CopilotKitEntry[]; actions?: CopilotKitAction[] };
 };

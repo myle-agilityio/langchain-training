@@ -14,6 +14,9 @@ export const AgentState = new StateSchema({
   // Set by moderator each run; routes straight to END when true.
   blocked: zodState(z.boolean().default(() => false)),
   summary: zodState(z.string().default(() => "")),
+  // How many leading `messages` are already folded into `summary` — messages themselves are
+  // never dropped (the UI shows full history), only excluded from call_model's prompt.
+  summarizedCount: zodState(z.number().default(() => 0)),
   // Survives across compose entries so a redraft can revise it; cleared on approve.
   lastRejectedDraft: zodState(
     RejectedDraftSchema.nullable().default(() => null),

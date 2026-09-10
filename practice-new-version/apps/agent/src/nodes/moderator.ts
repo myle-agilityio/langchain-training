@@ -7,6 +7,7 @@ import { END, type LangGraphRunnableConfig } from "@langchain/langgraph";
 import { copilotkitCustomizeConfig } from "@copilotkit/sdk-js/langgraph";
 
 import { getPlainModelWithConfig } from "@/config";
+import { SUMMARIZE_THRESHOLD } from "@/constants";
 import { moderationPrompt } from "@/prompts";
 import { ModerationCheckSchema, type AgentStateShape } from "@/types";
 import { withNode } from "./withNode";
@@ -60,6 +61,14 @@ export const moderator = withNode(
   { blocked: true },
 );
 
-// Routes to call_model or ends if the message was flagged
-export const afterModeration = (state: AgentStateShape) =>
-  state.blocked ? END : "call_model";
+// Ends if the message was flagged; otherwise skips straight to call_model for short threads and
+// only detours through summarize once the history is long enough to be worth condensing.
+export const afterModeration = (state: AgentStateShape) => {
+  if (state.blocked) {
+    return END;
+  }
+
+  return state.messages.length > SUMMARIZE_THRESHOLD
+    ? "summarize"
+    : "call_model";
+};
