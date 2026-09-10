@@ -13,7 +13,7 @@ const meta = {
   tags: ["autodocs"],
   decorators: [
     (Story) => (
-      <div className="h-dvh w-[360px] overflow-y-auto bg-panel">
+      <div className="h-dvh w-[640px] overflow-y-auto bg-panel">
         <Story />
       </div>
     ),
@@ -23,6 +23,8 @@ const meta = {
     totalCount: sampleEmails.length,
     isLoading: false,
     isFiltered: false,
+    isRefreshing: false,
+    onRefresh: noop,
     onMarkAllRead: noop,
     onMarkAllUnread: noop,
     selectedId: null,
@@ -84,6 +86,8 @@ export const Selected: Story = {
 };
 
 export const Loading: Story = { args: { isLoading: true, emails: [] } };
+
+export const Refreshing: Story = { args: { isRefreshing: true } };
 
 export const Empty: Story = { args: { emails: [], totalCount: 0 } };
 

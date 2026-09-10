@@ -6,6 +6,13 @@ import type {
   Urgency,
   WorkType,
 } from "@/types";
+import {
+  COURSE_LABEL,
+  STATUS_LABEL,
+  TOPIC_LABEL,
+  URGENCY_LABEL,
+  WORK_TYPE_LABEL,
+} from "@/constants";
 
 export interface EmailFilters {
   status?: EmailStatus;
@@ -70,3 +77,43 @@ export const filterEmails = (
     FILTER_CHECKS.every((check) => check(email, filters)),
   );
 };
+
+export interface FilterPill {
+  key: keyof EmailFilters;
+  text: string;
+}
+
+// One entry per active *structured* field — `search` is left out, since that value already
+// shows as plain typed text in the search bar rather than as a pill.
+const PILL_FIELDS: {
+  key: Exclude<keyof EmailFilters, "search">;
+  label: string;
+  format?: (filters: EmailFilters) => string;
+}[] = [
+  { key: "status", label: "Status", format: (f) => STATUS_LABEL[f.status!] },
+  {
+    key: "urgency",
+    label: "Urgency",
+    format: (f) => URGENCY_LABEL[f.urgency!],
+  },
+  { key: "course", label: "Grade", format: (f) => COURSE_LABEL[f.course!] },
+  { key: "topic", label: "Type", format: (f) => TOPIC_LABEL[f.topic!] },
+  {
+    key: "workType",
+    label: "Work type",
+    format: (f) => WORK_TYPE_LABEL[f.workType!],
+  },
+  { key: "from", label: "From" },
+  { key: "subject", label: "Subject" },
+  { key: "hasWords", label: "Has words" },
+  { key: "receivedAfter", label: "After" },
+  { key: "receivedBefore", label: "Before" },
+];
+
+export const describeFilters = (filters: EmailFilters): FilterPill[] =>
+  PILL_FIELDS.filter(({ key }) => filters[key]).map(
+    ({ key, label, format }) => ({
+      key,
+      text: `${label}: ${format ? format(filters) : filters[key]}`,
+    }),
+  );
