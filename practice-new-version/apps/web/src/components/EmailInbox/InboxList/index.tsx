@@ -214,7 +214,12 @@ export const InboxList = ({
                     {TOPIC_LABEL[email.classification.topic]}
                   </Badge>
                   {email.classification.workType !== "none" && (
-                    <Badge variant="secondary" className="text-[10px]">
+                    // Least essential badge in the row — drop it first as the container
+                    // narrows, before the topic badge or the urgency label.
+                    <Badge
+                      variant="secondary"
+                      className="hidden text-[10px] @min-[640px]:inline-flex"
+                    >
                       {WORK_TYPE_LABEL[email.classification.workType]}
                     </Badge>
                   )}
