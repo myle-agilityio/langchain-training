@@ -8,10 +8,10 @@ export const URGENCY_LABEL: Record<Urgency, string> = {
   low: "Low",
 };
 
-// Shares hues with topics, so it's separated by treatment instead.
+// Blue for medium, not amber — amber sits too close to high's red at flag-icon size.
 export const URGENCY_TONE: Record<Urgency, string> = {
   high: TONE.red,
-  medium: TONE.amber,
+  medium: TONE.blue,
   low: TONE.teal,
 };
 

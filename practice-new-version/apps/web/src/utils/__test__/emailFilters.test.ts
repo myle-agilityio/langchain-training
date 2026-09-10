@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import type { Email } from "@/types";
-import { EMPTY_FILTERS, filterEmails, hasActiveFilters } from "@/utils";
+import {
+  describeFilters,
+  EMPTY_FILTERS,
+  filterEmails,
+  hasActiveFilters,
+} from "@/utils";
 
 const email = (overrides: Partial<Email> = {}): Email => ({
   id: "e1",
@@ -70,5 +75,34 @@ describe("filterEmails", () => {
     expect(filterEmails(emails, { receivedAfter: "2026-03-04" })).toHaveLength(
       2,
     );
+  });
+});
+
+describe("describeFilters", () => {
+  it("has nothing to show for empty filters", () => {
+    expect(describeFilters(EMPTY_FILTERS)).toEqual([]);
+  });
+
+  it("leaves the quick search out — that text already shows in the input", () => {
+    expect(describeFilters({ search: "grade" })).toEqual([]);
+  });
+
+  it("labels an enum field with its display name, not the raw value", () => {
+    expect(describeFilters({ status: "flagged_for_followup" })).toEqual([
+      { key: "status", text: "Status: Follow up" },
+    ]);
+  });
+
+  it("passes a free-text field through as-is", () => {
+    expect(describeFilters({ from: "flo" })).toEqual([
+      { key: "from", text: "From: flo" },
+    ]);
+  });
+
+  it("returns one pill per active field, in a stable order", () => {
+    expect(describeFilters({ urgency: "high", status: "unread" })).toEqual([
+      { key: "status", text: "Status: Unread" },
+      { key: "urgency", text: "Urgency: High" },
+    ]);
   });
 });
