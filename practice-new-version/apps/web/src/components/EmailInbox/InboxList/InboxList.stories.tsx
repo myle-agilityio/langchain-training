@@ -13,7 +13,7 @@ const meta = {
   tags: ["autodocs"],
   decorators: [
     (Story) => (
-      <div className="h-dvh w-[360px] overflow-y-auto bg-panel">
+      <div className="h-dvh w-[640px] overflow-y-auto bg-panel">
         <Story />
       </div>
     ),

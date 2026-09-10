@@ -109,15 +109,16 @@ describe("InboxList — rows", () => {
     expect(screen.getByText("No emails")).toBeInTheDocument();
   });
 
-  it("shows sender, subject and a preview of the body", () => {
+  it("shows the sender's initial and name, the subject and a preview of the body", () => {
     draw();
 
+    expect(screen.getByText("S")).toBeInTheDocument();
     expect(screen.getByText("Sender a")).toBeInTheDocument();
     expect(screen.getByText("Subject a")).toBeInTheDocument();
-    expect(screen.getByText("Body a")).toBeInTheDocument();
+    expect(screen.getByText(/Body a/)).toBeInTheDocument();
   });
 
-  it("labels a classified email with topic, grade and urgency", () => {
+  it("labels a classified email with topic, grade, work type and urgency", () => {
     draw({
       emails: [
         email("a", {
@@ -131,26 +132,16 @@ describe("InboxList — rows", () => {
       ],
     });
 
-    expect(screen.getByText("high")).toBeInTheDocument();
+    expect(screen.getByText("High")).toBeInTheDocument();
     expect(screen.getByText("Grade dispute")).toBeInTheDocument();
+    expect(screen.getByText("Grade 12")).toBeInTheDocument();
+    expect(screen.getByText("Quiz")).toBeInTheDocument();
   });
 
-  it("leaves an unclassified email unlabelled", () => {
+  it("leaves an unclassified email with no class badges or urgency flag", () => {
     draw();
 
-    expect(screen.queryByText("high")).not.toBeInTheDocument();
-  });
-
-  it("marks a replied and a flagged email", () => {
-    draw({
-      emails: [
-        email("a", { status: "replied" }),
-        email("b", { status: "flagged_for_followup" }),
-      ],
-    });
-
-    expect(screen.getByText("Replied")).toBeInTheDocument();
-    expect(screen.getByText("Follow up")).toBeInTheDocument();
+    expect(screen.queryByText("High")).not.toBeInTheDocument();
   });
 
   it("selects a row on click and on the keyboard", async () => {

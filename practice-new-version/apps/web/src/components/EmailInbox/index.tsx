@@ -258,7 +258,7 @@ export const EmailInbox = () => {
           />
           {/* Only this card carries the frosted `bg-panel` — the toolbar above sits directly
               on the canvas, same as ChatPanel's. */}
-          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden thin-scrollbar rounded-xl bg-panel">
+          <div className="@container flex-1 min-h-0 overflow-y-auto overflow-x-hidden thin-scrollbar rounded-xl bg-panel">
             <InboxList
               emails={visibleEmails}
               totalCount={emails.length}
