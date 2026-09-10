@@ -45,11 +45,13 @@ export const listThreads = async (
   };
 };
 
-// Upsert: creates the row the first time a thread is touched, and just bumps updated_at on
-// every later touch. Title never gets clobbered (LLM-generated or teacher-renamed), but content
-// and messages are refreshed with the caller's latest full-conversation snapshot every time, so
-// search and history-replay stay current with the whole thread rather than just its first
-// message. COALESCE guards against a call that omits either, wiping out what's already there.
+// Upsert: creates the row the first time a thread is touched. Title never gets clobbered
+// (LLM-generated or teacher-renamed), but content and messages are refreshed with the caller's
+// latest full-conversation snapshot every time, so search and history-replay stay current with
+// the whole thread rather than just its first message. COALESCE guards against a call that omits
+// either, wiping out what's already there. updated_at only bumps when the transcript actually
+// changed — opening a thread replays its own stored messages back through this same upsert (see
+// ThreadHistoryRunner), and that no-op touch must not push the thread to the top of the list.
 export const upsertThread = async (
   id: string,
   userId: string,
@@ -62,9 +64,13 @@ export const upsertThread = async (
     `INSERT INTO chat_threads (id, user_id, title, content, messages)
      VALUES ($1, $2, $3, $4, $5)
      ON CONFLICT (id) DO UPDATE SET
-       updated_at = now(),
        content = COALESCE(EXCLUDED.content, chat_threads.content),
-       messages = COALESCE(EXCLUDED.messages, chat_threads.messages)
+       messages = COALESCE(EXCLUDED.messages, chat_threads.messages),
+       updated_at = CASE
+         WHEN COALESCE(EXCLUDED.messages, chat_threads.messages) IS DISTINCT FROM chat_threads.messages
+           THEN now()
+         ELSE chat_threads.updated_at
+       END
      RETURNING ${CHAT_THREAD_COLUMNS}`,
     [id, userId, title, content, messages ? JSON.stringify(messages) : null],
   );

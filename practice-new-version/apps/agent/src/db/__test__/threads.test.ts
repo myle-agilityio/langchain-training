@@ -141,6 +141,18 @@ describe("upsertThread", () => {
     expect(lastSql()).not.toContain("title = EXCLUDED");
   });
 
+  it("only bumps updated_at when the transcript actually changed", async () => {
+    mocks.query.mockResolvedValue({ rows: [row()] });
+
+    await upsertThread("t1", "user-1", null, "hi", [{ role: "user" }]);
+
+    expect(lastSql()).toContain(
+      "WHEN COALESCE(EXCLUDED.messages, chat_threads.messages) IS DISTINCT FROM chat_threads.messages",
+    );
+    expect(lastSql()).toContain("THEN now()");
+    expect(lastSql()).toContain("ELSE chat_threads.updated_at");
+  });
+
   it("returns the mapped row", async () => {
     mocks.query.mockResolvedValue({ rows: [row()] });
 
