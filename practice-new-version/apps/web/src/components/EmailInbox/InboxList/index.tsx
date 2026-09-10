@@ -180,69 +180,83 @@ export const InboxList = ({
                   : "border-b border-border hover:bg-secondary/50",
               )}
             >
-              {/* Same sender always gets the same hue (pickAvatarTone), scoped to this element
-                  so it doesn't fight the row's own --tone (urgency, for the accent bar/dot). */}
-              <div
-                className={cn(
-                  "mr-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--tone)/15 text-sm font-semibold text-(color:--tone)",
-                  pickAvatarTone(email.from.name),
-                )}
-              >
-                {avatarInitial}
-              </div>
-
-              <span
-                className={cn(
-                  "mr-8 w-24 shrink-0 truncate text-sm",
-                  isUnread
-                    ? "font-bold text-foreground"
-                    : "font-medium text-muted-foreground",
-                )}
-              >
-                {email.from.name}
-              </span>
-
-              {email.classification && (
-                <div className="mr-2 flex shrink-0 items-center gap-1">
-                  <Badge
-                    variant="tone"
-                    className={cn(
-                      "text-[10px]",
-                      TOPIC_TONE[email.classification.topic],
-                    )}
-                  >
-                    {TOPIC_LABEL[email.classification.topic]}
-                  </Badge>
-                  {email.classification.workType !== "none" && (
-                    // Least essential badge in the row — drop it first as the container
-                    // narrows, before the topic badge or the urgency label.
-                    <Badge
-                      variant="secondary"
-                      className="hidden text-[10px] @min-[640px]:inline-flex"
-                    >
-                      {WORK_TYPE_LABEL[email.classification.workType]}
-                    </Badge>
-                  )}
-                  {email.classification.course !== "none" && (
-                    <Badge variant="secondary" className="text-[10px]">
-                      {COURSE_LABEL[email.classification.course]}
-                    </Badge>
-                  )}
-                </div>
-              )}
-
-              <div className="mr-2 flex min-w-0 flex-1 items-center gap-2 text-sm">
-                <span
+              <div className="mr-2 flex min-w-0 flex-1 items-center overflow-hidden">
+                {/* Same sender always gets the same hue (pickAvatarTone), scoped to this
+                    element so it doesn't fight the row's own --tone (urgency, for the accent
+                    bar/dot). */}
+                <div
                   className={cn(
-                    "min-w-0 max-w-[50%] shrink truncate",
-                    isUnread ? "font-bold text-foreground" : "text-foreground",
+                    "mr-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--tone)/15 text-sm font-semibold text-(color:--tone)",
+                    pickAvatarTone(email.from.name),
                   )}
                 >
-                  {email.subject}
+                  {avatarInitial}
+                </div>
+
+                <span
+                  className={cn(
+                    "mr-8 w-24 shrink-0 truncate text-sm",
+                    isUnread
+                      ? "font-bold text-foreground"
+                      : "font-medium text-muted-foreground",
+                  )}
+                >
+                  {email.from.name}
                 </span>
-                <span className="min-w-0 flex-1 truncate text-muted-foreground">
-                  {email.body}
-                </span>
+
+                {email.classification && (
+                  <div className="mr-2 flex shrink-0 items-center gap-1">
+                    <Badge
+                      variant="tone"
+                      className={cn(
+                        "max-w-[110px] @max-[420px]:max-w-[64px] text-[10px]",
+                        TOPIC_TONE[email.classification.topic],
+                      )}
+                    >
+                      <span className="min-w-0 truncate">
+                        {TOPIC_LABEL[email.classification.topic]}
+                      </span>
+                    </Badge>
+                    {email.classification.workType !== "none" && (
+                      // Least essential badge in the row — drop it first as the container
+                      // narrows, before the topic badge or the urgency label.
+                      <Badge
+                        variant="secondary"
+                        className="hidden max-w-[100px] text-[10px] @min-[640px]:inline-flex"
+                      >
+                        <span className="min-w-0 truncate">
+                          {WORK_TYPE_LABEL[email.classification.workType]}
+                        </span>
+                      </Badge>
+                    )}
+                    {email.classification.course !== "none" && (
+                      <Badge
+                        variant="secondary"
+                        className="max-w-[100px] text-[10px]"
+                      >
+                        <span className="min-w-0 truncate">
+                          {COURSE_LABEL[email.classification.course]}
+                        </span>
+                      </Badge>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex min-w-0 flex-1 items-center gap-2 text-sm">
+                  <span
+                    className={cn(
+                      "min-w-0 max-w-[50%] shrink truncate",
+                      isUnread
+                        ? "font-bold text-foreground"
+                        : "text-foreground",
+                    )}
+                  >
+                    {email.subject}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-muted-foreground">
+                    {email.body}
+                  </span>
+                </div>
               </div>
 
               <div className="flex shrink-0 items-center gap-2">
