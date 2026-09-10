@@ -254,7 +254,7 @@ export const InboxList = ({
                     {email.subject}
                   </span>
                   <span className="min-w-0 flex-1 truncate text-muted-foreground">
-                    {email.body}
+                    - {email.body}
                   </span>
                 </div>
               </div>
