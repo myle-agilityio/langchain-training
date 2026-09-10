@@ -12,6 +12,11 @@ import { executableTools, modelTools } from "@/tools";
 import type { AgentStateShape } from "@/types";
 import { withNode } from "./withNode";
 
+// Messages already folded into `summary` are excluded here — `state.messages` itself keeps
+// everything so the UI still shows the full thread.
+const recentMessages = (state: AgentStateShape): BaseMessage[] =>
+  state.messages.slice(state.summarizedCount ?? 0);
+
 // Formats UI context for the prompt
 const renderFrontendContext = (state: AgentStateShape): string => {
   const entries = state.copilotkit?.context ?? [];
@@ -75,7 +80,7 @@ export const callModel = withNode(
         dateLine: currentDateLine(),
         summaryContext: renderSummaryContext(state),
         frontendContext: renderFrontendContext(state),
-        messages: state.messages,
+        messages: recentMessages(state),
       },
       config,
     );

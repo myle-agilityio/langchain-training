@@ -66,9 +66,11 @@ export const buildGraph = async () => {
 
     .addEdge(START, "moderator")
 
-    // Flagged message → decline message, end; otherwise into the normal ReAct loop.
+    // Flagged message → decline message, end. Otherwise: long threads detour through summarize
+    // first, short ones go straight to call_model.
     .addConditionalEdges("moderator", afterModeration, {
       summarize: "summarize",
+      call_model: "call_model",
       __end__: END,
     })
 
