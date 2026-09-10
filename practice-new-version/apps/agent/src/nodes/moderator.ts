@@ -64,7 +64,10 @@ export const moderator = withNode(
 // Ends if the message was flagged; otherwise skips straight to call_model for short threads and
 // only detours through summarize once the history is long enough to be worth condensing.
 export const afterModeration = (state: AgentStateShape) => {
-  if (state.blocked) return END;
+  if (state.blocked) {
+    return END;
+  }
+
   return state.messages.length > SUMMARIZE_THRESHOLD
     ? "summarize"
     : "call_model";
