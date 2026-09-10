@@ -157,6 +157,9 @@ export const InboxList = ({
             ? URGENCY_TONE[email.classification.urgency]
             : FALLBACK_TONE;
 
+          // First letter of the sender's name, uppercased, for the avatar.
+          const avatarInitial = email.from.name.charAt(0).toUpperCase();
+
           return (
             <div
               key={email.id}
@@ -185,7 +188,7 @@ export const InboxList = ({
                   pickAvatarTone(email.from.name),
                 )}
               >
-                {email.from.name.charAt(0).toUpperCase()}
+                {avatarInitial}
               </div>
 
               <span
