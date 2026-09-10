@@ -85,7 +85,7 @@ export const InboxList = ({
 
   return (
     <div>
-      <div className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-border bg-card px-4 py-1.5">
+      <div className="sticky top-0 z-10 flex h-10 items-center justify-between gap-2 border-b border-border bg-card px-4">
         <h2 className="text-sm font-bold text-foreground">
           Inbox{" "}
           <span className="text-muted-foreground font-normal">

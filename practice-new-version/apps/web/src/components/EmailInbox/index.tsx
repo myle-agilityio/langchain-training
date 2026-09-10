@@ -245,41 +245,41 @@ export const EmailInbox = () => {
 
   return (
     <div className="h-full flex flex-col gap-2 overflow-hidden">
+      <InboxToolbar
+        isLoading={isLoading}
+        filters={filters}
+        onApplyFilters={setFilters}
+        search={filters.search ?? ""}
+        onSearchChange={(search) =>
+          setFilters((f) => ({ ...f, search: search || undefined }))
+        }
+      />
+      {/* Only this card carries the frosted `bg-panel` — the toolbar above sits directly
+          on the canvas, same as ChatPanel's. */}
       {selectedId === null ? (
-        <>
-          <InboxToolbar
+        <div className="@container flex-1 min-h-0 overflow-y-auto overflow-x-hidden thin-scrollbar rounded-xl bg-panel">
+          <InboxList
+            emails={visibleEmails}
+            totalCount={emails.length}
             isLoading={isLoading}
-            filters={filters}
-            onApplyFilters={setFilters}
-            search={filters.search ?? ""}
-            onSearchChange={(search) =>
-              setFilters((f) => ({ ...f, search: search || undefined }))
-            }
+            isFiltered={isFiltered}
+            isRefreshing={isRefreshing}
+            onRefresh={refresh}
+            onMarkAllRead={markAllRead}
+            onMarkAllUnread={markAllUnread}
+            selectedId={selectedId}
+            onSelect={selectEmail}
+            onToggleRead={toggleRead}
+            hasMore={hasMore}
+            isLoadingMore={isLoadingMore}
+            onLoadMore={loadMore}
           />
-          {/* Only this card carries the frosted `bg-panel` — the toolbar above sits directly
-              on the canvas, same as ChatPanel's. */}
-          <div className="@container flex-1 min-h-0 overflow-y-auto overflow-x-hidden thin-scrollbar rounded-xl bg-panel">
-            <InboxList
-              emails={visibleEmails}
-              totalCount={emails.length}
-              isLoading={isLoading}
-              isFiltered={isFiltered}
-              isRefreshing={isRefreshing}
-              onRefresh={refresh}
-              onMarkAllRead={markAllRead}
-              onMarkAllUnread={markAllUnread}
-              selectedId={selectedId}
-              onSelect={selectEmail}
-              onToggleRead={toggleRead}
-              hasMore={hasMore}
-              isLoadingMore={isLoadingMore}
-              onLoadMore={loadMore}
-            />
-          </div>
-        </>
+        </div>
       ) : (
-        <>
-          <div className="shrink-0 flex items-center px-4 pt-3 pb-2">
+        <div className="flex-1 min-h-0 overflow-y-auto thin-scrollbar rounded-xl bg-panel">
+          {/* Same sticky-header treatment as InboxList's own "Inbox (N)" bar, so the two panes
+              read as the same kind of card. */}
+          <div className="sticky top-0 z-10 flex h-10 items-center border-b border-border bg-card px-4">
             <Button
               type="button"
               variant="ghost"
@@ -291,17 +291,15 @@ export const EmailInbox = () => {
               Inbox
             </Button>
           </div>
-          <div className="flex-1 min-h-0 overflow-y-auto thin-scrollbar rounded-xl bg-panel">
-            <EmailDetail
-              email={selected}
-              isLoading={isLoading}
-              onSendReply={sendManualReply}
-              onAskAgent={askAgentToReply}
-              isAgentBusy={isAgentBusy}
-              isDrafting={isDrafting}
-            />
-          </div>
-        </>
+          <EmailDetail
+            email={selected}
+            isLoading={isLoading}
+            onSendReply={sendManualReply}
+            onAskAgent={askAgentToReply}
+            isAgentBusy={isAgentBusy}
+            isDrafting={isDrafting}
+          />
+        </div>
       )}
     </div>
   );

@@ -9,9 +9,9 @@ interface InboxToolbarProps {
   onSearchChange: (value: string) => void;
 }
 
-// Sits above the list's own card (and above the reading pane's "Back to inbox" bar) rather
-// than inside either, so it's never wrapped in its own box — just the search+filter bar.
-// The "Inbox (N)" title, refresh and the mark-all actions are the list's own header, not here.
+// Sits above the card — the list or the reading pane, whichever is showing — rather than
+// inside either, so it's never wrapped in its own box — just the search+filter bar. The
+// "Inbox (N)" title, refresh and mark-all actions are the list's own header, not here.
 export const InboxToolbar = ({
   isLoading,
   filters,
