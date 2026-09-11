@@ -7,9 +7,11 @@ import { END, type LangGraphRunnableConfig } from "@langchain/langgraph";
 
 import { getModelWithConfig } from "@/config";
 import { TOOL } from "@repo/constants";
+import { USER_MEMORY_KEY, USER_MEMORY_NAMESPACE } from "@/constants";
+import { getMemoryStore } from "@/db";
 import { currentDateLine, SYSTEM_PROMPT } from "@/prompts";
 import { executableTools, modelTools } from "@/tools";
-import type { AgentStateShape } from "@/types";
+import type { AgentStateShape, UserMemoryValue } from "@/types";
 import { withNode } from "./withNode";
 
 // Messages already folded into `summary` are excluded here — `state.messages` itself keeps
@@ -42,6 +44,20 @@ const renderSummaryContext = (state: AgentStateShape): string => {
     : "";
 };
 
+// Durable facts extractMemoryForThread has collected about the teacher across every thread — ""
+// until there's anything on file yet. Reads the PostgresStore directly, not config.store — see
+// updateContactProfile.ts.
+const renderUserMemoryContext = async (): Promise<string> => {
+  const store = await getMemoryStore();
+  const value = (await store.get(USER_MEMORY_NAMESPACE, USER_MEMORY_KEY))
+    ?.value as UserMemoryValue | undefined;
+  const facts = value?.facts ?? [];
+
+  return facts.length > 0
+    ? `\n\nWhat you already know about the teacher from earlier conversations:\n${facts.map((f) => `- ${f}`).join("\n")}`
+    : "";
+};
+
 // Wraps frontend actions in OpenAI tool format
 const frontendTools = (state: AgentStateShape) => {
   return (state.copilotkit?.actions ?? []).map((a) =>
@@ -61,7 +77,11 @@ const frontendTools = (state: AgentStateShape) => {
 // System prompt + message history, as a template rather than manual array-spreading — the
 // placeholder marks exactly where state.messages goes, instead of `[new SystemMessage(...), ...]`.
 const callModelPrompt = ChatPromptTemplate.fromMessages([
-  ["system", SYSTEM_PROMPT + "{dateLine}{summaryContext}{frontendContext}"],
+  [
+    "system",
+    SYSTEM_PROMPT +
+      "{dateLine}{userMemoryContext}{summaryContext}{frontendContext}",
+  ],
   new MessagesPlaceholder("messages"),
 ]);
 
@@ -78,6 +98,7 @@ export const callModel = withNode(
     const response = await callModelPrompt.pipe(bound).invoke(
       {
         dateLine: currentDateLine(),
+        userMemoryContext: await renderUserMemoryContext(),
         summaryContext: renderSummaryContext(state),
         frontendContext: renderFrontendContext(state),
         messages: recentMessages(state),
