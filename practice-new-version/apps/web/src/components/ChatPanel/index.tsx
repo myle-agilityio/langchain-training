@@ -3,7 +3,6 @@ import { ModelPicker } from "@/components/ModelPicker";
 import { ChangeKeyButton } from "@/components/openAIKey";
 import { ThreadsMenu } from "@/components/ThreadsMenu";
 import { ThreadsSidebar } from "@/components/ThreadsSidebar";
-import { useViewMode } from "@/stores";
 
 // The chat pane: model, key and history belong to the conversation, so they sit in this
 // toolbar rather than the app-wide header. On the chat tab the history opens as a sidebar
