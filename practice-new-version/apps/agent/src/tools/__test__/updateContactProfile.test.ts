@@ -32,9 +32,12 @@ const run = async (
 
   const result = JSON.parse(
     String(
-      await update_contact_profile.invoke(input as never, {
-        configurable: { thread_id: "t1" },
-      } as never),
+      await update_contact_profile.invoke(
+        input as never,
+        {
+          configurable: { thread_id: "t1" },
+        } as never,
+      ),
     ),
   );
 

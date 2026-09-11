@@ -64,10 +64,8 @@ describe("extractMemoryForThread — before any model call", () => {
     await extractMemoryForThread("t1", "sk-test");
 
     expect(mocks.getPlainModelWithApiKey).not.toHaveBeenCalled();
-    expect(memory.put).toHaveBeenCalledWith(
-      MEMORY_CHECKPOINT_NAMESPACE,
-      "t1",
-      { checkedCount: 1 },
-    );
+    expect(memory.put).toHaveBeenCalledWith(MEMORY_CHECKPOINT_NAMESPACE, "t1", {
+      checkedCount: 1,
+    });
   });
 });
