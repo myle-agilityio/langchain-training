@@ -4,6 +4,7 @@ export {
   draftPrompt,
   needsResearchPrompt,
 } from "./composeEmail";
+export { memoryExtractionPrompt } from "./memoryExtraction";
 export { moderationPrompt } from "./moderation";
 export { suggestionsPrompt } from "./suggestions";
 export { summarizePrompt } from "./summarize";

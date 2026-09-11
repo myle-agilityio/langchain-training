@@ -6,7 +6,14 @@ import { ERROR_CODE, ERRORS } from "@/errors";
 import type { Email } from "@/types";
 import { update_contact_profile } from "../updateContactProfile";
 
-vi.mock("@/db", () => ({ listEmails: vi.fn() }));
+const store = () => ({ get: vi.fn(), put: vi.fn() });
+
+const mocks = vi.hoisted(() => ({ getMemoryStore: vi.fn() }));
+
+vi.mock("@/db", () => ({
+  listEmails: vi.fn(),
+  getMemoryStore: mocks.getMemoryStore,
+}));
 
 const email = (name: string, address: string): Email => ({
   id: address,
@@ -17,19 +24,18 @@ const email = (name: string, address: string): Email => ({
   status: "unread",
 });
 
-const store = () => ({ get: vi.fn(), put: vi.fn() });
-
 const run = async (
   input: { sender: string; tone?: string; facts?: string[] },
   memory = store(),
 ) => {
+  mocks.getMemoryStore.mockResolvedValue(memory);
+
   const result = JSON.parse(
     String(
       await update_contact_profile.invoke(
         input as never,
         {
           configurable: { thread_id: "t1" },
-          store: memory,
         } as never,
       ),
     ),
@@ -142,22 +148,5 @@ describe("update_contact_profile", () => {
     const { result } = await run({ sender: "Flo" }, memory);
 
     expect(result.ok).toBe(true);
-  });
-
-  it("fails loudly when the graph was compiled without a store", async () => {
-    vi.mocked(listEmails).mockResolvedValue([
-      email("Flo Beahan", "flo@example.com"),
-    ]);
-
-    const result = JSON.parse(
-      String(
-        await update_contact_profile.invoke({ sender: "Flo" } as never, {
-          configurable: { thread_id: "t1" },
-        }),
-      ),
-    );
-
-    expect(result.ok).toBe(false);
-    expect(result.error.code).toBe(ERROR_CODE.INTERNAL);
   });
 });

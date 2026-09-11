@@ -5,6 +5,7 @@ import {
   useSelfManagedThreads,
   useRenameThread,
   useDeleteThread,
+  useExtractThreadMemory,
   useLoadMoreSentinel,
 } from "@/hooks";
 import { Input } from "@/components/common";
@@ -24,6 +25,7 @@ export const ThreadsList = ({ onPicked, className }: ThreadsListProps) => {
     useSelfManagedThreads(search);
   const renameThread = useRenameThread();
   const deleteThread = useDeleteThread();
+  const extractThreadMemory = useExtractThreadMemory();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftTitle, setDraftTitle] = useState("");
   const sentinelRef = useLoadMoreSentinel(hasMore, loadMore);
@@ -31,6 +33,18 @@ export const ThreadsList = ({ onPicked, className }: ThreadsListProps) => {
   if (!config) {
     return null;
   }
+
+  // Scans the thread being left behind for durable facts before handing off to the new one.
+  // Not gated on hasExplicitThreadId — that flag only turns on when a thread is picked from
+  // this list, but useSyncThreads saves the current thread's messages regardless of it, so an
+  // unexplicit "just been chatting" thread is still a real saved thread worth scanning.
+  const startNewChat = () => {
+    if (config.threadId) {
+      extractThreadMemory(config.threadId);
+    }
+
+    config.startNewThread();
+  };
 
   const commitRename = (id: string) => {
     const title = draftTitle.trim();
@@ -48,7 +62,7 @@ export const ThreadsList = ({ onPicked, className }: ThreadsListProps) => {
         <button
           type="button"
           onClick={() => {
-            config.startNewThread();
+            startNewChat();
             onPicked?.();
           }}
           className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium hover:bg-secondary cursor-pointer"
@@ -140,6 +154,8 @@ export const ThreadsList = ({ onPicked, className }: ThreadsListProps) => {
                       e.stopPropagation();
                       deleteThread(thread.id);
 
+                      // Deleting is an explicit "forget this thread" — skip extraction rather
+                      // than racing the delete to read a transcript about to be gone.
                       if (active) {
                         config.startNewThread();
                       }

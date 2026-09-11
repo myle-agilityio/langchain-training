@@ -6,6 +6,7 @@ import { writeDraft } from "../writeDraft";
 const mocks = vi.hoisted(() => ({
   getPlainModelWithConfig: vi.fn(),
   getEmail: vi.fn(),
+  getMemoryStore: vi.fn(),
 }));
 
 vi.mock("@/config", () => ({
@@ -13,7 +14,10 @@ vi.mock("@/config", () => ({
   hidden: (c: unknown) => c,
 }));
 
-vi.mock("@/db", () => ({ getEmail: mocks.getEmail }));
+vi.mock("@/db", () => ({
+  getEmail: mocks.getEmail,
+  getMemoryStore: mocks.getMemoryStore,
+}));
 
 const state: ComposeEmailStateShape = {
   messages: [],

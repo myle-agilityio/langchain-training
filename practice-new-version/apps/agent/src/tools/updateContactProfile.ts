@@ -2,15 +2,18 @@ import { z } from "zod";
 
 import { CONTACT_PROFILE_NAMESPACE } from "@/constants";
 import { TOOL } from "@repo/constants";
-import { listEmails } from "@/db";
+import { getMemoryStore, listEmails } from "@/db";
 import { AppError, ERROR_CODE } from "@/errors";
 import type { ContactProfileValue } from "@/types";
 import { defineTool } from "./defineTool";
 
 // Resolves sender against real inbox data (like classify_emails resolves ids) instead of trusting
 // a model-guessed address — a wrong guess would silently file the memory where it's never found.
+//
+// Reads/writes the PostgresStore directly instead of config.store: this graph is served through
+// the LangGraph Agent Server (see http/copilotkit.ts)
 export const update_contact_profile = defineTool({
-  run: async (input, config) => {
+  run: async (input) => {
     const matches = await listEmails({ sender: input.sender });
     const addresses = [...new Set(matches.map((e) => e.from.email))];
 
@@ -29,13 +32,7 @@ export const update_contact_profile = defineTool({
     const email = addresses[0];
     const name = matches.find((e) => e.from.email === email)!.from.name;
 
-    const store = config.store;
-
-    if (!store) {
-      throw new AppError(ERROR_CODE.INTERNAL, {
-        detail: "BaseStore missing — graph must be compiled with a store",
-      });
-    }
+    const store = await getMemoryStore();
 
     // Store.put replaces the whole value, so merge facts read-modify-write style.
     const existing = (await store.get(CONTACT_PROFILE_NAMESPACE, email))
@@ -46,7 +43,11 @@ export const update_contact_profile = defineTool({
       facts: [...new Set([...(existing?.facts ?? []), ...(input.facts ?? [])])],
     };
 
-    await store.put(CONTACT_PROFILE_NAMESPACE, email, profile);
+    await store.put(
+      CONTACT_PROFILE_NAMESPACE,
+      email,
+      profile as unknown as Record<string, unknown>,
+    );
 
     return { profile: { email, ...profile } };
   },

@@ -62,3 +62,22 @@ export const deleteThread = async (id: string): Promise<void> => {
     headers: userIdHeaders(),
   });
 };
+
+// Fired when the teacher abandons this thread for a new one — best-effort, so callers don't
+// need to await or handle its result. The key is the teacher's own (BYOK): the route spends it
+// on the extraction call.
+export const extractThreadMemory = async (
+  id: string,
+  openaiKey?: string | null,
+): Promise<void> => {
+  await apiClient.post(
+    `${THREADS_PATH}/extract-memory`,
+    { id },
+    {
+      headers: {
+        ...userIdHeaders(),
+        ...(openaiKey ? { [OPENAI_API_KEY_HEADER]: openaiKey } : {}),
+      },
+    },
+  );
+};

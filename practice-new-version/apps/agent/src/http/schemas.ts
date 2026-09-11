@@ -58,6 +58,10 @@ export type RenameThreadBody = z.infer<typeof RenameThreadBodySchema>;
 export const ThreadIdQuerySchema = z.object({ id: z.string().min(1) });
 export type ThreadIdQuery = z.infer<typeof ThreadIdQuerySchema>;
 
+// POST /api/threads/extract-memory — fired when the teacher abandons this thread for a new one.
+export const ExtractMemoryBodySchema = z.object({ id: z.string().min(1) });
+export type ExtractMemoryBody = z.infer<typeof ExtractMemoryBodySchema>;
+
 // GET /api/knowledge — k mirrors searchKnowledge's own default of 3.
 export const SearchKnowledgeQuerySchema = z.object({
   query: z.string().min(1),
