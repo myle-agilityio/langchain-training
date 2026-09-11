@@ -2,7 +2,7 @@ import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
 import { getPlainModelWithConfig, hidden } from "@/config";
 import { CONTACT_PROFILE_NAMESPACE } from "@/constants";
-import { getEmail } from "@/db";
+import { getEmail, getMemoryStore } from "@/db";
 import { draftPrompt } from "@/prompts";
 import {
   DraftSchema,
@@ -23,9 +23,10 @@ export const writeDraft = async (
     return {};
   }
 
-  const profile = (
-    await config.store?.get(CONTACT_PROFILE_NAMESPACE, email.from.email)
-  )?.value as ContactProfileValue | undefined;
+  // Reads the PostgresStore directly, not config.store — see updateContactProfile.ts.
+  const store = await getMemoryStore();
+  const profile = (await store.get(CONTACT_PROFILE_NAMESPACE, email.from.email))
+    ?.value as ContactProfileValue | undefined;
   const senderContext = profile
     ? [
         profile.name ? `Name: ${profile.name}` : "",
