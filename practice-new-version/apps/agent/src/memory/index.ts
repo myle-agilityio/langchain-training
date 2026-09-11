@@ -112,7 +112,7 @@ export const extractMemoryForThread = async (
       .invoke({
         transcript: lines.map((l) => `${l.role}: ${l.text}`).join("\n"),
       });
-    console.log('------fact', facts);
+
     if (facts.length > 0) {
       await store.put(USER_MEMORY_NAMESPACE, USER_MEMORY_KEY, {
         facts: [...new Set([...existingFacts, ...facts])],
