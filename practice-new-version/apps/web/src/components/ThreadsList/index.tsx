@@ -17,6 +17,7 @@ import {
 } from "@/hooks";
 import { Button, Input, TryAgainButton } from "@/components/common";
 import { cn, formatRelative } from "@/utils";
+import { ThreadsListSkeleton } from "./ThreadsListSkeleton";
 
 interface ThreadsListProps {
   // Lets a host that overlays the page close itself once a thread is picked.
@@ -115,10 +116,7 @@ export const ThreadsList = ({
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto thin-scrollbar p-1">
         {isLoading ? (
-          <div className="flex items-center justify-center gap-1.5 px-2 py-4 text-sm text-muted-foreground">
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            Loading conversations…
-          </div>
+          <ThreadsListSkeleton />
         ) : isError && threads.length === 0 ? (
           <div className="flex flex-col items-center gap-2 px-2 py-4">
             <p className="text-sm text-destructive">

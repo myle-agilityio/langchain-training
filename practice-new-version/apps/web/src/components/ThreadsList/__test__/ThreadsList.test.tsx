@@ -102,10 +102,11 @@ describe("ThreadsList", () => {
     expect(await screen.findByText("New conversation")).toBeInTheDocument();
   });
 
-  it("shows a loading indicator while conversations are being fetched", () => {
-    draw([thread("a", "Grading questions")]);
+  it("shows a loading skeleton while conversations are being fetched", () => {
+    const { container } = draw([thread("a", "Grading questions")]);
 
-    expect(screen.getByText("Loading conversations…")).toBeInTheDocument();
+    expect(container.querySelector("[aria-hidden]")).toBeInTheDocument();
+    expect(screen.queryByText("Grading questions")).not.toBeInTheDocument();
   });
 
   it("shows an error message and retries the fetch when asked", async () => {
