@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, type ComponentProps } from "react";
 import {
   CopilotChat,
   isAbortError,
@@ -7,7 +7,10 @@ import {
 } from "@copilotkit/react-core/v2";
 import { reportFailure, toChatError } from "@/lib/errors";
 import { useComposeApproval } from "@/stores";
+import { SendButtonWithModelPicker } from "./SendButtonWithModelPicker";
 import { WelcomeScreen } from "./WelcomeScreen";
+
+type SendButtonProps = ComponentProps<typeof SendButtonWithModelPicker>;
 
 // Locks the composer while paused on a compose_reply interrupt: answer the card, not the chat.
 // The OpenAI key itself is gated app-wide by KeyGateOverlay — by the time this mounts, one exists.
@@ -63,7 +66,9 @@ export const EmailChat = () => {
               placeholder: "Approve or reject the draft to continue…",
             }
           : undefined,
-        sendButton: locked,
+        sendButton: (props: SendButtonProps) => (
+          <SendButtonWithModelPicker {...props} {...locked} />
+        ),
         addMenuButton: locked,
       }}
     />

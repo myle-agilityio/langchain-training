@@ -1,4 +1,4 @@
-import { Check, Cpu } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import {
   Button,
   DropdownMenu,
@@ -14,17 +14,21 @@ import { cn } from "@/utils";
 export const ModelPicker = () => {
   const modelId = useChatModel((s) => s.modelId);
   const setModelId = useChatModel((s) => s.setModelId);
+  const currentLabel =
+    CHAT_MODEL_OPTIONS.find((option) => option.id === modelId)?.label ??
+    modelId;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          size="icon"
+          size="sm"
           aria-label="Choose chat model"
           title="Choose chat model"
         >
-          <Cpu className="h-4 w-4" />
+          {currentLabel}
+          <ChevronDown className="h-3 w-3 shrink-0 opacity-60" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

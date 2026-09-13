@@ -1,4 +1,5 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useComposeApproval, useToast } from "@/stores";
@@ -25,7 +26,7 @@ type ChatProps = {
   onStop: () => void;
   input: {
     textArea?: { disabled: boolean; placeholder: string };
-    sendButton?: { disabled: true };
+    sendButton: (props: Record<string, unknown>) => ReactElement;
     addMenuButton?: { disabled: true };
   };
 };
@@ -54,8 +55,13 @@ describe("EmailChat — the approval lock", () => {
     render(<EmailChat />);
 
     expect(chat().input.textArea).toBeUndefined();
-    expect(chat().input.sendButton).toBeUndefined();
     expect(chat().input.addMenuButton).toBeUndefined();
+
+    const SendButton = chat().input.sendButton;
+
+    render(<SendButton />);
+
+    expect(screen.getByTestId("copilot-send-button")).not.toBeDisabled();
   });
 
   it("locks the composer and says why while a draft awaits a decision", () => {
@@ -66,8 +72,25 @@ describe("EmailChat — the approval lock", () => {
       disabled: true,
       placeholder: "Approve or reject the draft to continue…",
     });
-    expect(chat().input.sendButton).toEqual({ disabled: true });
     expect(chat().input.addMenuButton).toEqual({ disabled: true });
+
+    const SendButton = chat().input.sendButton;
+
+    render(<SendButton />);
+
+    expect(screen.getByTestId("copilot-send-button")).toBeDisabled();
+  });
+
+  it("puts the model picker next to the send button", () => {
+    render(<EmailChat />);
+
+    const SendButton = chat().input.sendButton;
+
+    render(<SendButton />);
+
+    expect(
+      screen.getByRole("button", { name: "Choose chat model" }),
+    ).toBeInTheDocument();
   });
 });
 

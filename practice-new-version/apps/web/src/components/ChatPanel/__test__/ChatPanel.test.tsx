@@ -5,7 +5,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChatPanel } from "..";
 
 vi.mock("@/components/EmailChat", () => ({ EmailChat: () => <div /> }));
-vi.mock("@/components/ModelPicker", () => ({ ModelPicker: () => <div /> }));
 
 // Stands in for the real, CopilotKit-backed ThreadsSidebar so this file can test ChatPanel's own
 // open/collapse wiring without needing a chat runtime — capture the props it's given instead.
