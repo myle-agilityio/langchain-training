@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { useOpenAIKey } from "@/stores";
 import { withCopilotRuntime } from "@/stories";
 import { EmailChat } from ".";
 
@@ -22,15 +21,4 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const WithSavedKey: Story = {
-  beforeEach: () => {
-    useOpenAIKey.setState({ apiKey: "sk-storybook-placeholder" });
-  },
-};
-
-// No key saved — the chat is replaced by the key gate, and the inbox stays usable behind it.
-export const KeyRequired: Story = {
-  beforeEach: () => {
-    useOpenAIKey.setState({ apiKey: null });
-  },
-};
+export const Default: Story = {};

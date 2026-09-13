@@ -1,7 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { useComposeApproval, useOpenAIKey, useToast } from "@/stores";
+import { useComposeApproval, useToast } from "@/stores";
 import { EmailChat } from "..";
 
 const chatProps = vi.hoisted(() => ({ current: {} as Record<string, never> }));
@@ -45,24 +45,8 @@ const toasts = () => useToast.getState().toasts;
 beforeEach(() => {
   vi.clearAllMocks();
   useToast.setState({ toasts: [] });
-  useOpenAIKey.setState({ apiKey: "sk-teacher" });
   useComposeApproval.setState({ awaitingApproval: false });
   vi.spyOn(console, "error").mockImplementation(() => {});
-});
-
-describe("EmailChat — the key gate", () => {
-  it("asks for a key instead of rendering the chat", () => {
-    useOpenAIKey.setState({ apiKey: null });
-    render(<EmailChat />);
-
-    expect(screen.queryByTestId("copilot-chat")).not.toBeInTheDocument();
-  });
-
-  it("renders the chat once a key is set", () => {
-    render(<EmailChat />);
-
-    expect(screen.getByTestId("copilot-chat")).toBeInTheDocument();
-  });
 });
 
 describe("EmailChat — the approval lock", () => {

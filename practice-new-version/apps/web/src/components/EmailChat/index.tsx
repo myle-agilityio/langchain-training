@@ -6,13 +6,12 @@ import {
   useCopilotKit,
 } from "@copilotkit/react-core/v2";
 import { reportFailure, toChatError } from "@/lib/errors";
-import { useComposeApproval, useOpenAIKey } from "@/stores";
-import { KeyRequiredCard } from "@/components/openAIKey";
+import { useComposeApproval } from "@/stores";
 import { WelcomeScreen } from "./WelcomeScreen";
 
 // Locks the composer while paused on a compose_reply interrupt: answer the card, not the chat.
+// The OpenAI key itself is gated app-wide by KeyGateOverlay — by the time this mounts, one exists.
 export const EmailChat = () => {
-  const apiKey = useOpenAIKey((s) => s.apiKey);
   const awaitingApproval = useComposeApproval((s) => s.awaitingApproval);
   const locked = awaitingApproval ? { disabled: true as const } : undefined;
   const { copilotkit } = useCopilotKit();
@@ -21,10 +20,6 @@ export const EmailChat = () => {
   // Clicking stop can still surface as a normal run error, not an AbortError — this flag
   // marks "we just stopped it ourselves" so that error gets ignored instead of toasted.
   const userStoppedRef = useRef(false);
-
-  if (!apiKey) {
-    return <KeyRequiredCard />;
-  }
 
   return (
     <CopilotChat

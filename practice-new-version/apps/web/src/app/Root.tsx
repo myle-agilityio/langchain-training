@@ -7,6 +7,7 @@ import {
   demonstrationCatalog,
   Toaster,
 } from "@/components";
+import { KeyGateOverlay } from "@/components/openAIKey";
 import { useSyncTheme } from "@/hooks";
 import { Inbox } from "@/pages";
 
@@ -37,6 +38,8 @@ export const Root = () => {
       useSingleEndpoint={false}
     >
       <Inbox />
+      {/* Blocks the whole app, until a key is saved. */}
+      {!apiKey && <KeyGateOverlay />}
       {/* One mount for every toast the query client raises. */}
       <Toaster />
     </CopilotKit>

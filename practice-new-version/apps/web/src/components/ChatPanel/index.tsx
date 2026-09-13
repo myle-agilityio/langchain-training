@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { PanelLeftOpen } from "lucide-react";
 import { EmailChat } from "@/components/EmailChat";
 import { ModelPicker } from "@/components/ModelPicker";
-import { ChangeKeyButton } from "@/components/openAIKey";
 import { ThreadsSidebar } from "@/components/ThreadsSidebar";
 import { Button } from "@/components/common";
 
@@ -63,7 +62,6 @@ export const ChatPanel = () => {
               whether or not the expand button above is rendered. */}
           <div className="ml-auto flex items-center gap-1">
             <ModelPicker />
-            <ChangeKeyButton />
           </div>
         </div>
         <div className="flex-1 min-h-0 overflow-y-auto pb-3">
