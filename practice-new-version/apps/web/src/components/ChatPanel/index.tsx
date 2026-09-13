@@ -6,7 +6,8 @@ import { ChangeKeyButton } from "@/components/openAIKey";
 import { ThreadsSidebar } from "@/components/ThreadsSidebar";
 import { Button } from "@/components/common";
 
-const SIDEBAR_AUTO_COLLAPSE_WIDTH = 1400;
+// Below this pane width the sidebar auto-closes; at/above it, it auto-opens.
+const SIDEBAR_WIDTH_BREAKPOINT = 1100;
 
 export const ChatPanel = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -25,7 +26,7 @@ export const ChatPanel = () => {
     // side), so it never fights a manual toggle made while the pane stays on the same side.
     let wasWide: boolean | null = null;
     const observer = new ResizeObserver(([entry]) => {
-      const isWide = entry.contentRect.width >= SIDEBAR_AUTO_COLLAPSE_WIDTH;
+      const isWide = entry.contentRect.width >= SIDEBAR_WIDTH_BREAKPOINT;
 
       if (isWide !== wasWide) {
         wasWide = isWide;

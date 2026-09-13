@@ -67,7 +67,7 @@ describe("ChatPanel", () => {
     expect(expandButton()).not.toBeInTheDocument();
   });
 
-  it("auto-collapses the sidebar once the pane narrows past the breakpoint", () => {
+  it("auto-collapses the sidebar once the pane narrows below 1100", () => {
     render(<ChatPanel />);
 
     resize(900);
@@ -76,11 +76,11 @@ describe("ChatPanel", () => {
     expect(expandButton()).toBeInTheDocument();
   });
 
-  it("auto-reopens once the pane widens back past the breakpoint", () => {
+  it("auto-reopens once the pane widens back to 1100 or more", () => {
     render(<ChatPanel />);
 
     resize(900);
-    resize(1500);
+    resize(1200);
 
     expect(sidebarProps.current.open).toBe(true);
     expect(expandButton()).not.toBeInTheDocument();
@@ -96,11 +96,11 @@ describe("ChatPanel", () => {
     expect(sidebarProps.current.open).toBe(true);
   });
 
-  it("re-collapses once the pane actually crosses back to narrow", () => {
+  it("re-collapses once the pane actually crosses back below 1100", () => {
     render(<ChatPanel />);
 
     resize(900);
-    resize(1500);
+    resize(1200);
     resize(900);
 
     expect(sidebarProps.current.open).toBe(false);
