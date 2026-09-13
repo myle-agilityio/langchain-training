@@ -34,6 +34,7 @@ const meta = {
     hasMore: false,
     isLoadingMore: false,
     onLoadMore: noop,
+    isLoadMoreError: false,
   },
 } satisfies Meta<typeof InboxList>;
 
@@ -106,6 +107,10 @@ export const Filtered: Story = {
 
 export const LoadingMore: Story = {
   args: { hasMore: true, isLoadingMore: true },
+};
+
+export const LoadMoreErrored: Story = {
+  args: { hasMore: true, isLoadMoreError: true },
 };
 
 // Nothing classified yet: the rail falls back to the brand lilac.

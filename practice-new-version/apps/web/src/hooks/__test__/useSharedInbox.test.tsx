@@ -110,6 +110,22 @@ describe("useSharedInbox", () => {
     await waitFor(() => expect(result.current.isError).toBe(true));
   });
 
+  it("flags a failed next-page fetch separately from the initial load", async () => {
+    vi.spyOn(apiClient, "get")
+      .mockResolvedValueOnce(page(["a"], true))
+      .mockRejectedValueOnce(new Error("boom"));
+
+    const { result } = renderHook(() => useSharedInbox(), { wrapper });
+
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+    result.current.loadMore();
+
+    await waitFor(() => expect(result.current.isLoadMoreError).toBe(true));
+    // The underlying query's own isError flips true too (same query, one status) — the already
+    // loaded page is what tells the list apart from a first-load failure, not isError alone.
+    expect(result.current.emails.map((e) => e.id)).toEqual(["a"]);
+  });
+
   it("hands back the same empty array while there is nothing loaded", () => {
     vi.spyOn(apiClient, "get").mockReturnValue(new Promise(() => {}));
 

@@ -108,14 +108,24 @@ describe("ThreadsList", () => {
     expect(screen.getByText("Loading conversations…")).toBeInTheDocument();
   });
 
-  it("shows an error message when fetching conversations fails", async () => {
-    vi.spyOn(apiClient, "get").mockRejectedValue(new Error("boom"));
+  it("shows an error message and retries the fetch when asked", async () => {
+    const get = vi
+      .spyOn(apiClient, "get")
+      .mockRejectedValueOnce(new Error("boom"));
 
     render(wrap(<ThreadsList />));
 
     expect(
-      await screen.findByText("Couldn't load conversations. Try again."),
+      await screen.findByText("Couldn't load conversations."),
     ).toBeInTheDocument();
+
+    get.mockResolvedValueOnce({
+      data: { threads: [thread("b", "Late work")], hasNext: false },
+    } as never);
+
+    await userEvent.click(screen.getByRole("button", { name: "Try again" }));
+
+    expect(await screen.findByText("Late work")).toBeInTheDocument();
   });
 
   it("says the list is empty, and says it differently while searching", async () => {

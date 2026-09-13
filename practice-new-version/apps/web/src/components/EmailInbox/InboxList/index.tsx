@@ -14,6 +14,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  TryAgainButton,
 } from "@/components";
 import { useLoadMoreSentinel } from "@/hooks";
 import { InboxSkeleton } from "./InboxSkeleton";
@@ -59,6 +60,7 @@ interface InboxListProps {
   hasMore: boolean;
   isLoadingMore: boolean;
   onLoadMore: () => void;
+  isLoadMoreError: boolean;
 }
 
 // The list's own header — "Inbox (N)" plus refresh and the mark-all actions behind a menu —
@@ -80,6 +82,7 @@ export const InboxList = ({
   hasMore,
   isLoadingMore,
   onLoadMore,
+  isLoadMoreError,
 }: InboxListProps) => {
   const hasUnread = emails.some((e) => e.status === "unread");
   const hasRead = emails.some((e) => e.status === "read");
@@ -145,9 +148,12 @@ export const InboxList = ({
 
       {isLoading ? (
         <InboxSkeleton />
-      ) : isError ? (
-        <div className="p-6 text-sm text-destructive text-center">
-          Couldn&apos;t load the inbox. Try again.
+      ) : isError && emails.length === 0 ? (
+        <div className="flex flex-col items-center gap-2 p-6 text-center">
+          <p className="text-sm text-destructive">
+            Couldn&apos;t load the inbox.
+          </p>
+          <TryAgainButton onClick={onRefresh} />
         </div>
       ) : emails.length === 0 ? (
         <div className="p-6 text-sm text-muted-foreground text-center">
@@ -329,13 +335,22 @@ export const InboxList = ({
       {!isLoading && emails.length > 0 && hasMore && (
         <div
           ref={sentinelRef}
-          className="pt-3 pb-5 flex items-center justify-center"
+          className="pt-3 pb-5 flex flex-col items-center justify-center gap-2"
         >
-          {isLoadingMore && (
-            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              Loading more…
-            </span>
+          {isLoadMoreError ? (
+            <>
+              <span className="text-xs text-destructive">
+                Couldn&apos;t load more emails.
+              </span>
+              <TryAgainButton onClick={onLoadMore} size="xs" />
+            </>
+          ) : (
+            isLoadingMore && (
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Loading more…
+              </span>
+            )
           )}
         </div>
       )}

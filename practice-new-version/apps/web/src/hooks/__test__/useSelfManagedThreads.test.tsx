@@ -116,6 +116,40 @@ describe("useSelfManagedThreads", () => {
     );
     expect(paramsOf(get, 1).offset).toBe(2);
   });
+
+  it("flags a failed next-page fetch separately from the initial load", async () => {
+    vi.spyOn(apiClient, "get")
+      .mockResolvedValueOnce(page(["a"], true))
+      .mockRejectedValueOnce(new Error("boom"));
+
+    const { result } = renderHook(() => useSelfManagedThreads(), { wrapper });
+
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+    result.current.loadMore();
+
+    await waitFor(() => expect(result.current.isLoadMoreError).toBe(true));
+    // The underlying query's own isError flips true too (same query, one status) — the already
+    // loaded page is what tells the list apart from a first-load failure, not isError alone.
+    expect(result.current.threads.map((t) => t.id)).toEqual(["a"]);
+  });
+
+  it("reports failure, then recovers once a manual refresh succeeds", async () => {
+    const get = vi
+      .spyOn(apiClient, "get")
+      .mockRejectedValueOnce(new Error("boom"))
+      .mockResolvedValueOnce(page(["a"]));
+
+    const { result } = renderHook(() => useSelfManagedThreads(), { wrapper });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    await result.current.refresh();
+
+    await waitFor(() =>
+      expect(result.current.threads.map((t) => t.id)).toEqual(["a"]),
+    );
+    expect(get).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe("useRenameThread", () => {

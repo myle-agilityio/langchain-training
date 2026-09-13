@@ -37,6 +37,7 @@ export const EmailInbox = () => {
     loadMore,
     hasMore,
     isLoadingMore,
+    isLoadMoreError,
   } = useSharedInbox();
   const patchEmail = usePatchEmail();
   const patchEmails = usePatchEmails();
@@ -275,6 +276,7 @@ export const EmailInbox = () => {
             hasMore={hasMore}
             isLoadingMore={isLoadingMore}
             onLoadMore={loadMore}
+            isLoadMoreError={isLoadMoreError}
           />
         </div>
       ) : (

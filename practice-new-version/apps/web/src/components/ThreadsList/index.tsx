@@ -15,7 +15,7 @@ import {
   useExtractThreadMemory,
   useLoadMoreSentinel,
 } from "@/hooks";
-import { Button, Input } from "@/components/common";
+import { Button, Input, TryAgainButton } from "@/components/common";
 import { cn, formatRelative } from "@/utils";
 
 interface ThreadsListProps {
@@ -35,8 +35,16 @@ export const ThreadsList = ({
 }: ThreadsListProps) => {
   const config = useCopilotChatConfiguration();
   const [search, setSearch] = useState("");
-  const { threads, loadMore, hasMore, isLoading, isLoadingMore, isError } =
-    useSelfManagedThreads(search);
+  const {
+    threads,
+    loadMore,
+    hasMore,
+    isLoading,
+    isLoadingMore,
+    isLoadMoreError,
+    isError,
+    refresh,
+  } = useSelfManagedThreads(search);
   const renameThread = useRenameThread();
   const deleteThread = useDeleteThread();
   const extractThreadMemory = useExtractThreadMemory();
@@ -111,10 +119,13 @@ export const ThreadsList = ({
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
             Loading conversations…
           </div>
-        ) : isError ? (
-          <p className="px-2 py-4 text-sm text-destructive">
-            Couldn&apos;t load conversations. Try again.
-          </p>
+        ) : isError && threads.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 px-2 py-4">
+            <p className="text-sm text-destructive">
+              Couldn&apos;t load conversations.
+            </p>
+            <TryAgainButton onClick={refresh} />
+          </div>
         ) : (
           threads.length === 0 && (
             <p className="px-2 py-4 text-sm text-muted-foreground">
@@ -208,10 +219,19 @@ export const ThreadsList = ({
         {threads.length > 0 && hasMore && (
           <div
             ref={sentinelRef}
-            className="flex items-center justify-center py-2"
+            className="flex flex-col items-center justify-center gap-2 py-2"
           >
-            {isLoadingMore && (
-              <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+            {isLoadMoreError ? (
+              <>
+                <span className="text-xs text-destructive">
+                  Couldn&apos;t load more conversations.
+                </span>
+                <TryAgainButton onClick={() => loadMore()} size="xs" />
+              </>
+            ) : (
+              isLoadingMore && (
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+              )
             )}
           </div>
         )}

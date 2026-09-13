@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   useInfiniteQuery,
   useMutation,
@@ -35,9 +35,11 @@ export const useSelfManagedThreads = (search = "") => {
 
   const {
     data,
+    refetch,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isFetchNextPageError,
     isLoading,
     isError,
   } = useInfiniteQuery({
@@ -56,13 +58,29 @@ export const useSelfManagedThreads = (search = "") => {
     [data],
   );
 
+  // Manual-refresh spinner only, same as useSharedInbox's — see there for why it's separate
+  // from isFetching.
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const refresh = useCallback(async () => {
+    setIsRefreshing(true);
+
+    try {
+      await refetch();
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [refetch]);
+
   return {
     threads,
     loadMore: fetchNextPage,
     hasMore: hasNextPage,
     isLoading,
     isLoadingMore: isFetchingNextPage,
+    isLoadMoreError: isFetchNextPageError,
     isError,
+    isRefreshing,
+    refresh,
   };
 };
 

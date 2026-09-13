@@ -27,6 +27,7 @@ export const useSharedInbox = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isFetchNextPageError,
   } = useInfiniteQuery({
     queryKey: inboxQueryKey,
     queryFn: ({ pageParam }) => fetchEmails(pageParam),
@@ -63,6 +64,7 @@ export const useSharedInbox = () => {
     loadMore: fetchNextPage,
     hasMore: hasNextPage,
     isLoadingMore: isFetchingNextPage,
+    isLoadMoreError: isFetchNextPageError,
   };
 };
 

@@ -38,6 +38,7 @@ const draw = (overrides: Partial<Props> = {}) => {
     selectedId: null,
     hasMore: false,
     isLoadingMore: false,
+    isLoadMoreError: false,
     ...spies,
     ...overrides,
   };
@@ -110,13 +111,14 @@ describe("InboxList — rows", () => {
     expect(screen.getByText("No emails")).toBeInTheDocument();
   });
 
-  it("shows an error message when fetching the inbox fails", () => {
-    draw({ emails: [], isError: true });
+  it("shows an error message and a retry button when fetching the inbox fails", async () => {
+    const spies = draw({ emails: [], isError: true });
 
-    expect(
-      screen.getByText("Couldn't load the inbox. Try again."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Couldn't load the inbox.")).toBeInTheDocument();
     expect(screen.queryByText("No emails")).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(spies.onRefresh).toHaveBeenCalledOnce();
   });
 
   it("shows the sender's initial and name, the subject and a preview of the body", () => {
@@ -208,5 +210,14 @@ describe("InboxList — paging", () => {
     draw({ hasMore: false, isLoadingMore: false });
 
     expect(screen.queryByText("Loading more…")).not.toBeInTheDocument();
+  });
+
+  it("shows an error message and a retry button when loading the next page fails", async () => {
+    const spies = draw({ hasMore: true, isLoadMoreError: true });
+
+    expect(screen.getByText("Couldn't load more emails.")).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(spies.onLoadMore).toHaveBeenCalledOnce();
   });
 });
