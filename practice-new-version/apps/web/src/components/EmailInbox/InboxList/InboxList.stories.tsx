@@ -22,6 +22,7 @@ const meta = {
     emails: sampleEmails,
     totalCount: sampleEmails.length,
     isLoading: false,
+    isError: false,
     isFiltered: false,
     isRefreshing: false,
     onRefresh: noop,
@@ -90,6 +91,10 @@ export const Loading: Story = { args: { isLoading: true, emails: [] } };
 export const Refreshing: Story = { args: { isRefreshing: true } };
 
 export const Empty: Story = { args: { emails: [], totalCount: 0 } };
+
+export const Errored: Story = {
+  args: { emails: [], totalCount: 0, isError: true },
+};
 
 export const Filtered: Story = {
   args: {

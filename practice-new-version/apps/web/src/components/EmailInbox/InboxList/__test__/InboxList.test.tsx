@@ -32,6 +32,7 @@ const draw = (overrides: Partial<Props> = {}) => {
     emails: [email("a")],
     totalCount: 1,
     isLoading: false,
+    isError: false,
     isFiltered: false,
     isRefreshing: false,
     selectedId: null,
@@ -107,6 +108,15 @@ describe("InboxList — rows", () => {
     draw({ emails: [] });
 
     expect(screen.getByText("No emails")).toBeInTheDocument();
+  });
+
+  it("shows an error message when fetching the inbox fails", () => {
+    draw({ emails: [], isError: true });
+
+    expect(
+      screen.getByText("Couldn't load the inbox. Try again."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("No emails")).not.toBeInTheDocument();
   });
 
   it("shows the sender's initial and name, the subject and a preview of the body", () => {

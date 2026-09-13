@@ -31,6 +31,7 @@ export const EmailInbox = () => {
   const {
     emails,
     isLoading,
+    isError,
     isRefreshing,
     refresh,
     loadMore,
@@ -262,6 +263,7 @@ export const EmailInbox = () => {
             emails={visibleEmails}
             totalCount={emails.length}
             isLoading={isLoading}
+            isError={isError}
             isFiltered={isFiltered}
             isRefreshing={isRefreshing}
             onRefresh={refresh}

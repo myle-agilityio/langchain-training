@@ -47,6 +47,7 @@ interface InboxListProps {
   emails: Email[];
   totalCount: number;
   isLoading: boolean;
+  isError: boolean;
   isFiltered: boolean;
   isRefreshing: boolean;
   onRefresh: () => void;
@@ -67,6 +68,7 @@ export const InboxList = ({
   emails,
   totalCount,
   isLoading,
+  isError,
   isFiltered,
   isRefreshing,
   onRefresh,
@@ -143,6 +145,10 @@ export const InboxList = ({
 
       {isLoading ? (
         <InboxSkeleton />
+      ) : isError ? (
+        <div className="p-6 text-sm text-destructive text-center">
+          Couldn&apos;t load the inbox. Try again.
+        </div>
       ) : emails.length === 0 ? (
         <div className="p-6 text-sm text-muted-foreground text-center">
           No emails

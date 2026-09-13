@@ -22,6 +22,7 @@ export const useSharedInbox = () => {
   const {
     data,
     isPending,
+    isError,
     refetch,
     fetchNextPage,
     hasNextPage,
@@ -56,6 +57,7 @@ export const useSharedInbox = () => {
   return {
     emails,
     isLoading: isPending,
+    isError,
     isRefreshing,
     refresh,
     loadMore: fetchNextPage,

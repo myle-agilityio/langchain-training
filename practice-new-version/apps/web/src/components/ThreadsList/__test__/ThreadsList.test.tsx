@@ -114,7 +114,7 @@ describe("ThreadsList", () => {
     render(wrap(<ThreadsList />));
 
     expect(
-      await screen.findByText("Couldn't load conversations."),
+      await screen.findByText("Couldn't load conversations. Try again."),
     ).toBeInTheDocument();
   });
 

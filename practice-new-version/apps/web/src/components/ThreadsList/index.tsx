@@ -113,7 +113,7 @@ export const ThreadsList = ({
           </div>
         ) : isError ? (
           <p className="px-2 py-4 text-sm text-destructive">
-            Couldn&apos;t load conversations.
+            Couldn&apos;t load conversations. Try again.
           </p>
         ) : (
           threads.length === 0 && (

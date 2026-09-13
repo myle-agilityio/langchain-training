@@ -102,6 +102,14 @@ describe("useSharedInbox", () => {
     expect(get).toHaveBeenCalledTimes(2);
   });
 
+  it("reports failure when every retry is exhausted", async () => {
+    vi.spyOn(apiClient, "get").mockRejectedValue(new Error("boom"));
+
+    const { result } = renderHook(() => useSharedInbox(), { wrapper });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+  });
+
   it("hands back the same empty array while there is nothing loaded", () => {
     vi.spyOn(apiClient, "get").mockReturnValue(new Promise(() => {}));
 
