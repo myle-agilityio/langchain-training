@@ -6,7 +6,7 @@ const meta = {
   title: "Chat/ChatPanel",
   component: ChatPanel,
   parameters: { layout: "fullscreen" },
-  // The chat surface, model picker and threads menu all call CopilotKit hooks.
+  // The chat surface, model picker and threads sidebar all call CopilotKit hooks.
   decorators: [
     withCopilotRuntime,
     (Story) => (

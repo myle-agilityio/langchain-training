@@ -1,10 +1,14 @@
 import { useCopilotChatConfiguration } from "@copilotkit/react-core/v2";
 import { ThreadsList } from "@/components/ThreadsList";
+import { cn } from "@/utils";
 
-// Shown once the chat pane itself (ChatPanel's `@container`) has room for it — the button
-// takes over below that width, on either tab. Always `flex`, never `hidden`, so the collapse
-// animates via width/opacity instead of the display jump a breakpoint toggle would cause.
-export const ThreadsSidebar = () => {
+interface ThreadsSidebarProps {
+  open: boolean;
+  // Collapses the sidebar — wired to the button ThreadsList renders beside "New chat" while open.
+  onCollapse: () => void;
+}
+
+export const ThreadsSidebar = ({ open, onCollapse }: ThreadsSidebarProps) => {
   const config = useCopilotChatConfiguration();
 
   if (!config) {
@@ -14,9 +18,17 @@ export const ThreadsSidebar = () => {
   return (
     <aside
       aria-label="Conversations"
-      className="flex h-full w-0 shrink-0 flex-col overflow-hidden border-r-0 opacity-0 transition-all duration-300 ease-in-out @min-[1400px]:w-64 @min-[1400px]:border-r @min-[1400px]:border-border @min-[1400px]:opacity-100"
+      className={cn(
+        "flex h-full shrink-0 flex-col overflow-hidden transition-all duration-300 ease-in-out",
+        open
+          ? "w-64 min-w-64 border-r border-border opacity-100"
+          : "w-0 min-w-0 border-r-0 opacity-0",
+      )}
     >
-      <ThreadsList className="h-full w-64" />
+      <ThreadsList
+        className="flex-1 min-h-0"
+        onCollapse={open ? onCollapse : undefined}
+      />
     </aside>
   );
 };

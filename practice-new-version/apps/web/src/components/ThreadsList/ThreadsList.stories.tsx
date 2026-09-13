@@ -28,7 +28,7 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-// The shared list behind both the ThreadsMenu dropdown and the ThreadsSidebar.
+// The list rendered inside the ThreadsSidebar.
 export const Default: Story = {};
 
 export const Empty: Story = {
@@ -40,4 +40,10 @@ export const Empty: Story = {
       }),
     ),
   ],
+};
+
+// ThreadsSidebar passes this once forced open below @min-[1400px] — the collapse button sits
+// beside "New chat" instead of hunting for a control elsewhere.
+export const WithCollapseButton: Story = {
+  args: { onCollapse: () => {} },
 };

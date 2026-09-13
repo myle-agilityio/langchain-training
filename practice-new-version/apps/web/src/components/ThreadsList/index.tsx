@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { Loader2, Pencil, Search, SquarePen, X } from "lucide-react";
+import {
+  Loader2,
+  PanelLeftClose,
+  Pencil,
+  Search,
+  SquarePen,
+  X,
+} from "lucide-react";
 import { useCopilotChatConfiguration } from "@copilotkit/react-core/v2";
 import {
   useSelfManagedThreads,
@@ -8,20 +15,27 @@ import {
   useExtractThreadMemory,
   useLoadMoreSentinel,
 } from "@/hooks";
-import { Input } from "@/components/common";
+import { Button, Input } from "@/components/common";
 import { cn, formatRelative } from "@/utils";
 
 interface ThreadsListProps {
-  // Lets a host that overlays the page (the dropdown) close itself once a thread is picked.
+  // Lets a host that overlays the page close itself once a thread is picked.
   onPicked?: () => void;
+  // Set by ThreadsSidebar while open — renders a collapse button beside "New chat" so closing it
+  // doesn't require hunting for a control somewhere else.
+  onCollapse?: () => void;
   className?: string;
 }
 
-// The conversation list itself — shared by the ThreadsMenu dropdown and the ThreadsSidebar.
-export const ThreadsList = ({ onPicked, className }: ThreadsListProps) => {
+// The conversation list itself, rendered inside the ThreadsSidebar.
+export const ThreadsList = ({
+  onPicked,
+  onCollapse,
+  className,
+}: ThreadsListProps) => {
   const config = useCopilotChatConfiguration();
   const [search, setSearch] = useState("");
-  const { threads, loadMore, hasMore, isLoadingMore } =
+  const { threads, loadMore, hasMore, isLoading, isLoadingMore, isError } =
     useSelfManagedThreads(search);
   const renameThread = useRenameThread();
   const deleteThread = useDeleteThread();
@@ -58,17 +72,29 @@ export const ThreadsList = ({ onPicked, className }: ThreadsListProps) => {
 
   return (
     <div className={cn("flex min-h-0 flex-col", className)}>
-      <div className="p-2 border-b border-border">
+      <div className="p-2 border-b border-border flex items-center gap-1">
         <button
           type="button"
           onClick={() => {
             startNewChat();
             onPicked?.();
           }}
-          className="w-full flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium hover:bg-secondary cursor-pointer"
+          className="flex-1 flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium hover:bg-secondary cursor-pointer"
         >
           <SquarePen className="h-3.5 w-3.5" /> New chat
         </button>
+        {onCollapse && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onCollapse}
+            aria-label="Collapse conversation history"
+            title="Collapse conversation history"
+          >
+            <PanelLeftClose className="h-4 w-4" />
+          </Button>
+        )}
       </div>
       <div className="p-2 border-b border-border relative">
         <Search className="absolute left-4 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
@@ -80,12 +106,23 @@ export const ThreadsList = ({ onPicked, className }: ThreadsListProps) => {
         />
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto thin-scrollbar p-1">
-        {threads.length === 0 && (
-          <p className="px-2 py-4 text-sm text-muted-foreground">
-            {search.trim()
-              ? "No matching conversations."
-              : "No conversations yet."}
+        {isLoading ? (
+          <div className="flex items-center justify-center gap-1.5 px-2 py-4 text-sm text-muted-foreground">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            Loading conversations…
+          </div>
+        ) : isError ? (
+          <p className="px-2 py-4 text-sm text-destructive">
+            Couldn&apos;t load conversations.
           </p>
+        ) : (
+          threads.length === 0 && (
+            <p className="px-2 py-4 text-sm text-muted-foreground">
+              {search.trim()
+                ? "No matching conversations."
+                : "No conversations yet."}
+            </p>
+          )
         )}
         <ul className="flex flex-col gap-0.5">
           {threads.map((thread) => {

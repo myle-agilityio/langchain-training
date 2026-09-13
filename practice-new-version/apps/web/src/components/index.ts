@@ -7,7 +7,6 @@ export * from "./ModelPicker";
 export * from "./openAIKey";
 export * from "./ThemeToggle";
 export * from "./ThreadsList";
-export * from "./ThreadsMenu";
 export * from "./ThreadsSidebar";
 export * from "./ToolRendering";
 export * from "./ViewTabs";

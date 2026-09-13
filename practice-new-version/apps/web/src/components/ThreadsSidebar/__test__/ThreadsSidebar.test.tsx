@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { useCopilotChatConfiguration } from "@copilotkit/react-core/v2";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -21,14 +22,14 @@ const thread = (id: string, title: string): ChatThread => ({
 
 let queryClient: QueryClient;
 
-const draw = (threads: ChatThread[]) => {
+const draw = (threads: ChatThread[], open = false, onCollapse = vi.fn()) => {
   vi.spyOn(apiClient, "get").mockResolvedValue({
     data: { threads, hasNext: false },
   } as never);
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <ThreadsSidebar />
+      <ThreadsSidebar open={open} onCollapse={onCollapse} />
     </QueryClientProvider>,
   );
 };
@@ -62,5 +63,48 @@ describe("ThreadsSidebar", () => {
     const { container } = draw([thread("b", "Late work")]);
 
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it("takes its open width when `open` is true", async () => {
+    draw([thread("b", "Late work")], true);
+
+    expect(await screen.findByLabelText("Conversations")).toHaveClass(
+      "w-64",
+      "min-w-64",
+      "opacity-100",
+    );
+  });
+
+  it("collapses to zero width when `open` is false", async () => {
+    draw([thread("b", "Late work")], false);
+
+    expect(await screen.findByLabelText("Conversations")).toHaveClass(
+      "w-0",
+      "min-w-0",
+      "opacity-0",
+    );
+  });
+
+  it("shows a collapse button while open, wired to onCollapse", async () => {
+    const onCollapse = vi.fn();
+
+    draw([thread("b", "Late work")], true, onCollapse);
+    await userEvent.click(
+      await screen.findByRole("button", {
+        name: "Collapse conversation history",
+      }),
+    );
+
+    expect(onCollapse).toHaveBeenCalledOnce();
+  });
+
+  it("has no collapse button while closed", async () => {
+    draw([thread("b", "Late work")], false);
+
+    await screen.findByText("Late work");
+
+    expect(
+      screen.queryByRole("button", { name: "Collapse conversation history" }),
+    ).not.toBeInTheDocument();
   });
 });

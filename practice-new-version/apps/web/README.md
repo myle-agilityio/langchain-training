@@ -62,9 +62,8 @@ src/
 │   ├── AppHeader/       # Top bar above both tabs: AppLogo, theme toggle, ViewTabs
 │   ├── AppLogo/         # Paper-plane mark + "AI Email Inbox" wordmark
 │   ├── ViewTabs/        # The Chat/App tab switch (also the enable*Mode frontend tools)
-│   ├── ThreadsList/     # The conversation list itself — shared by the two below
-│   ├── ThreadsSidebar/  # Always-open list, chat tab only (≥ md)
-│   ├── ThreadsMenu/     # The same list behind a clock button, for the app tab
+│   ├── ThreadsList/     # The conversation list itself, rendered inside ThreadsSidebar
+│   ├── ThreadsSidebar/  # Collapsible list, open by default — ChatPanel's expand/collapse button toggles it
 │   ├── openAIKey/       # BYOK — key form, chat gate card, change-key button
 │   ├── ModelPicker/     # Chat-model dropdown (GPT-4o mini/4o/4.1 mini/4.1)
 │   ├── ToolRendering/   # Tool-call reasoning renderer
@@ -117,9 +116,9 @@ knowledge-base pane renders without a request. The zustand stores are the real o
 can just `useOpenAIKey.setState(...)` in `beforeEach`. Light/dark comes from the toolbar's theme
 switch, which puts `.dark` on `<html>` exactly like `useSyncTheme` does.
 
-Eight components call CopilotKit hooks and need the agent running (`pnpm dev:agent`) to do more
+Seven components call CopilotKit hooks and need the agent running (`pnpm dev:agent`) to do more
 than render their chrome — `EmailInbox`, `EmailChat`, `ChatPanel`, `AppHeader`, `ViewTabs`,
-`ThreadsList`, `ThreadsSidebar`, `ThreadsMenu`. They carry
+`ThreadsList`, `ThreadsSidebar`. They carry
 the `withCopilotRuntime` decorator, and `src/stories/RuntimeBoundary.tsx` catches the mount
 error to say so instead of showing a crash overlay. The A2UI renderers in
 `declarativeGenerativeUI/renderers.tsx` have no stories: they're driven by the A2UI runtime, not

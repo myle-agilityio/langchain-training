@@ -33,17 +33,23 @@ export const useSelfManagedThreads = (search = "") => {
     ? [...threadsQueryKey, trimmedSearch]
     : threadsQueryKey;
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey,
-      queryFn: ({ pageParam }) =>
-        fetchThreads(pageParam, trimmedSearch || undefined),
-      initialPageParam: 0,
-      getNextPageParam: (lastPage, pages) =>
-        lastPage.hasNext
-          ? pages.reduce((count, page) => count + page.threads.length, 0)
-          : undefined,
-    });
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+  } = useInfiniteQuery({
+    queryKey,
+    queryFn: ({ pageParam }) =>
+      fetchThreads(pageParam, trimmedSearch || undefined),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) =>
+      lastPage.hasNext
+        ? pages.reduce((count, page) => count + page.threads.length, 0)
+        : undefined,
+  });
 
   const threads = useMemo(
     () => data?.pages.flatMap((page) => page.threads) ?? EMPTY,
@@ -54,7 +60,9 @@ export const useSelfManagedThreads = (search = "") => {
     threads,
     loadMore: fetchNextPage,
     hasMore: hasNextPage,
+    isLoading,
     isLoadingMore: isFetchingNextPage,
+    isError,
   };
 };
 

@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { apiClient } from "@/api";
 import type { ChatThread } from "@repo/types";
-import { ThreadsMenu } from "..";
+import { ThreadsList } from "..";
 
 vi.mock("@copilotkit/react-core/v2", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@copilotkit/react-core/v2")>()),
@@ -34,15 +34,12 @@ const wrap = (children: ReactNode) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
-const openMenu = async (threads: ChatThread[]) => {
+const draw = (threads: ChatThread[]) => {
   vi.spyOn(apiClient, "get").mockResolvedValue({
     data: { threads, hasNext: false },
   } as never);
 
-  render(wrap(<ThreadsMenu />));
-  await userEvent.click(
-    screen.getByRole("button", { name: "Conversation history" }),
-  );
+  return render(wrap(<ThreadsList />));
 };
 
 beforeEach(() => {
@@ -55,42 +52,74 @@ beforeEach(() => {
   });
 });
 
-describe("ThreadsMenu", () => {
+describe("ThreadsList", () => {
   it("renders nothing at all outside a chat configuration", () => {
     vi.mocked(useCopilotChatConfiguration).mockReturnValue(
       undefined as unknown as ReturnType<typeof useCopilotChatConfiguration>,
     );
 
-    const { container } = render(wrap(<ThreadsMenu />));
+    const { container } = draw([thread("b", "Late work")]);
 
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("keeps the list closed until the clock button is used", () => {
+  it("has no collapse button without an onCollapse handler", async () => {
+    draw([thread("b", "Late work")]);
+
+    await screen.findByText("Late work");
+
+    expect(
+      screen.queryByRole("button", { name: "Collapse conversation history" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows a collapse button beside New chat when given onCollapse", async () => {
+    const onCollapse = vi.fn();
+
     vi.spyOn(apiClient, "get").mockResolvedValue({
-      data: { threads: [], hasNext: false },
+      data: { threads: [thread("b", "Late work")], hasNext: false },
     } as never);
+    render(wrap(<ThreadsList onCollapse={onCollapse} />));
+    await userEvent.click(
+      await screen.findByRole("button", {
+        name: "Collapse conversation history",
+      }),
+    );
 
-    render(wrap(<ThreadsMenu />));
-
-    expect(screen.queryByText("New chat")).not.toBeInTheDocument();
+    expect(onCollapse).toHaveBeenCalledOnce();
   });
 
   it("lists each conversation with how long ago it was touched", async () => {
-    await openMenu([thread("a", "Grading questions")]);
+    draw([thread("a", "Grading questions")]);
 
     expect(await screen.findByText("Grading questions")).toBeInTheDocument();
     expect(screen.getByText("5m ago")).toBeInTheDocument();
   });
 
   it("names an untitled conversation", async () => {
-    await openMenu([thread("a", null)]);
+    draw([thread("a", null)]);
 
     expect(await screen.findByText("New conversation")).toBeInTheDocument();
   });
 
+  it("shows a loading indicator while conversations are being fetched", () => {
+    draw([thread("a", "Grading questions")]);
+
+    expect(screen.getByText("Loading conversations…")).toBeInTheDocument();
+  });
+
+  it("shows an error message when fetching conversations fails", async () => {
+    vi.spyOn(apiClient, "get").mockRejectedValue(new Error("boom"));
+
+    render(wrap(<ThreadsList />));
+
+    expect(
+      await screen.findByText("Couldn't load conversations."),
+    ).toBeInTheDocument();
+  });
+
   it("says the list is empty, and says it differently while searching", async () => {
-    await openMenu([]);
+    draw([]);
 
     expect(
       await screen.findByText("No conversations yet."),
@@ -113,12 +142,24 @@ describe("ThreadsMenu", () => {
       chat as unknown as ReturnType<typeof useCopilotChatConfiguration>,
     );
 
-    await openMenu([thread("b", "Late work")]);
+    draw([thread("b", "Late work")]);
     await userEvent.click(await screen.findByText("Late work"));
 
     expect(chat.setActiveThreadId).toHaveBeenCalledWith("b", {
       explicit: true,
     });
+  });
+
+  it("calls onPicked once a conversation is picked", async () => {
+    const onPicked = vi.fn();
+
+    vi.spyOn(apiClient, "get").mockResolvedValue({
+      data: { threads: [thread("b", "Late work")], hasNext: false },
+    } as never);
+    render(wrap(<ThreadsList onPicked={onPicked} />));
+    await userEvent.click(await screen.findByText("Late work"));
+
+    expect(onPicked).toHaveBeenCalledOnce();
   });
 
   it("starts a new chat from the header action", async () => {
@@ -128,20 +169,20 @@ describe("ThreadsMenu", () => {
       chat as unknown as ReturnType<typeof useCopilotChatConfiguration>,
     );
 
-    await openMenu([]);
+    draw([]);
     await userEvent.click(await screen.findByText("New chat"));
 
     expect(chat.startNewThread).toHaveBeenCalledOnce();
   });
 });
 
-describe("ThreadsMenu — renaming", () => {
+describe("ThreadsList — renaming", () => {
   it("commits a new title on Enter", async () => {
     const patch = vi
       .spyOn(apiClient, "patch")
       .mockResolvedValue({ data: {} } as never);
 
-    await openMenu([thread("b", "Late work")]);
+    draw([thread("b", "Late work")]);
     await userEvent.click(await screen.findByTitle("Rename"));
 
     const rename = screen.getByDisplayValue("Late work");
@@ -159,7 +200,7 @@ describe("ThreadsMenu — renaming", () => {
   it("abandons the rename on Escape", async () => {
     const patch = vi.spyOn(apiClient, "patch");
 
-    await openMenu([thread("b", "Late work")]);
+    draw([thread("b", "Late work")]);
     await userEvent.click(await screen.findByTitle("Rename"));
     await userEvent.type(
       screen.getByDisplayValue("Late work"),
@@ -172,7 +213,7 @@ describe("ThreadsMenu — renaming", () => {
   it("refuses to save an empty title", async () => {
     const patch = vi.spyOn(apiClient, "patch");
 
-    await openMenu([thread("b", "Late work")]);
+    draw([thread("b", "Late work")]);
     await userEvent.click(await screen.findByTitle("Rename"));
 
     const blank = screen.getByDisplayValue("Late work");
@@ -184,13 +225,13 @@ describe("ThreadsMenu — renaming", () => {
   });
 });
 
-describe("ThreadsMenu — deleting", () => {
+describe("ThreadsList — deleting", () => {
   it("deletes the conversation the button belongs to", async () => {
     const del = vi
       .spyOn(apiClient, "delete")
       .mockResolvedValue({ data: {} } as never);
 
-    await openMenu([thread("b", "Late work")]);
+    draw([thread("b", "Late work")]);
     await userEvent.click(await screen.findByTitle("Delete"));
 
     expect(del).toHaveBeenCalledWith(
@@ -207,7 +248,7 @@ describe("ThreadsMenu — deleting", () => {
     );
     vi.spyOn(apiClient, "delete").mockResolvedValue({ data: {} } as never);
 
-    await openMenu([thread("a", "Grading questions")]);
+    draw([thread("a", "Grading questions")]);
     await userEvent.click(await screen.findByTitle("Delete"));
 
     expect(chat.startNewThread).toHaveBeenCalledOnce();
