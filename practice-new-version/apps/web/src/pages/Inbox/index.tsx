@@ -51,7 +51,7 @@ export const Inbox = () => {
       >
         <div
           className={cn(
-            "h-full min-w-0 flex flex-col overflow-hidden rounded-xl bg-panel",
+            "h-full min-w-0 flex flex-col overflow-hidden rounded-xl bg-panel min-w-[650px]",
             !isDragging && "transition-all duration-300 ease-in-out",
             isApp
               ? "w-0 opacity-0 lg:w-[var(--chat-ratio)] lg:opacity-100"
