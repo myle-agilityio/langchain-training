@@ -66,9 +66,8 @@ src/
 │   ├── ThreadsSidebar/  # Collapsible list, open by default — ChatPanel's expand/collapse button toggles it
 │   ├── openAIKey/       # BYOK — key form, chat gate card, change-key button
 │   ├── ModelPicker/     # Chat-model dropdown (GPT-4o mini/4o/4.1 mini/4.1)
-│   ├── ToolRendering/   # Tool-call reasoning renderer
 │   ├── common/          # Primitives: Badge, Button, Card, Dialog, DropdownMenu, Field, Spinner, Toast
-│   ├── generativeUI/    # EmailReplyCard (approve/reject) + one card per tool
+│   ├── generativeUI/    # EmailReplyCard (approve/reject) + one Shell card per tool (GenericToolCard is the wildcard fallback)
 │   └── declarativeGenerativeUI/  # A2UI catalog: definitions.ts, renderers.tsx, theme.ts
 ├── api/                 # The only place that talks HTTP
 │   ├── client.ts        # axios instance — JSON in/out, uniform "METHOD /path failed (status)"

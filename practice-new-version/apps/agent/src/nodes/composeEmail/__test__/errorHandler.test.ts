@@ -25,10 +25,12 @@ describe("composeEmailErrorHandler", () => {
     expect(command.update).toMatchObject({ emailId: "" });
   });
 
-  it("answers a dangling reply_to_email so the next turn's history stays valid", () => {
+  it("answers a dangling reply_to_email and routes back to call_model to narrate it", () => {
     const command = handle([replyCall], new AppError(ERROR_CODE.MODEL_TIMEOUT));
     const [message] = (command.update as { messages: ToolMessage[] }).messages;
 
+    // A ToolMessage never renders on its own — call_model must read it and tell the teacher.
+    expect(command.goto).toEqual(["call_model"]);
     expect(ToolMessage.isInstance(message)).toBe(true);
     expect(message.tool_call_id).toBe("call_1");
     expect(message.content).toContain(
@@ -45,6 +47,8 @@ describe("composeEmailErrorHandler", () => {
     );
     const [message] = (command.update as { messages: AIMessage[] }).messages;
 
+    // Already teacher-visible on its own — no need to route back through call_model.
+    expect(command.goto).toEqual([END]);
     expect(AIMessage.isInstance(message)).toBe(true);
     expect(message.content).toBe(
       ERRORS[ERROR_CODE.EMAIL_NOT_FOUND].userMessage,

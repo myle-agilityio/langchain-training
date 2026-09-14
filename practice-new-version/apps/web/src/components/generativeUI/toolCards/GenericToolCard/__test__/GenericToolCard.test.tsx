@@ -1,25 +1,22 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { ToolReasoning } from "..";
+import { GenericToolCard } from "..";
 
-const details = (): HTMLDetailsElement | null =>
-  document.querySelector("details");
-
-describe("ToolReasoning", () => {
+describe("GenericToolCard", () => {
   it("names the tool even when it was called with no arguments", () => {
-    render(<ToolReasoning name="count_emails" status="complete" />);
+    render(<GenericToolCard name="count_emails" status="complete" />);
 
     expect(screen.getByText("count_emails")).toBeInTheDocument();
-    expect(details()).toBeNull();
+    expect(screen.getByText("Done.")).toBeInTheDocument();
   });
 
   it("summarises each argument rather than dumping it", () => {
     render(
-      <ToolReasoning
+      <GenericToolCard
         name="get_emails"
         status="complete"
-        args={{
+        parameters={{
           sender: "Flo",
           ids: ["a", "b", "c"],
           filter: { status: "unread", urgency: "high" },
@@ -36,27 +33,30 @@ describe("ToolReasoning", () => {
     expect(screen.getByText("true")).toBeInTheDocument();
   });
 
-  it("opens the argument list while the tool is running", () => {
+  it("shows a pending state while the tool is still running", () => {
     render(
-      <ToolReasoning name="get_emails" status="executing" args={{ a: 1 }} />,
+      <GenericToolCard
+        name="get_emails"
+        status="executing"
+        parameters={{ a: 1 }}
+      />,
     );
 
-    expect(details()?.open).toBe(true);
+    expect(screen.getByText("Running…")).toBeInTheDocument();
   });
 
-  it("collapses it once the tool is done", () => {
+  it("shows the failure once the envelope reports one", () => {
     render(
-      <ToolReasoning name="get_emails" status="complete" args={{ a: 1 }} />,
+      <GenericToolCard
+        name="get_emails"
+        status="complete"
+        result={JSON.stringify({
+          ok: false,
+          error: { code: "EMAIL_NOT_FOUND", message: "no row for that id" },
+        })}
+      />,
     );
 
-    expect(details()?.open).toBe(false);
-  });
-
-  it("treats inProgress as running too", () => {
-    render(
-      <ToolReasoning name="get_emails" status="inProgress" args={{ a: 1 }} />,
-    );
-
-    expect(details()?.open).toBe(true);
+    expect(screen.getByText(/no longer in the inbox/i)).toBeInTheDocument();
   });
 });

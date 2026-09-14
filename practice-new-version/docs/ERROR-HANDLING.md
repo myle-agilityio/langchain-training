@@ -104,15 +104,15 @@ Response body is always:
 - `withNode(name, run)` wraps every node, `tools` included: log, then always rethrow. Every
   failure — expected or not — gets the same `retryPolicy: { maxAttempts: 3 }`; there's no
   per-error distinction.
-- `nodeErrorHandler` is as the post-retry backstop: log the chat notice via `errorNotice(appError)` and goes to `END`.
-- `compose_email`'s subgraph nodes throw freely — the parent node's handler covers them. That
-  node gets its own `composeEmailErrorHandler` instead. It answers via `findUnansweredReplyCall`
-  before going to `END`.
+- `nodeErrorHandler` is attached to every node except `compose_email` and `summarize` as the
+  post-retry backstop: builds the chat notice via `errorNotice(appError)` and goes to `END`.
+- `compose_email`'s subgraph nodes throw freely — the parent node's own `composeEmailErrorHandler`
+  covers them. A dangling `reply_to_email` call gets answered with a `ToolMessage`, then routes to
+  `call_model` to narrate it (a `ToolMessage` never shows as a chat bubble on its own). Already
+  answered → falls back to an `errorNotice` `AIMessage` and ends at `END` directly.
 - `summarize` gets its own `summarizeErrorHandler` too: it's a
   context-compaction optimization the turn doesn't depend on, so its failure shouldn't end the
-  run. It `Command`s straight to `call_model` with an empty
-  update — the old `summary` and the full, uncondensed `messages` are what `call_model` would've
-  used anyway.
+  run. It `Command`s straight to `call_model` with an empty update — the old `summary` and the full, uncondensed `messages` are what `call_model` would've used anyway.
 
 ### Tools ([tools/](../apps/agent/src/tools/))
 

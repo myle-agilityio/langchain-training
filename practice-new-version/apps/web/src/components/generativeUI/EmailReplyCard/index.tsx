@@ -8,6 +8,7 @@ import {
   Textarea,
 } from "@/components/common";
 import { Mail, Check, X, TriangleAlert } from "lucide-react";
+import { REPLY_DECISION } from "@repo/constants";
 import { usePatchEmail } from "@/hooks";
 
 export interface EmailReplyCardProps {
@@ -57,11 +58,13 @@ export const EmailReplyCard = ({
     respond?.(
       JSON.stringify({
         decision: "approve",
+        // ReplyToEmailCard matches REPLY_DECISION's value out of this text, so it stays in sync
+        // even if the sentence around it changes.
         instruction:
-          "The teacher approved this draft and it has been sent. The UI already shows a " +
-          "'Reply sent' confirmation with the subject. Do NOT repeat the draft body, the " +
-          "subject, the classification, or anything from the knowledge base. Reply with one " +
-          "friendly line confirming it was sent, then stop.",
+          `The teacher ${REPLY_DECISION.APPROVED} this draft and it has been sent. The UI ` +
+          "already shows a 'Reply sent' confirmation with the subject. Do NOT repeat the draft " +
+          "body, the subject, the classification, or anything from the knowledge base. Reply " +
+          "with one friendly line confirming it was sent, then stop.",
       }),
     );
   };
@@ -76,17 +79,18 @@ export const EmailReplyCard = ({
         // The draft as last seen (edits included) — the agent keeps it for a later "adjust it".
         subject,
         body,
+        // Same REPLY_DECISION-matching note as handleApprove above.
         instruction:
-          "The teacher rejected this draft and nothing was sent. Do NOT write another " +
-          "draft and do NOT call compose_reply again unless they explicitly ask. Reply " +
-          "with one polite line acknowledging it, then stop.",
+          `The teacher ${REPLY_DECISION.REJECTED} this draft and nothing was sent. Do NOT ` +
+          "write another draft and do NOT call compose_reply again unless they explicitly " +
+          "ask. Reply with one polite line acknowledging it, then stop.",
       }),
     );
   };
 
   if (decision === "approve") {
     return (
-      <Card className="max-w-md w-full mx-auto mb-4 overflow-hidden">
+      <Card className="w-full mb-4 overflow-hidden">
         <CardContent className="p-6">
           <div className="flex flex-col items-center text-center gap-3">
             <div className="flex items-center justify-center h-10 w-10 rounded-full bg-tone-green">
@@ -104,7 +108,7 @@ export const EmailReplyCard = ({
 
   if (decision === "reject") {
     return (
-      <Card className="max-w-md w-full mx-auto mb-4 overflow-hidden">
+      <Card className="w-full mb-4 overflow-hidden">
         <CardContent className="p-6">
           <div className="flex flex-col items-center text-center gap-3">
             <div className="flex items-center justify-center h-12 w-12 rounded-full bg-secondary">
@@ -125,7 +129,7 @@ export const EmailReplyCard = ({
   }
 
   return (
-    <Card className="max-w-md w-full mx-auto mb-4 overflow-hidden">
+    <Card className="w-full mb-4 overflow-hidden">
       <CardContent className="p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="flex items-center justify-center h-9 w-9 rounded-full bg-accent shrink-0">
