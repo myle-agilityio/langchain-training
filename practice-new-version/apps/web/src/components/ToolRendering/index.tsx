@@ -1,11 +1,13 @@
 import { useEffect, useRef } from "react";
-import { Wrench, Check, ChevronDown } from "lucide-react";
+import { Wrench, Check, ChevronDown, TriangleAlert } from "lucide-react";
 import { ToolBusyIndicator } from "@/components/generativeUI/toolCards/common";
+import { parseToolResult } from "@/utils";
 
 interface ToolReasoningProps {
   name: string;
   args?: object | unknown;
   status: string;
+  result?: string;
 }
 
 const formatValue = (value: unknown): string => {
@@ -24,10 +26,17 @@ const formatValue = (value: unknown): string => {
   return String(value);
 };
 
-export const ToolReasoning = ({ name, args, status }: ToolReasoningProps) => {
+export const ToolReasoning = ({
+  name,
+  args,
+  status,
+  result,
+}: ToolReasoningProps) => {
   const entries = args ? Object.entries(args) : [];
   const detailsRef = useRef<HTMLDetailsElement>(null);
   const isRunning = status === "executing" || status === "inProgress";
+  const envelope = parseToolResult(result);
+  const hasError = !!envelope && !envelope.ok;
 
   // Auto-open while executing, auto-close when complete
   useEffect(() => {
@@ -40,6 +49,8 @@ export const ToolReasoning = ({ name, args, status }: ToolReasoningProps) => {
 
   const statusIcon = isRunning ? (
     <ToolBusyIndicator />
+  ) : hasError ? (
+    <TriangleAlert className="h-3 w-3 text-tone-red" />
   ) : (
     <Check className="h-3 w-3 text-tone-green" />
   );

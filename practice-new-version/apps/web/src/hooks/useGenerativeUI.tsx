@@ -26,12 +26,19 @@ export const useGenerativeUIExamples = () => {
   ];
 
   useDefaultRenderTool({
-    render: ({ name, status, parameters }) => {
+    render: ({ name, status, parameters, result }) => {
       if (ignoredTools.includes(name)) {
         return <></>;
       }
 
-      return <ToolReasoning name={name} status={status} args={parameters} />;
+      return (
+        <ToolReasoning
+          name={name}
+          status={status}
+          args={parameters}
+          result={result}
+        />
+      );
     },
   });
 

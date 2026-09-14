@@ -50,6 +50,15 @@ export const NoArguments: Story = {
   args: { name: "get_inbox_summary", status: "complete" },
 };
 
+export const Errored: Story = {
+  args: {
+    name: "search_knowledge_base",
+    status: "complete",
+    args: { query: "late work policy" },
+    result: '{"ok":false,"error":{"code":"NOT_FOUND","message":"x"}}',
+  },
+};
+
 // Paused on the compose_reply interrupt: the spinner becomes the blinking dot — nothing is
 // running, the draft is waiting on the teacher.
 export const AwaitingApproval: Story = {
