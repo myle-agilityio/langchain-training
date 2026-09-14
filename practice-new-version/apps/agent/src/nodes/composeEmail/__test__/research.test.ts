@@ -12,7 +12,10 @@ vi.mock("@/rag", () => ({ searchKnowledge: mocks.searchKnowledge }));
 vi.mock("@/config", () => ({
   getEmbeddingsWithConfig: vi.fn(),
 }));
-vi.mock("@/utils", () => ({ fetchEmailById: mocks.fetchEmailById }));
+vi.mock("@/utils", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/utils")>()),
+  fetchEmailById: mocks.fetchEmailById,
+}));
 
 const state: ComposeEmailStateShape = {
   messages: [],

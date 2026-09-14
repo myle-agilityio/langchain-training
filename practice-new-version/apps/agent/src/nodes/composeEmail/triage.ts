@@ -6,43 +6,45 @@ import { needsResearchPrompt } from "@/prompts";
 import { classifyEmail } from "@/tools";
 import { NeedsResearchSchema, type ComposeEmailStateShape } from "@/types";
 import { fetchEmailById, findReplyCall } from "@/utils";
+import { withNode } from "../withNode";
 
 // triage — resolve the email, classify it (skipped if already on file), decide if drafting
 // needs KB research. A fixed node, not a tool, so the model can't skip classification.
-export const triage = async (
-  state: ComposeEmailStateShape,
-  config: LangGraphRunnableConfig,
-) => {
-  const call = findReplyCall(state.messages);
-  const id = (call?.args as { id?: string } | undefined)?.id ?? "";
-  const email = id ? await fetchEmailById(id) : null;
+export const triage = withNode(
+  "triage",
+  async (state: ComposeEmailStateShape, config: LangGraphRunnableConfig) => {
+    const call = findReplyCall(state.messages);
+    const id = (call?.args as { id?: string } | undefined)?.id ?? "";
+    const email = id ? await fetchEmailById(id) : null;
 
-  if (!email) {
-    // Answer the dangling tool call so the model can recover.
-    return {
-      emailId: "",
-      messages: [
-        new ToolMessage({
-          tool_call_id: call?.id ?? "unknown",
-          name: "reply_to_email",
-          content: `No email with id "${id}". Call get_emails for current ids, then retry.`,
-        }),
-      ],
-    };
-  }
+    if (!email) {
+      // Answer the dangling tool call so the model can recover.
+      return {
+        emailId: "",
+        messages: [
+          new ToolMessage({
+            tool_call_id: call?.id ?? "unknown",
+            name: "reply_to_email",
+            content: `No email with id "${id}". Call get_emails for current ids, then retry.`,
+          }),
+        ],
+      };
+    }
 
-  if (!email.classification) {
-    const result = await classifyEmail(id, config);
+    if (!email.classification) {
+      const result = await classifyEmail(id, config);
 
-    email.classification = result.ok ? result.classification : undefined;
-  }
+      email.classification = result.ok ? result.classification : undefined;
+    }
 
-  const { needsResearch } = await getPlainModelWithConfig(config)
-    .withStructuredOutput(NeedsResearchSchema)
-    .invoke(needsResearchPrompt(email), hidden(config));
+    const { needsResearch } = await getPlainModelWithConfig(config)
+      .withStructuredOutput(NeedsResearchSchema)
+      .invoke(needsResearchPrompt(email), hidden(config));
 
-  return { emailId: email.id, needsResearch };
-};
+    return { emailId: email.id, needsResearch };
+  },
+  { emailId: "" },
+);
 
 export const afterTriage = (state: ComposeEmailStateShape) => {
   if (!state.emailId) {
