@@ -81,6 +81,7 @@ export const toAppError = (
   if (
     name === "TimeoutError" ||
     name === "AbortError" ||
+    name === "NodeTimeoutError" ||
     code === "ETIMEDOUT"
   ) {
     return new AppError(ERROR_CODE.MODEL_TIMEOUT, options);

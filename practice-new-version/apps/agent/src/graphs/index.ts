@@ -48,17 +48,17 @@ export const buildGraph = async () => {
       timeout: { runTimeout: 60_000 },
     })
     .addNode("moderator", moderator, {
-      errorHandler: nodeErrorHandler("moderator"),
+      errorHandler: nodeErrorHandler,
     })
     .addNode("summarize", summarizeConversation, {
-      errorHandler: nodeErrorHandler("summarize"),
+      errorHandler: nodeErrorHandler,
     })
     .addNode("call_model", callModel, {
-      errorHandler: nodeErrorHandler("call_model"),
+      errorHandler: nodeErrorHandler,
     })
     .addNode("tools", runTools, {
       timeout: { runTimeout: 90_000 },
-      errorHandler: nodeErrorHandler("tools"),
+      errorHandler: nodeErrorHandler,
     })
     .addNode("compose_email", runComposeEmail, {
       errorHandler: composeEmailErrorHandler,

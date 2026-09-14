@@ -1,6 +1,6 @@
 import { AIMessage } from "@langchain/core/messages";
 import { END, type NodeError } from "@langchain/langgraph";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { AppError, ERROR_CODE, ERRORS, GENERIC_MESSAGE } from "@/errors";
 import { nodeErrorHandler } from "../errorHandler";
@@ -8,11 +8,7 @@ import { nodeErrorHandler } from "../errorHandler";
 const failure = (error: unknown): NodeError => ({ error }) as NodeError;
 
 const handle = (error: unknown) =>
-  nodeErrorHandler("moderator")({ messages: [] }, failure(error));
-
-beforeEach(() => {
-  vi.spyOn(console, "error").mockImplementation(() => {});
-});
+  nodeErrorHandler({ messages: [] }, failure(error));
 
 describe("nodeErrorHandler", () => {
   it("ends the run and clears the in-flight email", () => {

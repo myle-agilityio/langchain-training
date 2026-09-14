@@ -61,7 +61,7 @@ detailed JSON logs for developers, safe messages for the teacher.
 | `ZodError`                                                              | `VALIDATION_FAILED` (issue paths → `detail`) |
 | status `401` / `invalid_api_key`                                        | `API_KEY_REJECTED`                           |
 | status `429` / `rate_limit_exceeded`                                    | `RATE_LIMITED`                               |
-| `TimeoutError` / `AbortError` / `ETIMEDOUT`                             | `MODEL_TIMEOUT`                              |
+| `TimeoutError` / `AbortError` / `NodeTimeoutError` / `ETIMEDOUT`        | `MODEL_TIMEOUT`                              |
 | `OutputParserException`                                                 | `MODEL_OUTPUT_INVALID`                       |
 | pg `42P01` / `28P01` / `3D000` / `08006` / `ECONNREFUSED` / `ENOTFOUND` | `DB_UNAVAILABLE`                             |
 | anything else                                                           | `INTERNAL`                                   |
@@ -75,7 +75,7 @@ graph TD
     Log --> Route{"which layer?"}
 
     Route -- "HTTP route" --> Http["app.onError()"]
-    Route -- "graph node" --> Node["withNode / nodeErrorHandler"]
+    Route -- "graph node" --> Node["withNode (logs, rethrows) → retryPolicy → nodeErrorHandler (no log)"]
     Route -- "tool" --> Tool["defineTool wrapper"]
 
     Http --> HttpOut["{ error: { code, message, requestId } }"]
@@ -101,10 +101,10 @@ Response body is always:
 
 ### Graph ([nodes/](../apps/agent/src/nodes/))
 
-- `withNode(name, run)` wraps each node: log, then always rethrow. Every failure — expected or
-  not — gets the same `retryPolicy: { maxAttempts: 3 }`; there's no per-error distinction.
-- `nodeErrorHandler(name)` is attached to every node except `compose_email` as the post-retry
-  backstop: log once, notice the teacher via `errorNotice(appError)`, go to `END`.
+- `withNode(name, run)` wraps every node, `tools` included: log, then always rethrow. Every
+  failure — expected or not — gets the same `retryPolicy: { maxAttempts: 3 }`; there's no
+  per-error distinction.
+- `nodeErrorHandler` is attached to every node except `compose_email` as the post-retry backstop: log the chat notice via `errorNotice(appError)` and goes to `END`.
 - `compose_email`'s subgraph nodes throw freely — the parent node's handler covers them. That
   node gets its own `composeEmailErrorHandler` instead. It answers via `findUnansweredReplyCall` before going to `END`.
 

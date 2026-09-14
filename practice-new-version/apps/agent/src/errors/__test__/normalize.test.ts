@@ -112,6 +112,11 @@ describe("toAppError — foreign error shapes", () => {
     expect(toAppError({ name: "AbortError" }).code).toBe(
       ERROR_CODE.MODEL_TIMEOUT,
     );
+    // LangGraph's own node-level `timeout` option throws this — race against the node's
+    // invocation, outside withNode's try/catch, so it reaches toAppError unnormalized.
+    expect(toAppError({ name: "NodeTimeoutError" }).code).toBe(
+      ERROR_CODE.MODEL_TIMEOUT,
+    );
     expect(toAppError({ code: "ETIMEDOUT" }).code).toBe(
       ERROR_CODE.MODEL_TIMEOUT,
     );
