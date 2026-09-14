@@ -17,6 +17,9 @@ export const composeEmailErrorHandler = (
   // Need to find it and answer it with the error message.
   const call = findUnansweredReplyCall(state.messages);
 
+  // A ToolMessage never renders as a chat bubble on its own — call_model has to read it and
+  // narrate it to the teacher. An errorNotice AIMessage is already teacher-visible, so that
+  // branch can end the run directly.
   return new Command({
     update: {
       emailId: "",
@@ -29,6 +32,6 @@ export const composeEmailErrorHandler = (
           ]
         : errorNotice(appError),
     },
-    goto: END,
+    goto: call ? "call_model" : END,
   });
 };
