@@ -12,8 +12,40 @@ describe("ReplyToEmailCard", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows a reviewed label once the call has been answered", () => {
-    render(<ReplyToEmailCard status="complete" parameters={{ id: "e1" }} />);
+  it("reports an approval once the teacher sent it", () => {
+    render(
+      <ReplyToEmailCard
+        status="complete"
+        parameters={{ id: "e1" }}
+        result="The teacher approved this draft and it has been sent."
+      />,
+    );
+
+    expect(screen.getByText("Draft approved and sent.")).toBeInTheDocument();
+  });
+
+  it("reports a rejection once the teacher declined it", () => {
+    render(
+      <ReplyToEmailCard
+        status="complete"
+        parameters={{ id: "e1" }}
+        result="The teacher rejected this draft and nothing was sent."
+      />,
+    );
+
+    expect(
+      screen.getByText("Draft rejected — nothing sent."),
+    ).toBeInTheDocument();
+  });
+
+  it("falls back to a generic label for anything else (e.g. a failure)", () => {
+    render(
+      <ReplyToEmailCard
+        status="complete"
+        parameters={{ id: "e1" }}
+        result="That took too long to come back. Tell the teacher in one short line and stop."
+      />,
+    );
 
     expect(screen.getByText("Draft reviewed.")).toBeInTheDocument();
   });

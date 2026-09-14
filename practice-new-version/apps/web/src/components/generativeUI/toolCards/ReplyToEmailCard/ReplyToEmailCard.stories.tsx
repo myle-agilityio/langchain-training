@@ -21,4 +21,17 @@ type Story = StoryObj<typeof meta>;
 
 export const Drafting: Story = { args: { status: "executing" } };
 
-export const Reviewed: Story = { args: { status: "complete" } };
+export const Approved: Story = {
+  args: {
+    result: "The teacher approved this draft and it has been sent.",
+  },
+};
+
+export const Rejected: Story = {
+  args: {
+    result: "The teacher rejected this draft and nothing was sent.",
+  },
+};
+
+// e.g. composeEmailErrorHandler's failure text — doesn't match either known phrasing.
+export const Unrecognized: Story = { args: { status: "complete" } };
