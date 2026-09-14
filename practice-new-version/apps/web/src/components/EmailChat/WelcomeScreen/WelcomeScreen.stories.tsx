@@ -9,7 +9,7 @@ const meta = {
   tags: ["autodocs"],
   decorators: [
     (Story) => (
-      <div className="mx-auto h-dvh w-[420px] min-w-[320px] border-x border-border bg-panel">
+      <div className="mx-auto h-dvh w-[600px] min-w-[320px] border-x border-border bg-panel">
         <Story />
       </div>
     ),
