@@ -5,7 +5,7 @@ detailed JSON logs for developers, safe messages for the teacher.
 
 ## Principles
 
-- **One catalog.** Every failure is an `ErrorCode` with fixed status, wording, and retry policy.
+- **One catalog.** Every failure is an `ErrorCode` with fixed status and wording.
 - **One handler per layer.** HTTP middleware, node wrapper, tool wrapper — no scattered `try/catch`.
 - **Expected vs unexpected.** Expected errors explain themselves; unexpected ones return a generic line.
 - **Nothing leaks.** Stack traces, pg messages, API keys, and connection strings stay in the log.
@@ -16,7 +16,7 @@ detailed JSON logs for developers, safe messages for the teacher.
 | Concern                                                          | Location                                                                                                                                                                                                               |
 | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Codes                                                            | [errors/codes.ts](../apps/agent/src/errors/codes.ts)                                                                                                                                                                   |
-| Catalog (status, wording, retry)                                 | [errors/catalog.ts](../apps/agent/src/errors/catalog.ts)                                                                                                                                                               |
+| Catalog (status, wording)                                        | [errors/catalog.ts](../apps/agent/src/errors/catalog.ts)                                                                                                                                                               |
 | `AppError`                                                       | [errors/AppError.ts](../apps/agent/src/errors/AppError.ts)                                                                                                                                                             |
 | `toAppError` — the only place foreign error shapes are inspected | [errors/normalize.ts](../apps/agent/src/errors/normalize.ts)                                                                                                                                                           |
 | JSON logger                                                      | [logging/logger.ts](../apps/agent/src/logging/logger.ts)                                                                                                                                                               |
@@ -32,25 +32,24 @@ detailed JSON logs for developers, safe messages for the teacher.
 ## The catalog
 
 `expected: false` → the user sees `GENERIC_MESSAGE`, never the real message.
-`retryable: true` → the node wrapper rethrows so LangGraph's `retryPolicy` still applies.
 
-| Code                        | Status | Expected | Retryable |
-| --------------------------- | ------ | -------- | --------- |
-| `VALIDATION_FAILED`         | 400    | ✅       | ❌        |
-| `EMAIL_NOT_FOUND`           | 404    | ✅       | ❌        |
-| `THREAD_NOT_FOUND`          | 404    | ✅       | ❌        |
-| `SENDER_NOT_FOUND`          | 404    | ✅       | ❌        |
-| `SENDER_AMBIGUOUS`          | 409    | ✅       | ❌        |
-| `STATUS_TRANSITION_INVALID` | 409    | ✅       | ❌        |
-| `API_KEY_MISSING`           | 401    | ✅       | ❌        |
-| `API_KEY_REJECTED`          | 401    | ✅       | ❌        |
-| `RATE_LIMITED`              | 429    | ✅       | ✅        |
-| `MODEL_TIMEOUT`             | 504    | ✅       | ✅        |
-| `MODEL_OUTPUT_INVALID`      | 502    | ✅       | ✅        |
-| `NOT_FOUND`                 | 404    | ✅       | ❌        |
-| `DB_UNAVAILABLE`            | 503    | ❌       | ✅        |
-| `CONFIG_INVALID`            | 500    | ❌       | ❌        |
-| `INTERNAL`                  | 500    | ❌       | ❌        |
+| Code                        | Status | Expected |
+| --------------------------- | ------ | -------- |
+| `VALIDATION_FAILED`         | 400    | ✅       |
+| `EMAIL_NOT_FOUND`           | 404    | ✅       |
+| `THREAD_NOT_FOUND`          | 404    | ✅       |
+| `SENDER_NOT_FOUND`          | 404    | ✅       |
+| `SENDER_AMBIGUOUS`          | 409    | ✅       |
+| `STATUS_TRANSITION_INVALID` | 409    | ✅       |
+| `API_KEY_MISSING`           | 401    | ✅       |
+| `API_KEY_REJECTED`          | 401    | ✅       |
+| `RATE_LIMITED`              | 429    | ✅       |
+| `MODEL_TIMEOUT`             | 504    | ✅       |
+| `MODEL_OUTPUT_INVALID`      | 502    | ✅       |
+| `NOT_FOUND`                 | 404    | ✅       |
+| `DB_UNAVAILABLE`            | 503    | ❌       |
+| `CONFIG_INVALID`            | 500    | ❌       |
+| `INTERNAL`                  | 500    | ❌       |
 
 ### Normalization
 
@@ -102,11 +101,10 @@ Response body is always:
 
 ### Graph ([nodes/](../apps/agent/src/nodes/))
 
-- `withNode(name, run, terminalUpdate?)` wraps each node:
-  - retryable → rethrow, so `retryPolicy: { maxAttempts: 3 }` still runs.
-  - terminal → return `errorNotice(appError)`, ending the turn with usable chat text.
+- `withNode(name, run)` wraps each node: log, then always rethrow. Every failure — expected or
+  not — gets the same `retryPolicy: { maxAttempts: 3 }`; there's no per-error distinction.
 - `nodeErrorHandler(name)` is attached to every node except `compose_email` as the post-retry
-  backstop: log once, notice the teacher, go to `END`.
+  backstop: log once, notice the teacher via `errorNotice(appError)`, go to `END`.
 - `compose_email`'s subgraph nodes throw freely — the parent node's handler covers them. That
   node gets its own `composeEmailErrorHandler` instead. It answers via `findUnansweredReplyCall` before going to `END`.
 
@@ -174,7 +172,7 @@ One JSON line per event, `console.log/warn/error`:
 ## Adding a new error
 
 1. Add the code to `errors/codes.ts`.
-2. Add its row to `errors/catalog.ts` (status, `expected`, `retryable`, `userMessage`, `recovery?`).
+2. Add its row to `errors/catalog.ts` (status, `expected`, `userMessage`, `recovery?`).
 3. If it comes from a library, add the mapping to `errors/normalize.ts`.
 4. If the UI shows it, add the wording to `apps/web/src/constants/errors.ts`.
 5. `throw new AppError(ERROR_CODE.X, { detail })` — never `throw new Error()`.

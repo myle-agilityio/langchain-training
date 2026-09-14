@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { AppError, ERROR_CODE, ERRORS, GENERIC_MESSAGE } from "@/errors";
+import { AppError, ERROR_CODE } from "@/errors";
 import { withNode } from "../withNode";
 
 const config = { configurable: { thread_id: "t1" } };
@@ -33,50 +33,24 @@ describe("withNode", () => {
     );
   });
 
-  it("rethrows a retryable failure so the graph's retry policy still applies", async () => {
-    const node = withNode("triage", async () => {
-      throw new AppError(ERROR_CODE.RATE_LIMITED);
-    });
-
-    await expect(node({}, config)).rejects.toMatchObject({
-      code: ERROR_CODE.RATE_LIMITED,
-    });
-  });
-
-  it("ends the turn with chat text on a terminal failure", async () => {
+  it("rethrows any AppError so the graph's retry policy and nodeErrorHandler still apply", async () => {
     const node = withNode("triage", async () => {
       throw new AppError(ERROR_CODE.EMAIL_NOT_FOUND);
     });
-    const result = (await node({}, config)) as {
-      messages: { content: string }[];
-    };
 
-    expect(result.messages[0].content).toBe(
-      ERRORS[ERROR_CODE.EMAIL_NOT_FOUND].userMessage,
-    );
+    await expect(node({}, config)).rejects.toMatchObject({
+      code: ERROR_CODE.EMAIL_NOT_FOUND,
+    });
   });
 
-  it("writes the extra state a node asked for alongside the notice", async () => {
-    const node = withNode(
-      "moderator",
-      async () => {
-        throw new AppError(ERROR_CODE.EMAIL_NOT_FOUND);
-      },
-      { blocked: true },
-    );
-
-    await expect(node({}, config)).resolves.toMatchObject({ blocked: true });
-  });
-
-  it("never lets an unexpected failure describe itself in chat", async () => {
+  it("normalizes an unexpected failure before rethrowing it", async () => {
     const node = withNode("triage", async () => {
       throw new Error("pool exhausted at pg.js:41");
     });
-    const result = (await node({}, config)) as {
-      messages: { content: string }[];
-    };
 
-    expect(result.messages[0].content).toBe(GENERIC_MESSAGE);
+    await expect(node({}, config)).rejects.toMatchObject({
+      code: ERROR_CODE.INTERNAL,
+    });
   });
 
   it("logs a failure once, with the node name and timing", async () => {
@@ -84,7 +58,7 @@ describe("withNode", () => {
       throw new AppError(ERROR_CODE.EMAIL_NOT_FOUND);
     });
 
-    await node({}, config);
+    await expect(node({}, config)).rejects.toThrow();
 
     expect(console.error).toHaveBeenCalledTimes(1);
     expect(lastLog(vi.mocked(console.error))).toMatchObject({ node: "triage" });

@@ -33,10 +33,6 @@ export class AppError extends Error {
     return this.spec.status;
   }
 
-  get retryable(): boolean {
-    return this.spec.retryable;
-  }
-
   // What a human may see. Unexpected errors never describe themselves.
   get userMessage(): string {
     return this.expected ? this.spec.userMessage : GENERIC_MESSAGE;

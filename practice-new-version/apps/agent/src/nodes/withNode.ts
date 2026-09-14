@@ -1,17 +1,14 @@
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
 import { logError, logInfo } from "@/logging";
-import { errorNotice, threadIdOf } from "@/utils";
+import { threadIdOf } from "@/utils";
 
-// The one try/catch every node runs behind. Retryable failures are rethrown so the graph's
-// retryPolicy still applies; a terminal expected failure ends the turn with chat text the
-// teacher can act on instead of a dead run.
+// The one try/catch every node runs behind: log success/failure, then always rethrow. Every
+// failure gets the same `retryPolicy` (maxAttempts: 3) and, once that's exhausted,
+// `nodeErrorHandler` ends the turn with chat text — no per-error distinction.
 export const withNode = <S, R>(
   name: string,
   run: (state: S, config: LangGraphRunnableConfig) => Promise<R>,
-  // Extra state written alongside the notice when a node ends on an error (moderator sets
-  // blocked, so the failed turn doesn't fall through into call_model and fail twice).
-  terminalUpdate: Record<string, unknown> = {},
 ) => {
   return async (state: S, config: LangGraphRunnableConfig) => {
     const startedAt = Date.now();
@@ -34,11 +31,7 @@ export const withNode = <S, R>(
         durationMs: Date.now() - startedAt,
       });
 
-      if (appError.retryable) {
-        throw appError;
-      }
-
-      return { ...terminalUpdate, messages: errorNotice(appError) };
+      throw appError;
     }
   };
 };

@@ -5,11 +5,10 @@ import { ERRORS, GENERIC_MESSAGE } from "../catalog";
 import { ERROR_CODE } from "../codes";
 
 describe("AppError", () => {
-  it("reads status, retryability and expectedness off the catalog", () => {
+  it("reads status and expectedness off the catalog", () => {
     const error = new AppError(ERROR_CODE.RATE_LIMITED);
 
     expect(error.status).toBe(ERRORS[ERROR_CODE.RATE_LIMITED].status);
-    expect(error.retryable).toBe(ERRORS[ERROR_CODE.RATE_LIMITED].retryable);
     expect(error.expected).toBe(true);
     expect(error.name).toBe("AppError");
   });

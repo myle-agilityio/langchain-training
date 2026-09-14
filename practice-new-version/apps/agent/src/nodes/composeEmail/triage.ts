@@ -43,7 +43,6 @@ export const triage = withNode(
 
     return { emailId: email.id, needsResearch };
   },
-  { emailId: "" },
 );
 
 export const afterTriage = (state: ComposeEmailStateShape) => {

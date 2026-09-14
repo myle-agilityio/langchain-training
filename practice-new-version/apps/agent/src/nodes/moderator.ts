@@ -58,7 +58,6 @@ export const moderator = withNode(
       ],
     };
   },
-  { blocked: true },
 );
 
 // Ends if the message was flagged; otherwise skips straight to call_model for short threads and
