@@ -54,7 +54,6 @@ interface InboxListProps {
   onRefresh: () => void;
   onMarkAllRead: () => void;
   onMarkAllUnread: () => void;
-  selectedId: string | null;
   onSelect: (email: Email) => void;
   onToggleRead: (email: Email) => void;
   hasMore: boolean;
@@ -76,7 +75,6 @@ export const InboxList = ({
   onRefresh,
   onMarkAllRead,
   onMarkAllUnread,
-  selectedId,
   onSelect,
   onToggleRead,
   hasMore,
@@ -162,9 +160,8 @@ export const InboxList = ({
       ) : (
         emails.map((email) => {
           const isUnread = email.status === "unread";
-          const isSelected = email.id === selectedId;
           // Rail hue tracks urgency once classified; before that it falls back to the brand
-          // lilac so selection is still visible on an untriaged inbox.
+          // lilac.
           const railTone = email.classification
             ? URGENCY_TONE[email.classification.urgency]
             : FALLBACK_TONE;
@@ -187,9 +184,7 @@ export const InboxList = ({
               className={cn(
                 "group flex w-full items-center px-4 py-3 text-left transition-colors cursor-pointer",
                 railTone,
-                isSelected
-                  ? "border-b border-border bg-card shadow-[inset_3px_0_0_0_var(--tone)]"
-                  : "border-b border-border hover:bg-secondary/50",
+                "border-b border-border hover:bg-secondary/50",
               )}
             >
               <div className="mr-2 flex min-w-0 flex-1 items-center overflow-hidden">

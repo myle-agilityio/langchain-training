@@ -35,7 +35,6 @@ const draw = (overrides: Partial<Props> = {}) => {
     isError: false,
     isFiltered: false,
     isRefreshing: false,
-    selectedId: null,
     hasMore: false,
     isLoadingMore: false,
     isLoadMoreError: false,

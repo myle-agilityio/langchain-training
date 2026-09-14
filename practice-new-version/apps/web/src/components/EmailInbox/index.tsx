@@ -270,7 +270,6 @@ export const EmailInbox = () => {
             onRefresh={refresh}
             onMarkAllRead={markAllRead}
             onMarkAllUnread={markAllUnread}
-            selectedId={selectedId}
             onSelect={selectEmail}
             onToggleRead={toggleRead}
             hasMore={hasMore}

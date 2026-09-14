@@ -28,7 +28,6 @@ const meta = {
     onRefresh: noop,
     onMarkAllRead: noop,
     onMarkAllUnread: noop,
-    selectedId: null,
     onSelect: noop,
     onToggleRead: noop,
     hasMore: false,
@@ -42,10 +41,9 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-// Click a row: selection, the header's mark-all buttons and the per-row menu are all wired here.
+// Click a row: the header's mark-all buttons and the per-row menu are all wired here.
 export const Default: Story = {
-  render: function SelectableList(args) {
-    const [selectedId, setSelectedId] = useState<string | null>(null);
+  render: function InteractiveList(args) {
     const [emails, setEmails] = useState<Email[]>(args.emails);
 
     const toggleRead = (email: Email) =>
@@ -61,8 +59,6 @@ export const Default: Story = {
       <InboxList
         {...args}
         emails={emails}
-        selectedId={selectedId}
-        onSelect={(email) => setSelectedId(email.id)}
         onToggleRead={toggleRead}
         onMarkAllRead={() =>
           setEmails((rows) =>
@@ -81,10 +77,6 @@ export const Default: Story = {
       />
     );
   },
-};
-
-export const Selected: Story = {
-  args: { selectedId: sampleEmails[1].id },
 };
 
 export const Loading: Story = { args: { isLoading: true, emails: [] } };
