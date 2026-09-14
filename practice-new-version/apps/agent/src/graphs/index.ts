@@ -16,6 +16,7 @@ import {
   nodeErrorHandler,
   routeAfterModel,
   summarizeConversation,
+  withNode,
 } from "@/nodes";
 import { ensureIndexed } from "@/rag";
 import { AgentState } from "@/state";
@@ -31,15 +32,13 @@ const runComposeEmail = async (
   return composeEmailSubgraph.invoke(state, config);
 };
 
-// Same wrapping reason as runComposeEmail — a bare ToolNode plus an options argument doesn't
-// type-check as a node action.
 const toolNode = new ToolNode(executableTools);
-const runTools = async (
-  state: typeof AgentState.State,
-  config: LangGraphRunnableConfig,
-) => {
-  return toolNode.invoke(state, config);
-};
+const runTools = withNode(
+  "tools",
+  async (state: typeof AgentState.State, config: LangGraphRunnableConfig) => {
+    return toolNode.invoke(state, config);
+  },
+);
 
 // Build the email assistant graph: a ReAct loop with the compose-email subgraph as a node.
 export const buildGraph = async () => {
