@@ -82,10 +82,10 @@ src/
 ├── nodes/
 │   ├── callModel.ts      # Model call + routeAfterModel (tools / compose_email / END)
 │   ├── moderator.ts      # Hard block on unsafe input + afterModeration router
-│   ├── errorHandler.ts   # nodeErrorHandler — last line of defence, attached to every node
+│   ├── errorHandler.ts   # nodeErrorHandler — last line of defence for every node but compose_email
 │   ├── withNode.ts       # Shared try/catch every node runs behind (logging + retry semantics)
 │   └── composeEmail/     # triage, research, writeDraft, checkCompliance,
-│                         #   requestApproval (interrupt()), errorHandler
+│                         #   requestApproval (interrupt()), errorHandler (composeEmailErrorHandler)
 ├── tools/                # One file per tool; index.ts splits modelTools vs executableTools
 │                         #   (reply_to_email is routing-only — the ToolNode never runs it)
 ├── prompts/              # Every prompt string: systemPrompt, classify, composeEmail, moderation

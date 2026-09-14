@@ -11,6 +11,7 @@ import { logError, logInfo } from "@/logging";
 import {
   afterModeration,
   callModel,
+  composeEmailErrorHandler,
   moderator,
   nodeErrorHandler,
   routeAfterModel,
@@ -61,7 +62,7 @@ export const buildGraph = async () => {
       errorHandler: nodeErrorHandler("tools"),
     })
     .addNode("compose_email", runComposeEmail, {
-      errorHandler: nodeErrorHandler("compose_email"),
+      errorHandler: composeEmailErrorHandler,
     })
 
     .addEdge(START, "moderator")

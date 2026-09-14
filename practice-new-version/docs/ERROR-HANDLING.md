@@ -13,21 +13,21 @@ detailed JSON logs for developers, safe messages for the teacher.
 
 ## Where things live
 
-| Concern                                                          | Location                                                                                                                   |
-| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Codes                                                            | [errors/codes.ts](../apps/agent/src/errors/codes.ts)                                                                       |
-| Catalog (status, wording, retry)                                 | [errors/catalog.ts](../apps/agent/src/errors/catalog.ts)                                                                   |
-| `AppError`                                                       | [errors/AppError.ts](../apps/agent/src/errors/AppError.ts)                                                                 |
-| `toAppError` — the only place foreign error shapes are inspected | [errors/normalize.ts](../apps/agent/src/errors/normalize.ts)                                                               |
-| JSON logger                                                      | [logging/logger.ts](../apps/agent/src/logging/logger.ts)                                                                   |
-| Secret/PII scrubbing                                             | [utils/redaction.ts](../apps/agent/src/utils/redaction.ts)                                                                 |
-| HTTP middleware                                                  | [http/middleware/](../apps/agent/src/http/middleware/)                                                                     |
-| Request schemas                                                  | [http/schemas.ts](../apps/agent/src/http/schemas.ts)                                                                       |
-| Node wrapper + handler                                           | [nodes/withNode.ts](../apps/agent/src/nodes/withNode.ts), [nodes/errorHandler.ts](../apps/agent/src/nodes/errorHandler.ts) |
-| Tool wrapper                                                     | [tools/defineTool.ts](../apps/agent/src/tools/defineTool.ts)                                                               |
-| Web `ApiError` + logger                                          | [lib/errors.ts](../apps/web/src/lib/errors.ts), [lib/logger.ts](../apps/web/src/lib/logger.ts)                             |
-| Web UI wording                                                   | [constants/errors.ts](../apps/web/src/constants/errors.ts)                                                                 |
-| Toast                                                            | [stores/useToast.ts](../apps/web/src/stores/useToast.ts), [common/Toast/](../apps/web/src/components/common/Toast/)        |
+| Concern                                                          | Location                                                                                                                                                                                                               |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codes                                                            | [errors/codes.ts](../apps/agent/src/errors/codes.ts)                                                                                                                                                                   |
+| Catalog (status, wording, retry)                                 | [errors/catalog.ts](../apps/agent/src/errors/catalog.ts)                                                                                                                                                               |
+| `AppError`                                                       | [errors/AppError.ts](../apps/agent/src/errors/AppError.ts)                                                                                                                                                             |
+| `toAppError` — the only place foreign error shapes are inspected | [errors/normalize.ts](../apps/agent/src/errors/normalize.ts)                                                                                                                                                           |
+| JSON logger                                                      | [logging/logger.ts](../apps/agent/src/logging/logger.ts)                                                                                                                                                               |
+| Secret/PII scrubbing                                             | [utils/redaction.ts](../apps/agent/src/utils/redaction.ts)                                                                                                                                                             |
+| HTTP middleware                                                  | [http/middleware/](../apps/agent/src/http/middleware/)                                                                                                                                                                 |
+| Request schemas                                                  | [http/schemas.ts](../apps/agent/src/http/schemas.ts)                                                                                                                                                                   |
+| Node wrapper + handler                                           | [nodes/withNode.ts](../apps/agent/src/nodes/withNode.ts), [nodes/errorHandler.ts](../apps/agent/src/nodes/errorHandler.ts), [nodes/composeEmail/errorHandler.ts](../apps/agent/src/nodes/composeEmail/errorHandler.ts) |
+| Tool wrapper                                                     | [tools/defineTool.ts](../apps/agent/src/tools/defineTool.ts)                                                                                                                                                           |
+| Web `ApiError` + logger                                          | [lib/errors.ts](../apps/web/src/lib/errors.ts), [lib/logger.ts](../apps/web/src/lib/logger.ts)                                                                                                                         |
+| Web UI wording                                                   | [constants/errors.ts](../apps/web/src/constants/errors.ts)                                                                                                                                                             |
+| Toast                                                            | [stores/useToast.ts](../apps/web/src/stores/useToast.ts), [common/Toast/](../apps/web/src/components/common/Toast/)                                                                                                    |
 
 ## The catalog
 
@@ -105,9 +105,10 @@ Response body is always:
 - `withNode(name, run, terminalUpdate?)` wraps each node:
   - retryable → rethrow, so `retryPolicy: { maxAttempts: 3 }` still runs.
   - terminal → return `errorNotice(appError)`, ending the turn with usable chat text.
-- `nodeErrorHandler(name)` is attached to every node as the post-retry backstop. It answers any
-  dangling `reply_to_email` call (via `findUnansweredReplyCall`) and goes to `END`.
-- `compose_email`'s subgraph nodes throw freely — the parent node's handler covers them.
+- `nodeErrorHandler(name)` is attached to every node except `compose_email` as the post-retry
+  backstop: log once, notice the teacher, go to `END`.
+- `compose_email`'s subgraph nodes throw freely — the parent node's handler covers them. That
+  node gets its own `composeEmailErrorHandler` instead. It answers via `findUnansweredReplyCall` before going to `END`.
 
 ### Tools ([tools/](../apps/agent/src/tools/))
 

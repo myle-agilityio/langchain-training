@@ -32,6 +32,7 @@ export const requestApproval = async (state: ComposeEmailStateShape) => {
         }
       : null;
 
+  // Find the dangling reply_to_email call
   const call = findReplyCall(state.messages);
 
   return {
