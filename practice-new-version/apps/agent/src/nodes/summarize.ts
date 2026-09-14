@@ -2,7 +2,11 @@ import {
   ChatPromptTemplate,
   MessagesPlaceholder,
 } from "@langchain/core/prompts";
-import type { LangGraphRunnableConfig } from "@langchain/langgraph";
+import {
+  Command,
+  type LangGraphRunnableConfig,
+  type NodeError,
+} from "@langchain/langgraph";
 
 import { getPlainModelWithConfig, hidden } from "@/config";
 import { KEEP_RECENT_COUNT } from "@/constants";
@@ -48,3 +52,10 @@ export const summarizeConversation = withNode(
     };
   },
 );
+
+// If summarize fails, skip straight to call_model with the summary/messages left untouched
+// (the old summary plus the full, uncondensed recent history call_model would use anyway).
+export const summarizeErrorHandler = (
+  _state: AgentStateShape,
+  _error: NodeError,
+) => new Command({ update: {}, goto: "call_model" });

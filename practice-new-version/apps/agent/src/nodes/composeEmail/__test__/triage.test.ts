@@ -58,9 +58,9 @@ const replyCall = (id: string) =>
 
 describe("afterTriage", () => {
   it("ends the subgraph when triage matched no email", () => {
-    expect(
-      afterTriage(routeState({ emailId: "", needsResearch: true })),
-    ).toBe(END);
+    expect(afterTriage(routeState({ emailId: "", needsResearch: true }))).toBe(
+      END,
+    );
   });
 
   it("researches first when the draft needs grounding", () => {

@@ -16,6 +16,7 @@ import {
   nodeErrorHandler,
   routeAfterModel,
   summarizeConversation,
+  summarizeErrorHandler,
   withNode,
 } from "@/nodes";
 import { ensureIndexed } from "@/rag";
@@ -51,7 +52,7 @@ export const buildGraph = async () => {
       errorHandler: nodeErrorHandler,
     })
     .addNode("summarize", summarizeConversation, {
-      errorHandler: nodeErrorHandler,
+      errorHandler: summarizeErrorHandler,
     })
     .addNode("call_model", callModel, {
       errorHandler: nodeErrorHandler,
