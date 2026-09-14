@@ -86,7 +86,7 @@ export const EmailReplyCard = ({
 
   if (decision === "approve") {
     return (
-      <Card className="max-w-md w-full mx-auto mb-4 overflow-hidden">
+      <Card className="w-full mb-4 overflow-hidden">
         <CardContent className="p-6">
           <div className="flex flex-col items-center text-center gap-3">
             <div className="flex items-center justify-center h-10 w-10 rounded-full bg-tone-green">
@@ -104,7 +104,7 @@ export const EmailReplyCard = ({
 
   if (decision === "reject") {
     return (
-      <Card className="max-w-md w-full mx-auto mb-4 overflow-hidden">
+      <Card className="w-full mb-4 overflow-hidden">
         <CardContent className="p-6">
           <div className="flex flex-col items-center text-center gap-3">
             <div className="flex items-center justify-center h-12 w-12 rounded-full bg-secondary">
@@ -125,7 +125,7 @@ export const EmailReplyCard = ({
   }
 
   return (
-    <Card className="max-w-md w-full mx-auto mb-4 overflow-hidden">
+    <Card className="w-full mb-4 overflow-hidden">
       <CardContent className="p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="flex items-center justify-center h-9 w-9 rounded-full bg-accent shrink-0">
