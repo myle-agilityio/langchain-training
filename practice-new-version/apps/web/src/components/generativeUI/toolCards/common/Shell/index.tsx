@@ -10,14 +10,14 @@ export const Shell = ({
   hasError = false,
   // Overrides the default complete-state icon (Check/TriangleAlert) — for an outcome that's
   // neither a plain success nor an error, e.g. ReplyToEmailCard's rejected-draft X.
-  statusIcon,
+  customStatusIcon,
   children,
 }: {
   icon: ComponentType<{ className?: string }>;
   title: string;
   status: ToolStatus;
   hasError?: boolean;
-  statusIcon?: ReactNode;
+  customStatusIcon?: ReactNode;
   children: React.ReactNode;
 }) => {
   return (
@@ -30,8 +30,8 @@ export const Shell = ({
         <span className="ml-auto shrink-0">
           {status !== "complete" ? (
             <ToolBusyIndicator />
-          ) : statusIcon ? (
-            statusIcon
+          ) : customStatusIcon ? (
+            customStatusIcon
           ) : hasError ? (
             <TriangleAlert className="h-3 w-3 text-tone-red" />
           ) : (

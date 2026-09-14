@@ -19,7 +19,7 @@ export const ReplyToEmailCard = ({
       icon={Reply}
       title="Draft reply"
       status={status}
-      statusIcon={
+      customStatusIcon={
         rejected ? <X className="h-3 w-3 text-muted-foreground" /> : undefined
       }
     >

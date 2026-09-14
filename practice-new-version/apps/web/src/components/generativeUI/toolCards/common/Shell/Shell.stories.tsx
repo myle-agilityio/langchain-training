@@ -41,6 +41,6 @@ export const Errored: Story = { args: { hasError: true } };
 // A custom outcome that's neither a plain success nor an error, e.g. a rejected draft.
 export const CustomStatusIcon: Story = {
   args: {
-    statusIcon: <X className="h-3 w-3 text-muted-foreground" />,
+    customStatusIcon: <X className="h-3 w-3 text-muted-foreground" />,
   },
 };
