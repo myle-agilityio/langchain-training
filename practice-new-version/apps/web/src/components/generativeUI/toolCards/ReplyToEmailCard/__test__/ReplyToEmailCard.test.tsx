@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
+import { REPLY_DECISION } from "@repo/constants";
 import { ReplyToEmailCard } from "..";
 
 describe("ReplyToEmailCard", () => {
@@ -17,7 +18,7 @@ describe("ReplyToEmailCard", () => {
       <ReplyToEmailCard
         status="complete"
         parameters={{ id: "e1" }}
-        result="The teacher approved this draft and it has been sent."
+        result={`The teacher ${REPLY_DECISION.APPROVED} this draft and it has been sent.`}
       />,
     );
 
@@ -29,7 +30,7 @@ describe("ReplyToEmailCard", () => {
       <ReplyToEmailCard
         status="complete"
         parameters={{ id: "e1" }}
-        result="The teacher rejected this draft and nothing was sent."
+        result={`The teacher ${REPLY_DECISION.REJECTED} this draft and nothing was sent.`}
       />,
     );
 

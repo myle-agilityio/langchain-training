@@ -1,4 +1,4 @@
-import type { ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { Check, TriangleAlert } from "lucide-react";
 import { ToolBusyIndicator } from "../ToolBusyIndicator";
 import type { ToolStatus } from "@/types";
@@ -8,12 +8,16 @@ export const Shell = ({
   title,
   status,
   hasError = false,
+  // Overrides the default complete-state icon (Check/TriangleAlert) — for an outcome that's
+  // neither a plain success nor an error, e.g. ReplyToEmailCard's rejected-draft X.
+  statusIcon,
   children,
 }: {
   icon: ComponentType<{ className?: string }>;
   title: string;
   status: ToolStatus;
   hasError?: boolean;
+  statusIcon?: ReactNode;
   children: React.ReactNode;
 }) => {
   return (
@@ -26,6 +30,8 @@ export const Shell = ({
         <span className="ml-auto shrink-0">
           {status !== "complete" ? (
             <ToolBusyIndicator />
+          ) : statusIcon ? (
+            statusIcon
           ) : hasError ? (
             <TriangleAlert className="h-3 w-3 text-tone-red" />
           ) : (

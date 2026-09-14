@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Inbox } from "lucide-react";
+import { Inbox, X } from "lucide-react";
 import { Shell } from ".";
 
 const meta = {
@@ -37,3 +37,10 @@ export const Complete: Story = {};
 export const Running: Story = { args: { status: "executing" } };
 
 export const Errored: Story = { args: { hasError: true } };
+
+// A custom outcome that's neither a plain success nor an error, e.g. a rejected draft.
+export const CustomStatusIcon: Story = {
+  args: {
+    statusIcon: <X className="h-3 w-3 text-muted-foreground" />,
+  },
+};
