@@ -10,7 +10,7 @@ export const Toaster = () => {
   }
 
   return (
-    <div className="pointer-events-none fixed bottom-4 right-4 z-50 flex w-80 max-w-[calc(100vw-2rem)] flex-col gap-2">
+    <div className="pointer-events-none fixed bottom-4 right-4 z-50 flex w-96 max-w-[calc(100vw-2rem)] flex-col gap-2">
       {toasts.map((toast) => (
         <ToastRow key={toast.id} toast={toast} />
       ))}
