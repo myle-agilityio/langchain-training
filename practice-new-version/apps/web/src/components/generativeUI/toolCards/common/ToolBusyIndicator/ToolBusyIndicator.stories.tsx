@@ -6,6 +6,7 @@ const meta = {
   title: "Tool cards/Common/ToolBusyIndicator",
   component: ToolBusyIndicator,
   tags: ["autodocs"],
+  parameters: { docs: { story: { inline: false } } },
 } satisfies Meta<typeof ToolBusyIndicator>;
 
 export default meta;

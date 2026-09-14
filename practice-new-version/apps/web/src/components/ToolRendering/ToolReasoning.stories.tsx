@@ -6,6 +6,7 @@ const meta = {
   title: "Chat/ToolReasoning",
   component: ToolReasoning,
   tags: ["autodocs"],
+  parameters: { docs: { story: { inline: false } } },
   decorators: [
     (Story) => (
       <div className="w-96">
