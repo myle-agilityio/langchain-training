@@ -35,7 +35,12 @@ export const GetEmailsCard = ({
   );
 
   return (
-    <Shell icon={Inbox} title="Read inbox" status={status}>
+    <Shell
+      icon={Inbox}
+      title="Read inbox"
+      status={status}
+      hasError={!!envelope && !envelope.ok}
+    >
       <FilterChips filter={filter} />
       {!envelope ? (
         <Pending label="Fetching emails…" />

@@ -35,3 +35,5 @@ type Story = StoryObj<typeof meta>;
 export const Complete: Story = {};
 
 export const Running: Story = { args: { status: "executing" } };
+
+export const Errored: Story = { args: { hasError: true } };

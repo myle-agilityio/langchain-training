@@ -55,7 +55,12 @@ export const CountEmailsCard = ({
   const max = Math.max(...groups.map(([, n]) => n), 1);
 
   return (
-    <Shell icon={Tags} title="Count emails" status={status}>
+    <Shell
+      icon={Tags}
+      title="Count emails"
+      status={status}
+      hasError={!!envelope && !envelope.ok}
+    >
       <FilterChips filter={parameters.filter ?? {}} />
       {!envelope ? (
         <Pending label="Counting…" />

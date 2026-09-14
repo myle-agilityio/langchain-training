@@ -22,7 +22,12 @@ export const ClassifyEmailsCard = ({
   const envelope = parseToolResult<{ results: ClassifyResult[] }>(result);
 
   return (
-    <Shell icon={Tags} title="Classify emails" status={status}>
+    <Shell
+      icon={Tags}
+      title="Classify emails"
+      status={status}
+      hasError={!!envelope && !envelope.ok}
+    >
       {!envelope ? (
         <Pending
           label={

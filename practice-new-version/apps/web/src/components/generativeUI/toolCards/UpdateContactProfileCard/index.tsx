@@ -16,7 +16,12 @@ export const UpdateContactProfileCard = ({
   const envelope = parseToolResult<ProfileResult>(result);
 
   return (
-    <Shell icon={UserRoundCog} title="Remember about contact" status={status}>
+    <Shell
+      icon={UserRoundCog}
+      title="Remember about contact"
+      status={status}
+      hasError={!!envelope && !envelope.ok}
+    >
       {!envelope ? (
         <Pending
           label={

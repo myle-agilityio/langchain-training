@@ -18,7 +18,12 @@ export const UpdateEmailStatusCard = ({
   const envelope = parseToolResult<{ results: StatusResult[] }>(result);
 
   return (
-    <Shell icon={MailCheck} title="Update status" status={status}>
+    <Shell
+      icon={MailCheck}
+      title="Update status"
+      status={status}
+      hasError={!!envelope && !envelope.ok}
+    >
       {!envelope ? (
         <Pending
           label={

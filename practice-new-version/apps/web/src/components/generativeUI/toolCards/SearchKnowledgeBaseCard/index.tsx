@@ -13,7 +13,12 @@ export const SearchKnowledgeBaseCard = ({
   }>(result);
 
   return (
-    <Shell icon={BookOpen} title="Knowledge base" status={status}>
+    <Shell
+      icon={BookOpen}
+      title="Knowledge base"
+      status={status}
+      hasError={!!envelope && !envelope.ok}
+    >
       {parameters.query && (
         <p className="mb-2 truncate text-[11px] italic text-muted-foreground">
           “{parameters.query}”

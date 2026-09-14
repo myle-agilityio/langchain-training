@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import { Check } from "lucide-react";
+import { Check, TriangleAlert } from "lucide-react";
 import { ToolBusyIndicator } from "../ToolBusyIndicator";
 import type { ToolStatus } from "@/types";
 
@@ -7,11 +7,13 @@ export const Shell = ({
   icon: Icon,
   title,
   status,
+  hasError = false,
   children,
 }: {
   icon: ComponentType<{ className?: string }>;
   title: string;
   status: ToolStatus;
+  hasError?: boolean;
   children: React.ReactNode;
 }) => {
   return (
@@ -22,10 +24,12 @@ export const Shell = ({
           {title}
         </span>
         <span className="ml-auto shrink-0">
-          {status === "complete" ? (
-            <Check className="h-3 w-3 text-tone-green" />
-          ) : (
+          {status !== "complete" ? (
             <ToolBusyIndicator />
+          ) : hasError ? (
+            <TriangleAlert className="h-3 w-3 text-tone-red" />
+          ) : (
+            <Check className="h-3 w-3 text-tone-green" />
           )}
         </span>
       </div>
