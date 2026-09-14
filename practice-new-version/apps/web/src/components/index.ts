@@ -8,7 +8,6 @@ export * from "./openAIKey";
 export * from "./ThemeToggle";
 export * from "./ThreadsList";
 export * from "./ThreadsSidebar";
-export * from "./ToolRendering";
 export * from "./ViewTabs";
 export * from "./common";
 export * from "./declarativeGenerativeUI";

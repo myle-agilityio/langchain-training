@@ -6,6 +6,7 @@ import {
   ClassifyEmailsCard,
   CountEmailsCard,
   GetEmailsCard,
+  ReplyToEmailCard,
   SearchKnowledgeBaseCard,
   UpdateContactProfileCard,
   UpdateEmailStatusCard,
@@ -56,7 +57,7 @@ const manageableStatusSchema = z.enum([
 ]);
 
 // Per-tool cards for the agent's inbox tools; a name-scoped renderer wins over the
-// wildcard in useGenerativeUIExamples, so unlisted tools fall back to ToolReasoning.
+// wildcard in useGenerativeUIExamples, so unlisted tools fall back to GenericToolCard.
 export const useToolRenderers = () => {
   useRenderTool(
     {
@@ -121,6 +122,15 @@ export const useToolRenderers = () => {
         facts: z.array(z.string()).optional(),
       }),
       render: (props) => <UpdateContactProfileCard {...props} />,
+    },
+    [],
+  );
+
+  useRenderTool(
+    {
+      name: TOOL.REPLY_TO_EMAIL,
+      parameters: z.object({ id: z.string() }),
+      render: (props) => <ReplyToEmailCard {...props} />,
     },
     [],
   );

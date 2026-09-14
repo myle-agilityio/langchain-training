@@ -7,7 +7,7 @@ import {
   useDefaultRenderTool,
 } from "@copilotkit/react-core/v2";
 
-import { ToolReasoning } from "@/components/ToolRendering";
+import { GenericToolCard } from "@/components/generativeUI/toolCards";
 import { useToolRenderers } from "@/hooks/useToolRenderers";
 
 export const useGenerativeUIExamples = () => {
@@ -16,13 +16,14 @@ export const useGenerativeUIExamples = () => {
   // Named per-tool cards; they take precedence over the wildcard renderer below.
   useToolRenderers();
 
-  // Renders every backend tool call as a collapsible card in the chat, so the teacher can see
-  // which inbox tools ran and with what arguments.
+  // Renders every backend tool call with no dedicated card as a generic Shell card, so the
+  // teacher can see which inbox tools ran and with what arguments.
   const ignoredTools: string[] = [
     "render_a2ui", // Rendered by A2UI streaming, not as a tool card
     TOOL.GENERATE_A2UI, // Legacy: rendered by A2UI, not as a tool card
     "log_a2ui_event", // Internal A2UI event tracker
     COMPOSE_REPLY_ACTION, // Rendered as the approval card by useEmailAgent
+    "toggleTheme", // Instant, self-evident from the theme change — no card needed
   ];
 
   useDefaultRenderTool({
@@ -32,10 +33,10 @@ export const useGenerativeUIExamples = () => {
       }
 
       return (
-        <ToolReasoning
+        <GenericToolCard
           name={name}
           status={status}
-          args={parameters}
+          parameters={parameters}
           result={result}
         />
       );
