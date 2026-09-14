@@ -88,16 +88,16 @@ embedded KB (`kb_documents`), graph checkpoints (`checkpoints*`), and the cross-
 Rules live in these skills now, not here — invoke the one matching what you're doing instead
 of improvising:
 
-| Skill | Use when |
-| --- | --- |
-| `shared` | Always — naming, comments, secrets, style, zod, barrels, formatting, test placement. The other four all assume you've read it |
-| `implement` | Building something new — a component, hook, page, tool, or graph node |
-| `fix` | Triaging or fixing a reported bug |
-| `verify` | Proving an agent/tool/node/UI change actually works, before calling it done |
-| `review` | Wrapping up — docs, teardown, the done checklist |
-| `agent-prompt-authoring` | Editing any prompt text or tool description — decides whether it belongs in the tool description, system prompt, or a `respond()` payload |
-| `add-agent-tool` | Wiring a brand-new tool end to end — LangGraph tool → CopilotKit render → generative UI card |
-| `create-tool` | A backend-only tool, or an additional tool with no dedicated card |
-| `debug-graph` | A LangGraph run misbehaves — tool never called, approval never fires, state/persistence looks wrong |
-| `order-imports` | Writing or editing import statements in `apps/web` |
-| `review-copilotkit-layers` | Reviewing a tool + `useRenderTool` hook + card trio before calling it done |
+| Skill                      | Use when                                                                                                                                  |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `shared`                   | Always — naming, comments, secrets, style, zod, barrels, formatting, test placement. The other four all assume you've read it             |
+| `implement`                | Building something new — a component, hook, page, tool, or graph node                                                                     |
+| `fix`                      | Triaging or fixing a reported bug                                                                                                         |
+| `verify`                   | Proving an agent/tool/node/UI change actually works, before calling it done                                                               |
+| `review`                   | Wrapping up — docs, teardown, the done checklist                                                                                          |
+| `agent-prompt-authoring`   | Editing any prompt text or tool description — decides whether it belongs in the tool description, system prompt, or a `respond()` payload |
+| `add-agent-tool`           | Wiring a brand-new tool end to end — LangGraph tool → CopilotKit render → generative UI card                                              |
+| `create-tool`              | A backend-only tool, or an additional tool with no dedicated card                                                                         |
+| `debug-graph`              | A LangGraph run misbehaves — tool never called, approval never fires, state/persistence looks wrong                                       |
+| `order-imports`            | Writing or editing import statements in `apps/web`                                                                                        |
+| `review-copilotkit-layers` | Reviewing a tool + `useRenderTool` hook + card trio before calling it done                                                                |

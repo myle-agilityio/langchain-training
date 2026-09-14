@@ -19,10 +19,10 @@ starts fine and then fails on the first inbox tool call, which is easy to misrea
 
 Start the narrowest thing that can prove the change, in the background:
 
-| Change | Start | Check |
-| --- | --- | --- |
-| Tool logic, graph wiring, state shape | `pnpm dev:agent` → :8123 | `http://localhost:8123/ok` before assuming a failure is yours |
-| Generative UI, interrupts, anything the user sees | `pnpm dev` → :3000 and :8123 | both ports up |
+| Change                                            | Start                        | Check                                                         |
+| ------------------------------------------------- | ---------------------------- | ------------------------------------------------------------- |
+| Tool logic, graph wiring, state shape             | `pnpm dev:agent` → :8123     | `http://localhost:8123/ok` before assuming a failure is yours |
+| Generative UI, interrupts, anything the user sees | `pnpm dev` → :3000 and :8123 | both ports up                                                 |
 
 ## 3. 🧪 Exercise the actual path
 

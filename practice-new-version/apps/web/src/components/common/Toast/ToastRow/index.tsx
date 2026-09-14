@@ -29,9 +29,7 @@ export const ToastRow = ({ toast }: { toast: ToastItem }) => {
       )}
     >
       <Icon className="mt-0.5 h-5 w-5 shrink-0" />
-      <p className="min-w-0 flex-1 text-sm text-foreground">
-        {toast.message}
-      </p>
+      <p className="min-w-0 flex-1 text-sm text-foreground">{toast.message}</p>
       <button
         type="button"
         aria-label="Dismiss"

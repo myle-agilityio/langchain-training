@@ -26,13 +26,13 @@ CLAUDE.md's "Where things live" section before adding a new pattern.
 
 ## 🏷️ Naming
 
-| Kind | Convention | Example |
-| --- | --- | --- |
-| Source files/folders (default) | camelCase | `useSharedInbox.ts`, `emailFilters.ts`, `components/generativeUI/` |
-| A file whose export is a React component | PascalCase, matching the export | `renderers.tsx`'s siblings |
-| A folder holding one component's `index.tsx` | PascalCase | `components/InboxList/`, `components/common/DropdownMenu/` |
-| Barrel files | keep the name | `index.ts` / `index.tsx` |
-| Assets and scripts | kebab-case | `public/copilotkit-logo-mark.svg`, `rag/sample-docs/*` |
+| Kind                                         | Convention                      | Example                                                            |
+| -------------------------------------------- | ------------------------------- | ------------------------------------------------------------------ |
+| Source files/folders (default)               | camelCase                       | `useSharedInbox.ts`, `emailFilters.ts`, `components/generativeUI/` |
+| A file whose export is a React component     | PascalCase, matching the export | `renderers.tsx`'s siblings                                         |
+| A folder holding one component's `index.tsx` | PascalCase                      | `components/InboxList/`, `components/common/DropdownMenu/`         |
+| Barrel files                                 | keep the name                   | `index.ts` / `index.tsx`                                           |
+| Assets and scripts                           | kebab-case                      | `public/copilotkit-logo-mark.svg`, `rag/sample-docs/*`             |
 
 ## 💬 Comments
 
@@ -92,7 +92,11 @@ hand-write a duplicate interface. Enums get their own named schema so they're re
 elsewhere (e.g. as a filter field). From `apps/agent/src/types/email.ts`:
 
 ```ts
-export const TopicSchema = z.enum(["question", "submission", "grade_dispute", /* ... */]);
+export const TopicSchema = z.enum([
+  "question",
+  "submission",
+  "grade_dispute" /* ... */,
+]);
 
 export const ClassificationSchema = z.object({
   topic: TopicSchema,
@@ -136,9 +140,9 @@ if (!check.flagged) {
 
 ## 🧪 Tests
 
-| Code | Home | Why |
-| --- | --- | --- |
-| Deterministic code | `__test__/` subfolder beside it, e.g. `utils/__test__/emailFilters.test.ts` | Both vitest configs only pick up `src/**/__test__/*.test.*` — a test anywhere else silently never runs |
-| Anything reaching `getModelWithConfig`/`withStructuredOutput`/embeddings | `evals/*.eval.ts` (`pnpm eval:agent`) | It calls a model — an eval, not a unit test |
+| Code                                                                     | Home                                                                        | Why                                                                                                    |
+| ------------------------------------------------------------------------ | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Deterministic code                                                       | `__test__/` subfolder beside it, e.g. `utils/__test__/emailFilters.test.ts` | Both vitest configs only pick up `src/**/__test__/*.test.*` — a test anywhere else silently never runs |
+| Anything reaching `getModelWithConfig`/`withStructuredOutput`/embeddings | `evals/*.eval.ts` (`pnpm eval:agent`)                                       | It calls a model — an eval, not a unit test                                                            |
 
 `pnpm test` runs both apps; the pre-push hook runs it for the whole push.

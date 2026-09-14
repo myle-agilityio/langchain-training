@@ -24,7 +24,7 @@ covers it, or write a new one if it's worth re-running later.
 ## 🧩 Find the root cause
 
 Don't patch the symptom you can see — trace it back to where the wrong state/value/decision
-was introduced. A fix that only makes the reproduction case pass without explaining *why* it
+was introduced. A fix that only makes the reproduction case pass without explaining _why_ it
 was wrong is a guess, not a fix.
 
 ## ❌ If you can't fix it confidently
