@@ -1,4 +1,4 @@
-import { useRef, type ComponentProps } from "react";
+import { useEffect, useRef, type ComponentProps } from "react";
 import {
   CopilotChat,
   isAbortError,
@@ -24,6 +24,16 @@ export const EmailChat = () => {
   // marks "we just stopped it ourselves" so that error gets ignored instead of toasted.
   const userStoppedRef = useRef(false);
 
+  useEffect(() => {
+    const subscription = agent.subscribe({
+      onRunStartedEvent: () => {
+        userStoppedRef.current = false;
+      },
+    });
+
+    return () => subscription.unsubscribe();
+  }, [agent]);
+
   return (
     <CopilotChat
       // The agent reports its own failures as chat text; this catches the ones that never got
@@ -43,9 +53,6 @@ export const EmailChat = () => {
       onStop={() => {
         userStoppedRef.current = true;
         copilotkit.stopAgent({ agent });
-        setTimeout(() => {
-          userStoppedRef.current = false;
-        }, 1000);
       }}
       attachments={{ enabled: true }}
       className="bg-transparent"
