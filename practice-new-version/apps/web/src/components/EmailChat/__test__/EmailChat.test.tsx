@@ -7,10 +7,21 @@ import { EmailChat } from "..";
 
 const chatProps = vi.hoisted(() => ({ current: {} as Record<string, never> }));
 const stopAgent = vi.hoisted(() => vi.fn());
+const runHandlers = vi.hoisted(
+  () => ({ current: {} }) as { current: { onRunStartedEvent?: () => void } },
+);
 
 vi.mock("@copilotkit/react-core/v2", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@copilotkit/react-core/v2")>()),
-  useAgent: () => ({ agent: {} }),
+  useAgent: () => ({
+    agent: {
+      subscribe: (next: { onRunStartedEvent?: () => void }) => {
+        runHandlers.current = next;
+
+        return { unsubscribe: vi.fn() };
+      },
+    },
+  }),
   useCopilotKit: () => ({ copilotkit: { stopAgent } }),
   isAbortError: (error: unknown) =>
     error instanceof Error && error.name === "AbortError",
@@ -133,16 +144,27 @@ describe("EmailChat — stopping", () => {
     expect(toasts()).toHaveLength(0);
   });
 
-  it("goes back to reporting failures a second later", () => {
-    vi.useFakeTimers();
+  it("goes back to reporting failures once the next run actually starts", () => {
     render(<EmailChat />);
 
     chat().onStop();
-    vi.advanceTimersByTime(1000);
-    vi.useRealTimers();
+    runHandlers.current.onRunStartedEvent?.();
 
     chat().onError({ error: new Error("run failed"), code: "UNKNOWN" });
 
     expect(toasts()).toHaveLength(1);
+  });
+
+  it("keeps swallowing errors no matter how long the stopped run's RUN_ERROR takes to arrive", () => {
+    vi.useFakeTimers();
+    render(<EmailChat />);
+
+    chat().onStop();
+    vi.advanceTimersByTime(60_000);
+    vi.useRealTimers();
+
+    chat().onError({ error: new Error("run failed"), code: "UNKNOWN" });
+
+    expect(toasts()).toHaveLength(0);
   });
 });
