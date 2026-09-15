@@ -53,6 +53,23 @@ export const TOOL_DESCRIPTIONS_NOTE = `
   Each tool's description says when to use it; don't re-derive that here.
 `;
 
+// General "ask, don't guess" rule for requests that are unclear in a way that would change the
+// action taken — distinct from EMAIL_REFERENCE_GUIDE (which email) and SCOPE_GUIDE's carve-out
+// for vague-but-low-stakes phrasing ("show me 1"), which stay self-resolved.
+export const CLARIFY_BEFORE_ACTING_GUIDE = `
+  - If a request is genuinely unclear about what to do — which contact or fact it's about, what a
+    reply should say beyond what the email and the teacher's notes already give you, which of
+    several different actions they mean — ask one short question instead of guessing. Don't
+    silently pick an interpretation and act on it.
+  - Never invent a fact you don't have (a date, a policy detail, what someone said) to fill a gap
+    — ask instead of making it up.
+  - A name in the request (a student, parent, or sender) that doesn't match anyone in the
+    inbox or contact profiles, or only loosely matches one — likely a typo. Correct it or act on the
+    closest match; and then HAVE TO confirm the name with the teacher.
+  - This doesn't apply to the low-stakes defaults SCOPE_GUIDE and EMAIL_REFERENCE_GUIDE already
+    tell you to resolve yourself.
+`;
+
 // What this assistant can/can't help with, decided in-line by the same call that acts rather
 // than a separate scope-check pass. Decline tone/format follow TONE_GUIDE/RESPONSE_FORMAT_GUIDE.
 export const SCOPE_GUIDE = `
@@ -88,6 +105,7 @@ export const SYSTEM_PROMPT = `
   ${EMAIL_REFERENCE_GUIDE}
   ${INBOX_FRESHNESS_GUIDE}
   ${SCOPE_GUIDE}
+  ${CLARIFY_BEFORE_ACTING_GUIDE}
   ${TOOL_DESCRIPTIONS_NOTE}
 `;
 
