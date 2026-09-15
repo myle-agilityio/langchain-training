@@ -117,79 +117,17 @@ export const EmailReplyCard = ({
     );
   };
 
-  if (decision === "approve") {
-    if (isSending) {
-      return (
-        <Card className="w-full mb-4 overflow-hidden">
-          <CardContent className="p-6">
-            <div className="flex flex-col items-center text-center gap-3">
-              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-accent">
-                <Mail className="h-5 w-5 text-ring" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-foreground">Sending…</h3>
-                <p className="text-sm text-muted-foreground mt-1">{subject}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      );
-    }
-
-    if (sendFailed) {
-      return (
-        <Card className="w-full mb-4 overflow-hidden">
-          <CardContent className="p-6">
-            <div className="flex flex-col items-center text-center gap-3">
-              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-tone-red/10">
-                <TriangleAlert className="h-5 w-5 text-tone-red" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-foreground">
-                  Sending failed.
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  There was an error sending this draft.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      );
-    }
-
+  if (decision === "approve" && isSending) {
     return (
       <Card className="w-full mb-4 overflow-hidden">
         <CardContent className="p-6">
           <div className="flex flex-col items-center text-center gap-3">
-            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-tone-green">
-              <Check className="h-5 w-5 text-white" strokeWidth={3} />
+            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-accent">
+              <Mail className="h-5 w-5 text-ring" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-foreground">Reply sent</h3>
+              <h3 className="text-lg font-bold text-foreground">Sending…</h3>
               <p className="text-sm text-muted-foreground mt-1">{subject}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (decision === "reject") {
-    return (
-      <Card className="w-full mb-4 overflow-hidden">
-        <CardContent className="p-6">
-          <div className="flex flex-col items-center text-center gap-3">
-            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-secondary">
-              <X className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-foreground">
-                Reply rejected
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Nothing was sent.
-              </p>
             </div>
           </div>
         </CardContent>
