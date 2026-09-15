@@ -9,9 +9,12 @@ const mocks = vi.hoisted(() => ({
   csvLoad: vi.fn(),
   docxLoad: vi.fn(),
   docxArgs: vi.fn(),
+  logError: vi.fn(),
 }));
 
 vi.mock("node:fs/promises", () => ({ readdir: vi.fn() }));
+
+vi.mock("@/logging", () => ({ logError: mocks.logError }));
 
 vi.mock("@langchain/community/document_loaders/fs/pdf", () => ({
   PDFLoader: class {
@@ -51,6 +54,7 @@ describe("loadDirectoryAsChunks", () => {
     mocks.csvLoad.mockReset();
     mocks.docxLoad.mockReset();
     mocks.docxArgs.mockReset();
+    mocks.logError.mockReset();
   });
 
   it("titles a CSV from its filename and leaves its content alone", async () => {
@@ -152,11 +156,27 @@ describe("loadDirectoryAsChunks", () => {
     expect(chunks.map((c) => c.metadata.source)).toEqual(["a.csv", "b.pdf"]);
   });
 
-  it("rejects a file type it has no loader for", async () => {
-    vi.mocked(readdir).mockResolvedValue(["notes.txt"] as never);
+  it("quietly skips a file type it has no loader for, without touching a loader", async () => {
+    vi.mocked(readdir).mockResolvedValue(["README.md"] as never);
 
-    await expect(loadDirectoryAsChunks("/kb")).rejects.toThrow(
-      /Unsupported KB file type/,
+    await expect(loadDirectoryAsChunks("/kb")).resolves.toEqual([]);
+    expect(mocks.pdfLoad).not.toHaveBeenCalled();
+    expect(mocks.csvLoad).not.toHaveBeenCalled();
+    expect(mocks.docxLoad).not.toHaveBeenCalled();
+    expect(mocks.logError).not.toHaveBeenCalled();
+  });
+
+  it("skips a file whose loader throws and still loads the rest of the directory", async () => {
+    vi.mocked(readdir).mockResolvedValue(["broken.pdf", "ok.csv"] as never);
+    mocks.pdfLoad.mockRejectedValue(new Error("corrupt PDF"));
+    mocks.csvLoad.mockResolvedValue([doc("csv body")]);
+
+    const chunks = await loadDirectoryAsChunks("/kb");
+
+    expect(chunks.map((c) => c.metadata.source)).toEqual(["ok.csv"]);
+    expect(mocks.logError).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({ detail: "kb file broken.pdf" }),
     );
   });
 

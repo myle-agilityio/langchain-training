@@ -1,20 +1,37 @@
 import { BookOpen, Sparkles } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Spinner,
-} from "@/components";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components";
 import { useKnowledgeSearch } from "@/hooks";
 
 interface RelatedArticlesProps {
   query: string;
 }
 
-// Surfaces KB articles relevant to the open email — GET /api/knowledge, no LLM turn spent.
+// Surfaces KB articles relevant to the open email
 export const RelatedArticles = ({ query }: RelatedArticlesProps) => {
-  const { articles, isLoading, isError } = useKnowledgeSearch(query);
+  const { articles, isLoading, isError, hasSearched } =
+    useKnowledgeSearch(query);
+  const isEmpty =
+    hasSearched && !isLoading && !isError && articles.length === 0;
+
+  if (!hasSearched) {
+    return null;
+  }
+
+  // Show a status message if the search is still in progress, failed, or returned no results.
+  if (isLoading || isError || isEmpty) {
+    return (
+      <div className="flex items-center gap-2 px-1 text-xs text-muted-foreground">
+        <Sparkles className={`h-3 w-3 ${isLoading ? "animate-pulse" : ""}`} />
+        <span className={isLoading ? "animate-pulse" : undefined}>
+          {isLoading
+            ? "Searching your knowledge base…"
+            : isError
+              ? "Couldn't search your knowledge base."
+              : "Nothing in the knowledge base matched this email."}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <Card>
@@ -29,30 +46,18 @@ export const RelatedArticles = ({ query }: RelatedArticlesProps) => {
         </span>
       </CardHeader>
       <CardContent className="pt-0">
-        {isLoading ? (
-          <Spinner size="sm" />
-        ) : isError ? (
-          <p className="text-sm text-muted-foreground">
-            Couldn't load related knowledge-base articles.
-          </p>
-        ) : articles.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No related knowledge-base articles found.
-          </p>
-        ) : (
-          <ul className="flex flex-col gap-3">
-            {articles.map((article, index) => (
-              <li key={index}>
-                <p className="text-sm font-medium text-foreground">
-                  {article.title}
-                </p>
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {article.content}
-                </p>
-              </li>
-            ))}
-          </ul>
-        )}
+        <ul className="flex flex-col gap-3">
+          {articles.map((article, index) => (
+            <li key={index}>
+              <p className="text-sm font-medium text-foreground">
+                {article.title}
+              </p>
+              <p className="text-sm text-muted-foreground line-clamp-2">
+                {article.content}
+              </p>
+            </li>
+          ))}
+        </ul>
       </CardContent>
     </Card>
   );

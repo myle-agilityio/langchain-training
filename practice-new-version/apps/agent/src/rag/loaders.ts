@@ -2,11 +2,14 @@ import { readdir } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
 import type { Document } from "@langchain/core/documents";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+import { logError } from "@/logging";
 
 const splitter = new RecursiveCharacterTextSplitter({
   chunkSize: 800,
   chunkOverlap: 100,
 });
+
+const SUPPORTED_EXTENSIONS = new Set([".pdf", ".csv", ".docx", ".doc"]);
 
 const titleFromFilename = (file: string): string => {
   return basename(file, extname(file))
@@ -69,7 +72,23 @@ export const loadDirectoryAsChunks = async (
 
   for (const file of files) {
     const ext = extname(file).toLowerCase();
-    const loaded = await loadFile(join(dir, file));
+
+    // Non-KB files (README, .gitkeep, ...) are expected in the directory — skip them quietly.
+    if (!SUPPORTED_EXTENSIONS.has(ext)) {
+      continue;
+    }
+
+    let loaded: Document[];
+
+    try {
+      loaded = await loadFile(join(dir, file));
+    } catch (error) {
+      // Never throw — one bad file (corrupt PDF, unreadable DOCX, ...) shouldn't sink the
+      // whole KB seed.
+      logError(error, { detail: `kb file ${file}` });
+      continue;
+    }
+
     const hasHeading = ext === ".pdf" || ext === ".docx" || ext === ".doc";
     let title = titleFromFilename(file);
 

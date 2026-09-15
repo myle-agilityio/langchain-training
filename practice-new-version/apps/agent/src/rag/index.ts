@@ -48,6 +48,7 @@ export const ensureIndexed = async (): Promise<void> => {
     return;
   }
 
+  // Seed the KB with the hardcoded articles
   const seedDocs = knowledgeBase.map(
     (a) =>
       new Document({
@@ -55,6 +56,8 @@ export const ensureIndexed = async (): Promise<void> => {
         metadata: { id: a.id, title: a.title, tags: a.tags },
       }),
   );
+
+  // Load any sample docs in the repo (PDF/DOCX/DOC/CSV)
   const fileDocs = await loadDirectoryAsChunks(SAMPLE_DOCS_DIR);
 
   await store.addDocuments([...seedDocs, ...fileDocs]);
