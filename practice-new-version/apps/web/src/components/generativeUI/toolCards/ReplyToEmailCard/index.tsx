@@ -13,18 +13,26 @@ export const ReplyToEmailCard = ({
 }: ToolCardProps<{ id: string }>) => {
   const approved = result?.includes(REPLY_DECISION.APPROVED);
   const rejected = result?.includes(REPLY_DECISION.REJECTED);
+  const sendFailed = result?.includes(REPLY_DECISION.SEND_FAILED);
+  const agentError =
+    status === "complete" && !approved && !rejected && !sendFailed;
 
   return (
     <Shell
       icon={Reply}
       title="Draft reply"
       status={status}
+      hasError={sendFailed || agentError}
       customStatusIcon={
         rejected ? <X className="h-3 w-3 text-muted-foreground" /> : undefined
       }
     >
       {status !== "complete" ? (
         <Pending label="Drafting a reply for approval…" />
+      ) : sendFailed ? (
+        <p className="text-xs text-muted-foreground">
+          Approved, but sending failed.
+        </p>
       ) : approved ? (
         <p className="text-xs text-muted-foreground">
           Draft approved and sent.
@@ -34,7 +42,9 @@ export const ReplyToEmailCard = ({
           Draft rejected — nothing sent.
         </p>
       ) : (
-        <p className="text-xs text-muted-foreground">Draft reviewed.</p>
+        <p className="text-xs text-muted-foreground">
+          Something went wrong drafting this draft.
+        </p>
       )}
     </Shell>
   );

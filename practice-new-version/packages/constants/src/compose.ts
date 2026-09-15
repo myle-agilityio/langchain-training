@@ -7,4 +7,7 @@ export const COMPOSE_REPLY_ACTION = "compose_reply";
 export const REPLY_DECISION = {
   APPROVED: "approved",
   REJECTED: "rejected",
+  // EmailReplyCard weaves this in when patchEmail fails after approval — deliberately never
+  // combined with APPROVED's literal text in the same instruction, so the two stay distinguishable.
+  SEND_FAILED: "sending failed",
 } as const;

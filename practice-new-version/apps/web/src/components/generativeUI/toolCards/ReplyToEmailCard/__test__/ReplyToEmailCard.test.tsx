@@ -39,7 +39,21 @@ describe("ReplyToEmailCard", () => {
     ).toBeInTheDocument();
   });
 
-  it("falls back to a generic label for anything else (e.g. a failure)", () => {
+  it("reports the send failed once approved but patchEmail errored", () => {
+    render(
+      <ReplyToEmailCard
+        status="complete"
+        parameters={{ id: "e1" }}
+        result={`The teacher said yes to sending this draft, but ${REPLY_DECISION.SEND_FAILED} due to a server error.`}
+      />,
+    );
+
+    expect(
+      screen.getByText("Approved, but sending failed."),
+    ).toBeInTheDocument();
+  });
+
+  it("reports an error for anything else — e.g. composeEmailErrorHandler's backstop after a crash mid-approval", () => {
     render(
       <ReplyToEmailCard
         status="complete"
@@ -48,6 +62,8 @@ describe("ReplyToEmailCard", () => {
       />,
     );
 
-    expect(screen.getByText("Draft reviewed.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Something went wrong reviewing this draft."),
+    ).toBeInTheDocument();
   });
 });

@@ -34,5 +34,12 @@ export const Rejected: Story = {
   },
 };
 
-// e.g. composeEmailErrorHandler's failure text — doesn't match either known phrasing.
-export const Unrecognized: Story = { args: { status: "complete" } };
+export const SendFailed: Story = {
+  args: {
+    result: `The teacher said yes to sending this draft, but ${REPLY_DECISION.SEND_FAILED} due to a server error.`,
+  },
+};
+
+// e.g. composeEmailErrorHandler's backstop text after a crash mid-approval — matches none of
+// the known phrasings, so it renders as a generic error rather than a false "reviewed".
+export const AgentError: Story = { args: { status: "complete" } };

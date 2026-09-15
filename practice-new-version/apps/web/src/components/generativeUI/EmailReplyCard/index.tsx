@@ -33,7 +33,6 @@ export const EmailReplyCard = ({
   const [subject, setSubject] = useState(draftSubject);
   const [body, setBody] = useState(draftBody);
   const [decision, setDecision] = useState<"approve" | "reject" | null>(null);
-  const [sendFailed, setSendFailed] = useState(false);
   const [isSending, setIsSending] = useState(false);
 
   // Tool args arrive empty on the first ("inProgress") render, only populating at "executing" —
@@ -79,16 +78,12 @@ export const EmailReplyCard = ({
         },
         onError: () => {
           setIsSending(false);
-          setSendFailed(true);
           respond?.(
             JSON.stringify({
               decision: "approve",
-              // Deliberately avoids the literal word "approved" (REPLY_DECISION.APPROVED) —
-              // ReplyToEmailCard matches that substring to render "Draft approved and sent.",
-              // which would be a lie here. Falls through to its generic "Draft reviewed."
               instruction:
-                "The teacher said yes to sending this draft, but the send itself failed due " +
-                "to a server error. The action is NOT complete — nothing was sent. Retry " +
+                `The teacher said yes to sending this draft, but ${REPLY_DECISION.SEND_FAILED} ` +
+                "due to a server error. The action is NOT complete — nothing was sent. Retry " +
                 "sending this exact draft, then tell the teacher what happened in one short " +
                 "line.",
             }),
