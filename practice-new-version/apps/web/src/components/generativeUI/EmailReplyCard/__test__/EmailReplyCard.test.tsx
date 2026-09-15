@@ -141,6 +141,7 @@ describe("EmailReplyCard — approving", () => {
 
     await userEvent.click(screen.getByRole("button", { name: /Approve/ }));
 
+    await waitFor(() => expect(respond).toHaveBeenCalled());
     expect(respondedWith(respond).decision).toBe("approve");
     expect(respondedWith(respond).instruction).toMatch(/Do NOT repeat/);
   });
@@ -154,9 +155,64 @@ describe("EmailReplyCard — approving", () => {
 
     await userEvent.click(screen.getByRole("button", { name: /Approve/ }));
 
-    expect(screen.getByText("Reply sent")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByText("Reply sent")).toBeInTheDocument(),
+    );
     expect(screen.getByText("Re: Missed test Monday")).toBeInTheDocument();
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  });
+
+  it("does not tell the agent it was sent until patchEmail actually resolves", async () => {
+    let resolvePatch!: (value: { data: { email: object } }) => void;
+
+    vi.spyOn(apiClient, "patch").mockReturnValue(
+      new Promise((resolve) => {
+        resolvePatch = resolve;
+      }) as never,
+    );
+
+    const { respond } = draw();
+
+    await userEvent.click(screen.getByRole("button", { name: /Approve/ }));
+
+    expect(screen.getByText("Sending…")).toBeInTheDocument();
+    expect(respond).not.toHaveBeenCalled();
+
+    resolvePatch({ data: { email: {} } });
+
+    await waitFor(() => expect(respond).toHaveBeenCalled());
+  });
+});
+
+describe("EmailReplyCard — approving, but the send fails", () => {
+  it("tells the agent the approval didn't complete and to retry, not that it was sent", async () => {
+    vi.spyOn(apiClient, "patch").mockRejectedValue(new Error("boom"));
+
+    const { respond } = draw();
+
+    await userEvent.click(screen.getByRole("button", { name: /Approve/ }));
+
+    await waitFor(() => expect(respond).toHaveBeenCalled());
+    const { instruction } = respondedWith(respond);
+
+    expect(instruction).toMatch(/failed/i);
+    expect(instruction).toMatch(/retry/i);
+    // Must not contain the literal "approved" — ReplyToEmailCard matches that substring to
+    // claim the draft was sent, which would misreport a failed send.
+    expect(instruction).not.toMatch(/approved/);
+  });
+
+  it("shows the failure on screen instead of a false 'Reply sent'", async () => {
+    vi.spyOn(apiClient, "patch").mockRejectedValue(new Error("boom"));
+
+    draw();
+
+    await userEvent.click(screen.getByRole("button", { name: /Approve/ }));
+
+    await waitFor(() =>
+      expect(screen.getByText("Sending failed.")).toBeInTheDocument(),
+    );
+    expect(screen.queryByText("Reply sent")).not.toBeInTheDocument();
   });
 });
 

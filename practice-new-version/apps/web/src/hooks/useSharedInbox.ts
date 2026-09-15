@@ -130,7 +130,15 @@ export const usePatchEmail = () => {
   });
 
   return useCallback(
-    (id: string, patch: Partial<Email>) => mutate({ id, patch }),
+    (
+      id: string,
+      patch: Partial<Email>,
+      callbacks?: { onSuccess?: () => void; onError?: () => void },
+    ) =>
+      mutate(
+        { id, patch },
+        { onSuccess: callbacks?.onSuccess, onError: callbacks?.onError },
+      ),
     [mutate],
   );
 };
