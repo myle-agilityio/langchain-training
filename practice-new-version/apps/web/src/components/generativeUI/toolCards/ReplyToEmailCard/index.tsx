@@ -43,7 +43,7 @@ export const ReplyToEmailCard = ({
         </p>
       ) : (
         <p className="text-xs text-muted-foreground">
-          Something went wrong drafting this draft.
+          Something went wrong with this draft.
         </p>
       )}
     </Shell>

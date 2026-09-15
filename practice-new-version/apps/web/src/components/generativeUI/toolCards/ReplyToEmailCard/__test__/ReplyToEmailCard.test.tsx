@@ -63,7 +63,7 @@ describe("ReplyToEmailCard", () => {
     );
 
     expect(
-      screen.getByText("Something went wrong reviewing this draft."),
+      screen.getByText("Something went wrong with this draft."),
     ).toBeInTheDocument();
   });
 });
