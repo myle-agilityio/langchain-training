@@ -7,7 +7,7 @@ import {
   Input,
   Textarea,
 } from "@/components/common";
-import { Mail, Check, X, TriangleAlert } from "lucide-react";
+import { Mail, TriangleAlert } from "lucide-react";
 import { REPLY_DECISION } from "@repo/constants";
 import { usePatchEmail } from "@/hooks";
 
@@ -33,6 +33,7 @@ export const EmailReplyCard = ({
   const [subject, setSubject] = useState(draftSubject);
   const [body, setBody] = useState(draftBody);
   const [decision, setDecision] = useState<"approve" | "reject" | null>(null);
+  const [isSending, setIsSending] = useState(false);
 
   // Tool args arrive empty on the first ("inProgress") render, only populating at "executing" —
   // useState's initializer runs once, so without this the fields would stay blank.
@@ -48,24 +49,47 @@ export const EmailReplyCard = ({
   }
 
   // The interrupt's resume doesn't replay the backend tool, so this card applies the state
-  // change via patchEmail. respond()'s instruction stops the model narrating what's on screen.
+  // change via patchEmail. respond() only fires once patchEmail's outcome is known — telling
+  // the model it sent before the request even resolves would be a lie if it then fails.
   const handleApprove = () => {
     setDecision("approve");
-    patchEmail(id, {
-      status: "replied",
-      reply: { subject, body, sentAt: new Date().toISOString() },
-    });
-    respond?.(
-      JSON.stringify({
-        decision: "approve",
-        // ReplyToEmailCard matches REPLY_DECISION's value out of this text, so it stays in sync
-        // even if the sentence around it changes.
-        instruction:
-          `The teacher ${REPLY_DECISION.APPROVED} this draft and it has been sent. The UI ` +
-          "already shows a 'Reply sent' confirmation with the subject. Do NOT repeat the draft " +
-          "body, the subject, the classification, or anything from the knowledge base. Reply " +
-          "with one friendly line confirming it was sent, then stop.",
-      }),
+    setIsSending(true);
+    patchEmail(
+      id,
+      {
+        status: "replied",
+        reply: { subject, body, sentAt: new Date().toISOString() },
+      },
+      {
+        onSuccess: () => {
+          setIsSending(false);
+          respond?.(
+            JSON.stringify({
+              decision: "approve",
+              // ReplyToEmailCard matches REPLY_DECISION's value out of this text, so it stays in
+              // sync even if the sentence around it changes.
+              instruction:
+                `The teacher ${REPLY_DECISION.APPROVED} this draft and it has been sent. The UI ` +
+                "already shows a confirmation. Do NOT repeat the draft body, the subject, the " +
+                "classification, or anything from the knowledge base. Reply with one friendly " +
+                "line confirming it was sent, then stop.",
+            }),
+          );
+        },
+        onError: () => {
+          setIsSending(false);
+          respond?.(
+            JSON.stringify({
+              decision: "approve",
+              instruction:
+                `The teacher said yes to sending this draft, but ${REPLY_DECISION.SEND_FAILED} ` +
+                "due to a server error. The action is NOT complete — nothing was sent. Retry " +
+                "sending this exact draft, then tell the teacher what happened in one short " +
+                "line.",
+            }),
+          );
+        },
+      },
     );
   };
 
@@ -88,39 +112,17 @@ export const EmailReplyCard = ({
     );
   };
 
-  if (decision === "approve") {
+  if (decision === "approve" && isSending) {
     return (
       <Card className="w-full mb-4 overflow-hidden">
         <CardContent className="p-6">
           <div className="flex flex-col items-center text-center gap-3">
-            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-tone-green">
-              <Check className="h-5 w-5 text-white" strokeWidth={3} />
+            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-accent">
+              <Mail className="h-5 w-5 text-ring" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-foreground">Reply sent</h3>
+              <h3 className="text-lg font-bold text-foreground">Sending…</h3>
               <p className="text-sm text-muted-foreground mt-1">{subject}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (decision === "reject") {
-    return (
-      <Card className="w-full mb-4 overflow-hidden">
-        <CardContent className="p-6">
-          <div className="flex flex-col items-center text-center gap-3">
-            <div className="flex items-center justify-center h-12 w-12 rounded-full bg-secondary">
-              <X className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-foreground">
-                Reply rejected
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Nothing was sent.
-              </p>
             </div>
           </div>
         </CardContent>
