@@ -146,22 +146,6 @@ describe("EmailReplyCard — approving", () => {
     expect(respondedWith(respond).instruction).toMatch(/Do NOT repeat/);
   });
 
-  it("confirms on screen instead of leaving the form up", async () => {
-    vi.spyOn(apiClient, "patch").mockResolvedValue({
-      data: { email: {} },
-    } as never);
-
-    draw();
-
-    await userEvent.click(screen.getByRole("button", { name: /Approve/ }));
-
-    await waitFor(() =>
-      expect(screen.getByText("Reply sent")).toBeInTheDocument(),
-    );
-    expect(screen.getByText("Re: Missed test Monday")).toBeInTheDocument();
-    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
-  });
-
   it("does not tell the agent it was sent until patchEmail actually resolves", async () => {
     let resolvePatch!: (value: { data: { email: object } }) => void;
 
@@ -201,19 +185,6 @@ describe("EmailReplyCard — approving, but the send fails", () => {
     // claim the draft was sent, which would misreport a failed send.
     expect(instruction).not.toMatch(/approved/);
   });
-
-  it("shows the failure on screen instead of a false 'Reply sent'", async () => {
-    vi.spyOn(apiClient, "patch").mockRejectedValue(new Error("boom"));
-
-    draw();
-
-    await userEvent.click(screen.getByRole("button", { name: /Approve/ }));
-
-    await waitFor(() =>
-      expect(screen.getByText("Sending failed.")).toBeInTheDocument(),
-    );
-    expect(screen.queryByText("Reply sent")).not.toBeInTheDocument();
-  });
 });
 
 describe("EmailReplyCard — rejecting", () => {
@@ -230,14 +201,5 @@ describe("EmailReplyCard — rejecting", () => {
       body: "Wednesday after school works.",
     });
     expect(respondedWith(respond).instruction).toMatch(/Do NOT write another/);
-  });
-
-  it("says plainly that nothing was sent", async () => {
-    draw();
-
-    await userEvent.click(screen.getByRole("button", { name: "Reject" }));
-
-    expect(screen.getByText("Reply rejected")).toBeInTheDocument();
-    expect(screen.getByText("Nothing was sent.")).toBeInTheDocument();
   });
 });

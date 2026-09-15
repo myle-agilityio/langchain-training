@@ -70,9 +70,9 @@ export const EmailReplyCard = ({
               // sync even if the sentence around it changes.
               instruction:
                 `The teacher ${REPLY_DECISION.APPROVED} this draft and it has been sent. The UI ` +
-                "already shows a 'Reply sent' confirmation with the subject. Do NOT repeat the " +
-                "draft body, the subject, the classification, or anything from the knowledge " +
-                "base. Reply with one friendly line confirming it was sent, then stop.",
+                "already shows a confirmation. Do NOT repeat the draft body, the subject, the " +
+                "classification, or anything from the knowledge base. Reply with one friendly " +
+                "line confirming it was sent, then stop.",
             }),
           );
         },
