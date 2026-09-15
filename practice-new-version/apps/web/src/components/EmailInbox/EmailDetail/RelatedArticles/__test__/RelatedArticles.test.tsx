@@ -76,6 +76,7 @@ describe("RelatedArticles", () => {
 
   it("stays hidden when there is no key to search with", () => {
     const get = vi.spyOn(apiClient, "get");
+
     useOpenAIKey.setState({ apiKey: null });
 
     draw();
