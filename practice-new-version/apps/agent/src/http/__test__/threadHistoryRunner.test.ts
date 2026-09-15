@@ -56,9 +56,9 @@ describe("ThreadHistoryRunner", () => {
       EventType.MESSAGES_SNAPSHOT,
       EventType.RUN_FINISHED,
     ]);
-    expect(((replayed[1] as unknown) as { messages: unknown[] }).messages).toEqual([
-      { role: "user", content: "reply to Flo" },
-    ]);
+    expect(
+      (replayed[1] as unknown as { messages: unknown[] }).messages,
+    ).toEqual([{ role: "user", content: "reply to Flo" }]);
   });
 
   it("replays an empty snapshot for a brand-new id rather than failing", async () => {
@@ -66,7 +66,9 @@ describe("ThreadHistoryRunner", () => {
 
     const replayed = await events(runner.connect({ threadId: "new" } as never));
 
-    expect(((replayed[1] as unknown) as { messages: unknown[] }).messages).toEqual([]);
+    expect(
+      (replayed[1] as unknown as { messages: unknown[] }).messages,
+    ).toEqual([]);
   });
 
   it("carries the thread id and one run id through the replayed events", async () => {
