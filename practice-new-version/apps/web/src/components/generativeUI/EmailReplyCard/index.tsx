@@ -7,7 +7,7 @@ import {
   Input,
   Textarea,
 } from "@/components/common";
-import { Mail, Check, X, TriangleAlert } from "lucide-react";
+import { Mail, TriangleAlert } from "lucide-react";
 import { REPLY_DECISION } from "@repo/constants";
 import { usePatchEmail } from "@/hooks";
 

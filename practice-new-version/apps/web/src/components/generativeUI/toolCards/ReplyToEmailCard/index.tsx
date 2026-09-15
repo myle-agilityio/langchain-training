@@ -3,14 +3,14 @@ import { REPLY_DECISION } from "@repo/constants";
 import type { ToolCardProps } from "@/types";
 import { Pending, Shell } from "../common";
 
-// reply_to_email never returns a JSON envelope — requestApproval.ts answers the call with free
-// text meant for the model's next turn, not a structured result. Matching REPLY_DECISION's value
-// (the same constant EmailReplyCard weaves into that text) keeps this in sync with it — a
-// reworded instruction can't silently break what this renders.
 export const ReplyToEmailCard = ({
   status,
   result,
 }: ToolCardProps<{ id: string }>) => {
+  // reply_to_email never returns a JSON envelope — requestApproval.ts answers the call with free
+  // text meant for the model's next turn, not a structured result. Matching REPLY_DECISION's value
+  // (the same constant EmailReplyCard weaves into that text) keeps this in sync with it — a
+  // reworded instruction can't silently break what this renders.
   const approved = result?.includes(REPLY_DECISION.APPROVED);
   const rejected = result?.includes(REPLY_DECISION.REJECTED);
   const sendFailed = result?.includes(REPLY_DECISION.SEND_FAILED);
