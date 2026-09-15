@@ -30,11 +30,12 @@ export const WithArticles: Story = {
   ],
 };
 
+// Non-critical widget: an empty result renders nothing rather than an empty-state message.
 export const NoArticles: Story = {
   decorators: [
     withQueryData((client) => client.setQueryData(["knowledge", QUERY], [])),
   ],
 };
 
-// Nothing seeded and no key saved, so the lookup never runs — same empty line the app shows.
+// Nothing seeded and no key saved, so the lookup never runs — renders nothing, same as NoArticles.
 export const NotSearched: Story = { args: { query: "" } };

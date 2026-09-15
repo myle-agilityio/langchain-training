@@ -6,14 +6,17 @@ import { useOpenAIKey } from "@/stores";
 export const useKnowledgeSearch = (query: string | null) => {
   const apiKey = useOpenAIKey((s) => s.apiKey);
 
+  // Only search if the query is non-empty and the user has an API key
+  const hasSearched = Boolean(query) && Boolean(apiKey);
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ["knowledge", query],
     queryFn: () => searchKnowledgeBase(query as string, apiKey),
-    enabled: Boolean(query) && Boolean(apiKey),
+    enabled: hasSearched,
     staleTime: Infinity,
     // A failed background lookup shouldn't toast — RelatedArticles shows its own inline message.
     meta: { silent: true },
   });
 
-  return { articles: data ?? [], isLoading, isError };
+  return { articles: data ?? [], isLoading, isError, hasSearched };
 };

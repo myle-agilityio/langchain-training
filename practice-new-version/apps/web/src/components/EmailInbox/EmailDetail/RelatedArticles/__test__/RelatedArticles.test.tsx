@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -7,8 +7,9 @@ import { apiClient } from "@/api";
 import { useOpenAIKey } from "@/stores";
 import { RelatedArticles } from "..";
 
-const NOT_FOUND = "No related knowledge-base articles found.";
-const FAILED = "Couldn't load related knowledge-base articles.";
+const SEARCHING = "Searching your knowledge base…";
+const NOTHING_MATCHED = "Nothing in the knowledge base matched this email.";
+const SEARCH_FAILED = "Couldn't search your knowledge base.";
 
 let queryClient: QueryClient;
 
@@ -28,14 +29,15 @@ beforeEach(() => {
 });
 
 describe("RelatedArticles", () => {
-  it("always frames the panel, even before anything is found", () => {
+  it("shows a searching status line — not the card — while the lookup is in flight", () => {
     vi.spyOn(apiClient, "get").mockReturnValue(new Promise(() => {}));
     draw();
 
-    expect(screen.getByText("Related knowledge")).toBeInTheDocument();
+    expect(screen.getByText(SEARCHING)).toBeInTheDocument();
+    expect(screen.queryByText("Related knowledge")).not.toBeInTheDocument();
   });
 
-  it("lists each article's title and a preview of its content", async () => {
+  it("lists each article's title and a preview of its content once loaded", async () => {
     vi.spyOn(apiClient, "get").mockResolvedValue({
       data: {
         articles: [
@@ -52,32 +54,33 @@ describe("RelatedArticles", () => {
     expect(screen.getByText("Make-up tests")).toBeInTheDocument();
   });
 
-  it("says nothing was found rather than showing an empty panel", async () => {
+  it("shows a 'nothing matched' status line and keeps it up — not the card", async () => {
     vi.spyOn(apiClient, "get").mockResolvedValue({
       data: { articles: [] },
     } as never);
 
     draw();
 
-    expect(await screen.findByText(NOT_FOUND)).toBeInTheDocument();
+    expect(await screen.findByText(NOTHING_MATCHED)).toBeInTheDocument();
+    expect(screen.queryByText("Related knowledge")).not.toBeInTheDocument();
   });
 
-  it("reports a failed lookup inline instead of interrupting with a toast", async () => {
+  it("shows a 'couldn't search' status line and keeps it up on a real lookup failure", async () => {
     vi.spyOn(apiClient, "get").mockRejectedValue(new Error("boom"));
 
     draw();
 
-    await waitFor(() => expect(screen.getByText(FAILED)).toBeInTheDocument());
+    expect(await screen.findByText(SEARCH_FAILED)).toBeInTheDocument();
+    expect(screen.queryByText("Related knowledge")).not.toBeInTheDocument();
   });
 
-  it("stays quiet when there is no key to search with", () => {
-    useOpenAIKey.setState({ apiKey: null });
-
+  it("stays hidden when there is no key to search with", () => {
     const get = vi.spyOn(apiClient, "get");
+    useOpenAIKey.setState({ apiKey: null });
 
     draw();
 
     expect(get).not.toHaveBeenCalled();
-    expect(screen.getByText(NOT_FOUND)).toBeInTheDocument();
+    expect(screen.queryByText("Related knowledge")).not.toBeInTheDocument();
   });
 });
