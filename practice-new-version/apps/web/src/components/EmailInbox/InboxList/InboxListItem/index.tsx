@@ -145,7 +145,7 @@ export const InboxListItem = ({
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
-        {email.classification && (
+        {email.classification && email.status !== "replied" && (
           <span className="flex items-center gap-1 text-[11px] font-medium text-(color:--tone)">
             <Flag className="h-3 w-3" />
             {/* Below this width the row is already tight — keep the flag, drop the
