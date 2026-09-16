@@ -1,7 +1,7 @@
 # Features
 
 User stories for the AI Email Assistant, from the teacher's point of view. For how it's built,
-see [ARCHITECTURE.md](./ARCHITECTURE.md); for click-through steps to try each of these, see
+see [architecture/](./architecture/README.md); for click-through steps to try each of these, see
 [TEST-SCENARIOS.md](./TEST-SCENARIOS.md).
 
 ## Triage & classification
