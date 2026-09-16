@@ -130,6 +130,10 @@ export const EmailReplyCard = ({
     );
   }
 
+  if (!!decision && !isSending) {
+    return null; // The interrupt is cleared, the agent has moved on, and this card is no longer needed.
+  }
+
   return (
     <Card className="w-full mb-4 overflow-hidden">
       <CardContent className="p-6">
