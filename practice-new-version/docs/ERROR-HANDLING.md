@@ -63,7 +63,7 @@ detailed JSON logs for developers, safe messages for the teacher.
 | status `429` / `rate_limit_exceeded`                                    | `RATE_LIMITED`                               |
 | `TimeoutError` / `AbortError` / `NodeTimeoutError` / `ETIMEDOUT`        | `MODEL_TIMEOUT`                              |
 | `OutputParserException`                                                 | `MODEL_OUTPUT_INVALID`                       |
-| pg `42P01` / `28P01` / `3D000` / `08006` / `ECONNREFUSED` / `ENOTFOUND` | `DB_UNAVAILABLE`                             |
+| pg `42P01` / `28P01` / `3D000` / `08006` / `53300` / `57P03` / `ECONNREFUSED` / `ENOTFOUND` | `DB_UNAVAILABLE`                             |
 | anything else                                                           | `INTERNAL`                                   |
 
 ## Flow

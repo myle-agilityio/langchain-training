@@ -137,7 +137,7 @@ README covering its layout and stack:
 - [`apps/web` README](./apps/web/README.md) - the Vite UI: structure, state layers, and stack
 - [`apps/agent` README](./apps/agent/README.md) - the LangGraph agent: graph, HTTP app, tables, and stack
 - [Features](./docs/FEATURES.md) - what the assistant does, from the teacher's point of view
-- [Architecture](./docs/ARCHITECTURE.md) - system, main graph, and `compose_email` subgraph diagrams
+- [Architecture](./docs/architecture/README.md) - system, main graph, and `compose_email` subgraph diagrams
 - [Error Handling](./docs/ERROR-HANDLING.md) - the error taxonomy and how HTTP/node/tool failures are caught and logged
 - [Test Scenarios](./docs/TEST-SCENARIOS.md) - scenarios the assistant is expected to handle
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraph/) - Learn more about LangGraph and its features
