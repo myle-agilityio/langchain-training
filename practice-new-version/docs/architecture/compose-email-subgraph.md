@@ -12,5 +12,5 @@ graph TD
     research["research"] --> write_draft
     write_draft["write_draft"] --> check_compliance
     check_compliance["check_compliance"] --> request_approval
-    request_approval["request_approval\n(interrupt() pauses here for approval,\nresumes into this same node)"] --> END_interrupt(["END\n(back to call_model)"])
+    request_approval["request_approval\n(interrupt() pauses & resumes here)"] --> END_interrupt(["END\n(back to call_model)"])
 ```
