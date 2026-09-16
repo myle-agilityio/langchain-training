@@ -55,16 +55,16 @@ detailed JSON logs for developers, safe messages for the teacher.
 
 `toAppError()` maps foreign shapes onto the codes above:
 
-| Incoming                                                                | Code                                         |
-| ----------------------------------------------------------------------- | -------------------------------------------- |
-| `AppError`                                                              | passthrough                                  |
-| `ZodError`                                                              | `VALIDATION_FAILED` (issue paths → `detail`) |
-| status `401` / `invalid_api_key`                                        | `API_KEY_REJECTED`                           |
-| status `429` / `rate_limit_exceeded`                                    | `RATE_LIMITED`                               |
-| `TimeoutError` / `AbortError` / `NodeTimeoutError` / `ETIMEDOUT`        | `MODEL_TIMEOUT`                              |
-| `OutputParserException`                                                 | `MODEL_OUTPUT_INVALID`                       |
+| Incoming                                                                                    | Code                                         |
+| ------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `AppError`                                                                                  | passthrough                                  |
+| `ZodError`                                                                                  | `VALIDATION_FAILED` (issue paths → `detail`) |
+| status `401` / `invalid_api_key`                                                            | `API_KEY_REJECTED`                           |
+| status `429` / `rate_limit_exceeded`                                                        | `RATE_LIMITED`                               |
+| `TimeoutError` / `AbortError` / `NodeTimeoutError` / `ETIMEDOUT`                            | `MODEL_TIMEOUT`                              |
+| `OutputParserException`                                                                     | `MODEL_OUTPUT_INVALID`                       |
 | pg `42P01` / `28P01` / `3D000` / `08006` / `53300` / `57P03` / `ECONNREFUSED` / `ENOTFOUND` | `DB_UNAVAILABLE`                             |
-| anything else                                                           | `INTERNAL`                                   |
+| anything else                                                                               | `INTERNAL`                                   |
 
 ## Flow
 

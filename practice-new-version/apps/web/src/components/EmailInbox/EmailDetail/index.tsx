@@ -89,12 +89,14 @@ export const EmailDetail = ({
                 {WORK_TYPE_LABEL[email.classification.workType]}
               </Badge>
             )}
-            <Badge
-              variant={URGENCY_VARIANT[email.classification.urgency]}
-              className={URGENCY_TONE[email.classification.urgency]}
-            >
-              {email.classification.urgency} urgency
-            </Badge>
+            {email.status !== "replied" && (
+              <Badge
+                variant={URGENCY_VARIANT[email.classification.urgency]}
+                className={URGENCY_TONE[email.classification.urgency]}
+              >
+                {email.classification.urgency} urgency
+              </Badge>
+            )}
           </div>
         )}
       </div>
