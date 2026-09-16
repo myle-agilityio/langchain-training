@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ComponentProps } from "react";
 import {
   CopilotChat,
+  CopilotChatUserMessage,
   isAbortError,
   useAgent,
   useCopilotKit,
@@ -11,6 +12,10 @@ import { SendButtonWithModelPicker } from "./SendButtonWithModelPicker";
 import { WelcomeScreen } from "./WelcomeScreen";
 
 type SendButtonProps = ComponentProps<typeof SendButtonWithModelPicker>;
+
+// askAgentToReply (EmailInbox) prepends "Email id: <uuid>" to the prompt so the agent can act
+// on it — the teacher never needs to see that line, so strip it from the displayed bubble only.
+const hideEmailId = (content: string) => content.replace(/^Email id: .+\n?/m, "");
 
 // Locks the composer while paused on a compose_reply interrupt: answer the card, not the chat.
 // The OpenAI key itself is gated app-wide by KeyGateOverlay — by the time this mounts, one exists.
@@ -62,7 +67,14 @@ export const EmailChat = () => {
       }}
       welcomeScreen={WelcomeScreen}
       messageView={{
-        userMessage: { messageRenderer: "userMessageBubble" },
+        userMessage: {
+          messageRenderer: ({ content }) => (
+            <CopilotChatUserMessage.MessageRenderer
+              content={hideEmailId(content)}
+              className="userMessageBubble"
+            />
+          ),
+        },
       }}
       input={{
         disclaimer: () => null,
