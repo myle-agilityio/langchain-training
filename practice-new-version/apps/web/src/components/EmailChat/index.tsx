@@ -34,7 +34,6 @@ export const EmailChat = () => {
     const subscription = agent.subscribe({
       onRunStartedEvent: () => {
         userStoppedRef.current = false;
-        console.log(agent.state.summary);
       },
     });
 
