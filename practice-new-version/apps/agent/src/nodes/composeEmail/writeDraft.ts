@@ -46,7 +46,7 @@ export const writeDraft = withNode(
           .filter(Boolean)
           .join("\n")
       : "";
-    console.log("senderContext", senderContext);
+
     // Same store, this visitor's own namespace — the durable facts `memorize` collects about the
     // teacher, not this one sender (that's senderContext above).
     const userMemory = userId
