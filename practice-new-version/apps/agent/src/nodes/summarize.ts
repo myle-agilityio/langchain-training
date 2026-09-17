@@ -7,9 +7,10 @@ import {
 } from "@langchain/langgraph";
 
 import { getPlainModelWithConfig, hidden } from "@/config";
-import { KEEP_RECENT_COUNT } from "@/constants";
+import { SUMMARIZE_BATCH_USER_MESSAGES } from "@/constants";
 import { summarizePrompt } from "@/prompts";
 import type { AgentStateShape } from "@/types";
+import { turnBoundaryAfterUserTurns } from "@/utils";
 import { withNode } from "./withNode";
 
 // Flattens messages into a plain "User: .../Assistant: ..." transcript. Drops
@@ -31,32 +32,30 @@ const toTranscript = (messages: BaseMessage[]): string =>
     })
     .join("\n");
 
-// Runs every turn once the thread is past SUMMARIZE_THRESHOLD — folds in only the messages that
-// newly fell out of the KEEP_RECENT_COUNT window since the last run, before call_model, so its
-// prompt stays bounded. `messages` itself is never dropped — the UI still shows full history.
+// Runs once the unsummarized tail passes SUMMARIZE_TRIGGER_PENDING_USER_MESSAGES — folds the
+// oldest SUMMARIZE_BATCH_USER_MESSAGES pending turns into `summary` as one fixed batch, before
+// call_model, so its prompt stays bounded. `messages` itself is never dropped — the UI still
+// shows full history.
 export const summarizeConversation = withNode(
   "summarize",
   async (state: AgentStateShape, config: LangGraphRunnableConfig) => {
     const summarizedCount = state.summarizedCount ?? 0;
-    const nextSummarizedCount = Math.max(
-      state.messages.length - KEEP_RECENT_COUNT,
+    const nextSummarizedCount = turnBoundaryAfterUserTurns(
+      state.messages,
       summarizedCount,
+      SUMMARIZE_BATCH_USER_MESSAGES,
     );
     const toSummarize = state.messages.slice(
       summarizedCount,
       nextSummarizedCount,
     );
 
-    // Nothing new to fold in yet (e.g. the thread hasn't grown past the recent window).
-    if (toSummarize.length === 0) {
-      return {};
-    }
-
     const transcript = toTranscript(toSummarize);
 
-    // Skip summarize until there's actually a transcript to fold in
+    // Empty only when there's nothing pending left to fold (summarizedCount already caught up)
+    // — a non-empty batch always opens on a HumanMessage, which toTranscript always keeps.
     if (!transcript) {
-      return {};
+      return { summarizedCount: nextSummarizedCount };
     }
 
     const existingSummary = state.summary ?? "";
