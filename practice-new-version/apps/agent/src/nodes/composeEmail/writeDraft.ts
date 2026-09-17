@@ -1,13 +1,18 @@
 import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
-import { getPlainModelWithConfig, hidden } from "@/config";
-import { CONTACT_PROFILE_NAMESPACE } from "@/constants";
+import { getPlainModelWithConfig, getUserIdFromConfig, hidden } from "@/config";
+import {
+  CONTACT_PROFILE_NAMESPACE,
+  USER_MEMORY_KEY,
+  userMemoryNamespace,
+} from "@/constants";
 import { getEmail, getMemoryStore } from "@/db";
 import { draftPrompt } from "@/prompts";
 import {
   DraftSchema,
   type ComposeEmailStateShape,
   type ContactProfileValue,
+  type UserMemoryValue,
 } from "@/types";
 import { collectRevisionNotes } from "@/utils";
 import { withNode } from "../withNode";
@@ -40,6 +45,17 @@ export const writeDraft = withNode(
           .join("\n")
       : "";
 
+    // Same store, this visitor's own namespace — the durable facts `memorize` collects about the
+    // teacher, not this one sender (that's senderContext above).
+    const userId = getUserIdFromConfig(config);
+    const userMemory = userId
+      ? ((await store.get(userMemoryNamespace(userId), USER_MEMORY_KEY))
+          ?.value as UserMemoryValue | undefined)
+      : undefined;
+    const userMemoryContext = userMemory?.facts?.length
+      ? userMemory.facts.join("; ")
+      : "";
+
     // Only revise the rejected draft when this compose is for the same email.
     const previousDraft =
       state.lastRejectedDraft?.emailId === state.emailId
@@ -53,6 +69,7 @@ export const writeDraft = withNode(
           email,
           kbContext: state.kbContext,
           senderContext,
+          userMemoryContext,
           revisionNotes: collectRevisionNotes(state.messages, state.emailId),
           previousDraft,
         }),

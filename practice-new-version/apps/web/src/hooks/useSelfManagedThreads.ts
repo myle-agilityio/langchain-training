@@ -9,7 +9,6 @@ import {
   fetchThreads,
   renameThread,
   deleteThread,
-  extractThreadMemory,
   saveThread,
   type ThreadsPage,
 } from "@/api";
@@ -145,19 +144,6 @@ export const useDeleteThread = () => {
       ),
     onError: (_error, _variables, context) =>
       rollback<ThreadsData>(queryClient, threadsQueryKey, context),
-  });
-
-  return mutate;
-};
-
-// Fire-and-forget when the teacher leaves a thread for a new one — see ThreadsList's "New chat".
-export const useExtractThreadMemory = () => {
-  const { mutate } = useMutation({
-    mutationKey: ["threads", "extract-memory"],
-    // Best-effort bookkeeping — a failure here shouldn't toast or block starting the new thread.
-    meta: { silent: true },
-    mutationFn: (id: string) =>
-      extractThreadMemory(id, useOpenAIKey.getState().apiKey),
   });
 
   return mutate;

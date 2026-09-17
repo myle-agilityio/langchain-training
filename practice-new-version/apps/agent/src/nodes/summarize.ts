@@ -14,8 +14,9 @@ import { turnBoundaryAfterUserTurns } from "@/utils";
 import { withNode } from "./withNode";
 
 // Flattens messages into a plain "User: .../Assistant: ..." transcript. Drops
-// tool messages and content-less AI turns (tool-call scaffolding)
-const toTranscript = (messages: BaseMessage[]): string =>
+// tool messages and content-less AI turns (tool-call scaffolding). Reused by memorize.ts for a
+// single turn's transcript, not just summarize's multi-turn batches.
+export const toTranscript = (messages: BaseMessage[]): string =>
   messages
     .filter(
       (m) =>

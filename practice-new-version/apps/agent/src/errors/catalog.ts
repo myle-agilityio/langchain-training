@@ -29,12 +29,6 @@ export const ERRORS: Record<ErrorCode, ErrorSpec> = {
     expected: true,
     userMessage: "That conversation no longer exists.",
   },
-  [ERROR_CODE.SENDER_NOT_FOUND]: {
-    status: 404,
-    expected: true,
-    userMessage: "No sender in the inbox matches that name.",
-    recovery: "Call get_emails to find the right name or address, then retry.",
-  },
   [ERROR_CODE.SENDER_AMBIGUOUS]: {
     status: 409,
     expected: true,

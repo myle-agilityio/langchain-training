@@ -9,9 +9,9 @@ import {
 } from "@langchain/core/prompts";
 import { END, type LangGraphRunnableConfig } from "@langchain/langgraph";
 
-import { getModelWithConfig } from "@/config";
+import { getModelWithConfig, getUserIdFromConfig } from "@/config";
 import { TOOL } from "@repo/constants";
-import { USER_MEMORY_KEY, USER_MEMORY_NAMESPACE } from "@/constants";
+import { USER_MEMORY_KEY, userMemoryNamespace } from "@/constants";
 import { getMemoryStore } from "@/db";
 import { currentDateLine, SYSTEM_PROMPT } from "@/prompts";
 import { executableTools, modelTools } from "@/tools";
@@ -61,12 +61,20 @@ const renderSummaryContext = (state: AgentStateShape): string => {
     : "";
 };
 
-// Durable facts extractMemoryForThread has collected about the teacher across every thread — ""
-// until there's anything on file yet. Reads the PostgresStore directly, not config.store — see
-// updateContactProfile.ts.
-const renderUserMemoryContext = async (): Promise<string> => {
+// Durable facts the `memorize` node has collected about this visitor across every thread — ""
+// until there's anything on file yet, or when no userId was forwarded to scope it by. Reads the
+// PostgresStore directly, not config.store — see updateContactProfile.ts.
+const renderUserMemoryContext = async (
+  config: LangGraphRunnableConfig,
+): Promise<string> => {
+  const userId = getUserIdFromConfig(config);
+
+  if (!userId) {
+    return "";
+  }
+
   const store = await getMemoryStore();
-  const value = (await store.get(USER_MEMORY_NAMESPACE, USER_MEMORY_KEY))
+  const value = (await store.get(userMemoryNamespace(userId), USER_MEMORY_KEY))
     ?.value as UserMemoryValue | undefined;
   const facts = value?.facts ?? [];
 
@@ -115,7 +123,7 @@ export const callModel = withNode(
     const response = await callModelPrompt.pipe(bound).invoke(
       {
         dateLine: currentDateLine(),
-        userMemoryContext: await renderUserMemoryContext(),
+        userMemoryContext: await renderUserMemoryContext(config),
         summaryContext: renderSummaryContext(state),
         frontendContext: renderFrontendContext(state),
         messages: recentMessages(state),
@@ -129,7 +137,7 @@ export const callModel = withNode(
 
 const EXECUTABLE_NAMES = new Set<string>(executableTools.map((t) => t.name));
 
-// Routes tool calls to compose_email, tools, or END
+// Routes tool calls to compose_email, tools, or memorize (the plain-answer end of the turn)
 export const routeAfterModel = (state: { messages: BaseMessage[] }) => {
   const last = state.messages[state.messages.length - 1];
 
@@ -147,5 +155,5 @@ export const routeAfterModel = (state: { messages: BaseMessage[] }) => {
     return "tools";
   }
 
-  return END;
+  return "memorize";
 };

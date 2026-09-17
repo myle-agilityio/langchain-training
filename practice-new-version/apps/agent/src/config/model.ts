@@ -8,6 +8,7 @@ import {
   CHAT_MODEL_OPTIONS,
   DEFAULT_CHAT_MODEL_ID,
   OPENAI_API_KEY_HEADER,
+  USER_ID_HEADER,
 } from "@repo/constants";
 
 export const EMBEDDING_MODEL = "text-embedding-3-small";
@@ -41,6 +42,12 @@ export const getApiKeyFromConfig = (
 
   return resolved;
 };
+
+// Lets graph-side memory (nodes/memorize.ts, callModel.ts's renderUserMemoryContext) scope facts per visitor.
+// Undefined only outside a real request (e.g. LangSmith Studio), where per-user memory is simply skipped.
+export const getUserIdFromConfig = (
+  config: LangGraphRunnableConfig,
+): string | undefined => getForwardedHeader(config, USER_ID_HEADER);
 
 // The teacher's model pick from the chat header, same forwarding path as the API key. Falls
 // back to the default when absent or not one of the offered options.

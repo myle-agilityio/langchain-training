@@ -1,7 +1,11 @@
 import { useMemo } from "react";
 import { CopilotKit } from "@copilotkit/react-core/v2";
-import { useChatModel, useOpenAIKey } from "@/stores";
-import { CHAT_MODEL_HEADER, OPENAI_API_KEY_HEADER } from "@repo/constants";
+import { useChatModel, useOpenAIKey, useUserId } from "@/stores";
+import {
+  CHAT_MODEL_HEADER,
+  OPENAI_API_KEY_HEADER,
+  USER_ID_HEADER,
+} from "@repo/constants";
 import {
   // A2UI catalog: definitions + renderers in @/components/declarativeGenerativeUI/
   demonstrationCatalog,
@@ -17,12 +21,16 @@ export const Root = () => {
   // re-renders, so without this a changed key/model kept using the old one until a reload.
   const apiKey = useOpenAIKey((s) => s.apiKey);
   const modelId = useChatModel((s) => s.modelId);
+  const userId = useUserId((s) => s.userId);
   const headers = useMemo(
     (): Record<string, string> => ({
       ...(apiKey ? { [OPENAI_API_KEY_HEADER]: apiKey } : {}),
       [CHAT_MODEL_HEADER]: modelId,
+      // Lets the graph scope per-visitor memory (see agent's config/model.ts) the same way
+      // /api/threads already does.
+      [USER_ID_HEADER]: userId,
     }),
-    [apiKey, modelId],
+    [apiKey, modelId, userId],
   );
 
   return (

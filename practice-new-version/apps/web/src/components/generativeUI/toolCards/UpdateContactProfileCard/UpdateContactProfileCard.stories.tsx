@@ -45,6 +45,11 @@ export const NameOnly: Story = {
   },
 };
 
+// Sender didn't match anyone in the inbox — general knowledge, not a specific contact.
+export const Skipped: Story = {
+  args: { result: toolResult({ skipped: true }) },
+};
+
 export const Running: Story = { args: { status: "executing" } };
 
 export const Failed: Story = { args: { result: toolFailure(sampleToolError) } };

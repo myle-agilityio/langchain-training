@@ -12,7 +12,6 @@ import {
   useSelfManagedThreads,
   useRenameThread,
   useDeleteThread,
-  useExtractThreadMemory,
   useLoadMoreSentinel,
 } from "@/hooks";
 import { Button, Input, TryAgainButton } from "@/components/common";
@@ -48,7 +47,6 @@ export const ThreadsList = ({
   } = useSelfManagedThreads(search);
   const renameThread = useRenameThread();
   const deleteThread = useDeleteThread();
-  const extractThreadMemory = useExtractThreadMemory();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftTitle, setDraftTitle] = useState("");
   const sentinelRef = useLoadMoreSentinel(hasMore, loadMore);
@@ -56,18 +54,6 @@ export const ThreadsList = ({
   if (!config) {
     return null;
   }
-
-  // Scans the thread being left behind for durable facts before handing off to the new one.
-  // Not gated on hasExplicitThreadId — that flag only turns on when a thread is picked from
-  // this list, but useSyncThreads saves the current thread's messages regardless of it, so an
-  // unexplicit "just been chatting" thread is still a real saved thread worth scanning.
-  const startNewChat = () => {
-    if (config.threadId) {
-      extractThreadMemory(config.threadId);
-    }
-
-    config.startNewThread();
-  };
 
   const commitRename = (id: string) => {
     const title = draftTitle.trim();
@@ -85,7 +71,7 @@ export const ThreadsList = ({
         <button
           type="button"
           onClick={() => {
-            startNewChat();
+            config.startNewThread();
             onPicked?.();
           }}
           className="flex-1 flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium hover:bg-secondary cursor-pointer"
