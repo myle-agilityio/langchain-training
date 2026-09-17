@@ -42,8 +42,8 @@ export const update_contact_profile = defineTool({
     const store = await getMemoryStore();
 
     // Store.put replaces the whole value, so merge facts read-modify-write style.
-    const existing = (await store.get(namespace, email))
-      ?.value as ContactProfileValue | undefined;
+    const existing = (await store.get(namespace, email))?.value as
+      ContactProfileValue | undefined;
     const profile: ContactProfileValue = {
       name,
       tone: input.tone ?? existing?.tone ?? null,

@@ -72,11 +72,11 @@ describe("update_contact_profile", () => {
 
     const { result } = await run({ sender: "Flo", tone: "formal" }, memory);
 
-    expect(memory.put).toHaveBeenCalledWith(
-      NAMESPACE,
-      "flo@example.com",
-      { name: "Flo Beahan", tone: "formal", facts: [] },
-    );
+    expect(memory.put).toHaveBeenCalledWith(NAMESPACE, "flo@example.com", {
+      name: "Flo Beahan",
+      tone: "formal",
+      facts: [],
+    });
     expect(result.data.profile.email).toBe("flo@example.com");
   });
 
