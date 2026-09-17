@@ -12,16 +12,13 @@ import {
 } from "@/db";
 import { AppError, ERROR_CODE } from "@/errors";
 import { logWarn } from "@/logging";
-import { extractMemoryForThread } from "@/memory";
 import { titlePrompt } from "@/prompts";
 import { requireUserId, validate } from "./middleware";
 import {
-  ExtractMemoryBodySchema,
   ListThreadsQuerySchema,
   RenameThreadBodySchema,
   SaveThreadBodySchema,
   ThreadIdQuerySchema,
-  type ExtractMemoryBody,
   type ListThreadsQuery,
   type RenameThreadBody,
   type SaveThreadBody,
@@ -143,20 +140,3 @@ threadsApp.delete("/", validate("query", ThreadIdQuerySchema), async (c) => {
 
   return c.json({ ok: true });
 });
-
-// Fired when the teacher abandons this thread for a new one (see apps/web's ThreadsList) — scans
-// whatever of it hasn't been checked yet for durable facts and folds them into the store.
-// Best-effort: extractMemoryForThread swallows its own failures, so this always reports ok.
-threadsApp.post(
-  "/extract-memory",
-  validate("json", ExtractMemoryBodySchema),
-  async (c) => {
-    const { id } = c.get("valid") as ExtractMemoryBody;
-    const apiKey =
-      c.req.header(OPENAI_API_KEY_HEADER) ?? process.env.OPENAI_API_KEY;
-
-    await extractMemoryForThread(id, apiKey);
-
-    return c.json({ ok: true });
-  },
-);

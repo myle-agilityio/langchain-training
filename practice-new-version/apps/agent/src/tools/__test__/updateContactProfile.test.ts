@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CONTACT_PROFILE_NAMESPACE } from "@/constants";
 import { listEmails } from "@/db";
-import { ERROR_CODE, ERRORS } from "@/errors";
+import { ERROR_CODE } from "@/errors";
 import type { Email } from "@/types";
 import { update_contact_profile } from "../updateContactProfile";
 
@@ -108,19 +108,13 @@ describe("update_contact_profile", () => {
     expect(memory.put.mock.lastCall?.[2].tone).toBe("warm");
   });
 
-  it("refuses to guess when no sender in the inbox matches", async () => {
+  it("skips instead of failing when no sender in the inbox matches — general knowledge, not a contact", async () => {
     vi.mocked(listEmails).mockResolvedValue([]);
 
-    const { result } = await run({ sender: "Nobody" });
+    const { result, memory } = await run({ sender: "Nobody" });
 
-    expect(result).toEqual({
-      ok: false,
-      error: {
-        code: ERROR_CODE.SENDER_NOT_FOUND,
-        message: ERRORS[ERROR_CODE.SENDER_NOT_FOUND].userMessage,
-        recovery: ERRORS[ERROR_CODE.SENDER_NOT_FOUND].recovery,
-      },
-    });
+    expect(result).toEqual({ ok: true, data: { skipped: true } });
+    expect(memory.put).not.toHaveBeenCalled();
   });
 
   it("refuses to pick when more than one sender matches", async () => {

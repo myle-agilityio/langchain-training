@@ -42,6 +42,7 @@ export const draftPrompt = (args: {
   email: Email;
   kbContext: string;
   senderContext: string;
+  userMemoryContext: string;
   revisionNotes: string;
   previousDraft?: { subject: string; body: string };
 }): string => {
@@ -66,6 +67,7 @@ export const draftPrompt = (args: {
     Reference material (school policy and curriculum):
     ${args.kbContext}
     ${args.senderContext ? `\nWhat we know about the sender:\n${args.senderContext}\n` : ""}
+    ${args.userMemoryContext ? `\nWhat you know about the teacher writing this reply (their own preferences, not the sender's):\n${args.userMemoryContext}\n` : ""}
     Email to reply to:
     ${renderEmail(args.email)}`;
 };

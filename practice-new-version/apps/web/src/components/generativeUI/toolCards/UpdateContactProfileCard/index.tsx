@@ -4,9 +4,11 @@ import { Pending, Shell, ToolFailure } from "../common";
 import type { ToolCardProps } from "@/types";
 import { parseToolResult } from "@/utils";
 
-interface ProfileResult {
-  profile: { name: string; tone: string | null; facts: string[] };
-}
+// Not tied to one inbox sender — the tool skips saving a contact profile and says so, rather
+// than failing. General facts about the teacher are captured automatically instead.
+type ProfileResult =
+  | { profile: { name: string; tone: string | null; facts: string[] } }
+  | { skipped: true };
 
 export const UpdateContactProfileCard = ({
   status,
@@ -32,6 +34,10 @@ export const UpdateContactProfileCard = ({
         />
       ) : !envelope.ok ? (
         <ToolFailure error={envelope.error} />
+      ) : "skipped" in envelope.data ? (
+        <p className="text-[11px] text-muted-foreground">
+          Not tied to a specific contact — noted as general context instead.
+        </p>
       ) : (
         <div className="space-y-2">
           <p className="text-xs font-semibold text-foreground">

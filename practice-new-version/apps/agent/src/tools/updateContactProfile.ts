@@ -17,10 +17,11 @@ export const update_contact_profile = defineTool({
     const matches = await listEmails({ sender: input.sender });
     const addresses = [...new Set(matches.map((e) => e.from.email))];
 
+    // Not tied to one inbox sender — general knowledge about the teacher, not this tool's job.
+    // The `memorize` node already checks every turn for durable facts and saves them on its own,
+    // so this is a no-op, not a failure the model needs to retry or apologize for.
     if (addresses.length === 0) {
-      throw new AppError(ERROR_CODE.SENDER_NOT_FOUND, {
-        detail: `no inbox sender matches "${input.sender}"`,
-      });
+      return { skipped: true } as const;
     }
 
     if (addresses.length > 1) {
@@ -60,7 +61,9 @@ export const update_contact_profile = defineTool({
     "facts are merged into what's already on file, not replaced — pass only the new fact(s), " +
     "not the full list. sender is whatever the teacher called them (name or address) — this " +
     "tool resolves it against the real inbox itself, so never guess or construct an address. " +
-    "Not for facts about a single email — that belongs in the reply itself, not the profile.",
+    "Not for facts about a single email — that belongs in the reply itself, not the profile. " +
+    "Not for general facts about the teacher themself (not tied to one person) — those are " +
+    "captured automatically, so don't call this tool for them.",
   schema: z.object({
     sender: z.string(),
     tone: z.string().optional(),
