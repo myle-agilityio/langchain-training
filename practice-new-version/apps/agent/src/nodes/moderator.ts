@@ -7,9 +7,10 @@ import { END, type LangGraphRunnableConfig } from "@langchain/langgraph";
 import { copilotkitCustomizeConfig } from "@copilotkit/sdk-js/langgraph";
 
 import { getPlainModelWithConfig } from "@/config";
-import { SUMMARIZE_THRESHOLD } from "@/constants";
+import { SUMMARIZE_TRIGGER_PENDING_USER_MESSAGES } from "@/constants";
 import { moderationPrompt } from "@/prompts";
 import { ModerationCheckSchema, type AgentStateShape } from "@/types";
+import { countUserMessages } from "@/utils";
 import { withNode } from "./withNode";
 
 // System prompt + full history, so a jailbreak attempt built up gradually across turns is still
@@ -61,13 +62,17 @@ export const moderator = withNode(
 );
 
 // Ends if the message was flagged; otherwise skips straight to call_model for short threads and
-// only detours through summarize once the history is long enough to be worth condensing.
+// only detours through summarize once enough pending turns have piled up to be worth condensing.
 export const afterModeration = (state: AgentStateShape) => {
   if (state.blocked) {
     return END;
   }
 
-  return state.messages.length > SUMMARIZE_THRESHOLD
+  const pendingUserMessages = countUserMessages(
+    state.messages.slice(state.summarizedCount ?? 0),
+  );
+
+  return pendingUserMessages > SUMMARIZE_TRIGGER_PENDING_USER_MESSAGES
     ? "summarize"
     : "call_model";
 };

@@ -1,6 +1,6 @@
-// Once the thread passes this many messages, summarize starts folding the older ones into
-// `summary` every turn — keeps call_model's prompt bounded instead of growing with every turn.
-export const SUMMARIZE_THRESHOLD = 10;
-// call_model only reads the messages after this many — `messages` itself stays intact so the UI
-// still shows full history.
-export const KEEP_RECENT_COUNT = 6;
+// Once pending user messages pass this, summarize folds the oldest SUMMARIZE_BATCH_USER_MESSAGES
+// turns into `summary` — counted in user messages, not raw count, so tool calls don't skew it.
+export const SUMMARIZE_TRIGGER_PENDING_USER_MESSAGES = 6;
+// How many of the oldest pending turns (a user message plus everything it triggered) get folded
+// into `summary` per summarize run.
+export const SUMMARIZE_BATCH_USER_MESSAGES = 3;

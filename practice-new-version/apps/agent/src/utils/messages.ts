@@ -42,6 +42,35 @@ export const findUnansweredReplyCall = (messages: BaseMessage[]) => {
   return answered ? undefined : call;
 };
 
+// A turn = one HumanMessage plus everything it triggered, up to the next HumanMessage.
+// Summarize counts/cuts by turns, not raw message count, so tool-call length doesn't skew it.
+export const countUserMessages = (messages: BaseMessage[]): number =>
+  messages.filter((m) => HumanMessage.isInstance(m)).length;
+
+// Index right after `turns` full turns starting at `from` — always a HumanMessage or the array
+// end, so a tool call and its result never get split across the cut.
+export const turnBoundaryAfterUserTurns = (
+  messages: BaseMessage[],
+  from: number,
+  turns: number,
+): number => {
+  let seen = 0;
+
+  for (let i = from; i < messages.length; i++) {
+    if (!HumanMessage.isInstance(messages[i])) {
+      continue;
+    }
+
+    if (seen === turns) {
+      return i;
+    }
+
+    seen += 1;
+  }
+
+  return messages.length;
+};
+
 // What the teacher actually said about this reply — original request, plus the "try again,
 // but..." note on a redraft. Without it, write_draft has no instructions and just repeats itself.
 export const collectRevisionNotes = (

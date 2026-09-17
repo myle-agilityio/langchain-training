@@ -1,5 +1,6 @@
-// summarize node's own prompt — condenses older turns into `summary` once the thread passes
-// SUMMARY_TRIGGER_COUNT messages, so call_model's history stays bounded.
+// summarize node's own prompt — condenses one SUMMARIZE_BATCH_USER_MESSAGES batch of older turns
+// into `summary` once the unsummarized tail passes SUMMARIZE_TRIGGER_PENDING_USER_MESSAGES, so
+// call_model's history stays bounded.
 //
 // `transcript` is plain "Teacher: .../Assistant: ..." text, not role-tagged BaseMessages fed in
 // as chat history: a human/assistant turn sequence ending on an assistant turn pulls the model
