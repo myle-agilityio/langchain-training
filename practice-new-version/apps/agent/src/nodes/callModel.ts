@@ -1,4 +1,8 @@
-import { AIMessage, type BaseMessage } from "@langchain/core/messages";
+import {
+  AIMessage,
+  ToolMessage,
+  type BaseMessage,
+} from "@langchain/core/messages";
 import {
   ChatPromptTemplate,
   MessagesPlaceholder,
@@ -14,10 +18,23 @@ import { executableTools, modelTools } from "@/tools";
 import type { AgentStateShape, UserMemoryValue } from "@/types";
 import { withNode } from "./withNode";
 
+// A `tool` message must stay paired with the assistant message whose tool_calls it answers —
+// OpenAI rejects a history that opens on an orphaned one. summarize's count-based cutoff can
+// land inside that pair, so drop any leading tool messages the slice below exposed.
+const dropLeadingOrphanToolMessages = (
+  messages: BaseMessage[],
+): BaseMessage[] => {
+  const start = messages.findIndex((m) => !ToolMessage.isInstance(m));
+
+  return start === -1 ? [] : messages.slice(start);
+};
+
 // Messages already folded into `summary` are excluded here — `state.messages` itself keeps
 // everything so the UI still shows the full thread.
-const recentMessages = (state: AgentStateShape): BaseMessage[] =>
-  state.messages.slice(state.summarizedCount ?? 0);
+export const recentMessages = (state: AgentStateShape): BaseMessage[] =>
+  dropLeadingOrphanToolMessages(
+    state.messages.slice(state.summarizedCount ?? 0),
+  );
 
 // Formats UI context for the prompt
 const renderFrontendContext = (state: AgentStateShape): string => {
