@@ -54,4 +54,14 @@ describe("UpdateContactProfileCard", () => {
     expect(screen.getByText("Flo Beahan")).toBeInTheDocument();
     expect(screen.queryByText("Tone")).not.toBeInTheDocument();
   });
+
+  it("says so, without an error, when the sender didn't match anyone in the inbox", () => {
+    card(JSON.stringify({ ok: true, data: { skipped: true } }));
+
+    expect(
+      screen.getByText(
+        "Not tied to a specific contact — noted as general context instead.",
+      ),
+    ).toBeInTheDocument();
+  });
 });
