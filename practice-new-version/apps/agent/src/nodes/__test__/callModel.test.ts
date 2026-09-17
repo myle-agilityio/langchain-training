@@ -17,8 +17,8 @@ const calling = (...names: string[]): AIMessage =>
   });
 
 describe("routeAfterModel", () => {
-  it("ends when the model answered in plain text", () => {
-    expect(routeAfterModel({ messages: [calling()] })).toBe(END);
+  it("routes to memorize when the model answered in plain text", () => {
+    expect(routeAfterModel({ messages: [calling()] })).toBe("memorize");
   });
 
   it("ends when the last message is not the model's", () => {
@@ -40,8 +40,10 @@ describe("routeAfterModel", () => {
     ).toBe("tools");
   });
 
-  it("ends on a frontend action, which the tool node cannot run", () => {
-    expect(routeAfterModel({ messages: [calling("setThemeColor")] })).toBe(END);
+  it("routes a frontend action (which the tool node cannot run) to memorize too", () => {
+    expect(routeAfterModel({ messages: [calling("setThemeColor")] })).toBe(
+      "memorize",
+    );
   });
 
   it("prefers compose_email when the turn asks for both", () => {

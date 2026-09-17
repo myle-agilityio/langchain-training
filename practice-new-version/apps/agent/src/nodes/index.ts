@@ -9,6 +9,11 @@ export {
   writeDraft,
 } from "./composeEmail";
 export { nodeErrorHandler } from "./errorHandler";
+export { memorize, memorizeErrorHandler } from "./memorize";
 export { afterModeration, moderator } from "./moderator";
-export { summarizeConversation, summarizeErrorHandler } from "./summarize";
+export {
+  summarizeConversation,
+  summarizeErrorHandler,
+  toTranscript,
+} from "./summarize";
 export { withNode } from "./withNode";

@@ -12,6 +12,8 @@ import {
   afterModeration,
   callModel,
   composeEmailErrorHandler,
+  memorize,
+  memorizeErrorHandler,
   moderator,
   nodeErrorHandler,
   routeAfterModel,
@@ -64,6 +66,9 @@ export const buildGraph = async () => {
     .addNode("compose_email", runComposeEmail, {
       errorHandler: composeEmailErrorHandler,
     })
+    .addNode("memorize", memorize, {
+      errorHandler: memorizeErrorHandler,
+    })
 
     .addEdge(START, "moderator")
 
@@ -77,16 +82,18 @@ export const buildGraph = async () => {
 
     .addEdge("summarize", "call_model")
 
-    // reply_to_email → subgraph; backend tool → tools; frontend tool or plain answer → end.
+    // reply_to_email → subgraph; backend tool → tools; plain answer → memorize, once, before end.
     .addConditionalEdges("call_model", routeAfterModel, {
       tools: "tools",
       compose_email: "compose_email",
+      memorize: "memorize",
       __end__: END,
     })
 
     .addEdge("tools", "call_model")
     // Only traversed when triage found no email; a successful draft pauses at the interrupt.
-    .addEdge("compose_email", "call_model");
+    .addEdge("compose_email", "call_model")
+    .addEdge("memorize", END);
 
   // Tables first, then the checkpointer/store and the pgvector KB seeded before first search.
   await ensureSchema();
