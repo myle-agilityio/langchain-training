@@ -1,7 +1,8 @@
 import { z } from "zod";
 
-import { CONTACT_PROFILE_NAMESPACE } from "@/constants";
+import { contactProfileNamespace } from "@/constants";
 import { TOOL } from "@repo/constants";
+import { getUserIdFromConfig } from "@/config";
 import { getMemoryStore, listEmails } from "@/db";
 import { AppError, ERROR_CODE } from "@/errors";
 import type { ContactProfileValue } from "@/types";
@@ -13,14 +14,18 @@ import { defineTool } from "./defineTool";
 // Reads/writes the PostgresStore directly instead of config.store: this graph is served through
 // the LangGraph Agent Server (see http/copilotkit.ts)
 export const update_contact_profile = defineTool({
-  run: async (input) => {
+  run: async (input, config) => {
+    const userId = getUserIdFromConfig(config);
     const matches = await listEmails({ sender: input.sender });
     const addresses = [...new Set(matches.map((e) => e.from.email))];
 
     // Not tied to one inbox sender — general knowledge about the teacher, not this tool's job.
     // The `memorize` node already checks every turn for durable facts and saves them on its own,
     // so this is a no-op, not a failure the model needs to retry or apologize for.
-    if (addresses.length === 0) {
+    //
+    // userId is undefined only outside a real request (e.g. LangSmith Studio) — see
+    // getUserIdFromConfig — where per-visitor contact profiles are simply skipped too.
+    if (!userId || addresses.length === 0) {
       return { skipped: true } as const;
     }
 
@@ -33,10 +38,11 @@ export const update_contact_profile = defineTool({
     const email = addresses[0];
     const name = matches.find((e) => e.from.email === email)!.from.name;
 
+    const namespace = contactProfileNamespace(userId);
     const store = await getMemoryStore();
 
     // Store.put replaces the whole value, so merge facts read-modify-write style.
-    const existing = (await store.get(CONTACT_PROFILE_NAMESPACE, email))
+    const existing = (await store.get(namespace, email))
       ?.value as ContactProfileValue | undefined;
     const profile: ContactProfileValue = {
       name,
@@ -45,7 +51,7 @@ export const update_contact_profile = defineTool({
     };
 
     await store.put(
-      CONTACT_PROFILE_NAMESPACE,
+      namespace,
       email,
       profile as unknown as Record<string, unknown>,
     );

@@ -1,18 +1,28 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { CONTACT_PROFILE_NAMESPACE } from "@/constants";
+import { contactProfileNamespace } from "@/constants";
 import { listEmails } from "@/db";
 import { ERROR_CODE } from "@/errors";
 import type { Email } from "@/types";
 import { update_contact_profile } from "../updateContactProfile";
 
+const USER_ID = "user-1";
+const NAMESPACE = contactProfileNamespace(USER_ID);
+
 const store = () => ({ get: vi.fn(), put: vi.fn() });
 
-const mocks = vi.hoisted(() => ({ getMemoryStore: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+  getMemoryStore: vi.fn(),
+  getUserIdFromConfig: vi.fn(),
+}));
 
 vi.mock("@/db", () => ({
   listEmails: vi.fn(),
   getMemoryStore: mocks.getMemoryStore,
+}));
+
+vi.mock("@/config", () => ({
+  getUserIdFromConfig: mocks.getUserIdFromConfig,
 }));
 
 const email = (name: string, address: string): Email => ({
@@ -46,6 +56,7 @@ const run = async (
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.getUserIdFromConfig.mockReturnValue(USER_ID);
   vi.spyOn(console, "error").mockImplementation(() => {});
 });
 
@@ -62,7 +73,7 @@ describe("update_contact_profile", () => {
     const { result } = await run({ sender: "Flo", tone: "formal" }, memory);
 
     expect(memory.put).toHaveBeenCalledWith(
-      CONTACT_PROFILE_NAMESPACE,
+      NAMESPACE,
       "flo@example.com",
       { name: "Flo Beahan", tone: "formal", facts: [] },
     );
@@ -112,6 +123,18 @@ describe("update_contact_profile", () => {
     vi.mocked(listEmails).mockResolvedValue([]);
 
     const { result, memory } = await run({ sender: "Nobody" });
+
+    expect(result).toEqual({ ok: true, data: { skipped: true } });
+    expect(memory.put).not.toHaveBeenCalled();
+  });
+
+  it("skips instead of failing when no userId was forwarded — outside a real request", async () => {
+    mocks.getUserIdFromConfig.mockReturnValue(undefined);
+    vi.mocked(listEmails).mockResolvedValue([
+      email("Flo Beahan", "flo@example.com"),
+    ]);
+
+    const { result, memory } = await run({ sender: "Flo" });
 
     expect(result).toEqual({ ok: true, data: { skipped: true } });
     expect(memory.put).not.toHaveBeenCalled();

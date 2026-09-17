@@ -2,8 +2,8 @@ import type { LangGraphRunnableConfig } from "@langchain/langgraph";
 
 import { getPlainModelWithConfig, getUserIdFromConfig, hidden } from "@/config";
 import {
-  CONTACT_PROFILE_NAMESPACE,
   USER_MEMORY_KEY,
+  contactProfileNamespace,
   userMemoryNamespace,
 } from "@/constants";
 import { getEmail, getMemoryStore } from "@/db";
@@ -30,9 +30,11 @@ export const writeDraft = withNode(
 
     // Reads the PostgresStore directly, not config.store — see updateContactProfile.ts.
     const store = await getMemoryStore();
-    const profile = (
-      await store.get(CONTACT_PROFILE_NAMESPACE, email.from.email)
-    )?.value as ContactProfileValue | undefined;
+    const userId = getUserIdFromConfig(config);
+    const profile = userId
+      ? ((await store.get(contactProfileNamespace(userId), email.from.email))
+          ?.value as ContactProfileValue | undefined)
+      : undefined;
     const senderContext = profile
       ? [
           profile.name ? `Name: ${profile.name}` : "",
@@ -44,10 +46,9 @@ export const writeDraft = withNode(
           .filter(Boolean)
           .join("\n")
       : "";
-
+    console.log("senderContext", senderContext);
     // Same store, this visitor's own namespace — the durable facts `memorize` collects about the
     // teacher, not this one sender (that's senderContext above).
-    const userId = getUserIdFromConfig(config);
     const userMemory = userId
       ? ((await store.get(userMemoryNamespace(userId), USER_MEMORY_KEY))
           ?.value as UserMemoryValue | undefined)
