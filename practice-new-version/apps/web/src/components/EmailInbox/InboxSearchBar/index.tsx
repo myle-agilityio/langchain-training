@@ -164,7 +164,7 @@ export const InboxSearchBar = ({
       <PopoverContent
         align="start"
         style={{ width: "var(--radix-popover-trigger-width)" }}
-        className="max-h-[70vh] overflow-y-auto"
+        className="max-h-[70vh] overflow-y-auto shadow-2xl dark:shadow-white/10"
       >
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
@@ -174,6 +174,7 @@ export const InboxSearchBar = ({
                 onChange={(e) =>
                   set("status", (e.target.value || undefined) as EmailStatus)
                 }
+                className="bg-card"
               >
                 <option value="">Any</option>
                 {(Object.keys(STATUS_LABEL) as EmailStatus[]).map((s) => (
@@ -189,6 +190,7 @@ export const InboxSearchBar = ({
                 onChange={(e) =>
                   set("urgency", (e.target.value || undefined) as Urgency)
                 }
+                className="bg-card"
               >
                 <option value="">Any</option>
                 {(Object.keys(URGENCY_LABEL) as Urgency[]).map((u) => (
@@ -204,6 +206,7 @@ export const InboxSearchBar = ({
                 onChange={(e) =>
                   set("course", (e.target.value || undefined) as Course)
                 }
+                className="bg-card"
               >
                 <option value="">Any</option>
                 <option value="math_11">{COURSE_LABEL.math_11}</option>
@@ -216,6 +219,7 @@ export const InboxSearchBar = ({
                 onChange={(e) =>
                   set("topic", (e.target.value || undefined) as EmailTopic)
                 }
+                className="bg-card"
               >
                 <option value="">Any</option>
                 {(Object.keys(TOPIC_LABEL) as EmailTopic[]).map((t) => (
@@ -233,6 +237,7 @@ export const InboxSearchBar = ({
               onChange={(e) =>
                 set("workType", (e.target.value || undefined) as WorkType)
               }
+              className="bg-card"
             >
               <option value="">Any</option>
               {(Object.keys(WORK_TYPE_LABEL) as WorkType[])
@@ -251,6 +256,7 @@ export const InboxSearchBar = ({
                 value={draft.from ?? ""}
                 onChange={(e) => set("from", e.target.value)}
                 placeholder="Name or email"
+                className="bg-card"
               />
             </Field>
             <Field label="Subject contains">
@@ -258,6 +264,7 @@ export const InboxSearchBar = ({
                 value={draft.subject ?? ""}
                 onChange={(e) => set("subject", e.target.value)}
                 placeholder="Subject text"
+                className="bg-card"
               />
             </Field>
           </div>
@@ -267,6 +274,7 @@ export const InboxSearchBar = ({
               value={draft.hasWords ?? ""}
               onChange={(e) => set("hasWords", e.target.value)}
               placeholder="Search the email body"
+              className="bg-card"
             />
           </Field>
 
@@ -276,6 +284,7 @@ export const InboxSearchBar = ({
                 type="date"
                 value={draft.receivedAfter ?? ""}
                 onChange={(e) => set("receivedAfter", e.target.value)}
+                className="bg-card"
               />
             </Field>
             <Field label="Received before">
@@ -283,6 +292,7 @@ export const InboxSearchBar = ({
                 type="date"
                 value={draft.receivedBefore ?? ""}
                 onChange={(e) => set("receivedBefore", e.target.value)}
+                className="bg-card"
               />
             </Field>
           </div>
