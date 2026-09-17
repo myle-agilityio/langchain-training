@@ -8,7 +8,7 @@ An inbox triage assistant for a high school math teacher, built with [LangGraph]
 
 ## Timeline
 
-30 Working Days (2026-07-15 to 2026-08-26)
+2026-07-15 to 2026-09-15
 
 ## Author
 
